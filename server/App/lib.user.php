@@ -33,4 +33,21 @@ function checkAuthenticationXML ()
 	return $txt;
 }
 
+function checkAuthenticationjson ()
+{
+	$array = "";
+	if (array_key_exists("login",$_SESSION)){
+		$array["auth"] = true;
+		$array["username"] = $_SESSION['login'];
+		$array["userclass"] = auth_get_class();
+		$array["user_id"] = (int)$_SESSION['user_id'];
+	}
+	else {
+		$array["auth"] = false;
+		$array["username"] = "guest";
+		$array["userclass"] = "guest";
+	}
+	return $array;
+}
+
 ?>
