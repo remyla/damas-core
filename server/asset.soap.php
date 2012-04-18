@@ -8,6 +8,7 @@ header('Content-type: application/xml; charset=UTF-8');
 echo '<?xml version="1.0" encoding="UTF-8"?>'."\n";
 include_once "service.php"; //error_code()
 include_once "../php/DAM.php";
+include_once "../php/data_model_1.xml.php";
 include_once "App/lib.user.php";
 
 include_once "FileVersion/lib.asset.php";

@@ -7,9 +7,11 @@ service1.php
 ../php/data_model.php
 ../php/data_model_1.json.php
 permissions.php // modif
+Workflow/workflow.json.php
+task.json.php
 |------------------------------------------------|
 fait pas testé :
 |------------------------------------------------|
 pas fait :
 asset.json.php
-task.json.php
+
