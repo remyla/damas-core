@@ -8,6 +8,7 @@ header('Content-type: application/json');
 
 include_once "service1.php"; //error_code()
 include_once "../php/DAM.php";
+include_once "../php/data_model_1.json.php";
 include_once "App/lib.user.php";
 
 include_once "FileVersion/lib.asset.php";
@@ -67,14 +68,19 @@ switch( $cmd )
 		break;
 	case "write":
 		$ret = DAM::write( arg("id"), arg("text") );
-		if (!$ret)
-			$err = $ERR_NODE_CREATE;
+		if (!$ret) {
+			header("HTTP/1.1: 304 Not Modified Error on create");
+			echo "Node create failed";
+			exit;
+			//$err = $ERR_NODE_CREATE;
+		}
 		break;
 	case "lock":
-		if( model::hastag( arg("id"), "lock" ) )
-		{
-			$err = $ERR_NODE_UPDATE;
-			break;
+		if( model::hastag( arg("id"), "lock" ) ) {
+			header("HTTP/1.1: 304 Not Modified Error on update");
+			echo "Node update failed";
+			exit;
+			//$err = $ERR_NODE_UPDATE;
 		}
 		$ret = model::tag( arg("id"), 'lock' );
 		$ret &= model::setKey( arg("id"), "lock_user", getUser() );
@@ -89,8 +95,12 @@ switch( $cmd )
 			model::removeKey( arg("id"), 'lock_user' );
 			model::removeKey( arg("id"), 'lock_text' );
 		}
-		if (!$ret)
-			$err = $ERR_NODE_UPDATE;
+		if (!$ret) {
+			header("HTTP/1.1: 304 Not Modified Error on update");
+			echo "Node update failed";
+			exit;
+			//$err = $ERR_NODE_UPDATE;
+		}
 		break;
 	case "upload_set_image":
 		if( is_uploaded_file( $_FILES['file']['tmp_name'] ) )
@@ -119,9 +129,10 @@ switch( $cmd )
 				break;
 			}
 		}
-		$err = $ERR_NODE_CREATE;
-		$ret = false;
-		break;
+		header("HTTP/1.1: 304 Not Modified Error on create");
+		echo "Node create failed";
+		exit;
+		//$err = $ERR_NODE_CREATE;
 	case "upload":
 		if( model::hastag( arg( 'id' ), 'lock' ) )
 		{
@@ -250,10 +261,11 @@ switch( $cmd )
 }
 
 damas_service::log_event();
-
+/*
 echo soaplike_head($cmd,$err);
 echo "\t<FILES";
 foreach ($_FILES as $k => $v)
-	echo " " . $k.'="'.$v.'"';
+	echo " " . $k.'="'.$v.'"';*/
+echo json_encode($ret);
 
 ?>
