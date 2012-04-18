@@ -7,10 +7,9 @@ session_start();
 header('Content-type: application/json');
 
 include_once "service1.php"; //error_code()
-include_once "App/lib.node.php";
 include_once "App/lib.user.php";
 include_once "Workflow/lib.task.php";
-include_once "Workflow/workflow.php";
+include_once "Workflow/workflow.json.php";
 include_once "../php/DAM.php";
 
 $cmd = arg("cmd");
@@ -44,14 +43,14 @@ if (!allowed("libtask.".$cmd)) {
 
 switch ($cmd){
 	case "taskAdd":
-		if( is_null( arg('id') ) || is_null( arg('name') ) ){ // là aussi
+		if( is_null( arg('id') ) || is_null( arg('name') ) ){
 			header("HTTP/1.1: 400 Bad Request");
 			echo "Bad command";
 			exit;
 		}
 		$ret = model::createNode( arg("id"), "task" );
-		if( $ret )                           // need explications
-			model::setKey( $ret, "label", arg("name")); //
+		if( $ret )
+			model::setKey( $ret, "label", arg("name"));
 		if( !$ret ) {
 			//$err = $ERR_NODE_CREATE;
 			header("HTTP/1.1: 304 Not Modified Error on create");
@@ -140,24 +139,28 @@ switch ($cmd){
 		break;
 	case "workflowByState":
 		$ret = workflowByState();
-		if (!$ret) $err = $ERR_PERMISSION;
-		break;
-	case "workflowByResource":
-		$ret = workflowByResource();
-		if (!$ret) $err = $ERR_PERMISSION;
+		if (!$ret) {
+			header("HTTP/1.1: 405 Method Not Allowed");
+			echo "Permission denied";
+			exit;
+			//$err = $ERR_PERMISSION;
+		}
 		break;
 	case "workflowByTask":
 		$ret = workflowByTask(arg("name"));
-		if (!$ret) $err = $ERR_PERMISSION;
-		break;
-	case "workflowByType":
-		$ret = workflowByType(arg("name"));
-		if (!$ret) $err = $ERR_PERMISSION;
+		if (!$ret) {
+			header("HTTP/1.1: 405 Method Not Allowed");
+			echo "Permission denied";
+			exit;
+			//$err = $ERR_PERMISSION;
+		}
 		break;
 	default:
-		$err = $ERR_COMMAND;
+		header("HTTP/1.1: 400 Bad Request");
+		echo "Bad command";
+		exit;
 }
 
-// ToDo
+echo json_encode($ret);
 
 ?>
