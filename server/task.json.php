@@ -131,7 +131,12 @@ switch ($cmd){
 		break;
 	case "workflowByStateTotal":
 		$ret = workflowByStateTotal();
-		if (!$ret) $err = $ERR_PERMISSION;
+		if (!$ret) {
+			header("HTTP/1.1: 405 Method Not Allowed");
+			echo "Permission denied";
+			exit;
+			//$err = $ERR_PERMISSION;
+		}
 		break;
 	case "workflowByState":
 		$ret = workflowByState();
