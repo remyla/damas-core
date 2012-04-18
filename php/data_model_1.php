@@ -1,4 +1,5 @@
 <?php
+
 /**
  *
  * DAMAS Data Model Library
@@ -29,10 +30,10 @@ class model
 		$query = "SELECT parent_id FROM node WHERE id='$id';";
 		$result = mysql_query($query);
 		$row = mysql_fetch_array($result);
-		if( ! is_null( $row['parent_id'] ) )
+		if( ! is_null( $row["parent_id"] ) )
 		{
-			$a = model::ancestors( $row['parent_id'] );
-			$a[] = $row['parent_id'];
+			$a = model::ancestors( $row["parent_id"] );
+			$a[] = $row["parent_id"];
 			return $a;
 		}
 		return array();
@@ -52,7 +53,7 @@ class model
 		$row = mysql_fetch_array($result);
 		if( $row )
 		{
-			$proto = model::searchKey( 'id', $row['value'] );
+			$proto = model::searchKey( "id", $row["value"] );
 			$proto = $proto[0];
 			if( $proto )
 			{
@@ -64,7 +65,7 @@ class model
 		$query = "SELECT id FROM node WHERE parent_id='$id' ORDER BY type;";
 		$result = mysql_query( $query );
 		while( $row = mysql_fetch_array( $result ) )
-			$res[] = $row['id'];
+			$res[] = $row["id"];
 		return $res;
 	}
 
@@ -80,7 +81,7 @@ class model
 		$result = mysql_query( "SELECT id FROM node WHERE parent_id='$id';" );
 		while( $row = mysql_fetch_array( $result ) )
 		{
-			$res = model::copyBranch( $row['id'], $newid );
+			$res = model::copyBranch( $row["id"], $newid );
 		}
 		return $newid;
 	}
@@ -98,9 +99,9 @@ class model
 		$result = mysql_query($query);
 		$row = mysql_fetch_array($result);
 		if( $tgt )
-			$newid = model::createNode( $tgt, $row['type'] );
+			$newid = model::createNode( $tgt, $row["type"] );
 		else
-			$newid = model::createNode( $row['parent_id'], $row['type'] );
+			$newid = model::createNode( $row["parent_id"], $row["type"] );
 		if( !$newid ) return false;
 
 		// copy keys
@@ -110,26 +111,26 @@ class model
 		$result = mysql_query( "SELECT * FROM `key` WHERE node_id='$id';" );
 		while( $row = mysql_fetch_array( $result ) )
 		{
-			model::setKey( $newid, $row['name'], $row['value'] );
+			model::setKey( $newid, $row["name"], $row["value"] );
 		}
 
 		// copy tags
 		$query = "SELECT name FROM tag WHERE node_id='$id';";
 		$result = mysql_query($query);
 		while ($row = mysql_fetch_array($result)){
-			model::tag($newid, $row['name']);
+			model::tag($newid, $row["name"]);
 		}
 		// copy references
 		$query = "SELECT src_id, tgt_id FROM link WHERE src_id='$id';";
 		$result = mysql_query($query);
 		while ($row = mysql_fetch_array($result)){
-			model::link( $newid, $row['tgt_id'] );
+			model::link( $newid, $row["tgt_id"] );
 		}
 		// copy referenced
 		$query = "SELECT src_id, tgt_id FROM link WHERE tgt_id='$id';";
 		$result = mysql_query($query);
 		while ($row = mysql_fetch_array($result)){
-			model::link( $row['src_id'], $newid);
+			model::link( $row["src_id"], $newid);
 		}
 		return $newid;
 	}
@@ -165,7 +166,7 @@ class model
 			mysql_real_escape_string($name) );
 		$res = mysql_query($query);
 		$row = mysql_fetch_array($res);
-		return $row['value'];
+		return $row["value"];
 		# we don't want & char to become &amp; for file names
 		#return htmlspecialchars($row['value'],ENT_QUOTES);
 	}
@@ -191,7 +192,7 @@ class model
 	/**
 	 * Get connected links. Recursive. Useful for graphs
 	 * @param {Integer} $id node index
-	 * returns an array or false
+	 * @return {Array} or false
 	 */
 	static function links_r ( $id, $targets )
 	{
@@ -201,11 +202,11 @@ class model
 		$a = array();
 		while( $row = mysql_fetch_array( $result ) )
 		{
-			$a[ $row['id'] ] = array( $row['src_id'], $row['tgt_id'] );
-			if( ! in_array( $row['tgt_id'], $targets ) )
+			$a[ $row["id"] ] = array( $row["src_id"], $row["tgt_id"] );
+			if( ! in_array( $row["tgt_id"], $targets ) )
 			{
-				$targets[] = $row['tgt_id'];
-				$a += model::links_r( $row['tgt_id'], $targets );
+				$targets[] = $row["tgt_id"];
+				$a += model::links_r( $row["tgt_id"], $targets );
 			}
 		}
 		return $a;
@@ -220,7 +221,8 @@ class model
 	static function move ( $id, $target )
 	{
 		$query = "UPDATE node SET parent_id='$target' WHERE id='$id';";
-		if( mysql_query($query))
+		$res = mysql_query($query);
+		if( $res)
 			return mysql_affected_rows() == 1;
 		return false;
 	}
@@ -280,11 +282,9 @@ class model
 			mysql_real_escape_string($name),
 			mysql_real_escape_string($value) );
 		$result = mysql_query($query);
-		//$row = mysql_fetch_array($result);
-		//return htmlspecialchars($row['node_id'],ENT_QUOTES);
 		$res = array();
 		while( $row = mysql_fetch_array($result) )
-			$res[] = $row['node_id'];
+			$res[] = $row["node_id"];
 		return $res;
 	}
 
@@ -459,19 +459,19 @@ class model
 		$row = mysql_fetch_array($result);
 		if( $row )
 		{
-			$proto = model::searchKey( 'id', $row['value'] );
+			$proto = model::searchKey( 'id', $row["value"] );
 			$proto = $proto[0];
 			if( $proto )
 			{
 				$res = model::keys( $proto );
-				unset( $res['id'] );
+				unset( $res["id"] );
 			}
 		}
 		// PROTOTYPE END
 		$query = "SELECT * FROM `key` WHERE node_id='$id' ORDER BY name;";
 		$result = mysql_query($query);
 		while ($row = mysql_fetch_array($result)){
-			$res[$row['name']] = $row['value'];
+			$res[$row["name"]] = $row["value"];
 		}
 		return $res;
 	}
@@ -486,176 +486,17 @@ class model
 		$query = "SELECT parent_id FROM node WHERE id='$id';";
 		$result = mysql_query($query);
 		$row = mysql_fetch_array($result);
-		return $row['parent_id'];
+		return $row["parent_id"];
 	}
 
-/*
-	static function clean ( )
-	{
-		$query = 'SELECT * FROM node AS node1 LEFT JOIN node AS node2 ON node2.id = node1.parent_id WHERE node2.parent_id IS NULL;';
-		$result = mysql_query($query);
-		while ($row = mysql_fetch_array($result)){
-			model::removeNode($row['id']);
-		}
-	}
-*/
-}
-
-/*
-1 nodes
-2 tags
-4 params
-8 links
-*/
-
-$NODE_TAG = 2;
-$NODE_PRM = 4;
-$NODE_LNK = 8;
-
-
-class model_xml
-{
-	static function children ( $id, $level )
-	{
-		$contents = "";
-		$children = model::children( $id );
-		//if (!$children) return false;
-		for( $i = 0; $i < sizeof( $children ); $i++ )
-			$contents .= model_xml::node( $children[$i], 1, 6 );
-		$contents .= model_xml::deps( $id, $level );
-		//$contents .= model_xml::rdeps( $id, $level );
-		return $contents;
-	}
-
-	// $node_id : integer - id of the node under which parameters are
-	// $level  : integer - number of tabs to output before tags
-	static function keys ( $id, $level )
-	{
-		$xml = "";
-		$keys = model::keys($id);
-		foreach( $keys as $key => $value ) {
-			for( $j=0;$j<$level;$j++) $xml .= "\t";
-			$xml .= sprintf( '<key name="%s">%s</key>' . "\n",
-				htmlspecialchars( $key, ENT_QUOTES ),
-				hide_team( htmlspecialchars( $value, ENT_QUOTES ) )
-				);
-		}
-		return $xml;
-	}
-
-	static function multi ( $ids, $depth, $flags )
-	{
-		$id_arr = split( ",", $ids );
-		$xml = "";
-		for( $i=0; $i<sizeof($id_arr); $i++ )
-			$xml .= model_xml::node( $id_arr[$i], $depth, $flags );
-		return $xml;
-	}
-
-	static function graph ( $id )
-	{
-		$links = model::links_r( $id, array() );
-		$values = array_values( $links );
-		$nodes = array();
-		for( $i = 0; $i < sizeof( $links ); $i++ )
-		{
-			$nodes[] = $values[$i][0];
-			$nodes[] = $values[$i][1];
-		}
-		$nodes = array_values( array_unique( $nodes ) );
-		for( $i = 0; $i < sizeof( $nodes ); $i++ )
-		{
-			$xml .= model_xml::node( $nodes[$i], 1, 7 );
-		}
-		while( list( $key, $val ) = each( $links ) )
-		{
-			$links_xml .= sprintf('<link link_id="%s" src_id="%s" tgt_id="%s"/>',
-				$key,
-				$val[0],
-				$val[1] );
-		}
-		return $xml . "\n" . $links_xml;
-	}
-
-	/**
-	 * Gets a node and subnodes in xml format
-	 * id    : integer - node index
-	 * depth : integer - depth of recursion (0 means no limit, 1 for single node)
-	 * flags : integer
-	 * returns false if node not found
+	/*
+	 * Get the tags id of a node
+	 * @param {Integer} $id node id
+	 * @return {array} tags 
 	 */
-	static function node ( $id, $depth = 0, $flags = 15 )
+	static function tags ( $id )
 	{
-		if( $id === false ) return false;
-		if( $id === null ) return false;
-		if( $id === "" ) return false;
-
-		$contents = "";
-		if( $flags & 2 )
-			$contents .= model_xml::tags( $id, 1 );
-		if( $flags & 4 )
-			$contents .= model_xml::keys( $id, 1 );
-		if( $flags & 8 )
-			$contents .= model_xml::deps( $id, 1 );
-		if( $flags & 8 )
-			$contents .= model_xml::rdeps( $id, 1 );
-		if( $depth != 1 ){
-			$children = model::children( $id );
-			if( sizeof($children)>0 )
-				for( $i=0; $i<sizeof($children); $i++ )
-					$contents .= mysql_get( $children[$i], max( $depth - 1, 0 ) );
-		}
-		return model_xml::node_xmltag( $id, "node", $contents );
-	}
-
-	static function node_xmltag ( $id, $name = "node", $contents = false )
-	{
-		if( $id == 0 ) {
-			#global $projectName;
-			$txt = sprintf( '<%s id="0" type="folder" parent_id="" childcount="%s"',
-				$name,
-				node_count_children( $id )
-			);
-			if( $contents )
-				return $txt.">\n$contents</$name>\n";
-			return $txt."/>\n";
-		}
-		$query = "SELECT * FROM node WHERE id='$id';";
-		if( !$result = mysql_query( $query ) )
-			return false;
-		if( !mysql_num_rows( $result ) )
-			return false;
-		$row = mysql_fetch_array( $result );
-		$txt = sprintf( '<%s id="%s" type="%s" parent_id="%s" childcount="%s" rlinks="%s"',
-			$name,
-			$id,
-			$row['type'],
-			$row['parent_id'],
-			node_count_children( $id ),
-			mysqlNode_countRlinks( $id )
-		);
-		if( $contents )
-			return $txt . ">\n$contents</$name>\n";
-		return $txt . "/>\n";
-	}
-
-	static function tags ( $id, $level )
-	{
-		$query = "SELECT name FROM tag WHERE node_id='$id';";
-		$result = mysql_query( $query );
-		$xml = "";
-		if( mysql_num_rows( $result ) == 0 ) return;
-		while( $row = mysql_fetch_array( $result ) ) {
-			for( $j=0; $j<$level; $j++ ) $xml .= "\t";
-			$xml .= sprintf( "<tag>%s</tag>\n",
-				htmlspecialchars( $row['name'], ENT_NOQUOTES ) );
-		}
-		return $xml;
-	}
-
-	static function deps ( $id, $level )
-	{
-		$xml = "";
+		$array = array();
 
 		// PROTOTYPE BEGIN
 		$protoname = model::getKey( $id, 'prototype' );
@@ -665,146 +506,96 @@ class model_xml
 			$proto = $proto[0];
 			if( $proto )
 			{
-				$xml .= model_xml::deps( $proto, $level );
+				$array = model::tags( $proto );
 			}
 		}
 		// PROTOTYPE END
-	
-		$query = "SELECT link.id AS link_id, link.tgt_id, node.* FROM link LEFT JOIN node ON node.id=link.tgt_id WHERE src_id='$id' ORDER BY type;";
-		if( !$result = mysql_query( $query ) ) return false;
-		if( !mysql_num_rows( $result ) ) return false;
+
+		$query = "SELECT name FROM tag WHERE node_id='$id';";
+		$result = mysql_query( $query );
 		while( $row = mysql_fetch_array( $result ) ) {
-			for( $j=0; $j<$level+1; $j++ ) $xml .= "\t";
-			$childcount = node_count_children( $id );
-			$xml .= sprintf('<link link_id="%s" id="%s" type="%s" parent_id="%s" childcount="%s" rlinks="%s">',
-				$row['link_id'],
-				$row['tgt_id'],
-				( $row['tgt_id'] == '0' )? 'folder' : $row['type'],
-				$row['parent_id'],
-				$childcount,
-				mysqlNode_countRlinks( $row['tgt_id'] ) );
-			$xml .= model_xml::tags( $row['tgt_id'], 1 );
-			$xml .= model_xml::keys( $row['tgt_id'], 1 );
-			$xml .= "</link>";
+			$array[] = $row["name"];
 		}
-		return $xml . "\n";
+		return $array;
 	}
 
-	static function rdeps ( $id, $level )
+	/*
+	 * Get the links of a node
+	 * @param {Integer} $id node id
+	 * @return {array} links 
+	 */
+	static function links ( $id )
 	{
-		$query = "SELECT link.id AS link_id, link.src_id, node.* FROM link LEFT JOIN node ON node.id=link.src_id WHERE tgt_id='$id' ORDER BY type;";
-		if( !$result = mysql_query( $query ) ) return false;
-		if( !mysql_num_rows( $result ) ) return false;
-		$xml = "";
-		while( $row = mysql_fetch_array( $result ) ) {
-			for( $j=0; $j<$level; $j++ ) $xml .= "\t";
-			$childcount = node_count_children( $id );
-			$xml .= sprintf( '<rlink link_id="%s" id="%s" type="%s" parent_id="%s" childcount="%s">',
-				$row['link_id'],
-				$row['src_id'],
-				( $row['src_id'] == '0' )? 'folder' : $row['type'],
-				$row['parent_id'],
-				$childcount);
-			$xml .= model_xml::tags( $row['tgt_id'],1 );
-			$xml .= model_xml::keys( $row['src_id'], 1 );
-			$xml .= "</rlink>";
-			//$xml .= xmlnodetag($row['id'], "ref", false);
+		$array = array();
+
+		// PROTOTYPE BEGIN
+		$protoname = model::getKey( $id, 'prototype' );
+		if( $protoname )
+		{
+			$proto = model::searchKey( 'id', $protoname );
+			$proto = $proto[0];
+			if( $proto )
+			{
+				$array = model::links( $proto );
+			}
 		}
-		return $xml . "\n";
+		// PROTOTYPE END
+
+
+		$query = "SELECT link.id AS link_id, link.tgt_id, node.* FROM link LEFT JOIN node ON node.id=link.tgt_id WHERE src_id='$id' ORDER BY type;";
+		if( !$result = mysql_query( $query ) ) return $array;
+		if( !mysql_num_rows( $result ) ) return $array;
+
+		while( $row = mysql_fetch_array( $result ) ) {
+
+			$res = array ("link_id"=>$row["link_id"], 
+					"id"=>$row["tgt_id"], 
+					"type"=>(($row["tgt_id"] == "0" )? "folder" : $row["type"]),
+					"parent_id"=>$row["parent_id"]);
+
+			$array[] = $res;
+		}
+		return $array;
 	}
 
-}
+	/*
+	 * Get the reverse links of a node
+	 * @param {Integer} $id node id
+	 * @return {array} links 
+	 */
+	static function rlinks ( $id )
+	{
+		$array = array();
 
-function hide_team ( $team )
-{
-	global $hidden_users;
-	if (in_array($team,$hidden_users))
-		return "***";
-	else
-		return $team;
-}
+		// PROTOTYPE BEGIN
+		$protoname = model::getKey( $id, 'prototype' );
+		if( $protoname )
+		{
+			$proto = model::searchKey( 'id', $protoname );
+			$proto = $proto[0];
+			if( $proto )
+			{
+				$array = model::rlinks( $proto );
+			}
+		}
+		// PROTOTYPE END
 
-function node_count_children ( $id )
-{
-	return mysqlNode_countChildren($id) + node_count_subelements($id);
-}
+		$query = "SELECT link.id AS link_id, link.src_id, node.* FROM link LEFT JOIN node ON node.id=link.src_id WHERE tgt_id='$id' ORDER BY type;";
+		if( !$result = mysql_query( $query ) ) return $array;
+		if( !mysql_num_rows( $result ) ) return $array;
 
-function node_count_subelements ( $id )
-{
-	$count = 0;
-	$query = "SELECT COUNT(node_id) as count FROM tag WHERE node_id='$id';";
-   	$result = mysql_query($query);
-   	$row = mysql_fetch_array($result);
-	$count += $row[0];
-	$query = "SELECT COUNT(node_id) as count FROM `key` WHERE node_id='$id';";
-   	$result = mysql_query($query);
-   	$row = mysql_fetch_array($result);
-	$count += $row[0];
-	$query = "SELECT COUNT(src_id) as count FROM link WHERE src_id='$id';";
-   	$result = mysql_query($query);
-   	$row = mysql_fetch_array($result);
-	$count += $row[0];
-/*
-	$query = "SELECT COUNT(tgt_id) as count FROM link WHERE tgt_id='$id';";
-   	$result = mysql_query($query);
-   	$row = mysql_fetch_array($result);
-	$count += $row[0];
-*/
-	return $count;
-}
+		while( $row = mysql_fetch_array( $result ) ) {
 
-function mysqlNode_countChildren ( $id )
-{
-	$query = "SELECT COUNT(id) as count FROM node WHERE parent_id='$id';";
-   	$result = mysql_query($query);
-   	$row = mysql_fetch_array($result);
-	return $row['count'];
-}
+			$res = array ("link_id"=>$row["link_id"], 
+					"id"=>$row["src_id"], 
+					"type"=>(($row["src_id"] == "0" )? "folder" : $row["type"]),
+					"parent_id"=>$row["parent_id"]);
 
-function mysqlNode_countRlinks ( $id )
-{
-	$query = "SELECT COUNT(src_id) as count FROM link WHERE tgt_id='$id';";
-   	$result = mysql_query($query);
-   	$row = mysql_fetch_array($result);
-	return $row['count'];
-}
-
-function xmlnodenav ( $id )
-{
-	if( $id == 0 ) {
-		$txt = '<nav id="0"'.
-		' parent="0"'.
-		' previous="0"'.
-		' next="0"'.
-		' childcount="' . $childcount . '"/>';
-		return $txt . "\n";
+			$array[] = $res;
+		}
+		return $array;
 	}
 
-	$query = "SELECT * FROM node WHERE id='$id';";
-	if( !$result = mysql_query( $query ) )
-		return false;
-	if( !mysql_num_rows( $result ) )
-		return false;
-	$row = mysql_fetch_array( $result );
-	$closesiblings = mysql_get_closesiblings( $id );
-	$txt = sprintf( '<nav id="%s" parent="%s" previous="%s" next="%s" childcount="%s" ancestors="%s"/>',
-		$id,
-		$row['parent_id'],
-		$closesiblings['previous'],
-		$closesiblings['next'],
-		node_count_children( $id ),
-		implode( model::ancestors( $id ), ',' )
-	);
-	return $txt . "\n";
-}
-
-function mysql_get_closesiblings ( $id )
-{
-	$xml = "";
-	$parent_id = model::parent($id);
-	$siblings = model::children($parent_id);
-	$index = array_search($id, $siblings);
-	return array("previous" => $siblings[$index-1], "next" => $siblings[$index+1]);
 }
 
 ?>

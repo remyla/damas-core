@@ -41,8 +41,8 @@ if (!$cmd ) {
 	exit;
 }
 
-if ( !accessGranted() ) { // test à réjouter sur les fichiers json.php et 
-	header("HTTP/1.1: 403 Forbidden"); // soap.php pour vérifier l'authetification
+if ( !accessGranted() ) {
+	header("HTTP/1.1: 403 Forbidden");
 	echo "User authentification required";
 	exit;
 }

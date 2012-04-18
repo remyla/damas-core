@@ -9,7 +9,7 @@
  **/
 
 
-include_once "data_model.php";
+include_once "data_model_1.php";
 
 /*
 1 nodes
@@ -199,19 +199,6 @@ class model_json
 	static function links ( $id )
 	{
 		$array = array();
-
-		// PROTOTYPE BEGIN
-		$protoname = model::getKey( $id, 'prototype' );
-		if( $protoname )
-		{
-			$proto = model::searchKey( 'id', $protoname );
-			$proto = $proto[0];
-			if( $proto )
-			{
-				$array[] = model_json::links( $proto );
-			}
-		}
-		// PROTOTYPE END
 	
 		$result = model::links($id);
 
