@@ -28,7 +28,6 @@ $anonymous_access = false;
  * "MySQL" - authentication against a "user" table in the database of project
  * "CAS"   - authentication against a Central Authentification Service
  */
-#$authentication = "Default";
 $authentication = "MySQL";
 
 

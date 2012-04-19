@@ -1,46 +1,43 @@
 """
-  Methods and objects for DAMAS
-  damas-software.org
-
-  Usage:
-
-  import damas
-  proj = damas.project( "https://example.com/damas/server" )
-  if proj.signIn( "login", "password" ):
-    print "authentication succeeded"
-    # ... code here ...
-  else:
-    print "authentication failed"
-
-
-  Usage 2: retrieve an element
-
-  elem = proj.searchKey( 'id', 'element_id')
-  print elem
-
-  author:
-    Remy Lalanne
-
-  contributors:
-    Stephane Hoarau
-    Sebastien Courtois
-    Michael Haussmann
+  Python methods and objects for DAMAS software (damas-software.org)
 
   Copyright 2011,2012 Remy Lalanne
 
-  damas.py is free software: you can redistribute it and/or modify
+  This file is part of damas-core.
+
+  damas-core is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
   the Free Software Foundation, either version 3 of the License, or
   (at your option) any later version.
 
-  damas.py is distributed in the hope that it will be useful,
+  damas-core is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
 
   You should have received a copy of the GNU General Public License
-  along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+  along with damas-core.  If not, see <http://www.gnu.org/licenses/>.
 
+  Usage:
+    import damas
+    proj = damas.project( "https://example.com/damas/server" )
+    if proj.signIn( "login", "password" ):
+      print "authentication succeeded"
+      # ... code here ...
+    else:
+      print "authentication failed"
+
+  Usage: retrieve an element
+    elem = proj.searchKey( 'id', 'element_id')
+    print elem
+
+  Author:
+    Remy Lalanne
+
+  Contributors:
+    Stephane Hoarau
+    Sebastien Courtois
+    Michael Haussmann
 
   ChangeLog:
     120131 added element.write method
@@ -53,7 +50,6 @@
     111003 element.id and element.parent_id are converted to integers
 
   Todo:
-
 """
 
 import urllib # quote()
