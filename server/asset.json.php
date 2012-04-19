@@ -16,7 +16,6 @@ include_once "FileSystem/lib.file.php";
 
 $cmd = arg("cmd");
 $ret = false;
-$nav = false;
 
 $init = null;
 $init = damas_service::init();
@@ -78,15 +77,19 @@ switch( $cmd )
 	case "lock":
 		if( model::hastag( arg("id"), "lock" ) ) {
 			header("HTTP/1.1: 304 Not Modified Error on update");
-			echo "Node update failed";
+			echo "Node update failed, already lock";
 			exit;
 			//$err = $ERR_NODE_UPDATE;
 		}
 		$ret = model::tag( arg("id"), 'lock' );
 		$ret &= model::setKey( arg("id"), "lock_user", getUser() );
 		$ret &= model::setKey( arg("id"), 'lock_text', arg("comment") );
-		if (!$ret)
-			$err = $ERR_ASSET_LOCK;
+		if (!$ret) {
+			header("HTTP/1.1: 304 Not Modified Asset Not Lock");
+			echo "Error during locking";
+			exit;
+			//$err = $ERR_ASSET_LOCK;
+		}
 		break;
 	case "unlock":
 		if( asset_ismylock( arg("id") ) )
@@ -94,14 +97,12 @@ switch( $cmd )
 			$ret = model::untag( arg("id"), 'lock' );
 			model::removeKey( arg("id"), 'lock_user' );
 			model::removeKey( arg("id"), 'lock_text' );
+			break;
 		}
-		if (!$ret) {
-			header("HTTP/1.1: 304 Not Modified Error on update");
-			echo "Node update failed";
-			exit;
-			//$err = $ERR_NODE_UPDATE;
-		}
-		break;
+		header("HTTP/1.1: 304 Not Modified Error on update");
+		echo "Node update failed";
+		exit;
+		//$err = $ERR_NODE_UPDATE;
 	case "upload_set_image":
 		if( is_uploaded_file( $_FILES['file']['tmp_name'] ) )
 		{
@@ -112,8 +113,10 @@ switch( $cmd )
 				break;
 			}
 		}
-		$err = $ERR_ASSET_UPDATE;
-		break;
+		header("HTTP/1.1: 304 Not Modified Asset Not updated");
+		echo "Error during asset update";
+		exit;
+		//$err = $ERR_ASSET_UPDATE;
 	case "upload_create_asset":
 		if( is_uploaded_file( $_FILES['file']['tmp_name'] ) )
 		{
@@ -125,7 +128,7 @@ switch( $cmd )
 				model::setKey( $id, 'text', arg( 'message' ) );
 				model::setKey( $id, 'user', getUser() );
 				model::setKey( $id, 'time', time() );
-				$ret = model_xml::node( $id, 1, $NODE_TAG | $NODE_PRM );
+				$ret = model_json::node( $id, 1, $NODE_TAG | $NODE_PRM );
 				break;
 			}
 		}
@@ -138,134 +141,85 @@ switch( $cmd )
 		{
 			if( model::getKey( arg( 'id' ), 'lock_user' ) != getUser() )
 			{
-				$err = $ERR_ASSET_UPDATE;
-				echo sprintf( "<error>asset is locked for the user %s</error>",
-					model::getKey( arg( 'id' ), 'lock_user' )
-				);
-				$ret = false;
-				break;
+				header("HTTP/1.1: 304 Not Modified Asset Not updated");
+				echo sprintf( "asset is locked for the user %s",
+					model::getKey( arg( 'id' ), 'lock_user' ) );
+				exit;
+				//$err = $ERR_ASSET_UPDATE;
 			}
 		}
 		$path = $_FILES['file']['tmp_name'];
 		if( !is_uploaded_file( $path ) )
 		{
-			$err = $ERR_ASSET_UPDATE;
-			echo "<error>is_uploaded_file() error</error>";
-			$ret = false;
-			break;
+			header("HTTP/1.1: 304 Not Modified Asset Not updated");
+			echo "Error on update, is_uploaded_file() error";
+			exit;
+			//$err = $ERR_ASSET_UPDATE;
 		}
 		if( !assets::asset_upload( arg("id"), $path, arg("message") ) )
 		{
-			$err = $ERR_ASSET_UPDATE;
-			$ret = false;
+			header("HTTP/1.1: 304 Not Modified Asset Not updated");
 			echo sprintf( "<error>Permission denied to copy %s to %s</error>",
 				$path,
-				$assetsLCL . model::getKey( arg( 'id' ), 'file' )
-			);
+				$assetsLCL . model::getKey( arg( 'id' ), 'file' ) );
+			exit;
+			//$err = $ERR_ASSET_UPDATE;
 		}
 		break;
 	case "version_backup":
 		$id = assets::version_backup( arg("id") );
-		if( !$id ) $err = $ERR_NODE_CREATE;
-		if( $id )
-			$ret = model_xml::node( $id, 1, $NODE_TAG | $NODE_PRM );
-		else
-			$ret = false;
+		if( !$id ) {
+			header('HTTP/1.1: 304 Not Modified Error on create');
+			echo "Node create failed";
+			exit;
+			//$err = $ERR_NODE_CREATE;
+		}
+		$ret = model_json::node( $id, 1, $NODE_TAG | $NODE_PRM );
 		break;
 	case "version_increment":
 		$ret = assets::version_increment( arg("id"), arg("message") );
-		if (!$ret)
-			$err = $ERR_ASSET_UPDATE;
+		if (!$ret) {
+			header("HTTP/1.1: 304 Not Modified Asset Not updated");
+			echo "Error during asset's version increment";
+			exit;
+			//$err = $ERR_ASSET_UPDATE;
+		}
 		break;
 	case "version_increment2":
-		if( is_null( arg('id') ) || is_null( arg('message') ) ){
-			$err = $ERR_COMMAND; break;
-		}
 		$ret = assets::version_increment2( arg("id"), arg("message") );
-		if (!$ret)
-			$err = $ERR_ASSET_UPDATE;
+		if (!$ret) {
+			header("HTTP/1.1: 304 Not Modified Asset Not updated");
+			echo "Error during asset's version increment";
+			exit;
+			//$err = $ERR_ASSET_UPDATE;
+		}
 		break;
 	case "recycle":
 		$ret = DAM::recycle( arg('id') );
-		if (!$ret)
-			$err = $ERR_NODE_MOVE;
+		if (!$ret) {
+			header("HTTP/1.1: 304 Not Modified Error on move");
+			echo "Node move failed";
+			exit;
+			//$err = $ERR_NODE_MOVE;
+		}
 		break;
 	case "empty_trashcan":
 		$ret = DAM::empty_trashcan();
-		if (!$ret)
-			$err = $ERR_NODE_ID;
-		break;
-	//
-	// OLD
-	//
-	case "save":
-		$ret = asset_save(arg("id"), arg("path"), arg("comment"));
-		if (!$ret)
-			$err = $ERR_ASSET_UPDATE;
-		break;
-	case "saveable":
-		if(!is_writable($assetsLCL.model::getKey(arg("id"),'path_backups'))){
-			$err = $ERR_FILE_PERMISSION;
-			break;
+		if (!$ret) {
+			header('HTTP/1.1: 404 Not Found');
+			echo "Node not found";
+			exit;
+			//$err = $ERR_NODE_ID;
 		}
-		$ret = asset_saveable(arg("id"));
-		if(!$ret)
-			$err = $ERR_ASSET_SAVEABLE;
-		break;
-	case "backup":
-		$ret = asset_backup(arg("id"));
-		if(!$ret)
-			$err = $ERR_ASSET_BACKUP;
-		break;
-	case "backupundo":
-		$ret = asset_backup_undo(arg("id"));
-		if(!$ret)
-			$err = $ERR_ASSET_UNDOBACKUP;
-		break;
-	case "commitnode":
-		$ret = asset_commit_node(arg("id"),arg("comment"));
-		if(!$ret)
-			$err = $ERR_ASSET_UPDATE;
-		break;
-	case "rollback":
-		$ret = asset_rollback(arg("id"), arg("comment"));
-		echo "ret=".$ret;
-		if(!$ret)
-			$err = $ERR_ASSET_ROLLBACK;
-		break;
-	case "savecheck":
-		if (!asset_backup_able(arg("id")))
-			$err = $ERR_ASSET_READONLY;
-		break;
-	case "filecheck":
-		if( !file_exists( $assetsLCL . model::getKey( arg("id"), 'file' ) ) )
-		{
-			$err = $ERR_FILE_NOT_FOUND;
-			break;
-		}
-		if( !is_readable( $assetsLCL . model::getKey( arg("id"), 'file' ) ) )
-		{
-			$err = $ERR_FILE_PERMISSION;
-			break;
-		}
-		if( !model::getKey( arg("id"), "sha1" ) )
-		{
-			$err = $ERR_ASSET_NOSHA1;
-			break;
-		}
-		if( !asset_check_sha1( arg("id") ) )
-			$err = $ERR_ASSET_FILECHECK;
 		break;
 	default:
-		$err = $ERR_COMMAND;
+		header("HTTP/1.1: 400 Bad Request");
+		echo "Bad command";
+		exit;
 }
 
 damas_service::log_event();
-/*
-echo soaplike_head($cmd,$err);
-echo "\t<FILES";
-foreach ($_FILES as $k => $v)
-	echo " " . $k.'="'.$v.'"';*/
+
 echo json_encode($ret);
 
 ?>
