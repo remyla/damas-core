@@ -42,7 +42,7 @@ if (!$cmd ) {
 }
 
 if ( !accessGranted() ) {
-	header("HTTP/1.1: 403 Forbidden");
+	header("HTTP/1.1: 401 Unauthorized");
 	echo "User authentification required";
 	exit;
 }
@@ -341,6 +341,21 @@ switch( $cmd )
 		}
 		$ret = model_json::graph( arg("id") );
 		if (!$ret) {
+			header('HTTP/1.1: 404 Not Found');
+			echo "Node not found";
+			exit;
+			//$err = $ERR_NODE_ID;
+		}
+		break;
+	case "export":
+		if( is_null( arg('id') ) ){
+			header('HTTP/1.1: 400 Bad Request');
+			echo "Bad command";
+			exit;
+			//$err = $ERR_COMMAND; break;
+		}
+		$ret = model_json::node( arg('id'), 0, $NODE_TAG | $NODE_PRM);
+		if( !$ret ) {
 			header('HTTP/1.1: 404 Not Found');
 			echo "Node not found";
 			exit;

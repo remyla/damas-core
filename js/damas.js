@@ -952,3 +952,8 @@ damas.element.time = function ( )
 }
 
 //damas.element = Class.create( damas.element );
+
+
+errorsManagement = function ( response ) {
+	document.fire ("err:" + response.status , response);
+} // errorsManagement ( response )
