@@ -17,6 +17,7 @@
 $mod["model::ancestors"] = array( "*" );
 $mod["model::children"] = array( "*" );
 $mod["model::links"] = array( "*" ); // Axel
+$mod["model::export"] = array( "*" ); // Axel
 $mod["model::createNode"] = array( "admin", "editor" );
 $mod["model::duplicate"] = array( "admin", "editor" );
 $mod["model::graph"] = array( "*" );

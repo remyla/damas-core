@@ -61,7 +61,7 @@ if( $err==$ERR_NOERROR )
 		case "getElementById":
 			$id = model::searchKey('id', arg('id'));
 			$id = $id[0];
-			$ret = mysql_get($id, 1, $NODE_TAG | $NODE_PRM);
+			$ret = model_xml::node($id, 1, $NODE_TAG | $NODE_PRM);
 			$nav = xmlnodenav(arg("id"));
 			if (!$ret)
 				$err = $ERR_NODE_ID;
