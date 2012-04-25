@@ -1051,6 +1051,7 @@ damas.element.time = function ( )
 }
 
 //damas.element = Class.create( damas.element );
+<<<<<<< HEAD
 /**
  * @fileoverview SOAP messages and Ajax queries handling
  *

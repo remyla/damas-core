@@ -132,12 +132,12 @@ class model_json
 		if( $flags & 8 )
 			$contents["rlinks"] = model_json::rlink( $id );
 
-/* 	depth toujours = 1, code inatteignable
+		//* 	depth toujours = 1, code inatteignable ==> c'est faux !
 		if( $depth != 1 ){
 			$children = model::children( $id );
 			if( sizeof($children)>0 )
 				for( $i=0; $i<sizeof($children); $i++ )
-					$contents .= mysql_get( $children[$i], max( $depth - 1, 0 ) );
+					$contents["children"][] = model_json::node ( $children[$i], max( $depth - 1, 0 ) );
 		} // */
 		return model_json::node_jsontag( $id, $contents );
 	} // done
@@ -179,7 +179,7 @@ class model_json
 		return $res;
 	} // done
 
-	/*
+	/**
 	 * Get the tags id of a node
 	 * @param {Integer} $id node id
 	 * @return {array} tags 
@@ -191,7 +191,7 @@ class model_json
 		return $tags;
 	} // done
 
-	/*
+	/**
 	 * Get the links id of a node and its ancestors
 	 * @param {Integer} $id node id
 	 * @return {array} links 
@@ -214,7 +214,7 @@ class model_json
 		return array_merge($array, $result);
 	} // done
 
-	/*
+	/**
 	 * Get the links id of a node
 	 * @param {Integer} $id node id
 	 * @return {array} links 
