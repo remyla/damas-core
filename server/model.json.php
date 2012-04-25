@@ -11,61 +11,40 @@ include_once "../php/data_model_1.json.php";
 $cmd = arg("cmd");
 $ret = false;
 
-$init = null;
-$init = damas_service::init();
-if ( !is_null($init) ) {
-	//if ( $init == $ERR_SERVER_CONF) {
-	header("HTTP/1.1: ".$init);
-	echo $init;
+if ( !damas_service::initServerDoc() ) {
+	header("HTTP/1.1: 500 Configuration file is invalid");
 	exit;
-
-	/*
-	} else if ($init == $ERR_MYSQL_SUPPORT) {
-		header("HTTP/1.1: 503 Service Unavailable");
-		echo json_encode($error[$ERR_MYSQL_SUPPORT]);
-	} else if ($init == $ERR_MYSQL_CONNECT) {
-		header("HTTP/1.1: 503 Service Unavailable Connection Error");
-		echo json_encode($error[$ERR_MYSQL_CONNECT]);
-	} else if ($init == $ERR_MYSQL_DB) {
-		header("HTTP/1.1: 503 Service Unavailable Select Error");
-		echo json_encode($error[$ERR_MYSQL_DB]);
-	} else if ($init == $ERR_AUTHREQUIRED) {
-		header("HTTP/1.1: 401 Unauthorized");
-		echo json_encode($error[$ERR_AUTHREQUIRED]);
-	}// */
+}
+if ( !damas_service::initMysql() ) { // contient initAuth car accessGranted est fait après de toute façon.
+	header("HTTP/1.1: 503 MySQL error"); echo "loo";
+	exit;
 }
 
 if (!$cmd ) {
 	header("HTTP/1.1: 400 Bad Request");
-	echo "Bad command";
 	exit;
 }
 
 if ( !accessGranted() ) {
 	header("HTTP/1.1: 401 Unauthorized");
-	echo "User authentification required";
 	exit;
 }
 
 if ( !allowed("model::".$cmd) ) {
 	header("HTTP/1.1: 405 Method Not Allowed");
-	echo "Permission denied";
 	exit;
 }
-
 switch( $cmd )
 {
 	case "createNode":
 		if( is_null( arg('id') ) || is_null( arg('type') ) ){
 			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
 			exit;
 		}
 		$id = model::createNode( arg("id"), arg("type") );
 		if( !$id ) {
 			//$err = $ERR_NODE_CREATE;
 			header("HTTP/1.1: 304 Not Modified Error on create");
-			echo "Node create failed";
 			exit;
 		}
 		if( $id )
@@ -76,14 +55,12 @@ switch( $cmd )
 	case "duplicate":
 		if( is_null( arg('id') ) ){
 			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
 			exit;
 			//$err = $ERR_COMMAND; break;
 		}
 		$id = model::copyBranch( arg("id"), false );
 		if( !$id) {
 			header("HTTP/1.1: 304 Not Modified Error on create");
-			echo "Node create failed";
 			exit;
 			//$err = $ERR_NODE_CREATE;
 		}
@@ -95,14 +72,12 @@ switch( $cmd )
 	case "removeNode":
 		if( is_null( arg('id') ) ){
 			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
 			exit;
 			//$err = $ERR_COMMAND; break;
 		}
 		$ret = model::removeNode( arg("id") );
 		if( !$ret ) {
 			header("HTTP/1.1: 304 Not Modified Error on delete");
-			echo "Node delete failed";
 			exit;
 			//$err = $ERR_NODE_DELETE;
 		}
@@ -110,14 +85,12 @@ switch( $cmd )
 	case "setKey":
 		if( is_null( arg('id') ) || is_null( arg('name') ) || is_null( arg('value') ) ){
 			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
 			exit;
 			//$err = $ERR_COMMAND; break;
 		}
 		$ret = model::setKey( arg("id"), arg("name"), arg("value") );
 		if( !$ret ) {
 			header("HTTP/1.1: 304 Not Modified Error on update");
-			echo "Node update failed";
 			exit;
 			//$err = $ERR_NODE_UPDATE;
 		}
@@ -125,14 +98,12 @@ switch( $cmd )
 	case "removeKey":
 		if( is_null( arg('id') ) || is_null( arg('name') ) ){
 			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
 			exit;
 			//$err = $ERR_COMMAND; break;
 		}
 		$ret = model::removeKey( arg("id"), arg("name") );
 		if( !$ret) {
 			header("HTTP/1.1: 304 Not Modified Error on update");
-			echo "Node update failed";
 			exit;
 			//$err = $ERR_NODE_UPDATE;
 		}
@@ -140,14 +111,12 @@ switch( $cmd )
 	case "move":
 		if( is_null( arg('id') ) || is_null( arg('target') ) ){
 			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
 			exit;
 			//$err = $ERR_COMMAND; break;
 		}
 		$ret = model::move( arg("id"), arg("target") );
 		if( !$ret) {
 			header("HTTP/1.1: 304 Not Modified Error on move");
-			echo "Node move failed";
 			exit;
 			//$err = $ERR_NODE_MOVE;
 		}
@@ -155,14 +124,12 @@ switch( $cmd )
 	case "tag":
 		if( is_null( arg('id') ) || is_null( arg('name') ) ){
 			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
 			exit;
 			//$err = $ERR_COMMAND; break;
 		}
 		$ret = model::tag( arg("id"), arg("name") );
 		if( !$ret ) {
 			header("HTTP/1.1: 304 Not Modified Error on update");
-			echo "Node update failed";
 			exit;
 			//$err = $ERR_NODE_UPDATE;
 		}
@@ -170,14 +137,12 @@ switch( $cmd )
 	case "untag":
 		if( is_null( arg('id') ) || is_null( arg('name') ) ){
 			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
 			exit;
 			//$err = $ERR_COMMAND; break;
 		}
 		$ret = model::untag( arg("id"), arg("name") );
 		if( !$ret) {
 			header("HTTP/1.1: 304 Not Modified Error on update");
-			echo "Node update failed";
 			exit;
 			//$err = $ERR_NODE_UPDATE;
 		}
@@ -185,14 +150,12 @@ switch( $cmd )
 	case "link":
 		if( arg('src') == null || arg('tgt') == null ) {
 			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
 			exit;
 			//$err = $ERR_COMMAND; break;
 		}
 		$ret = model::link( arg("src"), arg("tgt") );
 		if( !$ret) {
 			header("HTTP/1.1: 304 Not Modified Error on update");
-			echo "Node update failed";
 			exit;
 			//$err = $ERR_NODE_UPDATE;
 		}
@@ -200,14 +163,12 @@ switch( $cmd )
 	case "unlink":
 		if( is_null( arg('id') ) ){
 			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
 			exit;
 			//$err = $ERR_COMMAND; break;
 		}
 		$ret = model::unlink( arg("id") );
 		if( !$ret) {
 			header("HTTP/1.1: 304 Not Modified Error on update");
-			echo "Node update failed";
 			exit;
 			//$err = $ERR_NODE_UPDATE;
 		}
@@ -215,14 +176,12 @@ switch( $cmd )
 	case "setType":
 		if( is_null( arg('id') ) || is_null( arg('type') ) ){
 			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
 			exit;
 			//$err = $ERR_COMMAND; break;
 		}
 		$ret = model::setType( arg("id"), arg("type") );
 		if( !$ret) {
 			header("HTTP/1.1: 304 Not Modified Error on update");
-			echo "Node update failed";
 			exit;
 			//$err = $ERR_NODE_UPDATE;
 		}
@@ -230,14 +189,12 @@ switch( $cmd )
 	case "setTags":
 		if( is_null( arg('id') ) || is_null( arg('tags') ) ){
 			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
 			exit;
 			//$err = $ERR_COMMAND; break;
 		}
 		$ret = model::setTags( arg("id"), arg("tags") );
 		if( !$ret ) {
 			header("HTTP/1.1: 304 Not Modified Error on update");
-			echo "Node update failed";
 			exit;
 			//$err = $ERR_NODE_UPDATE;
 		}
@@ -245,14 +202,12 @@ switch( $cmd )
 	case "setKeys":
 		if( is_null( arg('id') ) || is_null( arg('old') ) || is_null( arg('new') ) ){
 			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
 			exit;
 			//$err = $ERR_COMMAND; break;
 		}
 		$ret = model::setKeys( arg("id"), arg("old"), arg("new") );
 		if( !$ret ) {
 			header("HTTP/1.1: 304 Not Modified Error on update");
-			echo "Node update failed";
 			exit;
 			//$err = $ERR_NODE_UPDATE;
 		}
@@ -268,7 +223,6 @@ switch( $cmd )
 	case "ancestors":
 		if( is_null( arg('id') ) ){
 			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
 			exit;
 			//$err = $ERR_COMMAND; break;
 		}
@@ -277,7 +231,6 @@ switch( $cmd )
 	case "searchKey": // should return array of ids (json array?) // this is done =D
 		if( is_null(arg('key')) || arg('value') == null ){
 			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
 			exit;
 			//$err = $ERR_COMMAND; break;
 		}
@@ -285,7 +238,6 @@ switch( $cmd )
 		$ret = model_json::multi( implode(',', $array), 1, $NODE_TAG | $NODE_PRM );
 		if( !$ret ) {
 			header('HTTP/1.1: 404 Not Found');
-			echo "Node not found";
 			exit;
 			//$err = $ERR_NODE_ID;
 		}
@@ -293,14 +245,12 @@ switch( $cmd )
 	case "single":
 		if( is_null( arg('id') ) ){
 			header('HTTP/1.1: 400 Bad Request');
-			echo "Bad command";
 			exit;
 			//$err = $ERR_COMMAND; break;
 		}
 		$ret = model_json::node( arg( "id" ), 1, $NODE_TAG | $NODE_PRM );
 		if( !$ret ) {
 			header('HTTP/1.1: 404 Not Found');
-			echo "Node not found";
 			exit;
 			//$err = $ERR_NODE_ID;
 		}
@@ -308,7 +258,6 @@ switch( $cmd )
 	case "children":
 		if( is_null( arg('id') ) ){
 			header('HTTP/1.1: 400 Bad Request');
-			echo "Bad command";
 			exit;
 			//$err = $ERR_COMMAND; break;
 		}
@@ -317,7 +266,6 @@ switch( $cmd )
 	case "links":
 		if( is_null( arg('id') ) ){
 			header('HTTP/1.1: 400 Bad Request');
-			echo "Bad command";
 			exit;
 			//$err = $ERR_COMMAND; break;
 		}
@@ -326,7 +274,6 @@ switch( $cmd )
 	case "multi":
 		if( is_null( arg('id') ) ){
 			header('HTTP/1.1: 400 Bad Request');
-			echo "Bad command";
 			exit;
 			//$err = $ERR_COMMAND; break;
 		}
@@ -335,14 +282,12 @@ switch( $cmd )
 	case "graph":
 		if( is_null( arg('id') ) ){
 			header('HTTP/1.1: 400 Bad Request');
-			echo "Bad command";
 			exit;
 			//$err = $ERR_COMMAND; break;
 		}
 		$ret = model_json::graph( arg("id") );
 		if (!$ret) {
 			header('HTTP/1.1: 404 Not Found');
-			echo "Node not found";
 			exit;
 			//$err = $ERR_NODE_ID;
 		}
@@ -350,21 +295,28 @@ switch( $cmd )
 	case "export":
 		if( is_null( arg('id') ) ){
 			header('HTTP/1.1: 400 Bad Request');
-			echo "Bad command";
 			exit;
 			//$err = $ERR_COMMAND; break;
 		}
 		$ret = model_json::node( arg('id'), 0, $NODE_TAG | $NODE_PRM);
 		if( !$ret ) {
 			header('HTTP/1.1: 404 Not Found');
-			echo "Node not found";
 			exit;
 			//$err = $ERR_NODE_ID;
 		}
 		break;
+	case "rech":
+		if( is_null( arg('value') ) ) {
+			header('HTTP/1.1: 400 Bad Request');
+			exit;
+			//$err = $ERR_COMMAND; break;
+		}
+		$tab = model::rech( arg('value') );
+		foreach ($tab as $key=>$value)
+			$ret[] = $value;//$tab[$key];
+		break;
 	default:
 		header('HTTP/1.1: 400 Bad Request');
-		echo "Bad command";
 		exit;
 		//$err = $ERR_COMMAND;
 } // switch / case
@@ -373,7 +325,10 @@ $nolog = array( 'single', 'children', 'multi', 'stats', 'types', 'tags' );
 
 if( ! in_array( arg('cmd'), $nolog ) )
 	damas_service::log_event();
-
-echo json_encode($ret);
+		
+//echo phpinfo();
+//echo $ret["keys"]["file"]."\n";	
+echo json_encode($ret)."\n";
+//echo json_encode($ret, JSON_UNESCAPED_SLASHES);
 
 ?>

@@ -13,21 +13,22 @@ include_once "../php/data_model.php";
 $cmd = arg("cmd");
 $ret = false;
 
-$init = null;
-$init = damas_service::init();
+if ( !damas_service::initServerDoc() ) {
+	header("HTTP/1.1: 500 Configuration file is invalid");
+	exit;
+}
+if ( !damas_service::initMysql() ) {
+	header("HTTP/1.1: 503 MySQL error");
+	exit;
+}
 
-if ( !is_null($init) ) {
-	if ($init == "401 User authentification required" && $cmd=="login") {} // GoTo login 
-	else {
-		header("HTTP/1.1: ".$init);
-		echo $init;
-		exit;
-	}
+if ( !accessGranted() && $cmd != "login") {
+	header("HTTP/1.1: 401 User authentification required");
+	exit;
 }
 
 if (!$cmd ) {
 	header("HTTP/1.1: 400 Bad Request");
-	echo "Bad command";
 	exit;
 }
 
@@ -36,7 +37,6 @@ switch ($cmd){
 		$ret = login( arg("user"), arg("password") );
 		if( !$ret ) {
 			header("HTTP/1.1: 401 Unautorized, Acces Denied");
-			echo "Login Error";
 			exit;
 			//$err = $ERR_AUTH;
 		}
@@ -46,7 +46,6 @@ switch ($cmd){
 		$ret = logout();
 		if (!$ret) {
 			header("HTTP/1.1: 401 Unautorized, Not logged in");
-			echo "Logout Error";
 			exit;
 			//$err = $ERR_LOGOUT;
 		}
@@ -55,7 +54,6 @@ switch ($cmd){
 		$ret = (int)checkAuthentication();
 		if (!$ret) {
 			header("HTTP/1.1: 401 User authentification required");
-			echo "You need to be authentifiated";
 			exit;
 			//$err = $ERR_AUTHREQUIRED;
 		}
@@ -65,7 +63,6 @@ switch ($cmd){
 		break;
 	default:
 		header('HTTP/1.1: 400 Bad Request');
-		echo "Bad command";
 		exit;
 }
 

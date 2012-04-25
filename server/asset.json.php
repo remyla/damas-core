@@ -17,29 +17,27 @@ include_once "FileSystem/lib.file.php";
 $cmd = arg("cmd");
 $ret = false;
 
-$init = null;
-$init = damas_service::init();
-if ( !is_null($init) ) {
-	header("HTTP/1.1: ".$init);
-	echo $init;
+if ( !damas_service::initServerDoc() ) {
+	header("HTTP/1.1: 500 Configuration file is invalid");
+	exit;
+}
+if ( !damas_service::initMysql() ) {
+	header("HTTP/1.1: 503 MySQL error");
 	exit;
 }
 
 if (!$cmd ) {
 	header("HTTP/1.1: 400 Bad Request");
-	echo "Bad command";
 	exit;
 }
 
 if ( !accessGranted() ) {
 	header("HTTP/1.1: 403 Forbidden");
-	echo "User authentification required";
 	exit;
 }
 
 if (!allowed("asset::".$cmd)) {
 	header("HTTP/1.1: 405 Method Not Allowed");
-	echo "Permission denied";
 	exit;
 }
 
@@ -59,7 +57,6 @@ switch( $cmd )
 	case "time":
 		if( ! model::setKey( arg("id"), "time", time() ) ) {
 			header("HTTP/1.1: 304 Not Modified Error on update");
-			echo "Node update failed";
 			exit;
 			//$err = $ERR_NODE_UPDATE;
 		}
@@ -69,7 +66,6 @@ switch( $cmd )
 		$ret = DAM::write( arg("id"), arg("text") );
 		if (!$ret) {
 			header("HTTP/1.1: 304 Not Modified Error on create");
-			echo "Node create failed";
 			exit;
 			//$err = $ERR_NODE_CREATE;
 		}
@@ -77,7 +73,6 @@ switch( $cmd )
 	case "lock":
 		if( model::hastag( arg("id"), "lock" ) ) {
 			header("HTTP/1.1: 304 Not Modified Error on update");
-			echo "Node update failed, already lock";
 			exit;
 			//$err = $ERR_NODE_UPDATE;
 		}
@@ -86,7 +81,6 @@ switch( $cmd )
 		$ret &= model::setKey( arg("id"), 'lock_text', arg("comment") );
 		if (!$ret) {
 			header("HTTP/1.1: 304 Not Modified Asset Not Lock");
-			echo "Error during locking";
 			exit;
 			//$err = $ERR_ASSET_LOCK;
 		}
@@ -100,7 +94,6 @@ switch( $cmd )
 			break;
 		}
 		header("HTTP/1.1: 304 Not Modified Error on update");
-		echo "Node update failed";
 		exit;
 		//$err = $ERR_NODE_UPDATE;
 	case "upload_set_image":
@@ -114,7 +107,6 @@ switch( $cmd )
 			}
 		}
 		header("HTTP/1.1: 304 Not Modified Asset Not updated");
-		echo "Error during asset update";
 		exit;
 		//$err = $ERR_ASSET_UPDATE;
 	case "upload_create_asset":
@@ -133,7 +125,6 @@ switch( $cmd )
 			}
 		}
 		header("HTTP/1.1: 304 Not Modified Error on create");
-		echo "Node create failed";
 		exit;
 		//$err = $ERR_NODE_CREATE;
 	case "upload":
@@ -142,8 +133,6 @@ switch( $cmd )
 			if( model::getKey( arg( 'id' ), 'lock_user' ) != getUser() )
 			{
 				header("HTTP/1.1: 304 Not Modified Asset Not updated");
-				echo sprintf( "asset is locked for the user %s",
-					model::getKey( arg( 'id' ), 'lock_user' ) );
 				exit;
 				//$err = $ERR_ASSET_UPDATE;
 			}
@@ -152,16 +141,12 @@ switch( $cmd )
 		if( !is_uploaded_file( $path ) )
 		{
 			header("HTTP/1.1: 304 Not Modified Asset Not updated");
-			echo "Error on update, is_uploaded_file() error";
 			exit;
 			//$err = $ERR_ASSET_UPDATE;
 		}
 		if( !assets::asset_upload( arg("id"), $path, arg("message") ) )
 		{
 			header("HTTP/1.1: 304 Not Modified Asset Not updated");
-			echo sprintf( "<error>Permission denied to copy %s to %s</error>",
-				$path,
-				$assetsLCL . model::getKey( arg( 'id' ), 'file' ) );
 			exit;
 			//$err = $ERR_ASSET_UPDATE;
 		}
@@ -170,7 +155,6 @@ switch( $cmd )
 		$id = assets::version_backup( arg("id") );
 		if( !$id ) {
 			header('HTTP/1.1: 304 Not Modified Error on create');
-			echo "Node create failed";
 			exit;
 			//$err = $ERR_NODE_CREATE;
 		}
@@ -180,7 +164,6 @@ switch( $cmd )
 		$ret = assets::version_increment( arg("id"), arg("message") );
 		if (!$ret) {
 			header("HTTP/1.1: 304 Not Modified Asset Not updated");
-			echo "Error during asset's version increment";
 			exit;
 			//$err = $ERR_ASSET_UPDATE;
 		}
@@ -189,7 +172,6 @@ switch( $cmd )
 		$ret = assets::version_increment2( arg("id"), arg("message") );
 		if (!$ret) {
 			header("HTTP/1.1: 304 Not Modified Asset Not updated");
-			echo "Error during asset's version increment";
 			exit;
 			//$err = $ERR_ASSET_UPDATE;
 		}
@@ -198,7 +180,6 @@ switch( $cmd )
 		$ret = DAM::recycle( arg('id') );
 		if (!$ret) {
 			header("HTTP/1.1: 304 Not Modified Error on move");
-			echo "Node move failed";
 			exit;
 			//$err = $ERR_NODE_MOVE;
 		}
@@ -207,14 +188,12 @@ switch( $cmd )
 		$ret = DAM::empty_trashcan();
 		if (!$ret) {
 			header('HTTP/1.1: 404 Not Found');
-			echo "Node not found";
 			exit;
 			//$err = $ERR_NODE_ID;
 		}
 		break;
 	default:
 		header("HTTP/1.1: 400 Bad Request");
-		echo "Bad command";
 		exit;
 }
 

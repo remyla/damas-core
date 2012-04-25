@@ -471,6 +471,7 @@ class model
 		$query = "SELECT * FROM `key` WHERE node_id='$id' ORDER BY name;";
 		$result = mysql_query($query);
 		while ($row = mysql_fetch_array($result)){
+			//htmlspecialchars($row['value'],ENT_QUOTES);
 			$res[$row["name"]] = $row["value"];
 		}
 		return $res;
@@ -489,7 +490,7 @@ class model
 		return $row["parent_id"];
 	}
 
-	/*
+	/**
 	 * Get the tags id of a node
 	 * @param {Integer} $id node id
 	 * @return {array} tags 
@@ -519,7 +520,7 @@ class model
 		return $array;
 	}
 
-	/*
+	/**
 	 * Get the links of a node
 	 * @param {Integer} $id node id
 	 * @return {array} links 
@@ -558,7 +559,7 @@ class model
 		return $array;
 	}
 
-	/*
+	/**
 	 * Get the reverse links of a node
 	 * @param {Integer} $id node id
 	 * @return {array} links 
@@ -594,6 +595,38 @@ class model
 			$array[] = $res;
 		}
 		return $array;
+	}
+	
+	/**
+	 * Return the result from search of $value on database
+	 * @param {String} $value string to search in the database
+	 * @return {Array} array of all value found in the database
+	 */
+	static function rech ( $value )
+	{
+		$value = strtolower($value);
+		$query = "SELECT DISTINCT k.value as kvalue FROM `key` k WHERE LOWER(k.value) like '%$value%' ORDER BY k.value ASC LIMIT 10";
+		//$query1 = "SELECT DISTINCT k.name as kname FROM `key` k WHERE LOWER(k.name) like '%$value%' ORDER BY k.name ASC LIMIT 10";
+		$query2 = "SELECT DISTINCT t.name as tname FROM tag t WHERE LOWER(t.name) like '%$value%' ORDER BY t.name ASC LIMIT 10";
+		$res = array();
+		$result = mysql_query($query);
+		while( $row = mysql_fetch_array( $result ) ) {
+			$res[] = $row["kvalue"];
+		}
+		
+		/*
+		$result1 = mysql_query($query1);
+		while( $row1 = mysql_fetch_array( $result1 ) ) {
+			$res[] = $row1["kname"];
+		}// */
+		
+		$result2 = mysql_query($query2);
+		while( $row2 = mysql_fetch_array( $result2 ) ) {
+			$res[] = $row2["tname"];
+		}
+		$res = array_unique($res);
+		natcasesort($res);
+		return $res;
 	}
 
 }
