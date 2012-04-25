@@ -270,42 +270,4 @@ function mysqlNode_countRlinks ( $id )
 	return $row['count'];
 }
 
-function xmlnodenav ( $id )
-{
-	if( $id == 0 ) {
-		$txt = '<nav id="0"'.
-		' parent="0"'.
-		' previous="0"'.
-		' next="0"'.
-		' childcount="' . $childcount . '"/>';
-		return $txt . "\n";
-	}
-
-	$query = "SELECT * FROM node WHERE id='$id';";
-	if( !$result = mysql_query( $query ) )
-		return false;
-	if( !mysql_num_rows( $result ) )
-		return false;
-	$row = mysql_fetch_array( $result );
-	$closesiblings = mysql_get_closesiblings( $id );
-	$txt = sprintf( '<nav id="%s" parent="%s" previous="%s" next="%s" childcount="%s" ancestors="%s"/>',
-		$id,
-		$row['parent_id'],
-		$closesiblings['previous'],
-		$closesiblings['next'],
-		node_count_children( $id ),
-		implode( model::ancestors( $id ), ',' )
-	);
-	return $txt . "\n";
-}
-
-function mysql_get_closesiblings ( $id )
-{
-	$xml = "";
-	$parent_id = model::parent($id);
-	$siblings = model::children($parent_id);
-	$index = array_search($id, $siblings);
-	return array("previous" => $siblings[$index-1], "next" => $siblings[$index+1]);
-}
-
 ?>

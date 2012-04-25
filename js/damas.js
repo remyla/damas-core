@@ -307,8 +307,6 @@ damas.project.getNode = function ( index )
 	var args = { 'cmd': 'single', 'id': index };
 	var req = new Ajax.Request( this.server + "/model.soap.php", { asynchronous: false, parameters: args } );
 	var soap = req.transport.responseXML;
-
-	damas.current_ancestors = soap.getElementsByTagName( "nav" )[0].getAttribute('ancestors');
 	return new damas.element( soap.getElementsByTagName( "node" )[0] );
 }
 
@@ -1051,7 +1049,7 @@ damas.element.time = function ( )
 }
 
 //damas.element = Class.create( damas.element );
-<<<<<<< HEAD
+
 /**
  * @fileoverview SOAP messages and Ajax queries handling
  *
