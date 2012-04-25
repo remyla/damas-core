@@ -15,29 +15,27 @@ include_once "../php/DAM.php";
 $cmd = arg("cmd");
 $ret = false;
 
-$init = null;
-$init = damas_service::init();
-if ( !is_null($init) ) {
-	header("HTTP/1.1: ".$init);
-	echo $init;
+if ( !damas_service::initServerDoc() ) {
+	header("HTTP/1.1: 500 Configuration file is invalid");
+	exit;
+}
+if ( !damas_service::initMysql() ) {
+	header("HTTP/1.1: 503 MySQL error");
 	exit;
 }
 
 if (!$cmd ) {
 	header("HTTP/1.1: 400 Bad Request");
-	echo "Bad command";
 	exit;
 }
 
 if ( !accessGranted() ) {
 	header("HTTP/1.1: 403 Forbidden");
-	echo "User authentification required";
 	exit;
 }
 
 if (!allowed("libtask.".$cmd)) {
 	header("HTTP/1.1: 405 Method Not Allowed");
-	echo "Permission denied";
 	exit;
 }
 
@@ -45,7 +43,6 @@ switch ($cmd){
 	case "taskAdd":
 		if( is_null( arg('id') ) || is_null( arg('name') ) ){
 			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
 			exit;
 		}
 		$ret = model::createNode( arg("id"), "task" );
@@ -54,34 +51,29 @@ switch ($cmd){
 		if( !$ret ) {
 			//$err = $ERR_NODE_CREATE;
 			header("HTTP/1.1: 304 Not Modified Error on create");
-			echo "Node create failed";
 			exit;
 		}
 		break;
 	case "taskTag":
 		if( is_null( arg('id') ) || is_null( arg('type') ) ){
 			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
 			exit;
 		}
 		$ret = model::tag(arg("id"), arg("name"));
 		if (!$ret) {
 			//$err = $ERR_NODE_UPDATE;
 			header("HTTP/1.1: 304 Not Modified Error on update");
-			echo "Node update failed";
 			exit;
 		}
 		break;
 	case "taskUntag":
 		if( is_null( arg('id') ) || is_null( arg('name') ) ){
 			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
 			exit;
 		}
 		$ret = model::untag(arg("id"), arg("name"));
 		if (!$ret) {
 			header("HTTP/1.1: 304 Not Modified Error on update");
-			echo "Node update failed";
 			exit;
 			//$err = $ERR_NODE_UPDATE;
 		}
@@ -89,13 +81,11 @@ switch ($cmd){
 	case "taskSet":
 		if( is_null( arg('id') ) || is_null( arg('name') ) || is_null( arg('value') ) ){
 			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
 			exit;
 		}
 		$ret = model::setKey(arg("id"), arg("name"), arg("value"));
 		if (!$ret) {
 			header("HTTP/1.1: 304 Not Modified Error on update");
-			echo "Node update failed";
 			exit;
 			//$err = $ERR_NODE_UPDATE;
 		}
@@ -103,13 +93,11 @@ switch ($cmd){
 	case "taskSetTeam":
 		if( is_null( arg('id') ) || is_null( arg('value') ) ){
 			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
 			exit;
 		}
 		$ret = taskSetTeam(arg("id"),arg("value"));
 		if (!$ret) {
 			header("HTTP/1.1: 304 Not Modified Error on update");
-			echo "Node update failed";
 			exit;
 			//$err = $ERR_NODE_UPDATE;
 		}
@@ -117,13 +105,11 @@ switch ($cmd){
 	case "taskSetState":
 		if( is_null( arg('id') ) || is_null( arg('value') ) ){
 			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
 			exit;
 		}
 		$ret = taskSetState(arg("id"),arg("value"));
 		if (!$ret) {
 			header("HTTP/1.1: 304 Not Modified Error on update");
-			echo "Node update failed";
 			exit;
 			//$err = $ERR_NODE_UPDATE;
 		}
@@ -132,7 +118,6 @@ switch ($cmd){
 		$ret = workflowByStateTotal();
 		if (!$ret) {
 			header("HTTP/1.1: 405 Method Not Allowed");
-			echo "Permission denied";
 			exit;
 			//$err = $ERR_PERMISSION;
 		}
@@ -141,7 +126,6 @@ switch ($cmd){
 		$ret = workflowByState();
 		if (!$ret) {
 			header("HTTP/1.1: 405 Method Not Allowed");
-			echo "Permission denied";
 			exit;
 			//$err = $ERR_PERMISSION;
 		}
@@ -150,14 +134,12 @@ switch ($cmd){
 		$ret = workflowByTask(arg("name"));
 		if (!$ret) {
 			header("HTTP/1.1: 405 Method Not Allowed");
-			echo "Permission denied";
 			exit;
 			//$err = $ERR_PERMISSION;
 		}
 		break;
 	default:
 		header("HTTP/1.1: 400 Bad Request");
-		echo "Bad command";
 		exit;
 }
 
