@@ -1,8 +1,24 @@
 /**
- * @fileoverview Static methods for Digital Asset Management
+ * @fileoverview Javascript methods and objects for DAMAS software (damas-software.org)
+ *
+ * Copyright 2005-2012 Remy Lalanne
+ *
+ * This file is part of damas-core.
+ *
+ * damas-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * damas-core is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with damas-core.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @author Remy Lalanne
- * Copyright 2005-2012 Remy Lalanne
  */
 
 /**
@@ -178,6 +194,37 @@ damas.sort_time_desc = function ( elements )
 	});
 }
 
+/**
+ *
+ * Errors handling
+ *
+ */
+damas.post = function ( url, args ) {
+	var req = new Ajax.Request( url, {
+		asynchronous: false,
+		parameters: args,
+		onFailure: damas.onFailure,
+		onException: damas.onException
+	});
+	return serverResponseHandle.decomposeResponse( req.transport.responseXML );
+}
+
+damas.onFailure = function ( transport )
+{
+	alert( 'Failure!' );
+	//alert( transport.status);
+	//alert( transport.responseText );
+	//alert( transport.headerJSON );
+	//alert( transport.responseJSON );
+	//document.fire( 'HTTPERROR', transport.status );
+}
+
+damas.onException = function ( response )
+{
+	alert( 'Exception!' );
+}
+
+
 
 /**
  * Methods to interact with a remote DAMAS project.
@@ -202,12 +249,28 @@ damas.project.initialize = function ( url )
 {
 	damas.log.cmd( "damas.project", arguments );
 	this.server = url;
-	var r = serverRequest.post( url + "/server.php", false );
+	var r = damas.post( url + "/server.php", false );
 	if( r.error != damas.errorCode( "ERR_NOERROR" ) )
 	{
 		return r.error;
 	}
 }
+
+damas.project.modelRequest = function ( args )
+{
+	var req = new Ajax.Request( this.server + "/model.json.phpp", {
+		asynchronous: false,
+		parameters: args,
+		onFailure: function( response ){
+		}
+	});
+	alert( 'finished' );
+	//return serverResponseHandle.decomposeResponse( req.transport.responseXML );
+}
+
+document.observe( 'HTTPERROR', function(e){
+	alert( e );
+} );
 
 /**
  * Remove every elements from the trashcan.
@@ -218,7 +281,7 @@ damas.project.empty_trashcan = function ( )
 {
 	damas.log.cmd( "project.empty_trashcan", arguments );
 	var args = { cmd: "empty_trashcan" };
-	var res = serverRequest.post( this.server + "/asset.soap.php", args ).bool;
+	var res = damas.post( this.server + "/asset.soap.php", args ).bool;
 	if( res ) document.fire('dam:element.updated', { 'id': this.getElementById('dam:trash').id } );
 }
 
@@ -244,8 +307,6 @@ damas.project.getNode = function ( index )
 	var args = { 'cmd': 'single', 'id': index };
 	var req = new Ajax.Request( this.server + "/model.soap.php", { asynchronous: false, parameters: args } );
 	var soap = req.transport.responseXML;
-
-	damas.current_ancestors = soap.getElementsByTagName( "nav" )[0].getAttribute('ancestors');
 	return new damas.element( soap.getElementsByTagName( "node" )[0] );
 }
 
@@ -286,6 +347,42 @@ damas.project.getChildren = function ( element )
  * @param {Array} indexes array of node ids to retrieve
  * @returns {Array} array of XML fragments
  */
+/*
+damas.project.getNodes = function ( indexes )
+{
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		method: "POST",
+		asynchronous: false,
+		parameters: { cmd: "multi", id: indexes.join( "," ), depth: "1", flags: "4" },
+		//onFailure: damas.project.onFailure,
+		//onException: damas.project.onFailure,
+		onFailure: function ( transport ){
+			alert( transport.status);
+			alert( transport.responseText );
+			alert( transport.headerJSON );
+			alert( transport.responseJSON );
+		},
+		onException: function ( transport ){
+			alert( transport.status);
+			alert( transport.responseText );
+			alert( transport.headerJSON );
+			alert( transport.responseJSON );
+		},
+		onSuccess: function ( transport ){
+			alert( transport.status);
+			alert( transport.responseText );
+			alert( transport.headerJSON );
+			alert( transport.responseJSON );
+		}
+	});
+	//return project.readElementsXML( req.transport.responseXML );
+	alert( req.transport.status);
+	alert( req.transport.responseText );
+	alert( req.transport.headerJSON );
+	alert( req.transport.responseJSON );
+	return( eval( req.transport.responseText ) );
+}
+*/
 damas.project.getNodes = function ( indexes )
 {
 	var req = new Ajax.Request( this.server + "/model.soap.php", {
@@ -323,7 +420,7 @@ damas.project.searchKey = function ( keyname, keyvalue )
 {
 	damas.log.cmd( "damas.project.getNodeByKey", arguments );
 	var args = { 'cmd': "searchKey", 'key': keyname, 'value': keyvalue };
-	var nodes = serverRequest.post( this.server + "/model.soap.php", args ).xml.getElementsByTagName( "node" );
+	var nodes = damas.post( this.server + "/model.soap.php", args ).xml.getElementsByTagName( "node" );
 	var elements = new Array();
 	for( var i = 0; i < nodes.length; i++ )
 	{
@@ -342,8 +439,8 @@ damas.project.createNode = function ( id, tagName )
 {
 	damas.log.cmd( "damas.project.createNode", arguments );
 	var args = { cmd: "createNode", id: id, type: tagName };
-	//return serverRequest.post( this.server + "/model.soap.php", args ).text;
-	return new damas.element( serverRequest.post( this.server + "/model.soap.php", args ).xml.getElementsByTagName( "node" )[0] );
+	//return damas.post( this.server + "/model.soap.php", args ).text;
+	return new damas.element( damas.post( this.server + "/model.soap.php", args ).xml.getElementsByTagName( "node" )[0] );
 }
 
 /**
@@ -355,8 +452,8 @@ damas.project.duplicate = function ( id )
 {
 	damas.log.cmd( "damas.project.duplicate", arguments );
 	var args = { cmd: "duplicate", id: id };
-	//return serverRequest.post( this.server + "/model.soap.php", args ).text;
-	return new damas.element( serverRequest.post( this.server + "/model.soap.php", args ).xml.getElementsByTagName( "node" )[0] );
+	//return damas.post( this.server + "/model.soap.php", args ).text;
+	return new damas.element( damas.post( this.server + "/model.soap.php", args ).xml.getElementsByTagName( "node" )[0] );
 }
 
 /**
@@ -394,7 +491,7 @@ damas.project.recycle = function ( id )
 {
 	damas.log.cmd( "damas.project.recycle", arguments );
 	var args = { cmd: "recycle", id: id };
-	return serverRequest.post( this.server + "/asset.soap.php", args ).bool;
+	return damas.post( this.server + "/asset.soap.php", args ).bool;
 	//if( res ) document.fire( 'dam:element.recycled', this );
 }
 
@@ -407,7 +504,7 @@ damas.project.removeNode = function ( id )
 {
 	damas.log.cmd( "damas.project.removeNode", arguments );
 	var args = { cmd: "removeNode", id: id };
-	return serverRequest.post( this.server + "/model.soap.php", args ).bool;
+	return damas.post( this.server + "/model.soap.php", args ).bool;
 }
 
 /**
@@ -422,8 +519,8 @@ damas.project.setKey = function ( id, name, value )
 {
 	damas.log.cmd( "project.setKey", arguments );
 	var args = { cmd: "setKey", id: id, name: name, value: value };
-	return serverRequest.post( this.server + "/model.soap.php", args ).bool;
-	//var res = serverRequest.post( damas.soap_srv, args ).bool;
+	return damas.post( this.server + "/model.soap.php", args ).bool;
+	//var res = damas.post( damas.soap_srv, args ).bool;
 	//if( res ) document.fire('dam:element.updated', { 'id': id, 'name': name, 'value': value } );
 	//return res;
 }
@@ -439,7 +536,7 @@ damas.project.setKeys = function ( id, old_pattern, new_pattern )
 {
 	damas.log.cmd( "project.setKeys", arguments );
 	var args = { cmd: "setKeys", 'id': id, 'old': old_pattern, 'new': new_pattern };
-	var res = serverRequest.post( this.server + "/model.soap.php", args ).bool;
+	var res = damas.post( this.server + "/model.soap.php", args ).bool;
 	if( res ) document.fire('dam:element.updated', { 'id': id } );
 	return res;
 }
@@ -454,8 +551,8 @@ damas.project.removeKey = function ( id, name )
 {
 	damas.log.cmd( "damas.project.removeKey", arguments );
 	var args = { cmd: "removeKey", id: id, name: name };
-	return serverRequest.post( this.server + "/model.soap.php", args ).bool;
-	//var res = serverRequest.post( damas.soap_srv, args ).bool;
+	return damas.post( this.server + "/model.soap.php", args ).bool;
+	//var res = damas.post( damas.soap_srv, args ).bool;
 	//if( res ) document.fire('dam:element.updated', { 'id': id, 'name': name } );
 	//return res;
 }
@@ -464,7 +561,7 @@ damas.project.setTags = function ( id, tags )
 {
 	damas.log.cmd( "project.setTags", arguments );
 	var args = { cmd: "setTags", id: id, tags: tags };
-	return serverRequest.post( this.server + "/model.soap.php", args ).bool;
+	return damas.post( this.server + "/model.soap.php", args ).bool;
 }
 
 /**
@@ -477,7 +574,7 @@ damas.project.tag = function ( id, name )
 {
 	damas.log.cmd( "damas.project.tag", arguments );
 	var args = { cmd: "tag", id: id, name: name };
-	return serverRequest.post( this.server + "/model.soap.php", args ).bool;
+	return damas.post( this.server + "/model.soap.php", args ).bool;
 }
 
 /**
@@ -490,7 +587,7 @@ damas.project.untag = function ( id, name )
 {
 	damas.log.cmd( "damas.project.untag", arguments );
 	var args = { cmd: "untag", id: id, name: name };
-	return serverRequest.post( this.server + "/model.soap.php", args ).bool;
+	return damas.post( this.server + "/model.soap.php", args ).bool;
 }
 
 /**
@@ -503,7 +600,7 @@ damas.project.link = function ( src_id, tgt_id )
 {
 	damas.log.cmd( "damas.project.link", arguments );
 	var args = { cmd: "link", src: src_id, tgt: tgt_id };
-	var res = serverRequest.post( this.server + "/model.soap.php", args ).bool;
+	var res = damas.post( this.server + "/model.soap.php", args ).bool;
 	document.fire( 'damas:project.link' );
 	return res;
 }
@@ -517,7 +614,7 @@ damas.project.unlink = function ( id )
 {
 	damas.log.cmd( "damas.project.unlink", arguments );
 	var args = { cmd: "unlink", id: id };
-	var res = serverRequest.post( this.server + "/model.soap.php", args ).bool;
+	var res = damas.post( this.server + "/model.soap.php", args ).bool;
 	//if( res ) document.fire('damas.project.unlink', id );
 	document.fire( 'damas:project.unlink' );
 	return res;
@@ -533,7 +630,7 @@ damas.project.setType = function ( id, type )
 {
 	damas.log.cmd( "project.setType", arguments );
 	var args = { cmd: "setType", id: id, type: type };
-	return serverRequest.post( this.server + "/model.soap.php", args ).bool;
+	return damas.post( this.server + "/model.soap.php", args ).bool;
 }
 
 /**
@@ -546,7 +643,7 @@ damas.project.move = function ( id, target )
 {
 	damas.log.cmd( "damas.project.move", arguments );
 	var args = { cmd: "move", id: id, target: target };
-	return serverRequest.post( this.server + "/model.soap.php", args ).bool;
+	return damas.post( this.server + "/model.soap.php", args ).bool;
 }
 
 /**
@@ -919,7 +1016,7 @@ damas.element.recycle = function ()
 {
 	damas.log.cmd( "that.recycle", arguments );
 	var args = { cmd: "recycle", id: this.id };
-	var res = serverRequest.post( project.server + "/asset.soap.php", args ).bool;
+	var res = damas.post( project.server + "/asset.soap.php", args ).bool;
 	if( res ) document.fire( 'dam:element.recycled', this );
 	return res;
 }
@@ -933,7 +1030,7 @@ damas.element.write = function ( text )
 {
 	damas.log.cmd( "that.write", arguments );
 	var args = { cmd: "write", id: this.id, text: text };
-	var res = serverRequest.post( project.server + "/asset.soap.php", args ).bool;
+	var res = damas.post( project.server + "/asset.soap.php", args ).bool;
 	if( res ) document.fire( 'dam:element.updated', this );
 	return res;
 }
@@ -946,14 +1043,128 @@ damas.element.time = function ( )
 {
 	damas.log.cmd( "that.time", arguments );
 	var args = { cmd: "time", id: this.id };
-	var res = serverRequest.post( project.server + "/asset.soap.php", args ).bool;
+	var res = damas.post( project.server + "/asset.soap.php", args ).bool;
 	if( res ) document.fire( 'dam:element.updated', this );
 	return res;
 }
 
 //damas.element = Class.create( damas.element );
 
+/**
+ * @fileoverview SOAP messages and Ajax queries handling
+ *
+ * @author Remy Lalanne
+ * Copyright 2005-2012 Remy Lalanne
+ */
 
-errorsManagement = function ( response ) {
-	document.fire ("err:" + response.status , response);
-} // errorsManagement ( response )
+/**
+ * Handle XML responses and errors from server
+ * @namespace
+ * @requires errors
+ * @requires serverResponse
+ */
+serverResponseHandle = {
+	/**
+	 * Extract the version of server from its response
+	 * @param {object} XMLResponse XML response document from server
+	 * @return {Hash} Server response hash
+	 */
+	decomposeResponse: function ( responseXML ) {
+		var xml = false;
+		var txt = false;
+		var err = this.notifyError(responseXML);
+		if (damas.errorText(err) == "ERR_NOERROR"){
+			body = serverResponse.getServerReturnDom(responseXML);
+			txt = serverResponse.getServerReturn(responseXML);
+			return { 'bool':true, 'error':err, 'xml':responseXML, 'body':body, 'text':txt };
+		}
+		return { 'bool':false, 'error':err, 'xml':null, 'body':null, 'text':null }
+	},
+	notifyError: function ( responseXML ) {
+		var error_code = this.checkResponse(responseXML);
+		if ( damas.errorText(error_code)!="ERR_NOERROR" )
+		{
+			document.fire( 'err:all', error_code );
+		}
+		document.fire( 'err:' + damas.errorText(error_code), error_code );
+		return error_code;
+	},
+	checkResponse: function ( XMLResponse ) {
+		var err = damas.errorCode("ERR_NOERROR");
+		if( XMLResponse == null )
+			return damas.errorCode("ERR_SERVER");
+		var version = serverResponse.getServerVersion(XMLResponse);
+		if (!version)
+			return damas.errorCode("ERR_SERVERRESPONSE");
+		if ( version != damas.version )
+			return damas.errorCode("ERR_VERSION");
+		err = serverResponse.getServerError(XMLResponse);
+		if ( err === false)
+			return damas.errorCode("ERR_SERVERRESPONSE");
+		return err;
+	}
+};
+
+/**
+ * Extract data from server's SOAP XML responses
+ * @namespace
+ */
+serverResponse = {
+	/**
+	 * Extract the version of server from its response
+	 * @param {object} XMLResponse XML response document from server
+	 * @returns {String} the version string, false on failure
+	 */
+	getServerVersion: function ( XMLResponse ) {
+		if (!XMLResponse) return false;
+		var tags = XMLResponse.getElementsByTagName('version');
+		if (tags.length==0) return false;
+		if (!tags[0].firstChild) return false;
+		return tags[0].firstChild.data;
+	},
+	/**
+	 * Extract the error code from a server response
+	 * @param {object} XMLResponse XML response document from server
+	 * @returns {Integer} the error code found in server response, or false on failure
+	 */
+	getServerError: function ( XMLResponse ) {
+		if (!XMLResponse) return false;
+		// *** XPATH disabled (HTML DOM method instead) ***
+		//var cod = XMLResponse.selectSingleNode("//error/@code");
+		//if (!cod) return false;
+		//return parseInt(cod.nodeValue);
+		var cod = false;
+		var err = XMLResponse.getElementsByTagName('error')[0];
+		for(var i=0; i<err.attributes.length; i++){
+			if (err.attributes[i].nodeName == "code")
+				return parseInt( err.attributes[i].nodeValue);
+		}
+		return false;
+
+	},
+	/**
+	 * Extract the returned value from a server response
+	 * @param {object} xmldoc returned server response
+	 * @returns {String} the return value found in server response
+	 */
+	getServerReturn: function ( XMLResponse ) {
+		if (!XMLResponse) return false;
+		var tags = XMLResponse.getElementsByTagName('returnvalue');
+		if (tags.length==0) return false;
+		if (!tags[0].firstChild) return false; // empty returnvalue
+		return tags[0].firstChild.data;
+	},
+	/**
+	 * Extract the returned value as DOM from a server response
+	 * @param {object} xmldoc returned server response
+	 * @returns {Dom} the return value found in server response, or false on failure
+	 */
+	getServerReturnDom: function ( XMLResponse ) {
+		if (!XMLResponse) return false;
+		var tags = XMLResponse.getElementsByTagName('returnvalue');
+		if (tags.length==0) return false;
+		//return tags[0];
+		//return DOMParser.parseFromString(Sarissa.xmlize(tags[0]),"text/xml");
+		return new DOMParser().parseFromString(new XMLSerializer().serializeToString(tags[0]),"text/xml");
+	}
+};

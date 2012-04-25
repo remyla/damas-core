@@ -12,7 +12,7 @@
  * - Element inheritance (prototype based) - beta
  *
  * @author Remy Lalanne
- * Copyright (c) 2007-2012 Remy Lalanne
+ * Copyright 2007-2012 Remy Lalanne
  *
  * 120221 : fixed graph redondant cycles
  *

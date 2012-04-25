@@ -141,7 +141,7 @@ if ($err==$ERR_NOERROR){
 			}
 			break;
 		case "fileUpload2":
-			include_once "../App/data_model_1.php";
+			include_once "../App/damas-xml.php";
 			$path = $_FILES['file']['tmp_name'];
 			if(!is_uploaded_file($path))
 				$err = $ERR_ASSET_UPDATE;
