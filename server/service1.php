@@ -103,7 +103,7 @@ function allowed ( $service_name )
 {
 	global $mod;
 	if (!is_array($mod[$service_name]))
-		return false;
+		return true;
 	if (in_array("*",$mod[$service_name]))
 		return true;
 	if (in_array(auth_get_class(),$mod[$service_name]))
@@ -175,6 +175,61 @@ class damas_service
 			return "401 User authentification required";
 		}
 		return null;
+	}
+	
+	static function initMysql()
+	{
+
+		# config options
+		global $projectName;
+		global $db_server;
+		global $anonymous_access;
+		global $hidden_users;
+		global $assetsLCL;
+		#global $versions;
+		#global $db_username;
+		#global $db_passwd;
+		#global $db_name;
+
+		include $_SERVER['DOCUMENT_ROOT']."/.damas/server.php";
+		
+		if( !function_exists("mysql_connect") )
+			return false;
+		if( !@mysql_connect($db_server, $db_username, $db_passwd) )
+			return false;
+		if( !mysql_select_db($db_name) )
+			return false;
+
+		mysql_query( "SET NAMES 'utf8'" );
+
+		#include "installer/mysql_prepare.php";
+		#echo "Main Database must be created!";
+		
+		if( $authentication == "Default" )
+		{
+			include "userAuth/authDefault.php";
+		}
+		if( $authentication == "MySQL" )
+		{
+			include "userAuth/authMySQL.php";
+		}
+		if( $authentication == "CAS" )
+		{
+			include "authCAS/lib.authCAS.php";
+		}
+		
+		return true;
+	}
+	
+	static function initServerDoc()
+	{
+		if( !file_exists( $_SERVER['DOCUMENT_ROOT'] . "/.damas/server.php" ) )
+			return false;
+		if( !is_readable( $_SERVER['DOCUMENT_ROOT'] . "/.damas/server.php" ) )
+			return false;
+		include $_SERVER['DOCUMENT_ROOT']."/.damas/server.php";
+		
+		return true;
 	}
 
 	/**
