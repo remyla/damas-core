@@ -901,6 +901,11 @@ damas.element.createNode = function ( type )
        return res;
 }
 
+damas.element.createUser = function ( username, password )
+{
+       return project.createUser( username, password );
+}
+
 /**
  * Make an exact copy of the element
  * @returns {damNode} new node on success, false otherwise.
