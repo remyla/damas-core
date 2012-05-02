@@ -20,7 +20,6 @@ header("Expires: 0");
 echo '<?xml version="1.0" encoding="UTF-8"?>'."\n";
 
 include_once "service.php"; //error_code()
-include_once "App/lib.user.php";
 include_once "FileSystem/lib.file.php";
 
 $cmd = arg("cmd");

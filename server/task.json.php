@@ -6,7 +6,7 @@
 session_start();
 header('Content-type: application/json');
 
-include_once "service1.php"; //error_code()
+include_once "service.php"; //error_code()
 include_once "App/lib.user.php";
 include_once "Workflow/lib.task.php";
 include_once "Workflow/workflow.json.php";
@@ -15,27 +15,19 @@ include_once "../php/DAM.php";
 $cmd = arg("cmd");
 $ret = false;
 
-if ( !damas_service::initServerDoc() ) {
-	header("HTTP/1.1: 500 Configuration file is invalid");
-	exit;
-}
-if ( !damas_service::initMysql() ) {
-	header("HTTP/1.1: 503 MySQL error");
-	exit;
-}
+damas_service::init();
+damas_service::accessGranted();
 
-if (!$cmd ) {
-	header("HTTP/1.1: 400 Bad Request");
+if( !$cmd )
+{
+	header("HTTP/1.1: 400 Bad Request"); //ERR_COMMAND
+	echo "Bad command";
 	exit;
 }
-
-if ( !accessGranted() ) {
-	header("HTTP/1.1: 403 Forbidden");
-	exit;
-}
-
-if (!allowed("libtask.".$cmd)) {
-	header("HTTP/1.1: 405 Method Not Allowed");
+if( !allowed( "model::" . $cmd ) )
+{
+	header("HTTP/1.1: 403 Forbidden"); //ERR_PERMISSION
+	echo "Permission denied";
 	exit;
 }
 

@@ -6,7 +6,7 @@
 session_start();
 header('Content-type: application/json');
 
-include_once "service1.php"; //error_code()
+include_once "service.php"; //error_code()
 include_once "../php/DAM.php";
 include_once "../php/data_model_1.json.php";
 include_once "App/lib.user.php";
@@ -17,27 +17,19 @@ include_once "FileSystem/lib.file.php";
 $cmd = arg("cmd");
 $ret = false;
 
-if ( !damas_service::initServerDoc() ) {
-	header("HTTP/1.1: 500 Configuration file is invalid");
-	exit;
-}
-if ( !damas_service::initMysql() ) {
-	header("HTTP/1.1: 503 MySQL error");
-	exit;
-}
+damas_service::init();
+damas_service::accessGranted();
 
-if (!$cmd ) {
-	header("HTTP/1.1: 400 Bad Request");
+if( !$cmd )
+{
+	header("HTTP/1.1: 400 Bad Request"); //ERR_COMMAND
+	echo "Bad command";
 	exit;
 }
-
-if ( !accessGranted() ) {
-	header("HTTP/1.1: 403 Forbidden");
-	exit;
-}
-
-if (!allowed("asset::".$cmd)) {
-	header("HTTP/1.1: 405 Method Not Allowed");
+if( !allowed( "model::" . $cmd ) )
+{
+	header("HTTP/1.1: 403 Forbidden"); //ERR_PERMISSION
+	echo "Permission denied";
 	exit;
 }
 

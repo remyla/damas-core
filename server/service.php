@@ -67,6 +67,11 @@ function arg ( $name )
 	return false;
 }
 
+function auth_get_class ()
+{
+	$id = model::searchKey( 'username', getUser() );
+	return model::getKey( $id[0], 'class' );
+}
 
 function debug_args()
 {
