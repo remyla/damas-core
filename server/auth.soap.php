@@ -6,7 +6,6 @@
 session_start();
 
 include_once "service.php";
-include_once "App/lib.user.php";
 include_once "../php/data_model_1.php";
 
 //$err = damas_service::init();

@@ -16,7 +16,7 @@
 
 $mod["model::ancestors"] = array( "*" );
 $mod["model::children"] = array( "*" );
-$mod["model::rech"] = array( "*" ); // Axel
+$mod["model::search"] = array( "*" ); // Axel
 $mod["model::links"] = array( "*" ); // Axel
 $mod["model::export"] = array( "admin" ); // Axel
 $mod["model::createNode"] = array( "admin", "editor" );
@@ -74,4 +74,8 @@ $mod["libtask.workflowByState"] = array( "*" );
 $mod["libtask.workflowByResource"] = array( "*" );
 $mod["libtask.workflowByTask"] = array( "*" );
 $mod["libtask.workflowByType"] = array( "*" );
+
+/*    FONCTIONS MDP SHA1   */
+$mod["sha1::transform"] = array("*"); // Axel
+
 ?>
