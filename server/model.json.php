@@ -11,12 +11,11 @@ include_once "../php/data_model_1.json.php";
 $cmd = arg("cmd");
 $ret = false;
 
-//echo "loool"; exit;
 if ( !damas_service::initServerDoc() ) {
 	header("HTTP/1.1: 500 Configuration file is invalid");
 	exit;
 }
-if ( !damas_service::initMysql() ) { // contient initAuth car accessGranted est fait après de toute façon.
+if ( !damas_service::initMysql() ) {
 	header("HTTP/1.1: 503 MySQL error");
 	exit;
 }
@@ -32,7 +31,7 @@ if ( !accessGranted() ) {
 }
 
 if ( !allowed("model::".$cmd) ) {
-	header("HTTP/1.1: 405 Method Not Allowed");
+	header("HTTP/1.1: 403 Forbidden");
 	exit;
 }
 switch( $cmd )
@@ -72,7 +71,7 @@ switch( $cmd )
 		break;
 	case "removeNode":
 		if( is_null( arg('id') ) ){
-			header("HTTP/1.1: 400 Bi.html#3ad Request");
+			header("HTTP/1.1: 400 Bad Request");
 			exit;
 			//$err = $ERR_COMMAND; break;
 		}
@@ -306,13 +305,13 @@ switch( $cmd )
 			//$err = $ERR_NODE_ID;
 		}
 		break;
-	case "rech":
+	case "search":
 		if( is_null( arg('value') ) ) {
 			header('HTTP/1.1: 400 Bad Request');
 			exit;
 			//$err = $ERR_COMMAND; break;
 		}
-		$ret = model::rech( arg('value') );
+		$ret = model::search( arg('value') );
 		break;
 	default:
 		header('HTTP/1.1: 400 Bad Request');
@@ -320,14 +319,11 @@ switch( $cmd )
 		//$err = $ERR_COMMAND;
 } // switch / case
 
-$nolog = array( 'single', 'children', 'multi', 'stats', 'types', 'tags', 'rech' );
+$nolog = array( 'single', 'children', 'multi', 'stats', 'types', 'tags', 'search' );
 
 if( ! in_array( arg('cmd'), $nolog ) )
 	damas_service::log_event();
 		
-//echo phpinfo();
-//echo $ret["keys"]["file"]."\n";	
 echo json_encode($ret);
-//echo json_encode($ret, JSON_UNESCAPED_SLASHES);
 
 ?>

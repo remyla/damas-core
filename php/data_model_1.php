@@ -598,11 +598,11 @@ class model
 	}
 	
 	/**
-	 * Return the result from search of $value on database
+	 * Search key.value or tag.name begginning by $value in database, only return the first word
 	 * @param {String} $value string to search in the database
-	 * @return {Array} array of all value found in the database
+	 * @return {Array} array of all corresponding words found in the database
 	 */
-	static function rech ( $value )
+	static function search ( $value )
 	{
 		$value = strtolower($value);
 		$query = "SELECT DISTINCT substring_index(LOWER (k.value), ' ', 1) as kvalue FROM `key` k WHERE LOWER(k.value) LIKE '$value%' ORDER BY k.value ASC LIMIT 10";
