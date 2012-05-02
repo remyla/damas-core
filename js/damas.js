@@ -131,7 +131,7 @@ damas.keep = function ( elements, type )
 }
 
 /**
- * Filter messages and tasks from an array of elements
+ * Keep messages and elements with a time key from an array of elements
  * @param {Array} elements elements to filter
  * @returns {Array} the filtered array
  */
@@ -140,7 +140,7 @@ damas.keep_timed = function ( elements )
 	var res = new Array();
 	for( var i=0; i< elements.length; i++ )
 	{
-		if( elements[i].keys.get( 'time' ) )
+		if( elements[i].keys.get( 'time' ) || elements[i].type === 'message' )
 			res.push( elements[i] );
 	}
 	return res;
@@ -211,7 +211,8 @@ damas.post = function ( url, args ) {
 
 damas.onFailure = function ( transport )
 {
-	alert( 'Failure!' );
+	//alert( 'HTTP Error ' + transport.status + '\n' + transport.responseText );
+	document.fire('http:error', transport );
 	//alert( transport.status);
 	//alert( transport.responseText );
 	//alert( transport.headerJSON );
