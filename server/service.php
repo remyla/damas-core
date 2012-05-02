@@ -111,21 +111,74 @@ function allowed ( $service_name )
 	return false;
 }
 
-// Function: accessGranted
-// return true if anonymous access if allowed or if authenticated
-// return false if authentication is needed
-function accessGranted()
-{
-	global $anonymous_access;
-	if ($anonymous_access)
-		return true;
-	if (checkAuthentication())
-		return true;
-	return false;
-}
-
 class damas_service
 {
+	
+	//ERR_SERVER_CONF ERR_MYSQL_SUPPORT ERR_MYSQL_CONNECT ERR_MYSQL_DB
+	static function init_http()
+	{
+		if( !file_exists( $_SERVER['DOCUMENT_ROOT'] . "/.damas/server.php" ) )
+		{
+			header("HTTP/1.1: 500 Internal Server Error");
+			echo "Configuration file .damas/server.php is missing";
+			exit;
+		}
+		if( !is_readable( $_SERVER['DOCUMENT_ROOT'] . "/.damas/server.php" ) )
+		{
+			header("HTTP/1.1: 500 Internal Server Error");
+			echo "Configuration file .damas/server.php is not readable";
+			exit;
+		}
+		include $_SERVER['DOCUMENT_ROOT']."/.damas/server.php";
+
+		if( !function_exists("mysql_connect") )
+		{
+			header("HTTP/1.1: 500 Internal Server Error");
+			echo "MySQL is not supported";
+			exit;
+		}
+		if( !@mysql_connect($db_server, $db_username, $db_passwd) )
+		{
+			header("HTTP/1.1: 500 Internal Server Error");
+			echo "MySQL connect returned error";
+			exit;
+		}
+		if( !mysql_select_db($db_name) )
+		{
+			header("HTTP/1.1: 500 Internal Server Error");
+			echo "MySQL database select error";
+			exit;
+		}
+
+		mysql_query( "SET NAMES 'utf8'" );
+		#include "installer/mysql_prepare.php";
+		#echo "Main Database must be created!";
+
+		if( $authentication == "Default" )
+		{
+			include "userAuth/authDefault.php";
+		}
+		if( $authentication == "MySQL" )
+		{
+			include "userAuth/authMySQL.php";
+		}
+		if( $authentication == "CAS" )
+		{
+			include "authCAS/lib.authCAS.php";
+		}
+
+/*
+		if( !damas_service::accessGranted() )
+		{
+			header("HTTP/1.1: 401 Unauthorized");
+			echo "User authentication required";
+			exit;
+		}
+*/
+		return true;
+
+	}
+
 	static function init()
 	{
 		global $ERR_NOERROR;
@@ -178,12 +231,31 @@ class damas_service
 		{
 			include "authCAS/lib.authCAS.php";
 		}
+/*
 		if( $err == $ERR_NOERROR )
 		{
 			if( !accessGranted() )
 			$err = $ERR_AUTHREQUIRED;
 		}
+*/
 		return $err;
+	}
+
+	/**
+	 * accessGranted
+	 * @return {Boolean} true if the user is authenticated or if the anonymous access is allowed, false if authentication is needed
+	 */
+	static function accessGranted()
+	{
+		global $anonymous_access;
+		if( $anonymous_access )
+			return true;
+		if( checkAuthentication() )
+			return true;
+		//return false;
+		header("HTTP/1.1: 401 Unauthorized"); //ERR_AUTHREQUIRED
+		echo "User authentication required";
+		exit;
 	}
 
 	/**
