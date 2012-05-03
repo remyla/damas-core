@@ -11,7 +11,7 @@ include_once "../php/data_model_1.json.php";
 $cmd = arg("cmd");
 $ret = false;
 
-damas_service::init();
+damas_service::init_http();
 damas_service::accessGranted();
 
 if( !$cmd )

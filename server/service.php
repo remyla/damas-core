@@ -248,7 +248,6 @@ class damas_service
 
 	/**
 	 * accessGranted
-	 * @return {Boolean} true if the user is authenticated or if the anonymous access is allowed, false if authentication is needed
 	 */
 	static function accessGranted()
 	{
@@ -264,8 +263,34 @@ class damas_service
 	}
 
 	/**
+	 * allowed - test if the command and the user are allowed
+	 */
+	static function allowed ( $service_name )
+	{
+		global $mod;
+		if( ! is_array( $mod[$service_name] ) )
+		{
+			header("HTTP/1.1: 403 Forbidden"); //ERR_PERMISSION
+			echo "Permission denied";
+			exit;
+		}
+		if( in_array("*", $mod[$service_name] ) )
+		{
+			return true;
+		}
+		if( in_array( auth_get_class(), $mod[$service_name] ) )
+		{
+			return true;
+		}
+		header("HTTP/1.1: 403 Forbidden"); //ERR_PERMISSION
+		echo "Permission denied";
+		exit;
+	}
+
+	/**
 	 * Log the current call to the web service in an `event` table.
 	 * mysql_real_escape_string is important to escape backslashes for utf8
+	 * @return {Boolean} true if logged succesfully, false otherwise
 	 */
 	static function log_event()
 	{
