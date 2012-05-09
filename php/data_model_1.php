@@ -1,18 +1,36 @@
 <?php
-
 /**
+ * Data Model for DAMAS software (damas-software.org)
  *
- * DAMAS Data Model Library
- *
- * Simple library written in PHP to handle a key=value data model on top of MySQL, supporting :
- * - Rooted tree management functions (ancestors, children, createNode, removeNode, copyNode, copyBranch, move, parent, setType)
- * - Text key and value pairs on nodes (keys, setKey, getKey, removeKey, searchKey, setKeys)
+ * Simple library written in PHP to handle a key=value data model on top of
+ * MySQL, supporting :
+ * - Rooted tree management functions (ancestors, children, createNode,
+ *    removeNode, copyNode, copyBranch, move, parent, setType)
+ * - Text key and value pairs on nodes (keys, setKey, getKey, removeKey,
+ *    searchKey, setKeys)
  * - Simple directed acyclic graph (DAG) functions (link, unlink, islinked)
  * - Tagging (tag, untag, hastag, setTags)
  * - Element inheritance (prototype based) - beta
  *
  * @author Remy Lalanne
- * Copyright 2007-2012 Remy Lalanne
+ *
+ * Copyright 2005-2012 Remy Lalanne
+ *
+ * This file is part of damas-core.
+ *
+ * damas-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * damas-core is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with damas-core.  If not, see <http://www.gnu.org/licenses/>.
+ *
  *
  * 120221 : fixed graph redondant cycles
  *
@@ -634,6 +652,22 @@ class model
 		}
 			
 		return $res;
+	}
+
+	// PRIVATE
+
+	static function countChildren ( $id )
+	{
+		$query = "SELECT COUNT(id) as count FROM node WHERE parent_id='$id';";
+		$row = mysql_fetch_array( mysql_query( $query ) );
+		return intval( $row["count"] );
+	}
+
+	static function countRLinks ( $id )
+	{
+		$query = "SELECT COUNT(src_id) as count FROM link WHERE tgt_id='$id';";
+    	$row = mysql_fetch_array( mysql_query( $query ) );
+    	return intval( $row["count"] );
 	}
 	
 }

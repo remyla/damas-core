@@ -1,35 +1,32 @@
 <?php
 /**
- * PHP Library : lib.ajaxserver.php
- * functions to handle common ajax tasks, server side
- * Author Remy Lalanne
- * Copyright (c) 2007 Remy Lalanne
+ * Web service methods for DAMAS software (damas-software.org)
+ *
+ * Copyright 2005-2012 Remy Lalanne
+ *
+ * This file is part of damas-core.
+ *
+ * damas-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * damas-core is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with damas-core.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
+
 include_once "errors.php";
 include_once "permissions.php";
 if (file_exists($_SERVER['DOCUMENT_ROOT']."/.damas/permissions.php"))
 	include_once $_SERVER['DOCUMENT_ROOT']."/.damas/permissions.php";
 
 $version = "2.2-beta6";
-/*
-function soaplike_response ( $cmd, $err, $out )
-{
-	global $error;
-	$txt = '<env:Envelope xmlns:env="http://www.w3.org/2003/05/soap-envelope">'."\n";
-	$txt .= "\t<env:Header>\n";
-	$txt .= "\t\t<cmd>".$cmd."</cmd>\n";
-	$txt .= error_code($err, $error[$err]);
-	if ($err>0 && function_exists("mysql_error"))
-		$txt .= "\t\t<mysql_error>".mysql_error()."</mysql_error>\n";
-	$txt .= debug_args();
-	$txt .= "\t</env:Header>\n";
-	$txt .= "\t<env:Body>\n";
-	$txt .= $out;
-	$txt .= "\t</env:Body>\n";
-	$txt .= "</env:Envelope>\n";
-	return $txt;
-}
-*/
 
 function soaplike_head ( $cmd, $err )
 {

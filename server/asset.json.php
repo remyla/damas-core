@@ -1,35 +1,41 @@
 <?php
 /**
- * Author Remy Lalanne
- * Copyright (c) 2005-2011 Remy Lalanne
+ * JSON web service of DAMAS software (damas-software.org)
+ *
+ * Copyright 2005-2012 Remy Lalanne
+ *
+ * This file is part of damas-core.
+ *
+ * damas-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * damas-core is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with damas-core.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
+
 session_start();
 
 include_once "service.php";
-include_once "../php/DAM.php";
 include_once "../php/data_model_1.json.php";
+include_once "../php/DAM.php";
 include_once "FileVersion/lib.asset.php";
 include_once "FileSystem/lib.file.php";
 
 damas_service::init_http();
 damas_service::accessGranted();
+damas_service::allowed( "asset::" . arg("cmd") );
 
 $cmd = arg("cmd");
 $ret = false;
 header('Content-type: application/json');
-
-if( !$cmd )
-{
-	header("HTTP/1.1: 400 Bad Request"); //ERR_COMMAND
-	echo "Bad command";
-	exit;
-}
-if( !allowed( "model::" . $cmd ) )
-{
-	header("HTTP/1.1: 403 Forbidden"); //ERR_PERMISSION
-	echo "Permission denied";
-	exit;
-}
 
 switch( $cmd )
 {
