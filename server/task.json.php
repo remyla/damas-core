@@ -7,7 +7,6 @@ session_start();
 header('Content-type: application/json');
 
 include_once "service.php"; //error_code()
-include_once "App/lib.user.php";
 include_once "Workflow/lib.task.php";
 include_once "Workflow/workflow.json.php";
 include_once "../php/DAM.php";

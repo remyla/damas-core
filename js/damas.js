@@ -153,11 +153,9 @@ damas.keep_timed = function ( elements )
 damas.search = function ( searchtext )
 {
 	damas.log.cmd('damas.search', arguments );
-	var sql = "SELECT DISTINCT node_id AS id FROM `key` WHERE value LIKE '%" + searchtext + "%';";
-	var keys = project.getNodesBySQL(sql);
-	var sql = "SELECT DISTINCT node_id AS id FROM tag WHERE name LIKE '%" + searchtext + "%';";
-	var tags = project.getNodesBySQL(sql);
-	damas.showMulti( keys.concat(tags) );
+	var input = $$("input[rel='dam:search.text']").first();
+	input.value = searchtext;
+	document.fire('dam:submit.search');
 }
 
 /**

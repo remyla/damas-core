@@ -8,8 +8,6 @@ header('Content-type: application/xml');
 echo '<?xml version="1.0" encoding="UTF-8"?>'."\n";
 
 include_once "service.php"; //error_code()
-include_once "App/lib.user.php";
-#include_once "../php/lib.mysql2xml.php";
 
 $err    = $ERR_NOERROR;
 $query = arg("query");

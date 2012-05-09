@@ -11,7 +11,6 @@
 session_start();
 
 include_once "service.php";
-include_once "App/lib.user.php";
 include_once "../php/data_model_1.xml.php";
 
 damas_service::init();
