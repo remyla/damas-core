@@ -48,12 +48,10 @@ class model
 	{
 		$res = array();
 		// PROTOTYPE BEGIN
-		$query = "SELECT * FROM `key` WHERE node_id='$id' AND name='prototype';";
-		$result = mysql_query($query);
-		$row = mysql_fetch_array($result);
-		if( $row )
+		$protoname = model::getKey( $id, 'prototype' );
+		if( $protoname )
 		{
-			$proto = model::searchKey( "id", $row["value"] );
+			$proto = model::searchKey( 'id', $protoname );
 			$proto = $proto[0];
 			if( $proto )
 			{
@@ -542,19 +540,18 @@ class model
 		}
 		// PROTOTYPE END
 
-
 		$query = "SELECT link.id AS link_id, link.tgt_id, node.* FROM link LEFT JOIN node ON node.id=link.tgt_id WHERE src_id='$id' ORDER BY type;";
 		if( !$result = mysql_query( $query ) ) return $array;
 		if( !mysql_num_rows( $result ) ) return $array;
 
-		while( $row = mysql_fetch_array( $result ) ) {
-
-			$res = array ("link_id"=>$row["link_id"], 
-					"id"=>$row["tgt_id"], 
-					"type"=>(($row["tgt_id"] == "0" )? "folder" : $row["type"]),
-					"parent_id"=>$row["parent_id"]);
-
-			$array[] = $res;
+		while( $row = mysql_fetch_array( $result ) )
+		{
+			$array[] = array(
+				"link_id" => $row["link_id"], 
+				"id" => $row["tgt_id"], 
+				"type" => ( ( $row["tgt_id"] == "0" )? "folder" : $row["type"] ),
+				"parent_id" => $row["parent_id"]
+			);
 		}
 		return $array;
 	}

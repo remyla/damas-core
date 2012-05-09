@@ -61,17 +61,17 @@ damas.errors[507] = "ERR_VERSION";
 
 /* server */
 damas.errors[0] = "ERR_NOERROR";
-damas.errors[6] = "ERR_SERVER_CONF";
+//damas.errors[6] = "ERR_SERVER_CONF";
 damas.errors[1] = "ERR_COMMAND";
-damas.errors[2] = "ERR_AUTHREQUIRED";
+//damas.errors[2] = "ERR_AUTHREQUIRED";
 damas.errors[3] = "ERR_PERMISSION";
-damas.errors[4] = "ERR_AUTH";
-damas.errors[5] = "ERR_LOGOUT";
+//damas.errors[4] = "ERR_AUTH";
+//damas.errors[5] = "ERR_LOGOUT";
 
-damas.errors[10] = "ERR_MYSQL_SUPPORT";
-damas.errors[11] = "ERR_MYSQL_SERVER";
-damas.errors[12] = "ERR_MYSQL_CONNECT";
-damas.errors[13] = "ERR_MYSQL_DB";
+//damas.errors[10] = "ERR_MYSQL_SUPPORT";
+//damas.errors[11] = "ERR_MYSQL_SERVER";
+//damas.errors[12] = "ERR_MYSQL_CONNECT";
+//damas.errors[13] = "ERR_MYSQL_DB";
 damas.errors[14] = "ERR_MYSQL_QUERY";
 
 damas.errors[30] = "ERR_NODE_ID";
@@ -195,9 +195,9 @@ damas.sort_time_desc = function ( elements )
 }
 
 /**
- *
+ * Communication
  * Errors handling
- *
+ * Events
  */
 damas.post = function ( url, args ) {
 	var req = new Ajax.Request( url, {
@@ -212,7 +212,7 @@ damas.post = function ( url, args ) {
 damas.onFailure = function ( transport )
 {
 	//alert( 'HTTP Error ' + transport.status + '\n' + transport.responseText );
-	document.fire('http:error', transport );
+	document.fire( 'http:error', transport );
 	//alert( transport.status);
 	//alert( transport.responseText );
 	//alert( transport.headerJSON );
@@ -222,9 +222,15 @@ damas.onFailure = function ( transport )
 
 damas.onException = function ( response )
 {
-	alert( 'Exception!' );
+	alert( 'Ajax Exception' );
 }
 
+document.observe( 'http:error', function( event ) {
+	if( event.memo.status == 401 )
+	{
+		document.fire( 'auth:required');
+	}
+});
 
 
 /**
@@ -803,7 +809,7 @@ damas.element.readXML = function ( XMLElement )
 }
 
 /**
- * Reads properties from an XML fragment
+ * Reads properties from a SOAP XML fragment
  * @private
  * @param {XMLElement} XMLElement XML fragment to read
  */
@@ -828,6 +834,24 @@ damas.element.readChildrenXML = function ( XMLElement )
 	}.bind( this ) );
 	damas.sort( this.children );
 	damas.sort( this.links );
+}
+
+/**
+ * Reads properties from a JSON
+ * @private
+ * @param {XMLElement} XMLElement XML fragment to read
+ */
+damas.element.readChildrenJSON = function ( obj )
+{
+	this.children = $A( obj );
+	this.children.each( function( c ){
+		c.parent_id = this.id;
+		c.keys = $H( c.keys );
+		c.tags = $A( c.tags );
+		Object.extend( c, new damas.element() );
+	}.bind( this ) );
+	damas.sort( this.children );
+	return;
 }
 
 /**
@@ -924,7 +948,7 @@ damas.element.move = function ( parent_id )
 }
 
 /**
- * Deletes the element
+ * Delete the element
  * @returns {Boolean} true on success, false otherwise.
  */
 damas.element.remove = function ()
@@ -936,7 +960,7 @@ damas.element.remove = function ()
 }
 
 /**
- * Remove a key on a node
+ * Remove a key from the element
  * @param {String} name Name of the attribute
  * @returns {Boolean} true on success, false otherwise.
  */
@@ -948,7 +972,7 @@ damas.element.removeKey = function ( name )
 }
 
 /**
- * Add a new key on a node. If an attribute with that name is already present in the element, its value is changed to be that of the value parameter. This value is a simple string; it is not parsed as it is being set. So any markup (such as syntax to be recognized as an entity reference) is treated as literal text, and needs to be appropriately escaped by the implementation when it is written out.
+ * Add a new key on the element. If an attribute with that name is already present in the element, its value is changed to be that of the value parameter. This value is a simple string; it is not parsed as it is being set. So any markup (such as syntax to be recognized as an entity reference) is treated as literal text, and needs to be appropriately escaped by the implementation when it is written out.
  * @param {String} name Name of the attribute
  * @param {String} value Value of the attribute
  * @returns {Boolean} true on success, false otherwise.
@@ -997,7 +1021,7 @@ damas.element.tag = function ( name )
 }
 
 /**
- * Remove a tag of the element.
+ * Remove a tag from the element
  * @param {String} name Tag name
  * @returns {Boolean} true on success, false otherwise.
  */
@@ -1009,8 +1033,8 @@ damas.element.untag = function ( name )
 }
 
 /**
- * Move the specified element to trashcan element ( id=dam:trashcan ) .
- * If trashcan is not found it is created under the root element.
+ * Move the element to the trashcan element ( id=dam:trashcan ) .
+ * If the trashcan is not found it is created under the root element.
  * @returns {Boolean} true on success, false otherwise
  */
 damas.element.recycle = function ()
@@ -1023,7 +1047,7 @@ damas.element.recycle = function ()
 }
 
 /**
- * Insert a message on the element
+ * Insert a message on the element. The message stores time, user, and text
  * @param {String} text text for the new message
  * @returns {Boolean} true on success, false otherwise
  */

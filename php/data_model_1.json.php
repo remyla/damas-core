@@ -28,30 +28,26 @@ class model_json
 	/**
 	 * Retrieve the children of a node
 	 * @param {Integer} $id node index
-	 * @return {Array} array of children nodes empty array if no child found
+	 * @return {Array} array of children nodes, empty array if no child found
 	 */
 	static function children ( $id )
 	{
-		$contents = array();
-		$children = model::children( $id );
-		//if (sizeof( $children ) == 0) return false;
-		for( $i = 0; $i < sizeof( $children ); $i++ ) {
-			$contents[] = model_json::node( $children[$i], 1, 6 );
+		$children = array();
+		$ids = model::children( $id );
+		for( $i = 0; $i < sizeof( $ids ); $i++ )
+		{
+			$row = mysql_fetch_array( mysql_query( "SELECT type FROM node WHERE id=" . $ids[$i] . ";" ) );
+			$children[] = array(
+				"id" => $ids[$i],
+				"type" => $row['type'],
+				"tags" => model::tags( $ids[$i] ),
+				"keys" => model::keys( $ids[$i] ),
+				"childcount" => node_count_children( $ids[$i] ),
+				"rlinks" => mysqlNode_countRlinks( $ids[$i] )
+			);
 		}
-		return $contents;
-	} // done
-
-	/**
-	 * Retrieve the keys of a node and its ancestors
-	 * @param {Integer} $id node index
-	 * @return {Array} array of keys (name=>value)
-	 */
-	static function keys ( $id )
-	{
-		$keys = model::keys($id);
-
-		return $keys;
-	} // done
+		return $children;
+	}
 
 	/**
 	 * Retrieve some nodes
@@ -119,26 +115,23 @@ class model_json
 		if( $id === "" ) return false;
 
 		$contents = array();
-		if( $flags & 2 ) {
-			$tags = model_json::tags( $id );
-			if ($tags) $contents["tags"] = $tags;
-		}
-		if( $flags & 4 ) {
-			$keys = model_json::keys( $id );
-			if ($keys) $contents["keys"] = $keys;
-		}
+		$tags = model::tags( $id );
+		if( $tags )
+			$contents["tags"] = $tags;
+		$keys = model::keys( $id );
+		if( $keys )
+			$contents["keys"] = $keys;
 		if( $flags & 8 )
+		{
 			$contents["links"] = model_json::links( $id );
-		if( $flags & 8 )
 			$contents["rlinks"] = model_json::rlink( $id );
-
-		//* 	depth toujours = 1, code inatteignable ==> c'est faux !
-		if( $depth != 1 ){
+		}
+		if( $depth != 1 )
+		{
 			$children = model::children( $id );
-			if( sizeof($children)>0 )
-				for( $i=0; $i<sizeof($children); $i++ )
-					$contents["children"][] = model_json::node ( $children[$i], max( $depth - 1, 0 ) );
-		} // */
+			for( $i=0; $i<sizeof($children); $i++ )
+				$contents["children"][] = model_json::node( $children[$i], max( $depth - 1, 0 ) );
+		}
 		return model_json::node_jsontag( $id, $contents );
 	} // done
 
@@ -167,7 +160,6 @@ class model_json
 			return false;
 		$row = mysql_fetch_array( $result );
 
-
 		$res = array ("id"=>$id, 
 			"type"=>$row["type"], 
 			"parent_id"=>$row["parent_id"], 
@@ -177,18 +169,6 @@ class model_json
 		if( $contents )
 			return array_merge($res, $contents);
 		return $res;
-	} // done
-
-	/**
-	 * Get the tags id of a node
-	 * @param {Integer} $id node id
-	 * @return {array} tags 
-	 */
-	static function tags ( $id )
-	{
-		$tags = model::tags( $id );
-
-		return $tags;
 	} // done
 
 	/**
@@ -207,8 +187,8 @@ class model_json
 			$childcount = node_count_children( $id );
 			$result[$i]["childcount"] = $childcount;
 			$result[$i]["rlinks"] = mysqlNode_countRlinks( $result[$i]["id"] );
-			$result[$i]["tags"] = model_json::tags( $result[$i]["id"] );
-			$result[$i]["keys"] = model_json::keys( $result[$i]["id"] );
+			$result[$i]["tags"] = model::tags( $result[$i]["id"] );
+			$result[$i]["keys"] = model::keys( $result[$i]["id"] );
 		}
 
 		return array_merge($array, $result);
@@ -228,8 +208,8 @@ class model_json
 			$childcount = node_count_children( $id );
 			$result[$i]["childcount"] = $childcount;
 			$result[$i]["rlinks"] = mysqlNode_countRlinks( $result[$i]["id"] );
-			$result[$i]["tags"] = model_json::tags( $result[$i]["id"] );
-			$result[$i]["keys"] = model_json::keys( $result[$i]["id"] );
+			$result[$i]["tags"] = model::tags( $result[$i]["id"] );
+			$result[$i]["keys"] = model::keys( $result[$i]["id"] );
 		}
 
 		return $result;
