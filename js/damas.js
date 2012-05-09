@@ -760,8 +760,6 @@ damas.element.copy = function ( elem )
 	this.id = elem.id;
 	this.type = elem.type;
 	this.parent_id = elem.parent_id;
-	//this.previous_id = elem.previous_id;
-	//this.next_id = elem.next_id;
 	this.keys = elem.keys;
 	this.tags = elem.tags;
 	this.single = elem.single;
@@ -785,7 +783,7 @@ damas.element.readXML = function ( XMLElement )
 	this.type = XMLElement.getAttribute('type');
 	this.keys = new Hash();
 	this.tags = new Array();
-	this.childCount = XMLElement.getAttribute("childcount");
+	this.childcount = XMLElement.getAttribute("childcount");
 	this.link_id = parseInt( XMLElement.getAttribute('link_id') );
 	var keys = XMLElement.getElementsByTagName("key");
 	for( var i=0; i < keys.length; i++ )
@@ -891,26 +889,6 @@ damas.element.print = function ()
 	}
 	return txt;
 }
-
-/**
- * Asynchronously retrieves the children of the element according to its id.
- * @private
- */
-/*
-damas.element.getChildren = function ( callback )
-{
-	new Ajax.Request( project.server + "/model.soap.php", {
-		parameters: { cmd: 'children', id: this.id },
-		onSuccess: function( transport ) {
-			var err = serverResponseHandle.notifyError( transport.responseXML );
-			this.readChildrenXML( transport.responseXML );
-			if( callback )
-				callback();
-			document.fire( 'damas:element.getchildren', this );
-		}.bind(this)
-	});
-}
-*/
 
 /**
  * Add a new sub node
