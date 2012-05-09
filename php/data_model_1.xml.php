@@ -20,7 +20,6 @@ class model_xml
 	{
 		$contents = "";
 		$children = model::children( $id );
-		//if (!$children) return false;
 		for( $i = 0; $i < sizeof( $children ); $i++ )
 			$contents .= model_xml::node( $children[$i], 1, 6 );
 		$contents .= model_xml::deps( $id, $level );

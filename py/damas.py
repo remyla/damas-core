@@ -56,11 +56,12 @@ import urllib # quote()
 import urllib2
 import cookielib
 import xml.dom.minidom
+import json
 
 class project :
-	"""
-		Static methods to interact with a remote DAMAS project
-	"""
+	'''
+	Static methods to interact with a remote DAMAS project
+	'''
 	def __init__ ( self, url) :
 		self.cj = cookielib.LWPCookieJar()
 		self.serverURL = url
@@ -68,13 +69,16 @@ class project :
 	# AUTHENTICATION METHODS
 
 	def signIn ( self, username, password ) :
-		""" return True on success, False otherwise"""
+		'''
+		return True on success, False otherwise
+		'''
 		opener = urllib2.build_opener( urllib2.HTTPCookieProcessor(self.cj) )
 		urllib2.install_opener( opener )
 		try: a = urllib2.urlopen( self.serverURL + '/auth.soap.php?cmd=login&user=' + username + '&password=' + password )
 		except: return False
-		soap = xml.dom.minidom.parseString( a.read() )
-		return soap.getElementsByTagName("error")[0].getAttribute("code") == "0"
+		return json.loads( a.read() )
+		#soap = xml.dom.minidom.parseString( a.read() )
+		#return soap.getElementsByTagName("error")[0].getAttribute("code") == "0"
 
 	def getElementById ( self, id ) :
 		return self.searchKey( 'id', id )[0]

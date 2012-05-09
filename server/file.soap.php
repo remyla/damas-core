@@ -8,6 +8,12 @@
  * Copyright (c) 2005,2006,2007 Remy Lalanne
  ******************************************************************************/
 session_start();
+
+include_once "service.php"; //error_code()
+include_once "FileSystem/lib.file.php";
+
+damas_service::init_http();
+
 header('Content-type: application/xml');
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
 header( 'Last-Modified: ' . gmdate( 'D, d M Y H:i:s' ) . ' GMT' );
@@ -19,8 +25,6 @@ header("Pragma: no-cache");
 header("Expires: 0");
 echo '<?xml version="1.0" encoding="UTF-8"?>'."\n";
 
-include_once "service.php"; //error_code()
-include_once "FileSystem/lib.file.php";
 
 $cmd = arg("cmd");
 $err = $ERR_NOERROR;
@@ -32,7 +36,6 @@ if ( arg('xsl') )
 echo '<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope">'."\n";
 echo "\t<soap:Header>\n";
 
-$err = damas_service::init();
 
 if ($err==$ERR_NOERROR){
 	if (!$cmd)

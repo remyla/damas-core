@@ -13,24 +13,9 @@ session_start();
 include_once "service.php";
 include_once "../php/data_model_1.xml.php";
 
-damas_service::init();
+damas_service::init_http();
 damas_service::accessGranted();
-
-$cmd = arg("cmd");
-if( !$cmd )
-{
-	header("HTTP/1.1: 400 Bad Request"); //ERR_COMMAND
-	echo "Bad command";
-	exit;
-}
-if( !allowed( "model::" . $cmd ) )
-{
-	header("HTTP/1.1: 403 Forbidden"); //ERR_PERMISSION
-	echo "Permission denied";
-	exit;
-}
-
-$ret = false;
+damas_service::allowed( "model::" . arg("cmd") );
 
 header('Content-type: application/xml; charset=UTF-8');
 echo '<?xml version="1.0" encoding="UTF-8"?>'."\n";
@@ -42,6 +27,8 @@ echo "\t<soap:Header>\n";
 
 $start_time = microtime();
 $err = $ERR_NOERROR;
+$ret = false;
+$cmd = arg("cmd");
 
 switch( $cmd )
 {
@@ -274,7 +261,9 @@ switch( $cmd )
 		break;
 */
 	default:
-		$err = $ERR_COMMAND;
+		header("HTTP/1.1: 400 Bad Request"); //ERR_COMMAND
+		echo "Bad command";
+		exit;
 }
 
 $exec_time = ceil((microtime() - $start_time) * 1000) + "ms";

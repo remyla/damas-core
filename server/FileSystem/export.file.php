@@ -2,7 +2,7 @@
 
 include_once "../../App/php/lib.ajaxserver.php";
 
-damas_service::init();
+damas_service::init_http();
 
 function exportSdfFile($filepath)
 {

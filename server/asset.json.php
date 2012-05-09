@@ -4,20 +4,19 @@
  * Copyright (c) 2005-2011 Remy Lalanne
  */
 session_start();
-header('Content-type: application/json');
 
-include_once "service.php"; //error_code()
+include_once "service.php";
 include_once "../php/DAM.php";
 include_once "../php/data_model_1.json.php";
-
 include_once "FileVersion/lib.asset.php";
 include_once "FileSystem/lib.file.php";
 
+damas_service::init_http();
+damas_service::accessGranted();
+
 $cmd = arg("cmd");
 $ret = false;
-
-damas_service::init();
-damas_service::accessGranted();
+header('Content-type: application/json');
 
 if( !$cmd )
 {

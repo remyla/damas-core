@@ -8,7 +8,6 @@ session_start();
 include_once "service.php";
 include_once "../php/data_model_1.php";
 
-//$err = damas_service::init();
 damas_service::init_http();
 
 if( arg('cmd') != 'login' )
@@ -19,16 +18,15 @@ if( arg('cmd') != 'login' )
 switch( arg("cmd") )
 {
 	case "login":
-		if( !login( arg("user"), arg("password") ) )
+		if( ! login( arg("user"), arg("password") ) )
 		{
    			header("HTTP/1.1: 401 Unauthorized"); //ERR_AUTHREQUIRED
    			echo "Incorrect username and password";
    			exit;
 		}
-		else
-		{
-			$_SESSION['user_id'] = getUserId( arg('user') );
-		}
+		#$_SESSION['user_id'] = getUserId( arg('user') );
+		#$res = model::searchKey( 'username', $login );
+		#return $res[0];
 		header('Content-type: application/json');
 		echo json_encode( true );
 		exit;
@@ -63,8 +61,8 @@ switch( arg("cmd") )
 		}
 		$array = array(
 			"username" => $_SESSION['login'],
-			"userclass" => auth_get_class(),
-			"user_id" => (int)$_SESSION['user_id']
+			"userclass" => auth_get_class()
+			#"user_id" => (int)$_SESSION['user_id']
 		);
 		header('Content-type: application/json');
 		echo json_encode( $array );

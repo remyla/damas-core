@@ -122,6 +122,10 @@ class damas_service
 	//ERR_SERVER_CONF ERR_MYSQL_SUPPORT ERR_MYSQL_CONNECT ERR_MYSQL_DB
 	static function init_http()
 	{
+		global $assetsLCL;
+		#global $hidden_users;
+		#global $versions;
+
 		if( !file_exists( $_SERVER['DOCUMENT_ROOT'] . "/.damas/server.php" ) )
 		{
 			header("HTTP/1.1: 500 Internal Server Error");
@@ -171,84 +175,11 @@ class damas_service
 		{
 			include "authCAS/lib.authCAS.php";
 		}
-
-/*
-		if( !damas_service::accessGranted() )
-		{
-			header("HTTP/1.1: 401 Unauthorized");
-			echo "User authentication required";
-			exit;
-		}
-*/
 		return true;
-
-	}
-
-	static function init()
-	{
-		global $ERR_NOERROR;
-		global $ERR_SERVER_CONF;
-		global $ERR_MYSQL_SUPPORT;
-		global $ERR_MYSQL_CONNECT;
-		global $ERR_MYSQL_DB;
-		global $ERR_AUTHREQUIRED;
-
-		# config options
-		global $projectName;
-		global $db_server;
-		global $anonymous_access;
-		global $hidden_users;
-		global $assetsLCL;
-		#global $versions;
-		#global $db_username;
-		#global $db_passwd;
-		#global $db_name;
-
-		$err = $ERR_NOERROR;
-
-		if( !file_exists( $_SERVER['DOCUMENT_ROOT'] . "/.damas/server.php" ) )
-			return $ERR_SERVER_CONF;
-		if( !is_readable( $_SERVER['DOCUMENT_ROOT'] . "/.damas/server.php" ) )
-			return $ERR_SERVER_CONF;
-		include $_SERVER['DOCUMENT_ROOT']."/.damas/server.php";
-
-		if( !function_exists("mysql_connect") )
-			return $ERR_MYSQL_SUPPORT;
-		if( !@mysql_connect($db_server, $db_username, $db_passwd) )
-			return $ERR_MYSQL_CONNECT;
-		if( !mysql_select_db($db_name) )
-			return $ERR_MYSQL_DB;
-
-		mysql_query( "SET NAMES 'utf8'" );
-
-		#include "installer/mysql_prepare.php";
-		#echo "Main Database must be created!";
-
-		if( $authentication == "Default" )
-		{
-			include "userAuth/authDefault.php";
-		}
-		if( $authentication == "MySQL" )
-		{
-			include "userAuth/authMySQL.php";
-		}
-		if( $authentication == "CAS" )
-		{
-			include "authCAS/lib.authCAS.php";
-		}
-/*
-		if( $err == $ERR_NOERROR )
-		{
-			if( !accessGranted() )
-			$err = $ERR_AUTHREQUIRED;
-		}
-*/
-		return $err;
 	}
 
 	/**
 	 * accessGranted
-	 * @return {Boolean} true if the user is authenticated or if the anonymous access is allowed, false if authentication is needed
 	 */
 	static function accessGranted()
 	{
@@ -257,15 +188,40 @@ class damas_service
 			return true;
 		if( checkAuthentication() )
 			return true;
-		//return false;
 		header("HTTP/1.1: 401 Unauthorized"); //ERR_AUTHREQUIRED
 		echo "User authentication required";
 		exit;
 	}
 
 	/**
+	 * allowed - test if the command and the user are allowed
+	 */
+	static function allowed ( $service_name )
+	{
+		global $mod;
+		if( ! is_array( $mod[$service_name] ) )
+		{
+			header("HTTP/1.1: 403 Forbidden"); //ERR_PERMISSION
+			echo "Permission denied";
+			exit;
+		}
+		if( in_array("*", $mod[$service_name] ) )
+		{
+			return true;
+		}
+		if( in_array( auth_get_class(), $mod[$service_name] ) )
+		{
+			return true;
+		}
+		header("HTTP/1.1: 403 Forbidden"); //ERR_PERMISSION
+		echo "Permission denied";
+		exit;
+	}
+
+	/**
 	 * Log the current call to the web service in an `event` table.
 	 * mysql_real_escape_string is important to escape backslashes for utf8
+	 * @return {Boolean} true if logged succesfully, false otherwise
 	 */
 	static function log_event()
 	{
