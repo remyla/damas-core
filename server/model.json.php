@@ -58,7 +58,7 @@ switch( $cmd )
 			echo "Error during the creation of node, please change your values";
 			exit;
 		}
-		$ret = model_json::node( $id, 1, $NODE_TAG | $NODE_PRM );
+		echo json_encode( model_json::node( $id, 1, $NODE_TAG | $NODE_PRM ) );
 		break;
 	case "duplicate":
 		if( is_null( arg('id') ) )
@@ -74,7 +74,7 @@ switch( $cmd )
 			echo "Error during the copy of nodes, please change your values";
 			exit;
 		}
-		$ret = model_json::node( $id, 1, $NODE_TAG | $NODE_PRM );
+		echo json_encode( model_json::node( $id, 1, $NODE_TAG | $NODE_PRM ) );
 		break;
 	case "removeNode":
 		if( is_null( arg('id') ) )
@@ -245,22 +245,16 @@ switch( $cmd )
 			echo "Bad command";
 			exit;
 		}
-		$ret = model_json::multi( implode( ',', model::ancestors( arg('id') ) ), 1, $NODE_TAG | $NODE_PRM );
+		echo json_encode( model_json::multi( model::ancestors( arg('id') ) ) );
 		break;
-	case "searchKey": // should return array of ids (json array?) // this is done =D
+	case "searchKey":
 		if( is_null(arg('key')) || arg('value') == null )
 		{
 			header("HTTP/1.1: 400 Bad Request"); //ERR_COMMAND
 			echo "Bad command";
 			exit;
 		}
-		$array = model::searchKey( arg('key'), arg('value') );
-		$ret = model_json::multi( implode(',', $array), 1, $NODE_TAG | $NODE_PRM );
-		if( !$ret )
-		{
-			header('HTTP/1.1: 404 Not Found'); //$err = $ERR_NODE_ID;
-			exit;
-		}
+		echo json_encode( model_json::multi( model::searchKey( arg('key'), arg('value') ) ) );
 		break;
 	case "single":
 		if( is_null( arg('id') ) )
@@ -274,6 +268,7 @@ switch( $cmd )
 			header('HTTP/1.1: 404 Not Found'); //$err = $ERR_NODE_ID;
 			exit;
 		}
+		echo json_encode( $ret );
 		break;
 	case "children":
 		if( is_null( arg('id') ) )
@@ -281,7 +276,8 @@ switch( $cmd )
 			header('HTTP/1.1: 400 Bad Request'); //$err = $ERR_COMMAND; break;
 			exit;
 		}
-		$ret = model_json::children( arg("id") );
+		//$ret = model_json::children( arg("id") );
+		echo json_encode( model_json::multi( model::children( arg('id') ) ) );
 		break;
 	case "links":
 		if( is_null( arg('id') ) )
@@ -289,7 +285,7 @@ switch( $cmd )
 			header('HTTP/1.1: 400 Bad Request'); //$err = $ERR_COMMAND; break;
 			exit;
 		}
-		$ret = model_json::links( arg("id") );
+		echo json_encode( model_json::links( arg("id") ) );
 		break;
 	case "multi":
 		if( is_null( arg('id') ) )
@@ -297,7 +293,7 @@ switch( $cmd )
 			header('HTTP/1.1: 400 Bad Request'); //$err = $ERR_COMMAND; break;
 			exit;
 		}
-		$ret = model_json::multi( arg("id"), 1, $NODE_TAG | $NODE_PRM );
+		echo json_encode( model_json::multi( split( ",", arg("id") ) ) );
 		break;
 	case "graph":
 		if( is_null( arg('id') ) )
@@ -309,8 +305,10 @@ switch( $cmd )
 		if (!$ret)
 		{
 			header('HTTP/1.1: 404 Not Found'); //$err = $ERR_NODE_ID;
+			echo json_encode( $ret );
 			exit;
 		}
+		echo json_encode( $ret );
 		break;
 	case "export":
 		if( is_null( arg('id') ) )
@@ -324,6 +322,7 @@ switch( $cmd )
 			header('HTTP/1.1: 404 Not Found'); //$err = $ERR_NODE_ID;
 			exit;
 		}
+		echo json_encode( $ret );
 		break;
 	case "search":
 		if( is_null( arg('value') ) )
@@ -331,7 +330,7 @@ switch( $cmd )
 			header('HTTP/1.1: 400 Bad Request'); //$err = $ERR_COMMAND; break;
 			exit;
 		}
-		$ret = model::search( arg('value') );
+		echo json_encode( model::search( arg('value') ) );
 		break;
 	default:
 		header('HTTP/1.1: 400 Bad Request'); //$err = $ERR_COMMAND;
@@ -339,10 +338,6 @@ switch( $cmd )
 } // switch / case
 
 $nolog = array( 'single', 'children', 'multi', 'stats', 'types', 'tags', 'search' );
-
-if( ! in_array( arg('cmd'), $nolog ) )
+if( !in_array( arg('cmd'), $nolog ) )
 	damas_service::log_event();
-		
-echo json_encode($ret);
-
 ?>

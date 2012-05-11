@@ -1,13 +1,25 @@
 <?php
 /**
+ * JSON methods for DAMAS software (damas-software.org)
  *
- * Voilà le fichier data_model oppérationel pour le json avec
- * de valeurs de retour dans des tableaux, avec embriquations 
- * de tableaux pour les fonctions récursives et les résultats
- * qui comprennent d'autres résultats =)
+ * Copyright 2005-2012 Remy Lalanne
  *
- **/
-
+ * This file is part of damas-core.
+ *
+ * damas-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * damas-core is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with damas-core.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 
 include_once "data_model_1.php";
 
@@ -25,11 +37,12 @@ $NODE_LNK = 8;
 
 class model_json
 {
-	/**
+	/*
 	 * Retrieve the children of a node
 	 * @param {Integer} $id node index
-	 * @return {Array} array of children nodes, empty array if no child found
+	 * @return {Array} children nodes, empty array if no child found
 	 */
+/*
 	static function children ( $id )
 	{
 		$children = array();
@@ -42,30 +55,37 @@ class model_json
 				"type" => $row['type'],
 				"tags" => model::tags( $ids[$i] ),
 				"keys" => model::keys( $ids[$i] ),
-				"childcount" => node_count_children( $ids[$i] ),
-				"rlinks" => mysqlNode_countRlinks( $ids[$i] )
+				"childcount" => model::countChildren( $ids[$i] ),
+				"rlinks" => model::countRLinks( $ids[$i] )
 			);
 		}
 		return $children;
 	}
+*/
 
 	/**
-	 * Retrieve some nodes
-	 * @param {String} $ids string of ids, separated by ','
-	 * @param {Integer} $depth integer depth of recursion (0 means no limit, 1 for single node)
-	 * @param {Integer} $flags integer of needed informations for the nodes
-	 * @return {Array} array of nodes or empty array if no node found
+	 * Retrieve nodes from a list of indexes
+	 * @param {Array} $ids array of indexes
+	 * @return {Array} nodes array
 	 */
-	static function multi ( $ids, $depth, $flags )
+	static function multi ( $ids )
 	{
-		$id_arr = split( ",", $ids );
-		$array = array();
-		for( $i=0; $i<sizeof($id_arr); $i++ ) {
-			$node = model_json::node( $id_arr[$i], $depth, $flags );
-			if ($node) $array[] = $node;
+		$nodes = array();
+		for( $i = 0; $i < sizeof( $ids ); $i++ )
+		{
+			$row = mysql_fetch_array( mysql_query( "SELECT parent_id, type FROM node WHERE id=" . $ids[$i] . ";" ) );
+			$nodes[] = array(
+				"id" => $ids[$i],
+				"parent_id" => $row['parent_id'],
+				"type" => $row['type'],
+				"tags" => model::tags( $ids[$i] ),
+				"keys" => model::keys( $ids[$i] ),
+				"childcount" => model::countChildren( $ids[$i] ),
+				"rlinks" => model::countRLinks( $ids[$i] )
+			);
 		}
-		return $array;
-	} // done
+		return $nodes;
+	}
 
 	/**
 	 * Retrieve the graph from a node
@@ -148,7 +168,7 @@ class model_json
 			$res["id"] = 0; 
 			$res["type"] = "folder"; 
 			$res["parent_id"] = ""; 
-			$res["childcount"] = node_count_children( $id );
+			$res["childcount"] = model::countChildren( $id );
 			if( $contents )
 				return array_merge($res, $contents);
 			return $res;
@@ -163,8 +183,8 @@ class model_json
 		$res = array ("id"=>$id, 
 			"type"=>$row["type"], 
 			"parent_id"=>$row["parent_id"], 
-			"childcount"=>node_count_children( $id ), 
-			"rlinks"=>mysqlNode_countRlinks( $id )
+			"childcount"=>model::countChildren( $id ), 
+			"rlinks"=>model::countRLinks( $id )
 		);
 		if( $contents )
 			return array_merge($res, $contents);
@@ -184,9 +204,9 @@ class model_json
 
 		for ($i = 0; $i < sizeof($result); $i++) {
 
-			$childcount = node_count_children( $id );
+			$childcount = model::countChildren( $id );
 			$result[$i]["childcount"] = $childcount;
-			$result[$i]["rlinks"] = mysqlNode_countRlinks( $result[$i]["id"] );
+			$result[$i]["rlinks"] = model::countRLinks( $result[$i]["id"] );
 			$result[$i]["tags"] = model::tags( $result[$i]["id"] );
 			$result[$i]["keys"] = model::keys( $result[$i]["id"] );
 		}
@@ -205,9 +225,9 @@ class model_json
 
 		for ($i = 0; $i < sizeof($result); $i++) {
 
-			$childcount = node_count_children( $id );
+			$childcount = model::countChildren( $id );
 			$result[$i]["childcount"] = $childcount;
-			$result[$i]["rlinks"] = mysqlNode_countRlinks( $result[$i]["id"] );
+			$result[$i]["rlinks"] = model::countRLinks( $result[$i]["id"] );
 			$result[$i]["tags"] = model::tags( $result[$i]["id"] );
 			$result[$i]["keys"] = model::keys( $result[$i]["id"] );
 		}
@@ -224,51 +244,6 @@ function hide_team ( $team )
 		return "***";
 	else
 		return $team;
-}
-
-function node_count_children ( $id )
-{
-	return mysqlNode_countChildren($id) + node_count_subelements($id);
-}
-
-function node_count_subelements ( $id )
-{
-	$count = 0;
-	$query = "SELECT COUNT(node_id) as count FROM tag WHERE node_id='$id';";
-   	$result = mysql_query($query);
-   	$row = mysql_fetch_array($result);
-	$count += $row[0];
-	$query = "SELECT COUNT(node_id) as count FROM `key` WHERE node_id='$id';";
-   	$result = mysql_query($query);
-   	$row = mysql_fetch_array($result);
-	$count += $row[0];
-	$query = "SELECT COUNT(src_id) as count FROM link WHERE src_id='$id';";
-   	$result = mysql_query($query);
-   	$row = mysql_fetch_array($result);
-	$count += $row[0];
-/*
-	$query = "SELECT COUNT(tgt_id) as count FROM link WHERE tgt_id='$id';";
-   	$result = mysql_query($query);
-   	$row = mysql_fetch_array($result);
-	$count += $row[0];
-*/
-	return $count;
-}
-
-function mysqlNode_countChildren ( $id )
-{
-	$query = "SELECT COUNT(id) as count FROM node WHERE parent_id='$id';";
-   	$result = mysql_query($query);
-   	$row = mysql_fetch_array($result);
-	return $row["count"];
-}
-
-function mysqlNode_countRlinks ( $id )
-{
-	$query = "SELECT COUNT(src_id) as count FROM link WHERE tgt_id='$id';";
-   	$result = mysql_query($query);
-   	$row = mysql_fetch_array($result);
-	return $row["count"];
 }
 
 ?>

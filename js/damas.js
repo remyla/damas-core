@@ -1,6 +1,8 @@
 /**
  * @fileoverview Javascript methods and objects for DAMAS software (damas-software.org)
  *
+ * @author Remy Lalanne
+ *
  * Copyright 2005-2012 Remy Lalanne
  *
  * This file is part of damas-core.
@@ -18,7 +20,6 @@
  * You should have received a copy of the GNU General Public License
  * along with damas-core.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @author Remy Lalanne
  */
 
 /**
@@ -96,6 +97,9 @@ damas.errors[106] = "ERR_ASSET_ROLLBACK";
 damas.errors[107] = "ERR_ASSET_NOSHA1";
 damas.errors[108] = "ERR_ASSET_FILECHECK";
 damas.errors[109] = "ERR_ASSET_READONLY";
+
+
+// SORT AND FILTER ELEMENTS
 
 /**
  * Filter messages and tasks from an array of elements
@@ -209,8 +213,9 @@ damas.post = function ( url, args ) {
 
 damas.onFailure = function ( transport )
 {
+	//document.fire( 'http:error', transport );
+
 	//alert( 'HTTP Error ' + transport.status + '\n' + transport.responseText );
-	document.fire( 'http:error', transport );
 	//alert( transport.status);
 	//alert( transport.responseText );
 	//alert( transport.headerJSON );
@@ -224,10 +229,12 @@ damas.onException = function ( response )
 }
 
 document.observe( 'http:error', function( event ) {
+/*
 	if( event.memo.status == 401 )
 	{
 		document.fire( 'auth:required');
 	}
+*/
 });
 
 
@@ -310,7 +317,10 @@ damas.project.getNode = function ( index )
 {
 	//damas.log.cmd( "damas.project.getNode", arguments );
 	var args = { 'cmd': 'single', 'id': index };
-	var req = new Ajax.Request( this.server + "/model.soap.php", { asynchronous: false, parameters: args } );
+	var req = new Ajax.Request( this.server + "/model.soap.php", {
+		asynchronous: false,
+		parameters: args
+	});
 	var soap = req.transport.responseXML;
 	return new damas.element( soap.getElementsByTagName( "node" )[0] );
 }
@@ -318,7 +328,10 @@ damas.project.getNode = function ( index )
 damas.project.getAncestors = function ( id )
 {
 	var args = { 'cmd': 'ancestors', 'id': id };
-	var req = new Ajax.Request( this.server + "/model.soap.php", { asynchronous: false, parameters: args } );
+	var req = new Ajax.Request( this.server + "/model.soap.php", {
+		asynchronous: false,
+		parameters: args
+	});
 	var soap = req.transport.responseXML;
 	var err = serverResponseHandle.notifyError( req.transport.responseXML );
 	return project.readElementsXML( soap );
@@ -328,23 +341,14 @@ damas.project.getChildren = function ( element )
 {
 	//damas.log.cmd( "damas.project.getChildren", arguments );
 	var args = { 'cmd': 'children', 'id': element.id };
-	var req = new Ajax.Request( this.server + "/model.soap.php", { asynchronous: false, parameters: args } );
+	var req = new Ajax.Request( this.server + "/model.soap.php", {
+		asynchronous: false,
+		parameters: args
+	});
 	var soap = req.transport.responseXML;
 	var err = serverResponseHandle.notifyError( req.transport.responseXML );
 	element.readChildrenXML( soap );
 	return element.children;
-	/*
-	new Ajax.Request( project.server + "/model.soap.php", {
-		parameters: { cmd: 'children', id: element.id },
-		onSuccess: function( transport ) {
-			var err = serverResponseHandle.notifyError( transport.responseXML );
-			element.readChildrenXML( transport.responseXML );
-			if( callback )
-				callback();
-			document.fire( 'damas:element.getchildren', this );
-		}.bind(this)
-	});
-	*/
 }
 
 /**
