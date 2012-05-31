@@ -212,6 +212,28 @@ damas.post = function ( url, args ) {
 }
 
 /**
+ * Reads properties from a JSON
+ * @private
+ * @param {XMLElement} XMLElement XML fragment to read
+ */
+damas.readJSONElements = function ( obj )
+{
+	$A( obj ).each( function( e ){
+		damas.readJSONElement( e );
+	} );
+	//damas.sort( this.children );
+	return obj;
+}
+
+damas.readJSONElement = function ( obj )
+{
+	obj.keys = $H( obj.keys );
+	obj.tags = $A( obj.tags );
+	return Object.extend( obj, new damas.element() );
+}
+
+
+/**
  * Methods to interact with a remote DAMAS project.
  *
  * Usage:
@@ -274,38 +296,41 @@ damas.project.getNode = function ( index )
 {
 	//damas.log.cmd( "damas.project.getNode", arguments );
 	var args = { 'cmd': 'single', 'id': index };
-	var req = new Ajax.Request( this.server + "/model.soap.php", {
+	var req = new Ajax.Request( this.server + "/model.json.php", {
 		asynchronous: false,
 		parameters: args
 	});
-	var soap = req.transport.responseXML;
-	return new damas.element( soap.getElementsByTagName( "node" )[0] );
+	return damas.readJSONElement( JSON.parse( req.transport.responseText ) );
 }
 
 damas.project.getAncestors = function ( id )
 {
-	var args = { 'cmd': 'ancestors', 'id': id };
-	var req = new Ajax.Request( this.server + "/model.soap.php", {
+	var req = new Ajax.Request( this.server + "/model.json.php", {
 		asynchronous: false,
-		parameters: args
+		parameters: { 'cmd': 'ancestors', 'id': id }
 	});
-	var soap = req.transport.responseXML;
-	var err = serverResponseHandle.notifyError( req.transport.responseXML );
-	return project.readElementsXML( soap );
+	return damas.readJSONElements( JSON.parse( req.transport.responseText ) );
 }
 
 damas.project.getChildren = function ( element )
 {
-	//damas.log.cmd( "damas.project.getChildren", arguments );
 	var args = { 'cmd': 'children', 'id': element.id };
-	var req = new Ajax.Request( this.server + "/model.soap.php", {
+	var req = new Ajax.Request( this.server + "/model.json.php", {
 		asynchronous: false,
 		parameters: args
 	});
-	var soap = req.transport.responseXML;
-	var err = serverResponseHandle.notifyError( req.transport.responseXML );
-	element.readChildrenXML( soap );
+	element.children = damas.readJSONElements( JSON.parse( req.transport.responseText ) );
 	return element.children;
+}
+
+damas.project.links = function ( id )
+{
+	var args = { 'cmd': 'links', 'id': id };
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: args
+	});
+	return damas.readJSONElements( JSON.parse( req.transport.responseText ) );
 }
 
 /**
@@ -313,50 +338,14 @@ damas.project.getChildren = function ( element )
  * @param {Array} indexes array of node ids to retrieve
  * @returns {Array} array of XML fragments
  */
-/*
 damas.project.getNodes = function ( indexes )
 {
 	var req = new Ajax.Request( this.server + "/model.json.php", {
 		method: "POST",
 		asynchronous: false,
-		parameters: { cmd: "multi", id: indexes.join( "," ), depth: "1", flags: "4" },
-		//onFailure: damas.project.onFailure,
-		//onException: damas.project.onFailure,
-		onFailure: function ( transport ){
-			alert( transport.status);
-			alert( transport.responseText );
-			alert( transport.headerJSON );
-			alert( transport.responseJSON );
-		},
-		onException: function ( transport ){
-			alert( transport.status);
-			alert( transport.responseText );
-			alert( transport.headerJSON );
-			alert( transport.responseJSON );
-		},
-		onSuccess: function ( transport ){
-			alert( transport.status);
-			alert( transport.responseText );
-			alert( transport.headerJSON );
-			alert( transport.responseJSON );
-		}
-	});
-	//return project.readElementsXML( req.transport.responseXML );
-	alert( req.transport.status);
-	alert( req.transport.responseText );
-	alert( req.transport.headerJSON );
-	alert( req.transport.responseJSON );
-	return( eval( req.transport.responseText ) );
-}
-*/
-damas.project.getNodes = function ( indexes )
-{
-	var req = new Ajax.Request( this.server + "/model.soap.php", {
-		method: "POST",
-		asynchronous: false,
 		parameters: { cmd: "multi", id: indexes.join( "," ), depth: "1", flags: "4" }
 	});
-	return project.readElementsXML( req.transport.responseXML );
+	return damas.readJSONElements( JSON.parse( req.transport.responseText ) );
 }
 
 /**

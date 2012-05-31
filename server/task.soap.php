@@ -12,6 +12,7 @@ include_once "Workflow/lib.task.php";
 include_once "Workflow/workflow.php";
 
 damas_service::init_http();
+damas_service::accessGranted();
 
 $err = $ERR_NOERROR;
 $cmd = arg("cmd");

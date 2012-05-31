@@ -8,6 +8,7 @@ session_start();
 include_once "service.php";
 
 damas_service::init_http();
+damas_service::accessGranted();
 
 //header('Content-type: application/xml');
 header("Content-type: application/octet-stream");

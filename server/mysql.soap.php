@@ -10,6 +10,7 @@ include_once "service.php"; //error_code()
 #include_once "../php/lib.mysql2xml.php";
 
 damas_service::init_http();
+damas_service::accessGranted();
 
 $err    = $ERR_NOERROR;
 $query = arg("query");

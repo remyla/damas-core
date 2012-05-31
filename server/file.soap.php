@@ -13,6 +13,7 @@ include_once "service.php"; //error_code()
 include_once "FileSystem/lib.file.php";
 
 damas_service::init_http();
+damas_service::accessGranted();
 
 header('Content-type: application/xml');
 header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");

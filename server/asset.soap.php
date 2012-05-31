@@ -12,6 +12,7 @@ include_once "FileVersion/lib.asset.php";
 include_once "FileSystem/lib.file.php";
 
 damas_service::init_http();
+damas_service::accessGranted();
 damas_service::allowed( "asset::" . arg("cmd") );
 
 $err = $ERR_NOERROR;
