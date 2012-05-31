@@ -620,9 +620,9 @@ class model
 	static function search ( $value )
 	{
 		$value = strtolower($value);
-		$query = "SELECT DISTINCT substring_index(LOWER (k.value), ' ', 1) as kvalue FROM `key` k WHERE LOWER(k.value) LIKE '$value%' ORDER BY k.value ASC LIMIT 10";
+		$query = "SELECT DISTINCT substring_index(LOWER (k.value), ' ', 2) as kvalue FROM `key` k WHERE LOWER(k.value) LIKE '$value%' ORDER BY k.value ASC LIMIT 10";
 		//$query1 = "SELECT DISTINCT k.name as kname FROM `key` k WHERE LOWER(k.name) like '%$value%' ORDER BY k.name ASC LIMIT 10";
-		$query2 = "SELECT DISTINCT substring_index(LOWER (t.name), ' ', 1) as tname FROM tag t WHERE LOWER(t.name) LIKE '$value%' ORDER BY t.name ASC LIMIT 10";
+		$query2 = "SELECT DISTINCT substring_index(LOWER (t.name), ' ', 2) as tname FROM tag t WHERE LOWER(t.name) LIKE '$value%' ORDER BY t.name ASC LIMIT 10";
 		
 		$return = array();
 		$result = mysql_query($query);
