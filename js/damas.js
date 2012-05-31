@@ -211,33 +211,6 @@ damas.post = function ( url, args ) {
 	return serverResponseHandle.decomposeResponse( req.transport.responseXML );
 }
 
-damas.onFailure = function ( transport )
-{
-	//document.fire( 'http:error', transport );
-
-	//alert( 'HTTP Error ' + transport.status + '\n' + transport.responseText );
-	//alert( transport.status);
-	//alert( transport.responseText );
-	//alert( transport.headerJSON );
-	//alert( transport.responseJSON );
-	//document.fire( 'HTTPERROR', transport.status );
-}
-
-damas.onException = function ( response )
-{
-	alert( 'Ajax Exception' );
-}
-
-document.observe( 'http:error', function( event ) {
-/*
-	if( event.memo.status == 401 )
-	{
-		document.fire( 'auth:required');
-	}
-*/
-});
-
-
 /**
  * Methods to interact with a remote DAMAS project.
  *
@@ -267,22 +240,6 @@ damas.project.initialize = function ( url )
 		return r.error;
 	}
 }
-
-damas.project.modelRequest = function ( args )
-{
-	var req = new Ajax.Request( this.server + "/model.json.phpp", {
-		asynchronous: false,
-		parameters: args,
-		onFailure: function( response ){
-		}
-	});
-	alert( 'finished' );
-	//return serverResponseHandle.decomposeResponse( req.transport.responseXML );
-}
-
-document.observe( 'HTTPERROR', function(e){
-	alert( e );
-} );
 
 /**
  * Remove every elements from the trashcan.

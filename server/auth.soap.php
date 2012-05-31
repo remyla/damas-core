@@ -38,6 +38,7 @@ switch( arg("cmd") )
    			exit;
 		}
 		header('Content-type: application/json');
+   		header("HTTP/1.1: 401 Unauthorized"); //ERR_AUTHREQUIRED
 		echo json_encode( true );
 		exit;
 /*
