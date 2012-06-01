@@ -294,11 +294,9 @@ damas.project.getElementById = function ( id )
  */
 damas.project.getNode = function ( index )
 {
-	//damas.log.cmd( "damas.project.getNode", arguments );
-	var args = { 'cmd': 'single', 'id': index };
 	var req = new Ajax.Request( this.server + "/model.json.php", {
 		asynchronous: false,
-		parameters: args
+		parameters: { 'cmd': 'single', 'id': index }
 	});
 	return damas.readJSONElement( JSON.parse( req.transport.responseText ) );
 }
@@ -314,10 +312,9 @@ damas.project.getAncestors = function ( id )
 
 damas.project.getChildren = function ( element )
 {
-	var args = { 'cmd': 'children', 'id': element.id };
 	var req = new Ajax.Request( this.server + "/model.json.php", {
 		asynchronous: false,
-		parameters: args
+		parameters: { 'cmd': 'children', 'id': element.id }
 	});
 	element.children = damas.readJSONElements( JSON.parse( req.transport.responseText ) );
 	return element.children;
@@ -325,10 +322,9 @@ damas.project.getChildren = function ( element )
 
 damas.project.links = function ( id )
 {
-	var args = { 'cmd': 'links', 'id': id };
 	var req = new Ajax.Request( this.server + "/model.json.php", {
 		asynchronous: false,
-		parameters: args
+		parameters: { 'cmd': 'links', 'id': id }
 	});
 	return damas.readJSONElements( JSON.parse( req.transport.responseText ) );
 }

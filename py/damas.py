@@ -40,6 +40,7 @@
     Michael Haussmann
 
   ChangeLog:
+	120503 user authentication now use json
     120131 added element.write method
     120119 added link and unlink methods
     120110 added getNodesBySQL()
