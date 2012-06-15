@@ -157,9 +157,7 @@ damas.keep_timed = function ( elements )
 damas.search = function ( searchtext )
 {
 	damas.log.cmd('damas.search', arguments );
-	var input = $$("input[rel='dam:search.text']").first();
-	input.value = searchtext;
-	document.fire('dam:submit.search');
+	document.fire('dam:submit.search', {'value': searchtext.substring(0, (searchtext.indexOf('&') == -1?searchtext.length: searchtext.indexOf('&')))} );
 }
 
 /**
