@@ -1,6 +1,9 @@
 <?php
 /**
- * Authentication using a table in a mysql database
+ *
+ * User authentication
+ *
+ * Users are stored in a MySQL database
  *
  */
 

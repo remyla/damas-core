@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS `event` (
 CREATE TABLE IF NOT EXISTS `key` (
   `node_id` int(11) unsigned NOT NULL DEFAULT '0',
   `name` varchar(255) NOT NULL DEFAULT '',
-  `value` varchar(512) NOT NULL DEFAULT '',
+  `value` varchar(1024) NOT NULL DEFAULT '',
   PRIMARY KEY (`node_id`,`name`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 

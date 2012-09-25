@@ -1,22 +1,23 @@
-Setting Up the DAMAS Server on a GNU/Debian
-===========================================
+DAMAS server setup on GNU/Debian
+================================
 
   This guide contains the intructions to setup a DAMAS server on a GNU/Debian
   Linux distribution. The current stable version of this distribution is Squeeze.
 
   Debian package dependencies :
-  apache2      (required)
-  php5         (required)
-  mysql-server (required)
-  php5-mysql   (required)
-  phpmyadmin   (optional)
-  cifs-utils # to mount files from a Microsoft server
+  apache2      required
+  php5         required
+  mysql-server required
+  php5-mysql   required
+  phpmyadmin   optional
+  cifs-utils # to mount files hosted on a Microsoft server
+  libapache2-mod-php5 # package should be in apache2 dependencies
 
 
 1. PHP 5.2.6 setup
 ------------------
-  Adapt the Php environment for better users : max size of uploaded files is
-  increased to 50MB and session lasts more.
+  Adapt the Php environment: max size of uploaded files is increased to 200MB
+  and user sessions are set to last more.
   - Edit php.ini
     - sessions lifetime seconds (24 minutes):
       ; After this number of seconds, stored data will be seen as 'garbage' and
@@ -57,11 +58,6 @@ Setting Up the DAMAS Server on a GNU/Debian
     can download it from http://eaccelerator.net. The php5-dev package is
     needed to compile it.
 
-  - Some icons from the kde-icons-crystalclear package are used in the interface.
-    This package is approximatly 22,4MB.
 
-  - The libapache2-mod-php5 package should be in apache2 dependencies
-
-  - bzip2 package is needed to package a new Damas build
   bzip2 unzip default-jre-headless phpdoc php-pear
   pear install phpdocumentator

@@ -1,6 +1,7 @@
 <?php
 /**
- * Web service methods for DAMAS software (damas-software.org)
+ * @fileoverview Web service methods for DAMAS (damas-software.org)
+ * @author Remy Lalanne
  *
  * Copyright 2005-2012 Remy Lalanne
  *
@@ -115,7 +116,6 @@ function allowed ( $service_name )
 
 class damas_service
 {
-	
 	//ERR_SERVER_CONF ERR_MYSQL_SUPPORT ERR_MYSQL_CONNECT ERR_MYSQL_DB
 	static function init_http()
 	{
@@ -162,11 +162,11 @@ class damas_service
 
 		if( $authentication == "Default" )
 		{
-			include "userAuth/authDefault.php";
+			include "authentication_dev.php";
 		}
 		if( $authentication == "MySQL" )
 		{
-			include "userAuth/authMySQL.php";
+			include "authentication_mysql.php";
 		}
 		if( $authentication == "CAS" )
 		{

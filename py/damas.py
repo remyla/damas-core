@@ -75,7 +75,7 @@ class project :
 		'''
 		opener = urllib2.build_opener( urllib2.HTTPCookieProcessor(self.cj) )
 		urllib2.install_opener( opener )
-		try: a = urllib2.urlopen( self.serverURL + '/auth.soap.php?cmd=login&user=' + username + '&password=' + password )
+		try: a = urllib2.urlopen( self.serverURL + '/authentication.php?cmd=login&user=' + username + '&password=' + password )
 		except: return False
 		return json.loads( a.read() )
 		#soap = xml.dom.minidom.parseString( a.read() )

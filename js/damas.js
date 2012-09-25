@@ -20,6 +20,14 @@
  * You should have received a copy of the GNU General Public License
  * along with damas-core.  If not, see <http://www.gnu.org/licenses/>.
  *
+ *
+ *
+ * 2012-09-12 added project.searchKey()
+ * 2012-09-12 added project.findTag()
+ * 2012-09-12 added project.findSQL()
+ * 2012-09-12 removed project.getElementsByTagName()
+ * 2012-09-12 removed project.getNodesBySQL()
+ * 2012-09-12 removed project.getNodesByTag()
  */
 
 /**
@@ -212,14 +220,13 @@ damas.post = function ( url, args ) {
 /**
  * Reads properties from a JSON
  * @private
- * @param {XMLElement} XMLElement XML fragment to read
+ * @param {Object} obj json object to read
  */
 damas.readJSONElements = function ( obj )
 {
 	$A( obj ).each( function( e ){
 		damas.readJSONElement( e );
 	} );
-	//damas.sort( this.children );
 	return obj;
 }
 
@@ -252,13 +259,7 @@ damas.project = {};
  */
 damas.project.initialize = function ( url )
 {
-	damas.log.cmd( "damas.project", arguments );
 	this.server = url;
-	var r = damas.post( url + "/server.php", false );
-	if( r.error != damas.errorCode( "ERR_NOERROR" ) )
-	{
-		return r.error;
-	}
 }
 
 /**
@@ -269,20 +270,29 @@ damas.project.initialize = function ( url )
 damas.project.empty_trashcan = function ( )
 {
 	damas.log.cmd( "project.empty_trashcan", arguments );
-	var args = { cmd: "empty_trashcan" };
-	var res = damas.post( this.server + "/asset.soap.php", args ).bool;
-	if( res ) document.fire('dam:element.updated', { 'id': this.getElementById('dam:trash').id } );
+	var req = new Ajax.Request( this.server + "/asset.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'empty_trashcan' }
+	});
+	if( req.transport.status == 200 )
+	{
+		document.fire( 'dam:element.updated', this.getElementById('dam:trash') );
+	}
+	return req.transport.status == 200;
 }
 
 /**
  * Returns the first element which has the specified value of the ID attribute
  * @param {String} key key to search
  * @param {String} value key value to search
- * @returns {XML Fragment} XML of node
+ * @returns {Integer} node index on success or false otherwise
  */
 damas.project.getElementById = function ( id )
 {
-	return this.searchKey( 'id', id )[0];
+	var res =  this.find( { 'id': id } );
+	if( res !== null )
+		return res[0];
+	return null;
 }
 
 /**
@@ -299,7 +309,12 @@ damas.project.getNode = function ( index )
 	return damas.readJSONElement( JSON.parse( req.transport.responseText ) );
 }
 
-damas.project.getAncestors = function ( id )
+/**
+ * Retrieve the ancestors (parent and above) of a node
+ * @param {Integer} id node index
+ * @return {Array} array of ancestors ids
+ */
+damas.project.ancestors = function ( id )
 {
 	var req = new Ajax.Request( this.server + "/model.json.php", {
 		asynchronous: false,
@@ -308,7 +323,12 @@ damas.project.getAncestors = function ( id )
 	return damas.readJSONElements( JSON.parse( req.transport.responseText ) );
 }
 
-damas.project.getChildren = function ( element )
+/**
+ * Retrieve the children of a node
+ * @param {Integer} $id node index
+ * @return {Array} array of children elements
+ */
+damas.project.children = function ( element )
 {
 	var req = new Ajax.Request( this.server + "/model.json.php", {
 		asynchronous: false,
@@ -360,25 +380,6 @@ damas.project.readElementsXML = function ( XMLElement )
 }
 
 /**
- * Returns elements wearing the specified key
- * @param {String} keyname key name to search
- * @param {String} keyvalue key value to search
- * @returns {XML Fragment} XML of node
- */
-damas.project.searchKey = function ( keyname, keyvalue )
-{
-	damas.log.cmd( "damas.project.getNodeByKey", arguments );
-	var args = { 'cmd': "searchKey", 'key': keyname, 'value': keyvalue };
-	var nodes = damas.post( this.server + "/model.soap.php", args ).xml.getElementsByTagName( "node" );
-	var elements = new Array();
-	for( var i = 0; i < nodes.length; i++ )
-	{
-		elements[i] = new damas.element( nodes[i] );
-	}
-	return elements;
-}
-
-/**
  * Creates a node of the specified type
  * @param {Integer} id Parent node index
  * @param {String} tagName type of the new node
@@ -386,10 +387,11 @@ damas.project.searchKey = function ( keyname, keyvalue )
  */
 damas.project.createNode = function ( id, tagName )
 {
-	damas.log.cmd( "damas.project.createNode", arguments );
-	var args = { cmd: "createNode", id: id, type: tagName };
-	//return damas.post( this.server + "/model.soap.php", args ).text;
-	return new damas.element( damas.post( this.server + "/model.soap.php", args ).xml.getElementsByTagName( "node" )[0] );
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: { 'cmd': 'createNode', 'id': id, 'type': tagName }
+	});
+	return damas.readJSONElement( JSON.parse( req.transport.responseText ) );
 }
 
 /**
@@ -399,10 +401,11 @@ damas.project.createNode = function ( id, tagName )
  */
 damas.project.duplicate = function ( id )
 {
-	damas.log.cmd( "damas.project.duplicate", arguments );
-	var args = { cmd: "duplicate", id: id };
-	//return damas.post( this.server + "/model.soap.php", args ).text;
-	return new damas.element( damas.post( this.server + "/model.soap.php", args ).xml.getElementsByTagName( "node" )[0] );
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: { 'cmd': 'duplicate', 'id': id }
+	});
+	return damas.readJSONElement( JSON.parse( req.transport.responseText ) );
 }
 
 /**
@@ -438,10 +441,16 @@ damas.project.createFromTemplate = function ( id, target, keys, tags )
  */
 damas.project.recycle = function ( id )
 {
-	damas.log.cmd( "damas.project.recycle", arguments );
-	var args = { cmd: "recycle", id: id };
-	return damas.post( this.server + "/asset.soap.php", args ).bool;
-	//if( res ) document.fire( 'dam:element.recycled', this );
+	damas.log.cmd( "project.recycle", arguments );
+	var req = new Ajax.Request( this.server + "/asset.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'recycle', id: id }
+	});
+	if( req.transport.status == 200 )
+	{
+		document.fire( 'dam:element.recycled', id );
+	}
+	return req.transport.status == 200;
 }
 
 /**
@@ -452,8 +461,11 @@ damas.project.recycle = function ( id )
 damas.project.removeNode = function ( id )
 {
 	damas.log.cmd( "damas.project.removeNode", arguments );
-	var args = { cmd: "removeNode", id: id };
-	return damas.post( this.server + "/model.soap.php", args ).bool;
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: { 'cmd': 'removeNode', 'id': id }
+	});
+	return req.transport.status == 200;
 }
 
 /**
@@ -467,11 +479,11 @@ damas.project.removeNode = function ( id )
 damas.project.setKey = function ( id, name, value )
 {
 	damas.log.cmd( "project.setKey", arguments );
-	var args = { cmd: "setKey", id: id, name: name, value: value };
-	return damas.post( this.server + "/model.soap.php", args ).bool;
-	//var res = damas.post( damas.soap_srv, args ).bool;
-	//if( res ) document.fire('dam:element.updated', { 'id': id, 'name': name, 'value': value } );
-	//return res;
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'setKey', id: id, name: name, value: value }
+	});
+	return req.transport.status == 200;
 }
 
 /**
@@ -484,10 +496,15 @@ damas.project.setKey = function ( id, name, value )
 damas.project.setKeys = function ( id, old_pattern, new_pattern )
 {
 	damas.log.cmd( "project.setKeys", arguments );
-	var args = { cmd: "setKeys", 'id': id, 'old': old_pattern, 'new': new_pattern };
-	var res = damas.post( this.server + "/model.soap.php", args ).bool;
-	if( res ) document.fire('dam:element.updated', { 'id': id } );
-	return res;
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'setKeys', id: id, old: old_pattern, 'new': new_pattern }
+	});
+	if( req.transport.status == 200 )
+	{
+		document.fire('dam:element.updated', { 'id': id } );
+	}
+	return req.transport.status == 200;
 }
 
 /**
@@ -499,18 +516,21 @@ damas.project.setKeys = function ( id, old_pattern, new_pattern )
 damas.project.removeKey = function ( id, name )
 {
 	damas.log.cmd( "damas.project.removeKey", arguments );
-	var args = { cmd: "removeKey", id: id, name: name };
-	return damas.post( this.server + "/model.soap.php", args ).bool;
-	//var res = damas.post( damas.soap_srv, args ).bool;
-	//if( res ) document.fire('dam:element.updated', { 'id': id, 'name': name } );
-	//return res;
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'removeKey', id: id, name: name }
+	});
+	return req.transport.status == 200;
 }
 
 damas.project.setTags = function ( id, tags )
 {
 	damas.log.cmd( "project.setTags", arguments );
-	var args = { cmd: "setTags", id: id, tags: tags };
-	return damas.post( this.server + "/model.soap.php", args ).bool;
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'setTags', id: id, tags: tags }
+	});
+	return req.transport.status == 200;
 }
 
 /**
@@ -522,8 +542,11 @@ damas.project.setTags = function ( id, tags )
 damas.project.tag = function ( id, name )
 {
 	damas.log.cmd( "damas.project.tag", arguments );
-	var args = { cmd: "tag", id: id, name: name };
-	return damas.post( this.server + "/model.soap.php", args ).bool;
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'tag', id: id, name: name }
+	});
+	return req.transport.status == 200;
 }
 
 /**
@@ -535,8 +558,11 @@ damas.project.tag = function ( id, name )
 damas.project.untag = function ( id, name )
 {
 	damas.log.cmd( "damas.project.untag", arguments );
-	var args = { cmd: "untag", id: id, name: name };
-	return damas.post( this.server + "/model.soap.php", args ).bool;
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'untag', id: id, name: name }
+	});
+	return req.transport.status == 200;
 }
 
 /**
@@ -548,10 +574,12 @@ damas.project.untag = function ( id, name )
 damas.project.link = function ( src_id, tgt_id )
 {
 	damas.log.cmd( "damas.project.link", arguments );
-	var args = { cmd: "link", src: src_id, tgt: tgt_id };
-	var res = damas.post( this.server + "/model.soap.php", args ).bool;
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'link', src: src_id, tgt: tgt_id }
+	});
 	document.fire( 'damas:project.link' );
-	return res;
+	return req.transport.status == 200;
 }
 
 /**
@@ -562,11 +590,12 @@ damas.project.link = function ( src_id, tgt_id )
 damas.project.unlink = function ( id )
 {
 	damas.log.cmd( "damas.project.unlink", arguments );
-	var args = { cmd: "unlink", id: id };
-	var res = damas.post( this.server + "/model.soap.php", args ).bool;
-	//if( res ) document.fire('damas.project.unlink', id );
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'unlink', id: id }
+	});
 	document.fire( 'damas:project.unlink' );
-	return res;
+	return req.transport.status == 200;
 }
 
 /**
@@ -578,8 +607,11 @@ damas.project.unlink = function ( id )
 damas.project.setType = function ( id, type )
 {
 	damas.log.cmd( "project.setType", arguments );
-	var args = { cmd: "setType", id: id, type: type };
-	return damas.post( this.server + "/model.soap.php", args ).bool;
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'setType', id: id, type: type }
+	});
+	return req.transport.status == 200;
 }
 
 /**
@@ -591,40 +623,43 @@ damas.project.setType = function ( id, type )
 damas.project.move = function ( id, target )
 {
 	damas.log.cmd( "damas.project.move", arguments );
-	var args = { cmd: "move", id: id, target: target };
-	return damas.post( this.server + "/model.soap.php", args ).bool;
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'move', id: id, target: target }
+	});
+	return req.transport.status == 200;
 }
 
 /**
- * Search for elements of the specified type
- * @param {String} type Type to search
- * @returns {Array} array of element indexes
+ * Find elements wearing the specified key(s)
+ * @param {Hash} keys Hash of key/value pairs to match
+ * @returns {Array} array of element indexes or null if no element found
  */
-damas.project.getNodesByTagName = function ( tagName )
+damas.project.find = function ( keys )
 {
-	damas.log.cmd( "damas.project.getNodesByTagName", arguments );
-	var query = "SELECT node.id FROM node WHERE type='" + tagName + "';";
-	return project.getNodesBySQL( query );
+	damas.log.cmd( "damas.project.find", arguments );
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: Object.extend( keys, { cmd: 'find' } )
+	});
+	return JSON.parse( req.transport.responseText );
 }
 
 /**
- * Search for elements, specifying an SQL SELECT query.
- * The SQL SELECT query must be formated to return results with an 'id' field, which contains elements indexes.
+ * Find elements, specifying an SQL SELECT query.
+ * The query must be formated to return results with an 'id' named column, which
+ * contains elements indexes.
  * @param {String} query SQL query to perform
  * @returns {Array} array of element indexes
  */
-damas.project.getNodesBySQL = function ( query )
+damas.project.findSQL = function ( query )
 {
-	damas.log.cmd( "damas.project.getNodesBySQL", arguments );
-	var req = new Ajax.Request( this.server + "/mysql.soap.php", {
+	damas.log.cmd( "damas.project.findSQL", arguments );
+	var req = new Ajax.Request( this.server + "/model.json.php", {
 		asynchronous: false,
-		parameters: { query: query }
+		parameters: { cmd: 'findSQL', query: query }
 	});
-	var idtags = req.transport.responseXML.getElementsByTagName( 'id' );
-	var ids = new Array();
-	for( var i = 0; i < idtags.length; i++ )
-		ids[i] = parseInt( idtags[i].firstChild.nodeValue );
-	return ids;
+	return JSON.parse( req.transport.responseText );
 }
 
 /**
@@ -632,11 +667,10 @@ damas.project.getNodesBySQL = function ( query )
  * @param {String} tagname Tag to search
  * @returns {Array} array of node indexes
  */
-damas.project.getNodesByTag = function ( tagname )
+damas.project.findTag = function ( tagname )
 {
-	damas.log.cmd( "damas.project.getNodesByTag", arguments );
-	var query = "SELECT node.id FROM node LEFT JOIN tag ON node.id=tag.node_id WHERE tag.name='" + tagname + "' ORDER BY node.type;";
-	return project.getNodesBySQL( query );
+	damas.log.cmd( "damas.project.findTag", arguments );
+	return project.findSQL( "SELECT node.id FROM node LEFT JOIN tag ON node.id=tag.node_id WHERE tag.name='" + tagname + "' ORDER BY node.type;" );
 }
 
 damas.project = Class.create( damas.project );
@@ -960,10 +994,15 @@ damas.element.untag = function ( name )
 damas.element.recycle = function ()
 {
 	damas.log.cmd( "that.recycle", arguments );
-	var args = { cmd: "recycle", id: this.id };
-	var res = damas.post( project.server + "/asset.soap.php", args ).bool;
-	if( res ) document.fire( 'dam:element.recycled', this );
-	return res;
+	var req = new Ajax.Request( project.server + "/asset.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'recycle', id: this.id }
+	});
+	if( req.transport.status == 200 )
+	{
+		document.fire( 'dam:element.recycled', this );
+	}
+	return req.status == 200;
 }
 
 /**
@@ -974,10 +1013,12 @@ damas.element.recycle = function ()
 damas.element.write = function ( text )
 {
 	damas.log.cmd( "that.write", arguments );
-	var args = { cmd: "write", id: this.id, text: text };
-	var res = damas.post( project.server + "/asset.soap.php", args ).bool;
-	if( res ) document.fire( 'dam:element.updated', this );
-	return res;
+	var req = new Ajax.Request( project.server + "/asset.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'write', id: this.id, text: text }
+	});
+	if( req.status == 200 ) document.fire( 'dam:element.updated', this );
+	return req.status == 200;
 }
 
 /**
@@ -987,10 +1028,15 @@ damas.element.write = function ( text )
 damas.element.time = function ( )
 {
 	damas.log.cmd( "that.time", arguments );
-	var args = { cmd: "time", id: this.id };
-	var res = damas.post( project.server + "/asset.soap.php", args ).bool;
-	if( res ) document.fire( 'dam:element.updated', this );
-	return res;
+	var req = new Ajax.Request( project.server + "/asset.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'time', id: this.id }
+	});
+	if( req.status == 200 )
+	{
+		document.fire( 'dam:element.updated', this );
+	}
+	return req.status == 200;
 }
 
 //damas.element = Class.create( damas.element );

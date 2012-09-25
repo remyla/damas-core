@@ -8,7 +8,7 @@ session_start();
 include_once "service.php";
 include_once "../php/DAM.php";
 include_once "../php/data_model_1.xml.php";
-include_once "FileVersion/lib.asset.php";
+include_once "asset.php";
 include_once "FileSystem/lib.file.php";
 
 damas_service::init_http();

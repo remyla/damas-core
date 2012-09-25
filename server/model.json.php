@@ -30,10 +30,7 @@ damas_service::init_http();
 damas_service::accessGranted();
 damas_service::allowed( "model::" . arg("cmd") );
 
-$cmd = arg("cmd");
-$ret = false;
-
-if( !$cmd )
+if( !arg("cmd") )
 {
 	header("HTTP/1.1: 400 Bad Request"); //ERR_COMMAND
 	echo "Bad command";
@@ -42,7 +39,9 @@ if( !$cmd )
 
 header('Content-type: application/json');
 
-switch( $cmd )
+$ret = false;
+
+switch( arg("cmd") )
 {
 	case "createNode":
 		if( is_null( arg('id') ) || is_null( arg('type') ) )
@@ -233,7 +232,7 @@ switch( $cmd )
 
 	/**
 	 *
-	 * json functions
+	 * json output functions
 	 * model_json namespace 
 	 *
 	 */
@@ -331,6 +330,32 @@ switch( $cmd )
 			exit;
 		}
 		echo json_encode( model::search( arg('value') ) );
+		break;
+	case "find":
+		$a = $_GET + $_POST;
+		unset( $a['cmd'] );
+		echo json_encode( model::find( $a ) );
+		break;
+	case "findSQL":
+		if( is_null( arg('query') ) )
+		{
+			header('HTTP/1.1: 400 Bad Request'); //$err = $ERR_COMMAND; break;
+			exit;
+		}
+		# Forbidden SQL manipulation keywords
+		# ALTER CREATE DROP RENAME
+		# CALL DELETE DO HANDLER INSERT LOAD REPLACE TRUNCATE UPDATE
+		$querystr = stripslashes( arg('query') );
+		$querystr = str_replace( "&", "&amp;", $querystr );
+		$querystr = str_replace( "<", "&lt;", $querystr );
+		$querystr = str_replace( ">", "&gt;", $querystr );
+		$result = mysql_query( $querystr );
+		$res = array();
+		while( $row = mysql_fetch_array( $result ) )
+		{
+			$res[] = intval( $row['id'] );
+		}
+		echo json_encode( $res );
 		break;
 	default:
 		header('HTTP/1.1: 400 Bad Request'); //$err = $ERR_COMMAND;

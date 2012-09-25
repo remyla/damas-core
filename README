@@ -1,4 +1,11 @@
-damas-core - a data management system over MySQL as a web service
+damas-core - a data management system over MySQL as a web service written in Php
+
+Supporting:
+    - nodes in rooted trees
+    - nodes in directed acyclic graph
+    - key and value pairs on nodes
+    - tagging
+    - beta, prototype based node inheritance
 
 Copyright 2005-2012 Remy Lalanne
 

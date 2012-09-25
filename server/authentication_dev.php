@@ -1,6 +1,9 @@
 <?php
 /**
- * Authentication using a Damas node
+ *
+ * User authentication
+ *
+ * Users are stored in Damas nodes
  *
  */
 

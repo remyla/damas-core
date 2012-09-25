@@ -1,7 +1,25 @@
 <?php
 /**
+ * @fileoverview User Authentication service of DAMAS (damas-software.org)
+ *
  * @author Remy Lalanne
- * Copyright (c) 2005-2012 Remy Lalanne
+ *
+ * Copyright 2005-2012 Remy Lalanne
+ *
+ * This file is part of damas-core.
+ *
+ * damas-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * damas-core is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with damas-core.  If not, see <http://www.gnu.org/licenses/>.
  */
 session_start();
 
@@ -41,18 +59,6 @@ switch( arg("cmd") )
    		header("HTTP/1.1: 401 Unauthorized"); //ERR_AUTHREQUIRED
 		echo json_encode( true );
 		exit;
-/*
-	case "checkAuthentication":
-		$ret = (int)checkAuthentication();
-		if (!$ret)
-		{
-   			header("HTTP/1.1: 401 Unauthorized"); //ERR_AUTHREQUIRED
-   			echo "User authentication required";
-   			exit;
-			$err = $ERR_AUTHREQUIRED;
-		}
-		break;
-*/
 	case "getUser":
 		if( ! array_key_exists( "login", $_SESSION ) )
 		{
@@ -60,13 +66,11 @@ switch( arg("cmd") )
    			echo "User not authenticated";
    			exit;
 		}
-		$array = array(
+		header('Content-type: application/json');
+		echo json_encode( array(
 			"username" => $_SESSION['login'],
 			"userclass" => auth_get_class()
-			#"user_id" => (int)$_SESSION['user_id']
-		);
-		header('Content-type: application/json');
-		echo json_encode( $array );
+		));
 		break;
 	default:
 		header("HTTP/1.1: 400 Bad Request"); //ERR_COMMAND

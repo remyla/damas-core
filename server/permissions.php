@@ -1,28 +1,41 @@
 <?php
 /**
- *
- * @fileoverview Permission rules per user classes
- *
- * Format: command_name => array of allowed user classes
- *
- * Syntax:
- * $mod["COMMAND"] = array( "usergroup1", "usergroup2" );
- *
+ * @fileoverview User privileges rules by class of DAMAS (damas-software.org)
  * @author Remy Lalanne
  *
- * copyright (c) 2005-2012 damas-software.com | Remy Lalanne
+ * Format:
+ * $mod["COMMAND_NAME"] = array( "USERCLASS1", "USERCLASS2" );
+ *
+ * Copyright 2005-2012 Remy Lalanne
+ *
+ * This file is part of damas-core.
+ *
+ * damas-core is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * damas-core is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with damas-core.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
+
 $mod["model::ancestors"] = array( "*" );
 $mod["model::children"] = array( "*" );
-$mod["model::search"] = array( "*" ); // Axel
-$mod["model::links"] = array( "*" ); // Axel
-$mod["model::export"] = array( "admin" ); // Axel
 $mod["model::createNode"] = array( "admin", "editor" );
 $mod["model::duplicate"] = array( "admin", "editor" );
+$mod["model::export"] = array( "admin" ); // Axel
+$mod["model::find"] = array( "*" );
+$mod["model::findSQL"] = array( "*" );
 $mod["model::graph"] = array( "*" );
 $mod["model::link"] = array( "admin", "editor", "linker" );
+$mod["model::links"] = array( "*" ); // Axel
 $mod["model::move"] = array( "admin", "editor" );
 $mod["model::multi"] = array( "*" );
 $mod["model::removeNode"] = array( "admin" );
@@ -32,6 +45,7 @@ $mod["model::setKeys"] = array( "admin", "editor" );
 $mod["model::setTags"] = array( "admin", "editor" );
 $mod["model::setType"] = array( "admin" );
 $mod["model::single"] = array( "guest", "user", "linker", "editor", "admin" );
+$mod["model::search"] = array( "*" ); // Axel
 $mod["model::searchKey"] = array( "*" );
 $mod["model::stats"] = array( "*" );
 $mod["model::tag"] = array( "admin", "editor" );
@@ -74,6 +88,8 @@ $mod["libtask.workflowByState"] = array( "*" );
 $mod["libtask.workflowByResource"] = array( "*" );
 $mod["libtask.workflowByTask"] = array( "*" );
 $mod["libtask.workflowByType"] = array( "*" );
+
+$mod["workflow::workflowByState"] = array( "*" );
 
 /*    FONCTIONS MDP SHA1   */
 $mod["sha1::transform"] = array("*"); // Axel

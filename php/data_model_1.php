@@ -6,7 +6,7 @@
  * MySQL, supporting :
  * - Rooted tree management functions (ancestors, children, createNode,
  *    removeNode, copyNode, copyBranch, move, parent, setType)
- * - Text key and value pairs on nodes (keys, setKey, getKey, removeKey,
+ * - Text key and value pairs on nodes (keys, find, setKey, getKey, removeKey,
  *    searchKey, setKeys)
  * - Simple directed acyclic graph (DAG) functions (link, unlink, islinked)
  * - Tagging (tag, untag, hastag, setTags)
@@ -39,9 +39,9 @@
 class model
 {
 	/**
-	 * Retrieve the children of a node
+	 * Retrieve the ancestors (parent and above) of a node
 	 * @param {Integer} $id node index
-	 * @return {Array} array of children ids
+	 * @return {Array} array of ancestors ids
 	 */
 	static function ancestors ( $id )
 	{
@@ -287,6 +287,28 @@ class model
 	}
 
 	/**
+	 * Find nodes wearing the specified key(s)
+	 * @param {Array} keys Array of key/value pairs to match
+	 * @returns {Array} array of matching node indexes
+	 */
+	static function find ( $keys )
+	{
+		$query = "SELECT DISTINCT node_id FROM `key` WHERE 1";
+        foreach( $keys as $k=>$v )
+		{
+			$query .= ' AND node_id IN ( SELECT node_id FROM `key` WHERE name="' . $k . '" AND value="' . $v . '" ) ';
+		}
+		$query .= ";";
+		$result = mysql_query( $query );
+		$matches = array();
+		while( $row = mysql_fetch_array( $result ) )
+		{
+			$matches[] = intval( $row['node_id'] );
+		}
+		return $matches;
+	}
+
+	/**
  	 * Search for nodes wearing a key/value pair
 	 * @param {String} $name key name
 	 * @param {String} $value key value
@@ -476,6 +498,7 @@ class model
 		if( $row )
 		{
 			$proto = model::searchKey( 'id', $row["value"] );
+			//$proto = model::find( [ 'id' => $row["value"] ] );
 			$proto = $proto[0];
 			if( $proto )
 			{

@@ -1,6 +1,6 @@
 <?php
 /**
- * JSON web service of DAMAS software (damas-software.org)
+ * JSON web service of DAMAS (damas-software.org)
  *
  * Copyright 2005-2012 Remy Lalanne
  *
@@ -26,18 +26,17 @@ session_start();
 include_once "service.php";
 include_once "../php/data_model_1.json.php";
 include_once "../php/DAM.php";
-include_once "FileVersion/lib.asset.php";
+include_once "asset.php";
 include_once "FileSystem/lib.file.php";
 
 damas_service::init_http();
 damas_service::accessGranted();
 damas_service::allowed( "asset::" . arg("cmd") );
 
-$cmd = arg("cmd");
 $ret = false;
 header('Content-type: application/json');
 
-switch( $cmd )
+switch( arg("cmd") )
 {
 	case "getElementById":
 		$id = model::searchKey('id', arg('id'));
