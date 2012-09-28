@@ -119,7 +119,7 @@ damas.filter = function ( elements )
 	var res = new Array();
 	for( var i=0; i< elements.length; i++ )
 	{
-		if( elements[i].type === 'message' || elements[i].type === 'task' ) continue;
+		if( elements[i].type === 'message' ) continue;
 		res.push( elements[i] );
 	}
 	return res;

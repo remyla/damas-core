@@ -54,9 +54,8 @@ INSERT INTO `user` (`login`, `password`) VALUES
 INSERT INTO `node` (`id`, `type`, `parent_id`) VALUES
 (1, 'asset', 3),
 (2, 'asset', 0),
-(3, 'asset', 2),
-(4, 'asset', 2),
-(5, 'asset', 2),
+(3, 'asset', 0),
+(4, 'asset', 0),
 (6, 'asset', 2);
 
 INSERT INTO `key` (`node_id`, `name`, `value`) VALUES
@@ -71,7 +70,5 @@ INSERT INTO `key` (`node_id`, `name`, `value`) VALUES
 (4, 'label', 'trash'),
 (4, 'style', 'color: #364E64'),
 (4, 'id', 'dam:trash'),
-(5, 'label', 'templates'),
-(5, 'style', 'color: #364E64'),
 (6, 'label', 'log'),
 (6, 'onload', 'damas.show2( project.getNodesBySQL("SELECT node_id AS id FROM `key` WHERE name=''time'' AND value!='' '' ORDER BY value DESC LIMIT 40;") );');
