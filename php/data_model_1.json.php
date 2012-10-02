@@ -167,7 +167,7 @@ class model_json
 			$res = array ();
 			$res["id"] = 0; 
 			$res["type"] = "folder"; 
-			$res["parent_id"] = ""; 
+			$res["parent_id"] = null; 
 			$res["childcount"] = model::countChildren( $id );
 			if( $contents )
 				return array_merge($res, $contents);

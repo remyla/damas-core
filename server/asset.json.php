@@ -95,9 +95,9 @@ switch( arg("cmd") )
 		if( is_uploaded_file( $_FILES['file']['tmp_name'] ) )
 		{
 			$extension = pathinfo( $_FILES['file']['name'], PATHINFO_EXTENSION );
-			if( move_uploaded_file( $_FILES['file']['tmp_name'], $assetsLCL . '/.damas/images/' . arg("id") . '.' . $extension ) )
+			if( move_uploaded_file( $_FILES['file']['tmp_name'], $assetsLCL . '/upload/' . arg("id") . '.' . $extension ) )
 			{
-				model::setKey( arg("id"), 'image', '/.damas/images/' . arg("id") . '.' . $extension );
+				model::setKey( arg("id"), 'image', '/upload/' . arg("id") . '.' . $extension );
 				break;
 			}
 		}

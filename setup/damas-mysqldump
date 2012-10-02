@@ -5,5 +5,5 @@
 db_name=
 db_user=
 db_pass=
-target="/home/www/PROJECT/.damas/db"
+target="/root/damas_backups"
 /usr/bin/mysqldump -u$db_user -p$db_pass $db_name | /bin/bzip2 > $target/${db_name}_`/bin/date +%y%m%d-%H:%M`.sql.bz2
