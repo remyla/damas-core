@@ -58,12 +58,14 @@ switch( arg("cmd") )
 		$ret = true;
 		break;
 	case "write":
-		$ret = DAM::write( arg("id"), arg("text") );
-		if (!$ret) {
-			header("HTTP/1.1: 304 Not Modified Error on create");
+		$id = DAM::write( arg("id"), arg("text") );
+		if( !$id )
+		{
+            header("HTTP/1.1: 409 Conflict");
+            echo "Error during the creation of the message";
 			exit;
-			//$err = $ERR_NODE_CREATE;
 		}
+        $ret = model_json::node( $id, 1, $NODE_TAG | $NODE_PRM );
 		break;
 	case "lock":
 		if( model::hastag( arg("id"), "lock" ) ) {

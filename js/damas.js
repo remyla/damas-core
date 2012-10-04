@@ -1017,8 +1017,11 @@ damas.element.write = function ( text )
 		asynchronous: false,
 		parameters: { cmd: 'write', id: this.id, text: text }
 	});
-	if( req.status == 200 ) document.fire( 'dam:element.updated', this );
-	return req.status == 200;
+	if( req.transport.status != 200 ){
+		return false;
+	}
+	return damas.readJSONElement( JSON.parse( req.transport.responseText ) );
+	//document.fire( 'dam:element.updated', this );
 }
 
 /**

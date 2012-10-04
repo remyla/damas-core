@@ -42,7 +42,7 @@ class dam
 			return false;
 		if( !model::setKey( $newid, "text", $text ) )
 			return false;
-		return true;
+		return $newid;
 	}
 
 	/**

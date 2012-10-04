@@ -4,12 +4,12 @@
  *
  * Simple library written in PHP to handle a key=value data model on top of
  * MySQL, supporting :
- * - Rooted tree management functions (ancestors, children, createNode,
- *    removeNode, copyNode, copyBranch, move, parent, setType)
+ * - Rooted tree management functions (ancestors, children, copyBranch, copyNode
+ *    createNode, move, parent, removeNode, setType)
  * - Text key and value pairs on nodes (keys, find, setKey, getKey, removeKey,
  *    searchKey, setKeys)
- * - Simple directed acyclic graph (DAG) functions (link, unlink, islinked)
- * - Tagging (tag, untag, hastag, setTags)
+ * - Simple directed acyclic graph (DAG) functions (link, unlink, links_r)
+ * - Tagging (hastag, setTags, tag, untag)
  * - Element inheritance (prototype based) - beta
  *
  * @author Remy Lalanne
@@ -32,6 +32,7 @@
  * along with damas-core.  If not, see <http://www.gnu.org/licenses/>.
  *
  *
+ * 121004 : removed islinked() function
  * 120221 : fixed graph redondant cycles
  *
  */
@@ -296,7 +297,10 @@ class model
 		$query = "SELECT DISTINCT node_id FROM `key` WHERE 1";
         foreach( $keys as $k=>$v )
 		{
-			$query .= ' AND node_id IN ( SELECT node_id FROM `key` WHERE name="' . $k . '" AND value="' . $v . '" ) ';
+			$query .= sprintf( " AND node_id IN ( SELECT node_id FROM `key` WHERE name='%s' AND value='%s' )",
+				mysql_real_escape_string($k),
+				mysql_real_escape_string($v) );
+			//$query .= ' AND node_id IN ( SELECT node_id FROM `key` WHERE name="' . $k . '" AND value="' . $v . '" ) ';
 		}
 		$query .= ";";
 		$result = mysql_query( $query );
@@ -446,28 +450,6 @@ class model
 		if( $res)
 			return mysql_affected_rows() == 1;
 		return $res;
-	}
-
-	/**
-	 * Check if 2 nodes are already linked
-	 * @param {Integer} $src_id node index
-	 * @param {Integer} $tgt_id node index
-	 * @return {Integer} link id on success, false otherwise
-	 */
-	static function islinked ( $src_id, $tgt_id )
-	{
-		$query = sprintf("SELECT id FROM link WHERE src_id='%s' AND tgt_id='%s';",
-			$src_id,
-			$tgt_id
-		);
-		$res = mysql_query($query);
-		if( $res){
-			if( mysql_num_rows($res)>0){
-				$row = mysql_fetch_array($res);
-				return $row['id'];
-			}
-		}
-		return false;
 	}
 
 	/**
@@ -636,7 +618,7 @@ class model
 	}
 	
 	/**
-	 * Search key.value or tag.name begginning by $value in database, only return the first word
+	 * Search key.value or tag.name beginning by $value in database, only return the first word
 	 * @param {String} $value string to search in the database
 	 * @return {Array} array of all corresponding words found in the database
 	 */
