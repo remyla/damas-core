@@ -5,7 +5,7 @@
  */
 session_start();
 
-include_once "service.php";
+include_once "service_deprecated.php";
 include_once "../php/DAM.php";
 include_once "../php/data_model_1.xml.php";
 include_once "asset.php";

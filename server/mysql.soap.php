@@ -6,7 +6,7 @@
 
 session_start();
 
-include_once "service.php"; //error_code()
+include_once "service_deprecated.php"; //error_code()
 #include_once "../php/lib.mysql2xml.php";
 
 damas_service::init_http();

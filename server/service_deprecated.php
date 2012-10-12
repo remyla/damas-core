@@ -1,6 +1,6 @@
 <?php
 /**
- * @fileoverview Methods for DAMAS web service (damas-software.org)
+ * @fileoverview Web service methods for DAMAS (damas-software.org)
  * @author Remy Lalanne
  *
  * Copyright 2005-2012 Remy Lalanne
@@ -22,17 +22,38 @@
  *
  */
 
+include_once "errors.php";
 include_once "permissions.php";
 if (file_exists($_SERVER['DOCUMENT_ROOT']."/.damas/permissions.php"))
 	include_once $_SERVER['DOCUMENT_ROOT']."/.damas/permissions.php";
 
 $version = "2.2-beta6";
 
-/**
- * get a command argument from POST then GET methods
- * @param $name {String} name of the argument to get value from
- * @return {String} argument value or null if the argument is not found
- */
+function soaplike_head ( $cmd, $err )
+{
+	global $error;
+	global $version;
+	$txt = "";
+	$txt .= "\t\t<version>".$version."</version>\n";
+	$txt .= "\t\t<cmd>".$cmd."</cmd>\n";
+	$txt .= error_code($err, $error[$err]);
+	if ($err>0 && function_exists("mysql_error"))
+		$txt .= "\t\t<mysql_error>".mysql_error()."</mysql_error>\n";
+	$txt .= debug_args();
+	return $txt;
+}
+
+// Function error_code - gives error code to ajax client
+// code : int    - optionnal error code to return (default is 0, success)
+// text : string - optionnal text to provide
+function error_code ( $code = 0, $text = "" )
+{
+	return "\t\t".'<error code="'.$code.'">'.$text."</error>\n";
+}
+
+// Function arg - get a command argument from POST then GET methods
+// name : string - name of the argument
+// return value : argument value or false if argument is not found
 function arg ( $name )
 {
 	global $_POST;
@@ -41,13 +62,44 @@ function arg ( $name )
 		return stripslashes( $_POST[$name] );
 	if( array_key_exists( $name, $_GET ) )
 		return stripslashes( $_GET[$name] );
-	return null;
+	return false;
 }
 
 function auth_get_class ()
 {
 	$id = model::searchKey( 'username', getUser() );
 	return model::getKey( $id[0], 'class' );
+}
+
+function debug_args()
+{
+	global $_POST;
+	global $_GET;
+	global $_SESSION;
+	$txt = "\t\t<debug>\n";
+
+	$txt .= "\t\t\t<GET";
+	foreach ($_GET as $k => $v)
+		$txt .= " " . $k.'="'.htmlspecialchars($v).'"';
+	$txt .= "/>\n";
+
+	$txt .= "\t\t\t<POST";
+	foreach ($_POST as $k => $v)
+		$txt .= " " . $k.'="'.htmlspecialchars($v).'"';
+	$txt .= "/>\n";
+
+	$txt .= "\t\t\t<COOKIE";
+	foreach ($_COOKIE as $k => $v)
+		$txt .= " " . htmlspecialchars( $k ) . '="' . htmlspecialchars( $v ) . '"';
+	$txt .= "/>\n";
+
+	$txt .= "\t\t\t<SESSION";
+	foreach ($_SESSION as $k => $v)
+		$txt .= " " . $k.'="'.$v.'"';
+	$txt .= "/>\n";
+
+	$txt .= "\t\t</debug>\n";
+	return $txt;
 }
 
 function allowed ( $service_name )
@@ -64,6 +116,7 @@ function allowed ( $service_name )
 
 class damas_service
 {
+	//ERR_SERVER_CONF ERR_MYSQL_SUPPORT ERR_MYSQL_CONNECT ERR_MYSQL_DB
 	static function init_http()
 	{
 		global $assetsLCL;
@@ -104,6 +157,8 @@ class damas_service
 		}
 
 		mysql_query( "SET NAMES 'utf8'" );
+		#include "installer/mysql_prepare.php";
+		#echo "Main Database must be created!";
 
 		if( $authentication == "Default" )
 		{

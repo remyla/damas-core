@@ -5,7 +5,7 @@
  */
 session_start();
 
-include_once "service.php";
+include_once "service_deprecated.php";
 
 damas_service::init_http();
 damas_service::accessGranted();

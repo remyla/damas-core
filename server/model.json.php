@@ -1,6 +1,9 @@
 <?php
 /**
- * JSON web service of DAMAS software (damas-software.org)
+ * Data model Php web service of DAMAS software (damas-software.org)
+ *
+ * output = JSON
+ * errors = HTTP
  *
  * Copyright 2005-2012 Remy Lalanne
  *
@@ -32,7 +35,7 @@ damas_service::allowed( "model::" . arg("cmd") );
 
 if( !arg("cmd") )
 {
-	header("HTTP/1.1: 400 Bad Request"); //ERR_COMMAND
+	header("HTTP/1.1: 400 Bad Request"); 
 	echo "Bad command";
 	exit;
 }
@@ -46,15 +49,15 @@ switch( arg("cmd") )
 	case "createNode":
 		if( is_null( arg('id') ) || is_null( arg('type') ) )
 		{
-			header("HTTP/1.1: 400 Bad Request"); //ERR_COMMAND
+			header("HTTP/1.1: 400 Bad Request");
 			echo "Bad command";
 			exit;
 		}
 		$id = model::createNode( arg("id"), arg("type") );
 		if( !$id )
 		{
-			header("HTTP/1.1: 409 Conflict"); //$err = $ERR_NODE_CREATE;
-			echo "Error during the creation of node, please change your values";
+			header("HTTP/1.1: 409 Conflict");
+			echo "createNode Error, please change your values";
 			exit;
 		}
 		echo json_encode( model_json::node( $id, 1, $NODE_TAG | $NODE_PRM ) );
@@ -62,15 +65,15 @@ switch( arg("cmd") )
 	case "duplicate":
 		if( is_null( arg('id') ) )
 		{
-			header("HTTP/1.1: 400 Bad Request"); //ERR_COMMAND
+			header("HTTP/1.1: 400 Bad Request");
 			echo "Bad command";
 			exit;
 		}
 		$id = model::copyBranch( arg("id"), false );
 		if( !$id )
 		{
-			header("HTTP/1.1: 409 Conflict"); //$err = $ERR_NODE_CREATE;
-			echo "Error during the copy of nodes, please change your values";
+			header("HTTP/1.1: 409 Conflict");
+			echo "copyBranch Error, please change your values";
 			exit;
 		}
 		echo json_encode( model_json::node( $id, 1, $NODE_TAG | $NODE_PRM ) );
@@ -78,56 +81,56 @@ switch( arg("cmd") )
 	case "removeNode":
 		if( is_null( arg('id') ) )
 		{
-			header("HTTP/1.1: 400 Bad Request"); //ERR_COMMAND
+			header("HTTP/1.1: 400 Bad Request");
 			echo "Bad command";
 			exit;
 		}
 		if( !model::removeNode( arg("id") ) )
 		{
-			header("HTTP/1.1: 409 Conflict"); //$err = $ERR_NODE_DELETE;
-			echo "Error during the deletion of node, please change your values";
+			header("HTTP/1.1: 409 Conflict");
+			echo "removeNode Error, please change your values";
 			exit;
 		}
 		break;
 	case "setKey":
 		if( is_null( arg('id') ) || is_null( arg('name') ) || is_null( arg('value') ) )
 		{
-			header("HTTP/1.1: 400 Bad Request"); //ERR_COMMAND
+			header("HTTP/1.1: 400 Bad Request");
 			echo "Bad command";
 			exit;
 		}
 		if( !model::setKey( arg("id"), arg("name"), arg("value") ) )
 		{
-			header("HTTP/1.1: 409 Conflict"); //$err = $ERR_NODE_UPDATE;
-			echo "Error during the updating of node, please change your values";
+			header("HTTP/1.1: 409 Conflict");
+			echo "setKey Error, please change your values";
 			exit;
 		}
 		break;
 	case "removeKey":
 		if( is_null( arg('id') ) || is_null( arg('name') ) )
 		{
-			header("HTTP/1.1: 400 Bad Request"); //ERR_COMMAND
+			header("HTTP/1.1: 400 Bad Request");
 			echo "Bad command";
 			exit;
 		}
 		if( !model::removeKey( arg("id"), arg("name") ) )
 		{
-			header("HTTP/1.1: 409 Conflict"); //$err = $ERR_NODE_UPDATE;
-			echo "Error during the updating of node, please change your values";
+			header("HTTP/1.1: 409 Conflict");
+			echo "removeKey Error, please change your values";
 			exit;
 		}
 		break;
 	case "move":
 		if( is_null( arg('id') ) || is_null( arg('target') ) )
 		{
-			header("HTTP/1.1: 400 Bad Request"); //ERR_COMMAND
+			header("HTTP/1.1: 400 Bad Request");
 			echo "Bad command";
 			exit;
 		}
 		if( !model::move( arg("id"), arg("target") ) )
 		{
 			header("HTTP/1.1: 409 Conflict"); //$err = $ERR_NODE_MOVE;
-			echo "Error during the moving of node, please change your values";
+			echo "move Error, please change your values";
 			exit;
 		}
 		break;
@@ -141,7 +144,7 @@ switch( arg("cmd") )
 		if( !model::tag( arg("id"), arg("name") ) )
 		{
 			header("HTTP/1.1: 409 Conflict"); //$err = $ERR_NODE_UPDATE;
-			echo "Error during the updating of node, please change your values";
+			echo "tag Error, please change your values";
 			exit;
 		}
 		break;
@@ -155,7 +158,7 @@ switch( arg("cmd") )
 		if( !model::untag( arg("id"), arg("name") ) )
 		{
 			header("HTTP/1.1: 409 Conflict"); //$err = $ERR_NODE_UPDATE;
-			echo "Error during the updating of node, please change your values";
+			echo "untag Error, please change your values";
 			exit;
 		}
 		break;
@@ -169,7 +172,7 @@ switch( arg("cmd") )
 		if( !model::link( arg("src"), arg("tgt") ) )
 		{
 			header("HTTP/1.1: 409 Conflict"); //$err = $ERR_NODE_UPDATE;
-			echo "Error during the updating of node, please change your values";
+			echo "link Error, please change your values";
 			exit;
 		}
 		break;
@@ -183,7 +186,7 @@ switch( arg("cmd") )
 		if( !model::unlink( arg("id") ) )
 		{
 			header("HTTP/1.1: 409 Conflict"); //$err = $ERR_NODE_UPDATE;
-			echo "Error during the updating of node, please change your values";
+			echo "Unlink Error, please change your values";
 			exit;
 		}
 		break;
@@ -197,7 +200,7 @@ switch( arg("cmd") )
 		if( ! model::setType( arg("id"), arg("type") ) )
 		{
 			header("HTTP/1.1: 409 Conflict"); //$err = $ERR_NODE_UPDATE;
-			echo "Error during the updating of node, please change your values";
+			echo "setType Error, please change your values";
 			exit;
 		}
 		break;
@@ -211,7 +214,7 @@ switch( arg("cmd") )
 		if( !model::setTags( arg("id"), arg("tags") ) )
 		{
 			header("HTTP/1.1: 409 Conflict"); //$err = $ERR_NODE_UPDATE;
-			echo "Error during the updating of node, please change your values";
+			echo "setTags Error, please change your values";
 			exit;
 		}
 		break;
@@ -225,7 +228,7 @@ switch( arg("cmd") )
 		if( !model::setKeys( arg("id"), arg("old"), arg("new") ) )
 		{
 			header("HTTP/1.1: 409 Conflict"); //$err = $ERR_NODE_UPDATE;
-			echo "Error during the updating of node, please change your values";
+			echo "setKeys Error, please change your values";
 			exit;
 		}
 		break;
@@ -240,96 +243,33 @@ switch( arg("cmd") )
 	case "ancestors":
 		if( is_null( arg('id') ) )
 		{
-			header("HTTP/1.1: 400 Bad Request"); //ERR_COMMAND
+			header("HTTP/1.1: 400 Bad Request");
 			echo "Bad command";
 			exit;
 		}
 		echo json_encode( model_json::multi( model::ancestors( arg('id') ) ) );
 		break;
-	case "searchKey":
-		if( is_null(arg('key')) || arg('value') == null )
-		{
-			header("HTTP/1.1: 400 Bad Request"); //ERR_COMMAND
-			echo "Bad command";
-			exit;
-		}
-		echo json_encode( model_json::multi( model::searchKey( arg('key'), arg('value') ) ) );
-		break;
-	case "single":
-		if( is_null( arg('id') ) )
-		{
-			header('HTTP/1.1: 400 Bad Request'); //$err = $ERR_COMMAND; break;
-			exit;
-		}
-		$ret = model_json::node( arg( "id" ), 1, $NODE_TAG | $NODE_PRM );
-		if( !$ret )
-		{
-			header('HTTP/1.1: 404 Not Found'); //$err = $ERR_NODE_ID;
-			exit;
-		}
-		echo json_encode( $ret );
-		break;
 	case "children":
 		if( is_null( arg('id') ) )
 		{
-			header('HTTP/1.1: 400 Bad Request'); //$err = $ERR_COMMAND; break;
+			header('HTTP/1.1: 400 Bad Request');
 			exit;
 		}
-		//$ret = model_json::children( arg("id") );
 		echo json_encode( model_json::multi( model::children( arg('id') ) ) );
 		break;
-	case "links":
+	case "branch":
 		if( is_null( arg('id') ) )
 		{
-			header('HTTP/1.1: 400 Bad Request'); //$err = $ERR_COMMAND; break;
-			exit;
-		}
-		echo json_encode( model_json::links( arg("id") ) );
-		break;
-	case "multi":
-		if( is_null( arg('id') ) )
-		{
-			header('HTTP/1.1: 400 Bad Request'); //$err = $ERR_COMMAND; break;
-			exit;
-		}
-		echo json_encode( model_json::multi( split( ",", arg("id") ) ) );
-		break;
-	case "graph":
-		if( is_null( arg('id') ) )
-		{
-			header('HTTP/1.1: 400 Bad Request'); //$err = $ERR_COMMAND; break;
-			exit;
-		}
-		$ret = model_json::graph( arg("id") );
-		if (!$ret)
-		{
-			header('HTTP/1.1: 404 Not Found'); //$err = $ERR_NODE_ID;
-			echo json_encode( $ret );
-			exit;
-		}
-		echo json_encode( $ret );
-		break;
-	case "export":
-		if( is_null( arg('id') ) )
-		{
-			header('HTTP/1.1: 400 Bad Request'); //$err = $ERR_COMMAND; break;
+			header('HTTP/1.1: 400 Bad Request');
 			exit;
 		}
 		$ret = model_json::node( arg('id'), 0, $NODE_TAG | $NODE_PRM);
 		if( !$ret )
 		{
-			header('HTTP/1.1: 404 Not Found'); //$err = $ERR_NODE_ID;
+			header('HTTP/1.1: 404 Not Found');
 			exit;
 		}
 		echo json_encode( $ret );
-		break;
-	case "search":
-		if( is_null( arg('value') ) )
-		{
-			header('HTTP/1.1: 400 Bad Request'); //$err = $ERR_COMMAND; break;
-			exit;
-		}
-		echo json_encode( model::search( arg('value') ) );
 		break;
 	case "find":
 		$a = $_GET + $_POST;
@@ -339,12 +279,27 @@ switch( arg("cmd") )
 	case "findSQL":
 		if( is_null( arg('query') ) )
 		{
-			header('HTTP/1.1: 400 Bad Request'); //$err = $ERR_COMMAND; break;
+			header('HTTP/1.1: 400 Bad Request');
 			exit;
 		}
 		# Forbidden SQL manipulation keywords
-		# ALTER CREATE DROP RENAME
-		# CALL DELETE DO HANDLER INSERT LOAD REPLACE TRUNCATE UPDATE
+		if( stripos( arg('query'), 'ALTER' ) ||
+			stripos( arg('query'), 'CALL' ) ||
+			stripos( arg('query'), 'CREATE' ) ||
+			stripos( arg('query'), 'DELETE' ) ||
+			//stripos( arg('query'), 'DO' ) || // interferes to much
+			stripos( arg('query'), 'DROP' ) ||
+			stripos( arg('query'), 'HANDLER' ) ||
+			stripos( arg('query'), 'INSERT' ) ||
+			stripos( arg('query'), 'LOAD' ) ||
+			stripos( arg('query'), 'RENAME' ) ||
+			stripos( arg('query'), 'REPLACE' ) ||
+			stripos( arg('query'), 'TRUNCATE' ) ||
+			stripos( arg('query'), 'UPDATE' ) )
+		{
+			header('HTTP/1.1: 400 Bad Request');
+			exit;
+		}
 		$querystr = stripslashes( arg('query') );
 		$querystr = str_replace( "&", "&amp;", $querystr );
 		$querystr = str_replace( "<", "&lt;", $querystr );
@@ -357,8 +312,83 @@ switch( arg("cmd") )
 		}
 		echo json_encode( $res );
 		break;
+	case "graph":
+		if( is_null( arg('id') ) )
+		{
+			header('HTTP/1.1: 400 Bad Request');
+			exit;
+		}
+		$ret = model_json::graph( arg("id") );
+		if (!$ret)
+		{
+			header('HTTP/1.1: 404 Not Found');
+			echo json_encode( $ret );
+			exit;
+		}
+		echo json_encode( $ret );
+		break;
+	case "links":
+		if( is_null( arg('id') ) )
+		{
+			header('HTTP/1.1: 400 Bad Request');
+			exit;
+		}
+		echo json_encode( model_json::links( arg("id") ) );
+		break;
+	case "list":
+		if( is_null( arg('key') ) )
+		{
+			$result = mysql_query( "SELECT DISTINCT name FROM `key` ORDER BY name;" );
+			$res = array();
+			while( $row = mysql_fetch_array( $result ) )
+			{
+				$res[] = $row['name'];
+			}
+			echo json_encode( $res );
+		}
+		else
+		{
+			$result = mysql_query( "SELECT DISTINCT value FROM `key` WHERE name='" . arg('key') . "' ORDER BY value;" );
+			$res = array();
+			while( $row = mysql_fetch_array( $result ) )
+			{
+				$res[] = $row['value'];
+			}
+			echo json_encode( $res );
+		}
+		break;
+	case "multi":
+		if( is_null( arg('id') ) )
+		{
+			header('HTTP/1.1: 400 Bad Request');
+			exit;
+		}
+		echo json_encode( model_json::multi( split( ",", arg("id") ) ) );
+		break;
+	case "search":
+		if( is_null( arg('value') ) )
+		{
+			header('HTTP/1.1: 400 Bad Request');
+			exit;
+		}
+		echo json_encode( model::search( arg('value') ) );
+		break;
+	case "single":
+		if( is_null( arg('id') ) )
+		{
+			header('HTTP/1.1: 400 Bad Request');
+			exit;
+		}
+		$ret = model_json::node( arg( "id" ), 1, $NODE_TAG | $NODE_PRM );
+		if( !$ret )
+		{
+			header('HTTP/1.1: 404 Not Found');
+			exit;
+		}
+		echo json_encode( $ret );
+		break;
 	default:
-		header('HTTP/1.1: 400 Bad Request'); //$err = $ERR_COMMAND;
+		header('HTTP/1.1: 400 Bad Request');
 		exit;
 } // switch / case
 

@@ -9,7 +9,7 @@
  ******************************************************************************/
 session_start();
 
-include_once "service.php"; //error_code()
+include_once "service_deprecated.php"; //error_code()
 include_once "FileSystem/lib.file.php";
 
 damas_service::init_http();

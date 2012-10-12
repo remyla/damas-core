@@ -348,6 +348,18 @@ damas.project.links = function ( id )
 }
 
 /**
+ * List all distinct values for a key
+ */
+damas.project.list = function ( key )
+{
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: key? { 'cmd': 'list', 'key': key } : { 'cmd': 'list' }
+	});
+	return damas.readJSONElements( JSON.parse( req.transport.responseText ) );
+}
+
+/**
  * Retrieve DAMAS elements specifying their internal node indexes
  * @param {Array} indexes array of node ids to retrieve
  * @returns {Array} array of XML fragments
