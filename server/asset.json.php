@@ -94,18 +94,29 @@ switch( arg("cmd") )
 		exit;
 		//$err = $ERR_NODE_UPDATE;
 	case "upload_set_image":
+		//
+		// this is the content type required by ajaxupload.js
+		//
+		header('Content-type: application/javascript');
 		if( is_uploaded_file( $_FILES['file']['tmp_name'] ) )
 		{
 			$extension = pathinfo( $_FILES['file']['name'], PATHINFO_EXTENSION );
 			if( move_uploaded_file( $_FILES['file']['tmp_name'], $assetsLCL . '/upload/' . arg("id") . '.' . $extension ) )
 			{
-				model::setKey( arg("id"), 'image', '/upload/' . arg("id") . '.' . $extension );
+				$ret = model::setKey( arg("id"), 'image', '/upload/' . arg("id") . '.' . $extension );
+				//
+				// The result must be true for ajaxupload.js
+				//
+				$ret = true;
 				break;
 			}
 		}
-		header("HTTP/1.1: 304 Not Modified Asset Not updated");
+		//
+		// HTTP errors don't work with ajaxupload - we send error 200 then a response != true
+		//header("HTTP/1.1: 304 Not Modified Asset Not updated");
+		//
+		echo json_encode( 'The file upload failed, the image was not updated' );
 		exit;
-		//$err = $ERR_ASSET_UPDATE;
 	case "upload_create_asset":
 		if( is_uploaded_file( $_FILES['file']['tmp_name'] ) )
 		{
@@ -118,35 +129,55 @@ switch( arg("cmd") )
 				model::setKey( $id, 'user', getUser() );
 				model::setKey( $id, 'time', time() );
 				$ret = model_json::node( $id, 1, $NODE_TAG | $NODE_PRM );
+				//
+				// The result must be true for ajaxupload.js
+				//
+				$ret = true;
 				break;
 			}
 		}
-		header("HTTP/1.1: 304 Not Modified Error on create");
+		//
+		// HTTP errors don't work with ajaxupload - we send error 200 then a response != true
+		//header("HTTP/1.1: 304 Not Modified Error on create");
+		//
+		echo json_encode( 'The file upload failed, the asset was not created' );
 		exit;
-		//$err = $ERR_NODE_CREATE;
 	case "upload":
 		if( model::hastag( arg( 'id' ), 'lock' ) )
 		{
 			if( model::getKey( arg( 'id' ), 'lock_user' ) != getUser() )
 			{
-				header("HTTP/1.1: 304 Not Modified Asset Not updated");
+				//
+				// HTTP errors don't work with ajaxupload - we send error 200 then a response != true
+				//header("HTTP/1.1: 304 Not Modified Asset Not updated");
+				//
+				echo json_encode( 'The asset is locked, and was not updated' );
 				exit;
-				//$err = $ERR_ASSET_UPDATE;
 			}
 		}
 		$path = $_FILES['file']['tmp_name'];
 		if( !is_uploaded_file( $path ) )
 		{
-			header("HTTP/1.1: 304 Not Modified Asset Not updated");
+			//
+			// HTTP errors don't work with ajaxupload - we send error 200 then a response != true
+			//header("HTTP/1.1: 304 Not Modified Asset Not updated");
+			//
+			echo json_encode( 'The file upload failed, the asset was not updated' );
 			exit;
-			//$err = $ERR_ASSET_UPDATE;
 		}
 		if( !assets::asset_upload( arg("id"), $path, arg("message") ) )
 		{
-			header("HTTP/1.1: 304 Not Modified Asset Not updated");
+			//
+			// HTTP errors don't work with ajaxupload - we send error 200 then a response != true
+			//header("HTTP/1.1: 304 Not Modified Asset Not updated");
+			//
+			echo json_encode( 'The file upload failed, the asset was not updated' );
 			exit;
-			//$err = $ERR_ASSET_UPDATE;
 		}
+		//
+		// The result must be true for ajaxupload.js
+		//
+		$ret = true;
 		break;
 	case "version_backup":
 		$id = assets::version_backup( arg("id") );
