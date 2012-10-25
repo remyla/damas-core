@@ -38,22 +38,10 @@ header('Content-type: application/json');
 
 switch( arg("cmd") )
 {
-	case "getElementById":
-		$id = model::searchKey('id', arg('id'));
-		$id = $id[0];
-		$ret = model_json::node($id, 1, $NODE_TAG | $NODE_PRM);
-		if( !$ret ) {
-			header('HTTP/1.1: 404 Not Found');
-			echo "Node not found";
-			exit;
-			//$err = $ERR_NODE_ID;
-		}
-		break;
 	case "time":
 		if( ! model::setKey( arg("id"), "time", time() ) ) {
-			header("HTTP/1.1: 304 Not Modified Error on update");
+			header("HTTP/1.1: 304 Not Modified Could not update time");
 			exit;
-			//$err = $ERR_NODE_UPDATE;
 		}
 		$ret = true;
 		break;
@@ -69,17 +57,15 @@ switch( arg("cmd") )
 		break;
 	case "lock":
 		if( model::hastag( arg("id"), "lock" ) ) {
-			header("HTTP/1.1: 304 Not Modified Error on update");
+			header("HTTP/1.1: 304 Not Modified Asset is already locked");
 			exit;
-			//$err = $ERR_NODE_UPDATE;
 		}
 		$ret = model::tag( arg("id"), 'lock' );
 		$ret &= model::setKey( arg("id"), "lock_user", getUser() );
 		$ret &= model::setKey( arg("id"), 'lock_text', arg("comment") );
 		if (!$ret) {
-			header("HTTP/1.1: 304 Not Modified Asset Not Lock");
+			header("HTTP/1.1: 304 Not Modified Asset lock failure");
 			exit;
-			//$err = $ERR_ASSET_LOCK;
 		}
 		break;
 	case "unlock":
@@ -90,9 +76,8 @@ switch( arg("cmd") )
 			model::removeKey( arg("id"), 'lock_text' );
 			break;
 		}
-		header("HTTP/1.1: 304 Not Modified Error on update");
+		header("HTTP/1.1: 304 Not Modified Locked by another user");
 		exit;
-		//$err = $ERR_NODE_UPDATE;
 	case "upload_set_image":
 		//
 		// this is the content type required by ajaxupload.js
@@ -184,7 +169,6 @@ switch( arg("cmd") )
 		if( !$id ) {
 			header('HTTP/1.1: 304 Not Modified Error on create');
 			exit;
-			//$err = $ERR_NODE_CREATE;
 		}
 		$ret = model_json::node( $id, 1, $NODE_TAG | $NODE_PRM );
 		break;
@@ -193,7 +177,6 @@ switch( arg("cmd") )
 		if (!$ret) {
 			header("HTTP/1.1: 304 Not Modified Asset Not updated");
 			exit;
-			//$err = $ERR_ASSET_UPDATE;
 		}
 		break;
 	case "version_increment2":
@@ -201,15 +184,13 @@ switch( arg("cmd") )
 		if (!$ret) {
 			header("HTTP/1.1: 304 Not Modified Asset Not updated");
 			exit;
-			//$err = $ERR_ASSET_UPDATE;
 		}
 		break;
 	case "recycle":
 		$ret = DAM::recycle( arg('id') );
 		if (!$ret) {
-			header("HTTP/1.1: 304 Not Modified Error on move");
+			header("HTTP/1.1: 304 Not Modified Could not move element to trash");
 			exit;
-			//$err = $ERR_NODE_MOVE;
 		}
 		break;
 	case "empty_trashcan":
@@ -217,7 +198,6 @@ switch( arg("cmd") )
 		if (!$ret) {
 			header('HTTP/1.1: 404 Not Found');
 			exit;
-			//$err = $ERR_NODE_ID;
 		}
 		break;
 	default:

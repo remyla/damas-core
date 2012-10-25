@@ -28,7 +28,7 @@
       print "authentication failed"
 
   Usage: retrieve an element
-    elem = proj.searchKey( 'id', 'element_id')
+    elem = proj.find({'id': 'element_id'})
     print elem
 
   Author:
@@ -40,7 +40,13 @@
     Michael Haussmann
 
   ChangeLog:
-	120503 user authentication now use json
+	120924 renamed dam.getChildren in dam.children
+       added dam.find
+       dam.getElementsBySQL replaced by dam.findSQL
+       removed dam.getElementById method
+       soap is replaced by json
+       xml.dom module import removed
+    120503 user authentication now use json
     120131 added element.write method
     120119 added link and unlink methods
     120110 added getNodesBySQL()
@@ -53,10 +59,9 @@
   Todo:
 """
 
-import urllib # quote()
+import urllib # quote(), urlencode()
 import urllib2
 import cookielib
-import xml.dom.minidom
 import json
 
 class project :
@@ -71,34 +76,87 @@ class project :
 
 	def signIn ( self, username, password ) :
 		'''
-		return True on success, False otherwise
+		@return {Boolean} True on success, False otherwise
 		'''
 		opener = urllib2.build_opener( urllib2.HTTPCookieProcessor(self.cj) )
 		urllib2.install_opener( opener )
 		try: a = urllib2.urlopen( self.serverURL + '/authentication.php?cmd=login&user=' + username + '&password=' + password )
 		except: return False
 		return json.loads( a.read() )
-		#soap = xml.dom.minidom.parseString( a.read() )
-		#return soap.getElementsByTagName("error")[0].getAttribute("code") == "0"
 
-	def getElementById ( self, id ) :
-		return self.searchKey( 'id', id )[0]
+	def signOut ( self ) :
+		'''
+		@return {Boolean} True on success, False otherwise
+		'''
+		return self.command( { 'cmd': 'logout' }, '/authentication.php' )['status'] == 401
+
+	def getUser ( self ) :
+		'''
+		@return {dict} a dictionary containing username and userclass on success, None otherwise
+		'''
+		return self.command( { 'cmd': 'getUser' }, '/authentication.php' )['json']
+
 
 	# MODEL METHODS
 
-	def createNode ( self, id, tagName ) :
-		data = "cmd=createNode&id=" + str(id) + "&type=" + tagName
-		a = urllib2.urlopen( self.serverURL + "/model.soap.php?" + data )
-		soap = xml.dom.minidom.parseString( a.read() )
-		return element( soap, self )
+	def ancestors ( self, id ) :
+		'''
+		Retrieve the ancestors (parent and above) of a node
+		@param {Integer} id node index
+		@return {list} list of ancestors ids
+		'''
+		return self.readJSONElements( self.command( { 'cmd': 'ancestors', 'id': id } )['json'] )
+
+	def children ( self, id ) :
+		'''
+		Retrieve the children of a node
+		@param {Integer} id node index
+		@return {list} list of children elements
+		'''
+		return self.readJSONElements( self.command( { 'cmd': 'children', 'id': id } )['json'] )
 
 	def cloneNode ( self, id ) :
-		data = "cmd=duplicate&id=" + str(id)
-		a = urllib2.urlopen( self.serverURL + "/model.soap.php?" + data )
-		soap = xml.dom.minidom.parseString( a.read() )
-		return element( soap, self )
+		'''
+		Make an exact copy of an element
+		@param {Integer} id Element Index
+		@returns {Element} element created on success, False otherwise
+		'''
+		res = self.command( { 'cmd': 'duplicate', 'id': id } )
+		if res['status'] == 200:
+			return element( res['json'], self )
+		return False
+
+	def command ( self, args, server = "/model.json.php" ) :
+		'''
+		Send a command to the web service
+		@param {dict} args the arguments of he command to send
+		@param {string} server the URL of the web service
+		@returns {dict} a dictionary containing the returned code, text, and json
+		'''
+		req = urllib2.Request( self.serverURL + server, urllib.urlencode(args) )
+		try:
+			a = urllib2.urlopen(req)
+		except urllib2.HTTPError, error:
+			return { 'status': error.code, 'text': error.read(), 'json': None }
+		except urllib2.URLError, error:
+			print 'Could not connect to server'
+			print error.reason
+			return { 'status': False, 'text': None, 'json': None }
+		responseText = a.read()
+		try:
+			return { 'status': a.code, 'text': responseText, 'json': json.loads(responseText) }
+		except:
+			return { 'status': a.code, 'text': responseText, 'json': None }
 
 	def createFromTemplate ( self, id, target, keys, tags ) :
+		'''
+		Creates a node using an existing node as template.
+		@param {Integer} id Template node index
+		@param {Integer} target Parent node index
+		@param {Hash} keys Hash of key/value pairs
+		@param {String} tags Comma separated tags string
+		@returns {Element} the new element
+		'''
 		elem = self.cloneNode( id )
 		elem.move( target )
 		for k, v in keys.items() :
@@ -107,58 +165,54 @@ class project :
 		elem.setTags( tags )
 		return elem
 
-	def setKeys ( self, id, old_pattern, new_pattern ) :
-		data = "cmd=setKeys&id=" + str(id) + "&old=" + urllib.quote( old_pattern ) + "&new=" + urllib.quote( new_pattern )
-		a = urllib2.urlopen( self.serverURL + "/model.soap.php?" + data )
-		soap = xml.dom.minidom.parseString( a.read() )
-		try: return soap.getElementsByTagName("returnvalue")[0].firstChild.nodeValue == "1"
-		except: return False
+	def createNode ( self, id, nodeType ) :
+		'''
+		Creates a node of the specified type
+		@param {Integer} id Parent node index
+		@param {String} nodeType type of the new node
+		@returns {DamNode} New node on success, false otherwise
+		'''
+		res = self.command( { 'cmd': 'createNode', 'id': id, 'type': nodeType } )
+		if res['status'] == 200:
+			return element( res['json'], self )
+		return False
 
-	def setTags ( self, id, tags ) :
-		data = "cmd=setTags&id=" + str(id) + "&tags=" + urllib.quote( tags )
-		a = urllib2.urlopen( self.serverURL + "/model.soap.php?" + data )
-		soap = xml.dom.minidom.parseString( a.read() )
-		try: return soap.getElementsByTagName("returnvalue")[0].firstChild.nodeValue == "1"
-		except: return False
+	def find ( self, keys ) :
+		'''
+		Find elements wearing the specified key(s)
+		@param {dict} keys dictionary of key/value pairs to match
+		@returns {list} list of elements indexes found
+		'''
+		keys['cmd'] = 'find'
+		return json.loads( self.command( keys )['text'] )
 
 	def getNode ( self, id ) :
-		data = "cmd=single&id=" + str( id )
-		a = urllib2.urlopen( self.serverURL + "/model.soap.php?" + data )
-		soap = xml.dom.minidom.parseString( a.read() )
-		return element( soap, self )
-
-	def getChildren ( self, id ) :
-		data = "cmd=children&id=" + str( id )
-		a = urllib2.urlopen( self.serverURL + "/model.soap.php?" + data )
-		soap = xml.dom.minidom.parseString( a.read() )
-		children = []
-		for node in soap.getElementsByTagName("node") :
-			children.append( element( node, self ) )
-		return children
+		'''
+		Retrieve a Damas element specifying its internal node index
+		@param {Integer} id the internal node index to search
+		@returns {Damas Element} DAMAS element or false on failure
+		'''
+		res = self.command( { 'cmd': 'single', 'id': id } )
+		if res['status'] == 200:
+			return element( res['json'], self )
+		return False
 
 	def getNodes ( self, ids ) :
-		data = "cmd=multi&depth=1&flags=4&id=" + ",".join( map( str, ids ) )
-		a = urllib2.urlopen( self.serverURL + "/model.soap.php?" + data )
-		soap = xml.dom.minidom.parseString( a.read() )
-		elements = []
-		for node in soap.getElementsByTagName("node") :
-			elements.append( element( node, self ) )
-		return elements
+		'''
+		Retrieve DAMAS elements specifying their internal node indexes
+		@param {Array} indexes array of node ids to retrieve
+		@returns {Array} array of Damas elements
+		'''
+		return self.readJSONElements( self.command( { 'cmd': 'multi', 'id': ','.join(id) } )['json'] )
 
-	def getNodesBySQL ( self, query ):
+	def findSQL ( self, query ):
 		'''
 		Search for elements, specifying an SQL SELECT query.
 		The SQL SELECT query must be formated to return results with an 'id' field, which contains elements indexes.
 		@param {String} query SQL query to perform
 		@returns {Array} array of element indexes
 		'''
-		data = "query=" + urllib.quote( query.encode('utf8') )
-		a = urllib2.urlopen( self.serverURL + "/mysql.soap.php?" + data )
-		soap = xml.dom.minidom.parseString( a.read() )
-		ids = []
-		for id in soap.getElementsByTagName('id') :
-			ids.append( id )
-		return ids
+		return self.command( { 'cmd': 'findSQL', 'query': query } )['json']
 
 	def link ( self, src_id, tgt_id ) :
 		'''
@@ -167,41 +221,73 @@ class project :
 		@param {Integer} tgt_id the target node internal id of the link
 		@returns the link id integer on success, False otherwise
 		'''
-		data = "cmd=link&src=" + str( src_id ) + "&tgt=" + str( tgt_id )
-		a = urllib2.urlopen( self.serverURL + "/model.soap.php?" + data )
-		soap = xml.dom.minidom.parseString( a.read() )
-		try: return int( soap.getElementsByTagName("returnvalue")[0].firstChild.nodeValue )
-		except: return False
+		return int( self.command( { 'cmd': 'link', 'src': src_id, 'tgt': tgt_id } )['text'] ) | False
+
+	def links ( self, id ) :
+		'''
+		Retrieve the elements linked to the specified element
+		@param {Array} indexes array of node ids to retrieve
+		@returns {Array} array of Damas elements
+		'''
+		return self.readJSONElements( self.command( { 'cmd': 'links', 'id': id } )['json'] )
 
 	def move ( self, id, target ) :
-		data = "cmd=move&id=" + str( id ) + "&target=" + str( target )
-		a = urllib2.urlopen( self.serverURL + "/model.soap.php?" + data )
-		soap = xml.dom.minidom.parseString( a.read() )
-		try: return soap.getElementsByTagName("returnvalue")[0].firstChild.nodeValue == "1"
-		except: return False
+		'''
+		Move elements
+		@param {Integer} id Element index
+		@param {Integer} target Index of the new parent element
+		@returns {Boolean} true on success, false otherwise
+		'''
+		return self.command( { 'cmd': 'move', 'id': id, 'target': target } )['status'] == 200
+
+	def readJSONElements ( self, json ) :
+		'''
+		Deserialize JSON objects to Damas elements
+		@param {Object} obj json object to read
+		@return list of deserialized elements
+		'''
+		elements = []
+		for e in json:
+			elements.append( element( e, self ) )
+		return elements
 
 	def removeNode ( self, id ) :
-		data = "cmd=removeNode&id=" + str(id)
-		a = urllib2.urlopen( self.serverURL + "/model.soap.php?" + data )
-		soap = xml.dom.minidom.parseString( a.read() )
-		try: return soap.getElementsByTagName("returnvalue")[0].firstChild.nodeValue == "1"
-		except: return False
+		'''
+		Recursively delete the specified node
+		@param {Integer} id Element index to delete
+		@returns {Boolean} True on success, False otherwise
+		'''
+		return self.command( { 'cmd': 'removeNode', 'id': id } )['status'] == 200
 
 	def setKey ( self, id, name, value ) :
-		data = "cmd=setKey&id=" + str(id) + "&name=" + name + "&value=" + urllib.quote( value.encode('utf8') )
-		a = urllib2.urlopen( self.serverURL + "/model.soap.php?" + data )
-		soap = xml.dom.minidom.parseString( a.read() )
-		try: return soap.getElementsByTagName("returnvalue")[0].firstChild.nodeValue == "1"
-		except: return False
+		'''
+		Adds a new attribute. If an attribute with that name is already present in
+		the element, its value is changed to be that of the value parameter
+		@param {Integer} id Element index
+		@param {String} name Name of the attribute
+		@param {String} value Value of the attribute
+		@returns {Boolean} True on success, False otherwise
 
-	def searchKey ( self, keyname, keyvalue ) :
-		data = "cmd=searchKey&key=" + keyname + "&value=" + urllib.quote( keyvalue )
-		a = urllib2.urlopen( self.serverURL + "/model.soap.php?" + data )
-		soap = xml.dom.minidom.parseString( a.read() )
-		elements = []
-		for node in soap.getElementsByTagName("node") :
-			elements.append( element( node, self ) )
-		return elements
+		'''
+		return self.command( { 'cmd': 'setKey', 'id': id, 'name': name, 'value': value } )['status'] == 200
+
+	def setKeys ( self, id, old_pattern, new_pattern ) :
+		'''
+		Recursively modify a node, searching and replacing a specified pattern in its sub key values
+		@param {Integer} id Node index to modify
+		@param {String} old_pattern Name of the attribute
+		@param {String} value Value of the attribute
+		@returns {Boolean} True on success, False otherwise
+		'''
+		return self.command( { 'cmd': 'setKeys', 'id': id, 'old': old_pattern, 'new': new_pattern } )['status'] == 200
+
+	def setTags ( self, id, tags ) :
+		'''
+		Set multiple tags at a time on the specified element
+		@param {String} tags The coma separated tags to set
+		@returns {Boolean} True on success, False otherwise
+		'''
+		return self.command( { 'cmd': 'setTags', 'id': id, 'tags': tags } )['status'] == 200
 
 	def unlink ( self, link_id ) :
 		'''
@@ -209,64 +295,25 @@ class project :
 		@param {Integer} the link id to remove
 		@returns True on success, False otherwise
 		'''
-		data = "cmd=unlink&id=" + str( link_id )
-		a = urllib2.urlopen( self.serverURL + "/model.soap.php?" + data )
-		soap = xml.dom.minidom.parseString( a.read() )
-		try: return soap.getElementsByTagName("returnvalue")[0].firstChild.nodeValue == "1"
-		except: return False
-
-	# FILE METHODS
-
-	def lock ( self, id, comment ) :
-		data = "cmd=lock&id=" + str(id) + "&comment=" + urllib.quote( comment )
-		a = urllib2.urlopen( self.serverURL + "/asset.soap.php?" + data )
-		soap = xml.dom.minidom.parseString( a.read() )
-		try: return soap.getElementsByTagName("returnvalue")[0].firstChild.nodeValue == "1"
-		except: return False
-
-	def unlock ( self, id ) :
-		data = "cmd=unlock&id=" + str(id)
-		a = urllib2.urlopen( self.serverURL + "/asset.soap.php?" + data )
-		soap = xml.dom.minidom.parseString( a.read() )
-		try: return soap.getElementsByTagName("returnvalue")[0].firstChild.nodeValue == "1"
-		except: return False
-
-	def backup ( self, id ) :
-		"""Copy the asset to backupdir and make a new version element"""
-		data = "cmd=version_backup&id=" + str( id )
-		a = urllib2.urlopen( self.serverURL + "/asset.soap.php?" + data )
-		soap = xml.dom.minidom.parseString( a.read() )
-		return element( soap, self )
-
-	def increment ( self, id, message ) :
-		"""Increment the asset after a successful commit"""
-		data = "cmd=version_increment&id=" + str(id) + "&message=" + urllib.quote( message )
-		a = urllib2.urlopen( self.serverURL + "/asset.soap.php?" + data )
-		soap = xml.dom.minidom.parseString( a.read() )
-		try: return soap.getElementsByTagName("returnvalue")[0].firstChild.nodeValue == "1"
-		except: return False
-
-	# DAM METHODS
-	def recycle ( self, id ) :
-		data = "cmd=recycle&id=" + str(id)
-		a = urllib2.urlopen( self.serverURL + "/asset.soap.php?" + data )
-		soap = xml.dom.minidom.parseString( a.read() )
-		try: return soap.getElementsByTagName("returnvalue")[0].firstChild.nodeValue == "1"
-		except: return False
+		return self.command( { 'cmd': 'unlink', 'id': id } )['status'] == 200
 
 
 class element ( object ) :
 	"""This class defines elements in a DAMAS project"""
 
-	def __init__ ( self, XMLElement, project ) :
+	def __init__ ( self, json, project ) :
 		self.children = []
-		self.id = None
 		self.keys = {}
-		self.parent_id = None
-		self.project = project
 		self.tags = []
-		self.type = None
-		self.readXML( XMLElement )
+		self.project = project
+		if json:
+			self.id = json['id']
+			if 'keys' in json:
+				self.keys = json['keys']
+			self.parent_id = json['parent_id']
+			if 'tags' in json:
+				self.tags = json['tags']
+			self.type = json['type']
 
 	def __repr__ ( self ) :
 		txt  = "id= " + str( self.id )
@@ -277,30 +324,11 @@ class element ( object ) :
 		txt += "\nchildren= " + str( self.children )
 		return txt
 
-	def readXML ( self, XMLElement ) :
-		if not hasattr( XMLElement, 'tagName' ) :
-			XMLElement = XMLElement.getElementsByTagName("node")[0]
-		if XMLElement.tagName != "node" :
-			XMLElement = XMLElement.getElementsByTagName("node")[0]
-		self.id = int( XMLElement.getAttribute( "id" ) )
-		self.type = XMLElement.getAttribute( "type" )
-		self.parent_id = int( XMLElement.getAttribute( "parent_id" ) ) if XMLElement.getAttribute( "parent_id" ) else None
-		keys = XMLElement.getElementsByTagName("key")
-		for k in keys:
-			if k.firstChild:
-				self.keys[ k.getAttribute('name') ] = k.firstChild.nodeValue
-			else:
-				self.keys[ k.getAttribute('name') ] = ""
-		tags = XMLElement.getElementsByTagName("tag")
-		for t in tags:
-			self.tags.append( t.firstChild.nodeValue )
-
-
 	def createNode ( self, type ) :
 		return self.project.createNode( self.id, type )
 
 	def getChildren ( self ) :
-		self.children = self.project.getChildren( self.id )
+		self.children = self.project.children( self.id )
 		return self.children
 
 	def move ( self, target ) :
@@ -310,32 +338,41 @@ class element ( object ) :
 		return False
 
 	def setKey ( self, name, value ) :
-		# stephane update
 		if self.project.setKey( self.id, name, value ):
 			self.keys[name] = value
 			return True
 		return False
-		#return self.project.setKey( self.id, name, value )
 
 	def setTags ( self, tags ) :
 		return self.project.setTags( self.id, tags )
 
+
+	# FILE METHODS
+
 	def lock ( self, text ) :
-		return self.project.lock( self.id, text )
+		return self.project.command(
+				{ 'cmd': 'lock', 'id': self.id, 'comment': text },
+				'/asset.json.php' )['status'] == 200
 
 	def unlock ( self ) :
-		return self.project.unlock( self.id )
+		return self.project.command(
+				{ 'cmd': 'unlock', 'id': self.id },
+				'/asset.json.php' )['status'] == 200
 
 	def backup ( self ) :
 		"""Copy the asset to backupdir and make a new asset version. To run before overwriting the file"""
-		return self.project.backup( self.id )
+		return element( self.project.command( { 'cmd': 'backup', 'id': self.id }, '/asset.json.php' )['json'], self )
 
 	def increment ( self, message ) :
 		"""Increment the asset. To run after a successful file overwrite"""
-		return self.project.increment( self.id, message )
+		return self.project.command(
+				{ 'cmd': 'version_increment', 'id': self.id, 'message': message },
+				'/asset.json.php' )['status'] == 200
+
+	# DAM METHODS
 
 	def recycle ( self ) :
-		return self.project.recycle( self.id )
+		return self.project.command( { 'cmd': 'recycle', 'id': id }, '/asset.json.php' )['status'] == 200
 
 	def write ( self, text ) :
 		'''
@@ -343,8 +380,6 @@ class element ( object ) :
 		@param {String} text text for the new message
 		@returns {Boolean} true on success, false otherwise
 		'''
-		data = "cmd=write&id=" + str( self.id ) + "&text=" +  urllib.quote( text.encode('utf8') )
-		a = urllib2.urlopen( self.project.serverURL + "/asset.soap.php?" + data )
-		soap = xml.dom.minidom.parseString( a.read() )
-		try: return soap.getElementsByTagName("returnvalue")[0].firstChild.nodeValue == "1"
-		except: return False
+		return self.project.command(
+			{ 'cmd': 'write', 'id': id, 'text': text },
+			'/asset.json.php' )['status'] == 200
