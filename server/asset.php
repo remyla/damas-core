@@ -7,6 +7,7 @@
  * Copyright (c) 2007-2012 Remy Lalanne
  */
 
+/*
 function asset_ismylock( $id )
 {
 	if( !model::hastag( $id, "lock" ) )
@@ -23,14 +24,14 @@ function asset_save( $id, $path, $comment )
 		return false;
 	if (!asset_backup($id))
 		return false;
-	/*
+	// /*
 	$path = $assetsLCL.$path;
 	$opath = $assetsLCL.model::getKey($id,'path');
 	if (!copy($path,$opath)){
 		asset_backup_undo($id);
 		return false;
 	}
-	*/
+	// * /
 	if (!fileSave($id,$path)){
 		asset_backup_undo($id);
 		return false;
@@ -49,13 +50,13 @@ function asset_upload( $id, $path, $comment )
 		return false;
 	if (!asset_backup($id))
 		return false;
-	/*
+	// /*
 	$opath = $assetsLCL.model::getKey($id,'path');
 	if (!move_uploaded_file($path, $opath)){
 		asset_backup_undo($id);
 		return false;
 	}
-	*/
+	// * /
 	if (!fileUpload($id,$path)){
 		asset_backup_undo($id);
 		return false;
@@ -66,12 +67,14 @@ function asset_upload( $id, $path, $comment )
 	}
 	return true;
 }
+*/
 
 /**
  * Rollback an asset to the specified version
  * @param {Integer} id version node index
  * @param {String} comment for the new version
  */
+/*
 function asset_rollback( $id, $comment )
 {
 	$parent_id = mysql_fetch_parent($id);
@@ -80,11 +83,13 @@ function asset_rollback( $id, $comment )
 	$path = model::getKey($id,"path");
 	return asset_save($parent_id, $path, $comment);
 }
+*/
 
 /**
  * Test if the user can save a new version of asset
  * @param {Integer} id version node index
  */
+/*
 function asset_saveable( $id )
 {
 	global $assetsLCL;
@@ -96,10 +101,12 @@ function asset_saveable( $id )
 		return false;
 	return true;
 }
+*/
 
 /**
  * Perform write checks in backup folder
  */
+/*
 function asset_backup_able( $id )
 {
 	global $assetsLCL;
@@ -109,6 +116,7 @@ function asset_backup_able( $id )
 		return false;
 	return true;
 }
+*/
 
 class assets
 {
@@ -177,30 +185,7 @@ class assets
 	}
 
 	/**
-	 * function called prior to save file
-	 *
-	 * warning, doesn't check file permissions
-	 */
-	static function version_increment2 ( $id, $message )
-	{
-		$file =  model::getKey( $id, 'file' );
-		if( !$file ) return false;
-		$new_id = model::createNode( $id, "asset" );
-		if( !$new_id ) return false;
-		$version =  model::getKey( $id, "version" ) ? str_pad( model::getKey( $id, "version" ) + 1, 3, '0', STR_PAD_LEFT ) : "001";
-		model::setKey( $new_id, "file", dirname( dirname( $file ) ) . '/' . $version . '/' . basename( $file ) );
-		model::setKey( $new_id, "text", $message );
-		model::setKey( $new_id, "time", time() );
-		model::setKey( $new_id, "user", getUser() );
-		model::setKey( $new_id, "version", $version );
-		model::setKey( $id, "file", model::getKey( $new_id, "file" ) );
-		model::setKey( $id, "time", model::getKey( $new_id, "time" ) );
-		model::setKey( $id, "version", model::getKey( $new_id, "version" ) );
-		return $new_id;
-	}
-
-	/**
-	 * Increment the asset after a successful commit
+	 * Increment the asset after a successful backup and commit sequence
 	 * @param {Integer} asset node index
 	 * @param {String} user message for the new version
 	 */
@@ -218,6 +203,29 @@ class assets
 		#if( !model::setKey( $id, "sha1", sha1_file( $assetsLCL . model::getKey( $id, 'file' ) ) ) )
 		#	return false;
 		return true;
+	}
+
+	/**
+	 * Increment the asset after a successful commit. The path is incremented too. Not backup needed 
+	 * @param {Integer} asset node index
+	 * @param {String} user message for the new version
+	 */
+	static function version_increment2 ( $id, $message )
+	{
+		$file =  model::getKey( $id, 'file' );
+		if( !$file ) return false;
+		$new_id = model::createNode( $id, "asset" );
+		if( !$new_id ) return false;
+		$version =  model::getKey( $id, "version" ) ? str_pad( model::getKey( $id, "version" ) + 1, 3, '0', STR_PAD_LEFT ) : "001";
+		model::setKey( $new_id, "file", dirname( dirname( $file ) ) . '/' . $version . '/' . basename( $file ) );
+		model::setKey( $new_id, "text", $message );
+		model::setKey( $new_id, "time", time() );
+		model::setKey( $new_id, "user", getUser() );
+		model::setKey( $new_id, "version", $version );
+		model::setKey( $id, "file", model::getKey( $new_id, "file" ) );
+		model::setKey( $id, "time", model::getKey( $new_id, "time" ) );
+		model::setKey( $id, "version", model::getKey( $new_id, "version" ) );
+		return $new_id;
 	}
 
 
@@ -328,55 +336,6 @@ function asset_version_node( $id )
 	model::setKey($new_id, "time", model::getKey($id,'time') );
 	model::setKey($new_id, "sha1", model::getKey($id,'sha1') );
 	return $new_id;
-}
-
-/*
-function asset_getbackupfolder( $id )
-{
-	$path = model::getKey($id,'path_backups');
-	if ($path){
-		if (substr($path,-1)=='/') $path= substr($path,0,-1);
-		return $path;
-	}
-	return dirname(model::getKey($id,'path'));
-	//return "/versions";
-}
-
-function asset_getbackupname( $id )
-{
-	$opath = model::getKey($id,'path');
-	$pinfo = pathinfo($opath);
-	$filename = substr( basename($opath),0, strpos(basename($opath), '.'));
-	$version = model::getKey($id,'version') ? model::getKey($id,'version') : "0";
-	return $filename."-".$version.".".$pinfo['extension'];
-}
-
-function asset_getbackuppath( $id )
-{
-	return asset_getbackupfolder($id)."/".asset_getbackupname($id);
-}
-
-function asset_fileexists( $id )
-{
-	global $assetsLCL;
-	return file_exists($assetsLCL.model::getKey($id,'path'));
-}
-
-function asset_fileisreadable( $id )
-{
-	global $assetsLCL;
-	return is_readable($assetsLCL.model::getKey($id,'path'));
-}
-*/
-
-function asset_check_sha1( $id )
-{
-	global $assetsLCL;
-	$sha1_db = model::getKey($id,'sha1');
-	$sha1_fs = sha1_file($assetsLCL.model::getKey($id,'path'));
-	if ($sha1_fs == $sha1_db)
-		return true;
-	return false;
 }
 
 ?>

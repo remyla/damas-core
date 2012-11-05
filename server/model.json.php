@@ -5,6 +5,7 @@
  * output = JSON
  * errors = HTTP
  *
+ * Author Remy Lalanne
  * Copyright 2005-2012 Remy Lalanne
  *
  * This file is part of damas-core.

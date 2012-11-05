@@ -659,7 +659,7 @@ class model
 		return $res;
 	}
 
-	// PRIVATE
+	// HELPER FUNCTIONS USEFUL FOR RENDERING
 
 	static function countChildren ( $id )
 	{

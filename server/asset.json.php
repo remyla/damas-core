@@ -38,9 +38,34 @@ header('Content-type: application/json');
 
 switch( arg("cmd") )
 {
+	case "filecheck":
+		if( ! file_exists( $assetsLCL . model::getKey( arg("id"), 'file' ) ) )
+		{
+			header("HTTP/1.1: 404 Not Found");
+			echo "File " . model::getKey( arg("id"), 'file' ) . " not found";
+			exit;
+		}
+		if( ! is_readable( $assetsLCL . model::getKey( arg("id"), 'file' ) ) )
+		{
+			header("HTTP/1.1: 403 Forbidden");
+			echo "The file is not readable";
+			exit;
+		}
+		if( ! is_null( arg('sha1') ) )
+		{
+			if( sha1_file( $assetsLCL . model::getKey( arg("id"), 'file' ) ) !== arg('sha1') )
+			{
+				header("HTTP/1.1: 409 Conflict");
+				echo "The sha1 checksum does not match";
+				exit;
+			}
+		}
+		$ret = true;
+		break;
 	case "time":
 		if( ! model::setKey( arg("id"), "time", time() ) ) {
 			header("HTTP/1.1: 304 Not Modified Could not update time");
+			echo "Could not update time";
 			exit;
 		}
 		$ret = true;
@@ -49,11 +74,11 @@ switch( arg("cmd") )
 		$id = DAM::write( arg("id"), arg("text") );
 		if( !$id )
 		{
-            header("HTTP/1.1: 409 Conflict");
-            echo "Error during the creation of the message";
+			header("HTTP/1.1: 409 Conflict");
+			echo "Error during the creation of the message";
 			exit;
 		}
-        $ret = model_json::node( $id, 1, $NODE_TAG | $NODE_PRM );
+		$ret = model_json::node( $id, 1, $NODE_TAG | $NODE_PRM );
 		break;
 	case "lock":
 		if( model::hastag( arg("id"), "lock" ) ) {

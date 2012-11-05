@@ -60,6 +60,15 @@ switch( arg("cmd") )
 		echo json_encode( true );
 		exit;
 	case "getUser":
+		if( $anonymous_access == true )
+		{
+			header('Content-type: application/json');
+			echo json_encode( array(
+				"username" => "guest",
+				"userclass" => "guest"
+			));
+   			exit;
+		}
 		if( ! array_key_exists( "login", $_SESSION ) )
 		{
    			header( "HTTP/1.1: 401 Unauthorized" );
