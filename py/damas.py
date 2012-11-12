@@ -59,38 +59,38 @@
   Todo:
 """
 
-import urllib # quote(), urlencode()
+import urllib
 import urllib2
 import cookielib
 import json
 
-class project :
+class project( object ) :
 	'''
 	Static methods to interact with a remote DAMAS project
 	'''
-	def __init__ ( self, url) :
+	def __init__( self, url ) :
 		self.cj = cookielib.LWPCookieJar()
 		self.serverURL = url
 
 	# AUTHENTICATION METHODS
 
-	def signIn ( self, username, password ) :
+	def signIn( self, username, password ) :
 		'''
 		@return {Boolean} True on success, False otherwise
 		'''
-		opener = urllib2.build_opener( urllib2.HTTPCookieProcessor(self.cj) )
+		opener = urllib2.build_opener( urllib2.HTTPCookieProcessor( self.cj ) )
 		urllib2.install_opener( opener )
 		try: a = urllib2.urlopen( self.serverURL + '/authentication.php?cmd=login&user=' + username + '&password=' + password )
 		except: return False
 		return json.loads( a.read() )
 
-	def signOut ( self ) :
+	def signOut( self ) :
 		'''
 		@return {Boolean} True on success, False otherwise
 		'''
 		return self.command( { 'cmd': 'logout' }, '/authentication.php' )['status'] == 401
 
-	def getUser ( self ) :
+	def getUser( self ) :
 		'''
 		@return {dict} a dictionary containing username and userclass on success, None otherwise
 		'''
@@ -99,7 +99,7 @@ class project :
 
 	# MODEL METHODS
 
-	def ancestors ( self, id ) :
+	def ancestors( self, id ) :
 		'''
 		Retrieve the ancestors (parent and above) of a node
 		@param {Integer} id node index
@@ -107,7 +107,7 @@ class project :
 		'''
 		return self.readJSONElements( self.command( { 'cmd': 'ancestors', 'id': id } )['json'] )
 
-	def children ( self, id ) :
+	def children( self, id ) :
 		'''
 		Retrieve the children of a node
 		@param {Integer} id node index
@@ -115,7 +115,7 @@ class project :
 		'''
 		return self.readJSONElements( self.command( { 'cmd': 'children', 'id': id } )['json'] )
 
-	def cloneNode ( self, id ) :
+	def cloneNode( self, id ) :
 		'''
 		Make an exact copy of an element
 		@param {Integer} id Element Index
@@ -126,16 +126,16 @@ class project :
 			return element( res['json'], self )
 		return False
 
-	def command ( self, args, server = "/model.json.php" ) :
+	def command( self, args, server = "/model.json.php" ) :
 		'''
 		Send a command to the web service
 		@param {dict} args the arguments of he command to send
 		@param {string} server the URL of the web service
 		@returns {dict} a dictionary containing the returned code, text, and json
 		'''
-		req = urllib2.Request( self.serverURL + server, urllib.urlencode(args) )
+		req = urllib2.Request( self.serverURL + server, urllib.urlencode( args ) )
 		try:
-			a = urllib2.urlopen(req)
+			a = urllib2.urlopen( req )
 		except urllib2.HTTPError, error:
 			return { 'status': error.code, 'text': error.read(), 'json': None }
 		except urllib2.URLError, error:
@@ -144,11 +144,11 @@ class project :
 			return { 'status': False, 'text': None, 'json': None }
 		responseText = a.read()
 		try:
-			return { 'status': a.code, 'text': responseText, 'json': json.loads(responseText) }
+			return { 'status': a.code, 'text': responseText, 'json': json.loads( responseText ) }
 		except:
 			return { 'status': a.code, 'text': responseText, 'json': None }
 
-	def createFromTemplate ( self, id, target, keys, tags ) :
+	def createFromTemplate( self, id, target, keys, tags ) :
 		'''
 		Creates a node using an existing node as template.
 		@param {Integer} id Template node index
@@ -165,7 +165,7 @@ class project :
 		elem.setTags( tags )
 		return elem
 
-	def createNode ( self, id, nodeType ) :
+	def createNode( self, id, nodeType ) :
 		'''
 		Creates a node of the specified type
 		@param {Integer} id Parent node index
@@ -177,7 +177,7 @@ class project :
 			return element( res['json'], self )
 		return False
 
-	def find ( self, keys ) :
+	def find( self, keys ) :
 		'''
 		Find elements wearing the specified key(s)
 		@param {dict} keys dictionary of key/value pairs to match
@@ -186,7 +186,7 @@ class project :
 		keys['cmd'] = 'find'
 		return json.loads( self.command( keys )['text'] )
 
-	def getNode ( self, id ) :
+	def getNode( self, id ) :
 		'''
 		Retrieve a Damas element specifying its internal node index
 		@param {Integer} id the internal node index to search
@@ -197,15 +197,15 @@ class project :
 			return element( res['json'], self )
 		return False
 
-	def getNodes ( self, ids ) :
+	def getNodes( self, ids ) :
 		'''
 		Retrieve DAMAS elements specifying their internal node indexes
 		@param {Array} indexes array of node ids to retrieve
 		@returns {Array} array of Damas elements
 		'''
-		return self.readJSONElements( self.command( { 'cmd': 'multi', 'id': ','.join(id) } )['json'] )
+		return self.readJSONElements( self.command( { 'cmd': 'multi', 'id': ','.join( ids ) } )['json'] )
 
-	def findSQL ( self, query ):
+	def findSQL( self, query ):
 		'''
 		Search for elements, specifying an SQL SELECT query.
 		The SQL SELECT query must be formated to return results with an 'id' field, which contains elements indexes.
@@ -214,7 +214,7 @@ class project :
 		'''
 		return self.command( { 'cmd': 'findSQL', 'query': query } )['json']
 
-	def link ( self, src_id, tgt_id ) :
+	def link( self, src_id, tgt_id ) :
 		'''
 		Make a directed link between 2 elements
 		@param {Integer} src_id the source node internal id of the link
@@ -223,7 +223,7 @@ class project :
 		'''
 		return int( self.command( { 'cmd': 'link', 'src': src_id, 'tgt': tgt_id } )['text'] ) | False
 
-	def links ( self, id ) :
+	def links( self, id ) :
 		'''
 		Retrieve the elements linked to the specified element
 		@param {Array} indexes array of node ids to retrieve
@@ -231,7 +231,7 @@ class project :
 		'''
 		return self.readJSONElements( self.command( { 'cmd': 'links', 'id': id } )['json'] )
 
-	def move ( self, id, target ) :
+	def move( self, id, target ) :
 		'''
 		Move elements
 		@param {Integer} id Element index
@@ -240,7 +240,7 @@ class project :
 		'''
 		return self.command( { 'cmd': 'move', 'id': id, 'target': target } )['status'] == 200
 
-	def readJSONElements ( self, json ) :
+	def readJSONElements( self, json ) :
 		'''
 		Deserialize JSON objects to Damas elements
 		@param {Object} obj json object to read
@@ -251,7 +251,7 @@ class project :
 			elements.append( element( e, self ) )
 		return elements
 
-	def removeNode ( self, id ) :
+	def removeNode( self, id ) :
 		'''
 		Recursively delete the specified node
 		@param {Integer} id Element index to delete
@@ -259,7 +259,7 @@ class project :
 		'''
 		return self.command( { 'cmd': 'removeNode', 'id': id } )['status'] == 200
 
-	def setKey ( self, id, name, value ) :
+	def setKey( self, id, name, value ) :
 		'''
 		Adds a new attribute. If an attribute with that name is already present in
 		the element, its value is changed to be that of the value parameter
@@ -271,7 +271,7 @@ class project :
 		'''
 		return self.command( { 'cmd': 'setKey', 'id': id, 'name': name, 'value': value } )['status'] == 200
 
-	def setKeys ( self, id, old_pattern, new_pattern ) :
+	def setKeys( self, id, old_pattern, new_pattern ) :
 		'''
 		Recursively modify a node, searching and replacing a specified pattern in its sub key values
 		@param {Integer} id Node index to modify
@@ -281,7 +281,7 @@ class project :
 		'''
 		return self.command( { 'cmd': 'setKeys', 'id': id, 'old': old_pattern, 'new': new_pattern } )['status'] == 200
 
-	def setTags ( self, id, tags ) :
+	def setTags( self, id, tags ) :
 		'''
 		Set multiple tags at a time on the specified element
 		@param {String} tags The coma separated tags to set
@@ -289,7 +289,7 @@ class project :
 		'''
 		return self.command( { 'cmd': 'setTags', 'id': id, 'tags': tags } )['status'] == 200
 
-	def unlink ( self, link_id ) :
+	def unlink( self, link_id ) :
 		'''
 		Remove a directed link between 2 elements
 		@param {Integer} the link id to remove
@@ -298,15 +298,20 @@ class project :
 		return self.command( { 'cmd': 'unlink', 'id': id } )['status'] == 200
 
 
-class element ( object ) :
+class element( object ) :
 	"""This class defines elements in a DAMAS project"""
 
-	def __init__ ( self, json, project ) :
+	def __init__( self, json, project ) :
+		self.childcount = None
 		self.children = []
+		self.id = None
 		self.keys = {}
-		self.tags = []
+		self.parent_id = None
 		self.project = project
+		self.tags = []
+		self.type = None
 		if json:
+			self.childcount = json['childcount']
 			self.id = json['id']
 			if 'keys' in json:
 				self.keys = json['keys']
@@ -315,7 +320,7 @@ class element ( object ) :
 				self.tags = json['tags']
 			self.type = json['type']
 
-	def __repr__ ( self ) :
+	def __repr__( self ) :
 		txt  = "id= " + str( self.id )
 		txt += "\ntype= " + self.type
 		txt += "\nparent_id= " + str( self.parent_id )
@@ -324,46 +329,46 @@ class element ( object ) :
 		txt += "\nchildren= " + str( self.children )
 		return txt
 
-	def createNode ( self, type ) :
+	def createNode( self, type ) :
 		return self.project.createNode( self.id, type )
 
-	def getChildren ( self ) :
+	def getChildren( self ) :
 		self.children = self.project.children( self.id )
 		return self.children
 
-	def move ( self, target ) :
+	def move( self, target ) :
 		if self.project.move( self.id, target ):
 			self.parent_id = target
 			return True
 		return False
 
-	def setKey ( self, name, value ) :
+	def setKey( self, name, value ) :
 		if self.project.setKey( self.id, name, value ):
 			self.keys[name] = value
 			return True
 		return False
 
-	def setTags ( self, tags ) :
+	def setTags( self, tags ) :
 		return self.project.setTags( self.id, tags )
 
 
 	# FILE METHODS
 
-	def lock ( self, text ) :
+	def lock( self, text ) :
 		return self.project.command(
 				{ 'cmd': 'lock', 'id': self.id, 'comment': text },
 				'/asset.json.php' )['status'] == 200
 
-	def unlock ( self ) :
+	def unlock( self ) :
 		return self.project.command(
 				{ 'cmd': 'unlock', 'id': self.id },
 				'/asset.json.php' )['status'] == 200
 
-	def backup ( self ) :
+	def backup( self ) :
 		"""Copy the asset to backupdir and make a new asset version. To run before overwriting the file"""
 		return element( self.project.command( { 'cmd': 'backup', 'id': self.id }, '/asset.json.php' )['json'], self )
 
-	def increment ( self, message ) :
+	def increment( self, message ) :
 		"""Increment the asset. To run after a successful file overwrite"""
 		return self.project.command(
 				{ 'cmd': 'version_increment', 'id': self.id, 'message': message },
@@ -371,10 +376,10 @@ class element ( object ) :
 
 	# DAM METHODS
 
-	def recycle ( self ) :
+	def recycle( self ) :
 		return self.project.command( { 'cmd': 'recycle', 'id': id }, '/asset.json.php' )['status'] == 200
 
-	def write ( self, text ) :
+	def write( self, text ) :
 		'''
 		Insert a message on the element
 		@param {String} text text for the new message
