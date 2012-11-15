@@ -81,27 +81,30 @@ switch( arg("cmd") )
 		$ret = model_json::node( $id, 1, $NODE_TAG | $NODE_PRM );
 		break;
 	case "lock":
-		if( model::hastag( arg("id"), "lock" ) ) {
-			header("HTTP/1.1: 304 Not Modified Asset is already locked");
+		//if( model::hastag( arg("id"), "lock" ) ) {
+		if( model::getKey( $id, 'lock' ) )
+		{
+			header("HTTP/1.1: 304 Not Modified - Asset is already locked");
 			exit;
 		}
-		$ret = model::tag( arg("id"), 'lock' );
-		$ret &= model::setKey( arg("id"), "lock_user", getUser() );
-		$ret &= model::setKey( arg("id"), 'lock_text', arg("comment") );
-		if (!$ret) {
-			header("HTTP/1.1: 304 Not Modified Asset lock failure");
+		//$ret &= model::setKey( arg("id"), "lock", getUser() );
+		//$ret = model::tag( arg("id"), 'lock' );
+		//$ret &= model::setKey( arg("id"), 'lock_text', arg("comment") );
+		if ( ! model::setKey( arg("id"), "lock", getUser() ) )
+		{
+			header("HTTP/1.1: 304 Not Modified - Asset lock failure");
 			exit;
 		}
 		break;
 	case "unlock":
-		if( asset_ismylock( arg("id") ) )
+		if( getUser() == model::getKey( arg('id'), 'lock' ) )
 		{
-			$ret = model::untag( arg("id"), 'lock' );
-			model::removeKey( arg("id"), 'lock_user' );
-			model::removeKey( arg("id"), 'lock_text' );
+			model::removeKey( arg("id"), 'lock' );
+			//$ret = model::untag( arg("id"), 'lock' );
+			//model::removeKey( arg("id"), 'lock_text' );
 			break;
 		}
-		header("HTTP/1.1: 304 Not Modified Locked by another user");
+		header("HTTP/1.1: 304 Not Modified - Not locked by " . getUser() );
 		exit;
 	case "upload_set_image":
 		//

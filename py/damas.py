@@ -40,6 +40,8 @@
     Michael Haussmann
 
   ChangeLog:
+	121113 reflected lock / unlock methods api changes
+	121112 some code cleanup (thanks Stephane Hoarau)
 	120924 renamed dam.getChildren in dam.children
        added dam.find
        dam.getElementsBySQL replaced by dam.findSQL
@@ -186,6 +188,15 @@ class project( object ) :
 		keys['cmd'] = 'find'
 		return json.loads( self.command( keys )['text'] )
 
+	def findSQL( self, query ):
+		'''
+		Search for elements, specifying an SQL SELECT query.
+		The SQL SELECT query must be formated to return results with an 'id' field, which contains elements indexes.
+		@param {String} query SQL query to perform
+		@returns {Array} array of element indexes
+		'''
+		return self.command( { 'cmd': 'findSQL', 'query': query } )['json']
+
 	def getNode( self, id ) :
 		'''
 		Retrieve a Damas element specifying its internal node index
@@ -204,15 +215,6 @@ class project( object ) :
 		@returns {Array} array of Damas elements
 		'''
 		return self.readJSONElements( self.command( { 'cmd': 'multi', 'id': ','.join( ids ) } )['json'] )
-
-	def findSQL( self, query ):
-		'''
-		Search for elements, specifying an SQL SELECT query.
-		The SQL SELECT query must be formated to return results with an 'id' field, which contains elements indexes.
-		@param {String} query SQL query to perform
-		@returns {Array} array of element indexes
-		'''
-		return self.command( { 'cmd': 'findSQL', 'query': query } )['json']
 
 	def link( self, src_id, tgt_id ) :
 		'''
@@ -354,9 +356,9 @@ class element( object ) :
 
 	# FILE METHODS
 
-	def lock( self, text ) :
+	def lock( self ) :
 		return self.project.command(
-				{ 'cmd': 'lock', 'id': self.id, 'comment': text },
+				{ 'cmd': 'lock', 'id': self.id },
 				'/asset.json.php' )['status'] == 200
 
 	def unlock( self ) :
