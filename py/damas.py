@@ -40,6 +40,7 @@
     Michael Haussmann
 
   ChangeLog:
+	121116 added element.filecheck method
 	121113 reflected lock / unlock methods api changes
 	121112 some code cleanup (thanks Stephane Hoarau)
 	120924 renamed dam.getChildren in dam.children
@@ -375,6 +376,11 @@ class element( object ) :
 		return self.project.command(
 				{ 'cmd': 'version_increment', 'id': self.id, 'message': message },
 				'/asset.json.php' )['status'] == 200
+
+	def filecheck( self ) :
+		return self.project.command(
+				{ 'cmd': 'filecheck', 'id': self.id },
+				'/asset.json.php' )['status'];
 
 	# DAM METHODS
 
