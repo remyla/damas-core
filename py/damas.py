@@ -215,7 +215,7 @@ class project( object ) :
 		@param {Array} indexes array of node ids to retrieve
 		@returns {Array} array of Damas elements
 		'''
-		return self.readJSONElements( self.command( { 'cmd': 'multi', 'id': ','.join( ids ) } )['json'] )
+		return self.readJSONElements( self.command( { 'cmd': 'multi', 'id': ','.join( str(id) for id in ids ) } )['json'] )
 
 	def link( self, src_id, tgt_id ) :
 		'''
@@ -378,6 +378,11 @@ class element( object ) :
 				'/asset.json.php' )['status'] == 200
 
 	def filecheck( self ) :
+		"""
+		200 = check is ok
+		404 = file not found
+		403 = file read only
+		"""
 		return self.project.command(
 				{ 'cmd': 'filecheck', 'id': self.id },
 				'/asset.json.php' )['status'];
