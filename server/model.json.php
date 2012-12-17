@@ -79,6 +79,37 @@ switch( arg("cmd") )
 		}
 		echo json_encode( model_json::node( $id, 1, $NODE_TAG | $NODE_PRM ) );
 		break;
+	case "move":
+		if( is_null( arg('id') ) || is_null( arg('target') ) )
+		{
+			header("HTTP/1.1: 400 Bad Request");
+			echo "Bad command";
+			exit;
+		}
+		if( model::getKey( arg("id"), "file" ) && model::getKey( arg("target"), "dir" ) )
+		{
+			$newfile = model::getKey( arg("target"), "dir" ) . "/" . basename( model::getKey( arg("id"), "file" ) );
+			if( file_exists( $assetsLCL . $newfile ) )
+			{
+				header("HTTP/1.1: 409 Conflict");
+				echo "move error, file exists";
+				exit;
+			}
+			if( ! rename( $assetsLCL . model::getKey( arg("id"), "file" ), $assetsLCL . $newfile ) )
+			{
+				header("HTTP/1.1: 409 Conflict");
+				echo "file rename error, move aborted";
+				exit;
+			}
+			model::setKey( arg("id"), "file", $newfile );
+		}
+		if( !model::move( arg("id"), arg("target") ) )
+		{
+			header("HTTP/1.1: 409 Conflict");
+			echo "move Error, please change your values";
+			exit;
+		}
+		break;
 	case "removeNode":
 		if( is_null( arg('id') ) )
 		{
@@ -100,6 +131,16 @@ switch( arg("cmd") )
 			echo "Bad command";
 			exit;
 		}
+		/* EXPERIMENTAL
+		$ids = explode( ",", arg("id") );
+		if( $ids )
+		{
+			foreach( $ids as $id )
+			{
+				model::setKey( $id, arg("name"), arg("value") );
+			}
+		}
+		*/
 		if( !model::setKey( arg("id"), arg("name"), arg("value") ) )
 		{
 			header("HTTP/1.1: 409 Conflict");
@@ -118,20 +159,6 @@ switch( arg("cmd") )
 		{
 			header("HTTP/1.1: 409 Conflict");
 			echo "removeKey Error, please change your values";
-			exit;
-		}
-		break;
-	case "move":
-		if( is_null( arg('id') ) || is_null( arg('target') ) )
-		{
-			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
-			exit;
-		}
-		if( !model::move( arg("id"), arg("target") ) )
-		{
-			header("HTTP/1.1: 409 Conflict"); //$err = $ERR_NODE_MOVE;
-			echo "move Error, please change your values";
 			exit;
 		}
 		break;
@@ -250,14 +277,6 @@ switch( arg("cmd") )
 		}
 		echo json_encode( model_json::multi( model::ancestors( arg('id') ) ) );
 		break;
-	case "children":
-		if( is_null( arg('id') ) )
-		{
-			header('HTTP/1.1: 400 Bad Request');
-			exit;
-		}
-		echo json_encode( model_json::multi( model::children( arg('id') ) ) );
-		break;
 	case "branch":
 		if( is_null( arg('id') ) )
 		{
@@ -271,6 +290,14 @@ switch( arg("cmd") )
 			exit;
 		}
 		echo json_encode( $ret );
+		break;
+	case "children":
+		if( is_null( arg('id') ) )
+		{
+			header('HTTP/1.1: 400 Bad Request');
+			exit;
+		}
+		echo json_encode( model_json::multi( model::children( arg('id') ) ) );
 		break;
 	case "find":
 		$a = $_GET + $_POST;
