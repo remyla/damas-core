@@ -33,7 +33,6 @@ damas_service::init_http();
 damas_service::accessGranted();
 damas_service::allowed( "asset::" . arg("cmd") );
 
-$ret = false;
 header('Content-type: application/json');
 
 switch( arg("cmd") )
@@ -60,7 +59,7 @@ switch( arg("cmd") )
 				exit;
 			}
 		}
-		$ret = true;
+		echo json_encode( true );
 		break;
 	case "time":
 		if( ! model::setKey( arg("id"), "time", time() ) ) {
@@ -68,7 +67,7 @@ switch( arg("cmd") )
 			echo "Could not update time";
 			exit;
 		}
-		$ret = true;
+		echo json_encode( true );
 		break;
 	case "write":
 		$id = DAM::write( arg("id"), arg("text") );
@@ -78,18 +77,14 @@ switch( arg("cmd") )
 			echo "Error during the creation of the message";
 			exit;
 		}
-		$ret = model_json::node( $id, 1, $NODE_TAG | $NODE_PRM );
+		echo json_encode( model_json::node( $id, 1, $NODE_TAG | $NODE_PRM ) );
 		break;
 	case "lock":
-		//if( model::hastag( arg("id"), "lock" ) ) {
 		if( model::getKey( $id, 'lock' ) )
 		{
 			header("HTTP/1.1: 304 Not Modified - Asset is already locked");
 			exit;
 		}
-		//$ret &= model::setKey( arg("id"), "lock", getUser() );
-		//$ret = model::tag( arg("id"), 'lock' );
-		//$ret &= model::setKey( arg("id"), 'lock_text', arg("comment") );
 		if ( ! model::setKey( arg("id"), "lock", getUser() ) )
 		{
 			header("HTTP/1.1: 304 Not Modified - Asset lock failure");
@@ -100,8 +95,6 @@ switch( arg("cmd") )
 		if( getUser() == model::getKey( arg('id'), 'lock' ) )
 		{
 			model::removeKey( arg("id"), 'lock' );
-			//$ret = model::untag( arg("id"), 'lock' );
-			//model::removeKey( arg("id"), 'lock_text' );
 			break;
 		}
 		header("HTTP/1.1: 304 Not Modified - Not locked by " . getUser() );
@@ -120,7 +113,7 @@ switch( arg("cmd") )
 				//
 				// The result must be true for ajaxupload.js
 				//
-				$ret = true;
+				echo json_encode( true );
 				break;
 			}
 		}
@@ -131,6 +124,81 @@ switch( arg("cmd") )
 		echo json_encode( 'The file upload failed, the image was not updated' );
 		exit;
 	case "upload_create_asset":
+		foreach( $_FILES as $file )
+		{
+			if( $file['error'] != 0 )
+			{
+				header("HTTP/1.1: 409 Conflict");
+				echo $file['name'] . ' was not uploaded: ';
+				switch ($file['error']) {
+					case UPLOAD_ERR_INI_SIZE:
+						echo 'The uploaded file exceeds the upload_max_filesize directive in php.ini';
+						break;
+					case UPLOAD_ERR_FORM_SIZE:
+						echo 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form';
+						break;
+					case UPLOAD_ERR_PARTIAL:
+						echo 'The uploaded file was only partially uploaded';
+						break;
+					case UPLOAD_ERR_NO_FILE:
+						echo 'No file was uploaded';
+						break;
+					case UPLOAD_ERR_NO_TMP_DIR:
+						echo 'Missing a temporary folder';
+						break;
+					case UPLOAD_ERR_CANT_WRITE:
+						echo 'Failed to write file to disk';
+						break;
+					case UPLOAD_ERR_EXTENSION:
+						echo 'File upload stopped by extension';
+						break;
+					default:
+						echo 'Unknown upload error';
+						break;
+				} 
+				echo '. ';
+				continue;
+			}
+			if( ! is_uploaded_file( $file['tmp_name'] ) )
+			{
+				header("HTTP/1.1: 409 Conflict");
+				echo "is_uploaded_file returned false. Possible break attempt";
+				exit;
+			}
+			$path = model::getKey( arg( 'id' ), 'dir' ) . '/' . $file['name'];
+			// overwrite an existing file!
+			if( move_uploaded_file( $file['tmp_name'], $assetsLCL . $path ) )
+			{
+				$asset = false;
+				$assets = model::find( array( 'file' => $path ) );
+				foreach( $assets as $a )
+				{
+					if( model::parent($a) == arg('id') )
+					{
+						$asset = $a;
+					}
+				}
+				if( ! $asset )
+				{
+					$asset = model::createNode( arg( 'id' ), "asset" );
+					model::setKey( $asset, 'file', $path );
+					model::setKey( $asset, 'text', arg( 'message' ) );
+				}
+				model::setKey( $asset, 'user', getUser() );
+				model::setKey( $asset, 'time', time() );
+				//$ret += model_json::node( $id, 1, $NODE_TAG | $NODE_PRM );
+			}
+			else
+			{
+				header("HTTP/1.1: 304 Not Modified Error on create");
+				echo "move_uploaded_file failed. enough space?";
+				exit;
+			}
+		}
+		break;
+
+/*
+
 		if( is_uploaded_file( $_FILES['file']['tmp_name'] ) )
 		{
 			$file = model::getKey( arg( 'id' ), 'dir' ) . '/' . $_FILES['file']['name'];
@@ -155,6 +223,7 @@ switch( arg("cmd") )
 		//
 		echo json_encode( 'The file upload failed, the asset was not created' );
 		exit;
+*/
 	case "upload":
 		if( model::hastag( arg( 'id' ), 'lock' ) )
 		{
@@ -190,51 +259,52 @@ switch( arg("cmd") )
 		//
 		// The result must be true for ajaxupload.js
 		//
-		$ret = true;
+		echo json_encode( true );
 		break;
 	case "version_backup":
 		$id = assets::version_backup( arg("id") );
-		if( !$id ) {
+		if( !$id )
+		{
 			header('HTTP/1.1: 304 Not Modified Error on create');
 			exit;
 		}
-		$ret = model_json::node( $id, 1, $NODE_TAG | $NODE_PRM );
+		echo json_encode( model_json::node( $id, 1, $NODE_TAG | $NODE_PRM ) );
 		break;
 	case "version_increment":
-		$ret = assets::version_increment( arg("id"), arg("message") );
-		if (!$ret) {
+		if( ! assets::version_increment( arg("id"), arg("message") ) )
+		{
 			header("HTTP/1.1: 304 Not Modified Asset Not updated");
 			exit;
 		}
+		echo json_encode( true );
 		break;
 	case "version_increment2":
-		$ret = assets::version_increment2( arg("id"), arg("message") );
-		if (!$ret) {
+		if( ! assets::version_increment2( arg("id"), arg("message") ) )
+		{
 			header("HTTP/1.1: 304 Not Modified Asset Not updated");
 			exit;
 		}
+		echo json_encode( true );
 		break;
 	case "recycle":
-		$ret = DAM::recycle( arg('id') );
-		if (!$ret) {
+		if( ! DAM::recycle( arg('id') ) )
+		{
 			header("HTTP/1.1: 304 Not Modified Could not move element to trash");
 			exit;
 		}
+		echo json_encode( true );
 		break;
 	case "empty_trashcan":
-		$ret = DAM::empty_trashcan();
-		if (!$ret) {
+		if( ! $ret = DAM::empty_trashcan() )
+		{
 			header('HTTP/1.1: 404 Not Found');
 			exit;
 		}
+		echo json_encode( true );
 		break;
 	default:
 		header("HTTP/1.1: 400 Bad Request");
 		exit;
 }
-
 damas_service::log_event();
-
-echo json_encode($ret);
-
 ?>
