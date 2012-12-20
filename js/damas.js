@@ -252,96 +252,6 @@ damas.utils.readJSONElement = function ( obj )
 }
 
 /**
- * Reads properties from a JSON
- * @private
- * @param {XMLElement} XMLElement XML fragment to read
- */
-/*
-damas.element.readChildrenJSON = function ( obj )
-{
-	this.children = $A( obj );
-	this.children.each( function( c ){
-		c.parent_id = this.id;
-		c.keys = $H( c.keys );
-		c.tags = $A( c.tags );
-		Object.extend( c, new damas.element() );
-	}.bind( this ) );
-	damas.utils.sort( this.children );
-	return;
-}
-*/
-
-/**
- * Reads properties from an XML fragment
- * @private
- * @param {XMLElement} XMLElement XML fragment to read
- */
-/*
-damas.element.readXML = function ( XMLElement )
-{
-	this.single = XMLElement;
-	this.id = parseInt( XMLElement.getAttribute( 'id' ) );
-	this.parent_id = parseInt( XMLElement.getAttribute( 'parent_id' ) );
-	this.parent_id = ( isNaN( this.parent_id ) )? undefined : this.parent_id;  //parent_id is a number or undefined if root
-	this.type = XMLElement.getAttribute('type');
-	this.keys = new Hash();
-	this.tags = new Array();
-	this.childcount = XMLElement.getAttribute("childcount");
-	this.link_id = parseInt( XMLElement.getAttribute('link_id') );
-	var keys = XMLElement.getElementsByTagName("key");
-	for( var i=0; i < keys.length; i++ )
-	{
-		this.keys.set( keys[i].getAttribute('name'), ( keys[i].firstChild ) ? keys[i].firstChild.data : ' ' );
-		//var tmp = keys[i].firstChild;
-		//if( tmp ) this.keys.set( keys[i].getAttribute('name'), tmp.data );
-		//else this.keys.set( keys[i].getAttribute('name'), '' );
-	}
-	var tags = XMLElement.getElementsByTagName("tag");
-	//var tags = XMLElement.selectNodes("tag");
-	for( var i=0; i<tags.length; i++ )
-	{
-		//var tmp = tags[i].firstChild;
-		//if( tmp ) this.tags.push(tmp.data);
-		this.tags.push( ( tags[i].firstChild )? tags[i].firstChild.data : ' ' );
-	}
-	this.tagName = XMLElement.tagName;
-}
-*/
-
-/**
- * Reads properties from a SOAP XML fragment
- * @private
- * @param {XMLElement} XMLElement XML fragment to read
- */
-/*
-damas.element.readChildrenXML = function ( XMLElement )
-{
-	this.children_xml = XMLElement;
-	this.children = $A();
-	this.links = $A();
-	this.rlinks = $A();
-	$A( XMLElement.getElementsByTagName('returnvalue')[0].childNodes).each( function ( c ){
-		var elem = new damas.element(c).extendme();
-		if( c.nodeName == 'node' ){
-		//if( c.nodeName == 'node' | c.nodeName == 'link' | c.nodeName == 'rlink' ){
-			this.children.push( elem );
-		}
-		if( c.nodeName == 'link' ){
-			this.links.push( elem );
-		}
-		if( c.nodeName == 'rlink' ){
-			this.rlinks.push( elem );
-		}
-	}.bind( this ) );
-	damas.utils.sort( this.children );
-	damas.utils.sort( this.links );
-}
-*/
-
-
-
-
-/**
  * Methods to interact with a remote DAMAS project.
  *
  * Usage:
@@ -379,10 +289,9 @@ damas.project.ancestors = function ( id )
  * @param {Integer} id node index
  * @return {Array} array of children elements
  */
-damas.project.children = function ( element )
+damas.project.children = function ( id )
 {
-	element.children = damas.utils.readJSONElements( JSON.parse( this.command( { cmd: 'children', id: id } ).text ) );
-	return element.children;
+	return damas.utils.readJSONElements( JSON.parse( this.command( { cmd: 'children', id: id } ).text ) );
 }
 
 /**
@@ -1078,8 +987,6 @@ damas.element.time = function ( )
 	}
 	return req.status == 200;
 }
-
-//damas.element = Class.create( damas.element );
 
 /**
  * @fileoverview SOAP messages and Ajax queries handling
