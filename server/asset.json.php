@@ -38,13 +38,21 @@ header('Content-type: application/json');
 switch( arg("cmd") )
 {
 	case "filecheck":
-		if( ! file_exists( $assetsLCL . model::getKey( arg("id"), 'file' ) ) )
+		if( model::getKey( $id, 'file' ) )
+		{
+			$path = model::getKey( $id, 'file' );
+		}
+		if( model::getKey( $id, 'dir' ) )
+		{
+			$path = model::getKey( $id, 'dir' );
+		}
+		if( ! file_exists( $assetsLCL . $path ) )
 		{
 			header("HTTP/1.1: 404 Not Found");
-			echo "File " . model::getKey( arg("id"), 'file' ) . " not found";
+			echo "File " . $path . " not found";
 			exit;
 		}
-		if( ! is_readable( $assetsLCL . model::getKey( arg("id"), 'file' ) ) )
+		if( ! is_readable( $assetsLCL . $path ) )
 		{
 			header("HTTP/1.1: 403 Forbidden");
 			echo "The file is not readable";
@@ -52,7 +60,7 @@ switch( arg("cmd") )
 		}
 		if( ! is_null( arg('sha1') ) )
 		{
-			if( sha1_file( $assetsLCL . model::getKey( arg("id"), 'file' ) ) !== arg('sha1') )
+			if( sha1_file( $assetsLCL . $path ) !== arg('sha1') )
 			{
 				header("HTTP/1.1: 409 Conflict");
 				echo "The sha1 checksum does not match";
@@ -80,7 +88,7 @@ switch( arg("cmd") )
 		echo json_encode( model_json::node( $id, 1, $NODE_TAG | $NODE_PRM ) );
 		break;
 	case "lock":
-		if( model::getKey( $id, 'lock' ) )
+		if( model::getKey( arg("id"), 'lock' ) )
 		{
 			header("HTTP/1.1: 304 Not Modified - Asset is already locked");
 			exit;
