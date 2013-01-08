@@ -35,7 +35,6 @@
  * Static library with methods for Digital Asset Management
  * @namespace
  * @requires damas.serverRequest
- * @requires damas.log
  * @property {Array} errors DAMAS Error codes definitions
  * @property {String} server The currently connected DAMAS server URL
  * @property {Hash} types A Hash of the different Damas Element types defined
@@ -46,8 +45,6 @@ var damas = {};
 damas.server = '';
 damas.types = {};
 damas.version = '2.2-beta6';
-
-damas.log = app.log;
 
 damas.errorCode = function ( text )
 {
@@ -128,7 +125,6 @@ damas.post = function ( url, args ) {
  */
 damas.search = function ( searchtext )
 {
-	damas.log.cmd('damas.search', arguments );
 	document.fire('dam:submit.search', {'value': searchtext.substring(0, (searchtext.indexOf('&') == -1?searchtext.length: searchtext.indexOf('&')))} );
 }
 
@@ -260,7 +256,6 @@ damas.utils.readJSONElement = function ( obj )
  * @namespace
  * @requires Ajax
  * @requires damas.serverRequest
- * @requires damas.log
  * @requires damas.element
  */
 damas.project = {};
@@ -335,7 +330,6 @@ damas.project.command_a = function ( args, callback )
  */
 damas.project.createFromTemplate = function ( id, target, keys, tags )
 {
-	damas.log.cmd( "damas.project.createFromTemplate", arguments );
 	var newnode = project.duplicate( id );
 	if( newnode.parent_id !== target )
 	{
@@ -388,7 +382,6 @@ damas.project.duplicate = function ( id )
  */
 damas.project.empty_trashcan = function ( )
 {
-	damas.log.cmd( "project.empty_trashcan", arguments );
 	var req = new Ajax.Request( this.server + "/asset.json.php", {
 		asynchronous: false,
 		parameters: { cmd: 'empty_trashcan' }
@@ -407,7 +400,6 @@ damas.project.empty_trashcan = function ( )
  */
 damas.project.find = function ( keys )
 {
-	damas.log.cmd( "damas.project.find", arguments );
 	var req = new Ajax.Request( this.server + "/model.json.php", {
 		asynchronous: false,
 		parameters: Object.extend( keys, { cmd: 'find' } )
@@ -424,7 +416,6 @@ damas.project.find = function ( keys )
  */
 damas.project.findSQL = function ( query )
 {
-	damas.log.cmd( "damas.project.findSQL", arguments );
 	var req = new Ajax.Request( this.server + "/model.json.php", {
 		asynchronous: false,
 		parameters: { cmd: 'findSQL', query: query }
@@ -439,7 +430,6 @@ damas.project.findSQL = function ( query )
  */
 damas.project.findTag = function ( tagname )
 {
-	damas.log.cmd( "damas.project.findTag", arguments );
 	return project.findSQL( "SELECT node.id FROM node LEFT JOIN tag ON node.id=tag.node_id WHERE tag.name='" + tagname + "' ORDER BY node.type;" );
 }
 
@@ -480,7 +470,6 @@ damas.project.getNodes = function ( indexes )
  */
 damas.project.link = function ( src_id, tgt_id )
 {
-	damas.log.cmd( "damas.project.link", arguments );
 	var req = new Ajax.Request( this.server + "/model.json.php", {
 		asynchronous: false,
 		parameters: { cmd: 'link', src: src_id, tgt: tgt_id }
@@ -523,7 +512,6 @@ damas.project.list = function ( key )
  */
 damas.project.move = function ( id, target )
 {
-	damas.log.cmd( "damas.project.move", arguments );
 	var req = new Ajax.Request( this.server + "/model.json.php", {
 		asynchronous: false,
 		parameters: { cmd: 'move', id: id, target: target }
@@ -538,7 +526,6 @@ damas.project.move = function ( id, target )
  */
 damas.project.recycle = function ( id )
 {
-	damas.log.cmd( "project.recycle", arguments );
 	var req = new Ajax.Request( this.server + "/asset.json.php", {
 		asynchronous: false,
 		parameters: { cmd: 'recycle', id: id }
@@ -558,7 +545,6 @@ damas.project.recycle = function ( id )
  */
 damas.project.removeKey = function ( id, name )
 {
-	damas.log.cmd( "damas.project.removeKey", arguments );
 	var req = new Ajax.Request( this.server + "/model.json.php", {
 		asynchronous: false,
 		parameters: { cmd: 'removeKey', id: id, name: name }
@@ -573,7 +559,6 @@ damas.project.removeKey = function ( id, name )
  */
 damas.project.removeNode = function ( id )
 {
-	damas.log.cmd( "damas.project.removeNode", arguments );
 	var req = new Ajax.Request( this.server + "/model.json.php", {
 		asynchronous: false,
 		parameters: { 'cmd': 'removeNode', 'id': id }
@@ -591,7 +576,6 @@ damas.project.removeNode = function ( id )
  */
 damas.project.setKey = function ( id, name, value )
 {
-	damas.log.cmd( "project.setKey", arguments );
 	var req = new Ajax.Request( this.server + "/model.json.php", {
 		asynchronous: false,
 		parameters: { cmd: 'setKey', id: id, name: name, value: value }
@@ -608,7 +592,6 @@ damas.project.setKey = function ( id, name, value )
  */
 damas.project.setKeys = function ( id, old_pattern, new_pattern )
 {
-	damas.log.cmd( "project.setKeys", arguments );
 	var req = new Ajax.Request( this.server + "/model.json.php", {
 		asynchronous: false,
 		parameters: { cmd: 'setKeys', id: id, old: old_pattern, 'new': new_pattern }
@@ -627,7 +610,6 @@ damas.project.setKeys = function ( id, old_pattern, new_pattern )
  */
 damas.project.setTags = function ( id, tags )
 {
-	damas.log.cmd( "project.setTags", arguments );
 	var req = new Ajax.Request( this.server + "/model.json.php", {
 		asynchronous: false,
 		parameters: { cmd: 'setTags', id: id, tags: tags }
@@ -643,7 +625,6 @@ damas.project.setTags = function ( id, tags )
  */
 damas.project.tag = function ( id, name )
 {
-	damas.log.cmd( "damas.project.tag", arguments );
 	var req = new Ajax.Request( this.server + "/model.json.php", {
 		asynchronous: false,
 		parameters: { cmd: 'tag', id: id, name: name }
@@ -659,7 +640,6 @@ damas.project.tag = function ( id, name )
  */
 damas.project.untag = function ( id, name )
 {
-	damas.log.cmd( "damas.project.untag", arguments );
 	var req = new Ajax.Request( this.server + "/model.json.php", {
 		asynchronous: false,
 		parameters: { cmd: 'untag', id: id, name: name }
@@ -674,7 +654,6 @@ damas.project.untag = function ( id, name )
  */
 damas.project.unlink = function ( id )
 {
-	damas.log.cmd( "damas.project.unlink", arguments );
 	var req = new Ajax.Request( this.server + "/model.json.php", {
 		asynchronous: false,
 		parameters: { cmd: 'unlink', id: id }
@@ -691,7 +670,6 @@ damas.project.unlink = function ( id )
  */
 damas.project.setType = function ( id, type )
 {
-	damas.log.cmd( "project.setType", arguments );
 	var req = new Ajax.Request( this.server + "/model.json.php", {
 		asynchronous: false,
 		parameters: { cmd: 'setType', id: id, type: type }
@@ -709,7 +687,6 @@ damas.project = Class.create( damas.project );
  * custom events : dam:element.updated, inserted, recycled
  * @class
  * @requires damas.project
- * @requires damas.log
  * @requires ServerRequest
  * @requires errors
  * @_param {Object} id Index, damas.element, or XML fragment
@@ -853,7 +830,6 @@ damas.element.move = function ( parent_id )
  */
 damas.element.remove = function ()
 {
-	//damas.log.cmd("this.remove",arguments);
 	var res = project.removeNode( this.id );
 	if( res ) document.fire('dam:element.updated', this);
        return res;
@@ -939,7 +915,6 @@ damas.element.untag = function ( name )
  */
 damas.element.recycle = function ()
 {
-	damas.log.cmd( "that.recycle", arguments );
 	var req = new Ajax.Request( project.server + "/asset.json.php", {
 		asynchronous: false,
 		parameters: { cmd: 'recycle', id: this.id }
@@ -958,7 +933,6 @@ damas.element.recycle = function ()
  */
 damas.element.write = function ( text )
 {
-	damas.log.cmd( "that.write", arguments );
 	var req = new Ajax.Request( project.server + "/asset.json.php", {
 		asynchronous: false,
 		parameters: { cmd: 'write', id: this.id, text: text }
@@ -976,7 +950,6 @@ damas.element.write = function ( text )
  */
 damas.element.time = function ( )
 {
-	damas.log.cmd( "that.time", arguments );
 	var req = new Ajax.Request( project.server + "/asset.json.php", {
 		asynchronous: false,
 		parameters: { cmd: 'time', id: this.id }
