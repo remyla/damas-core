@@ -319,7 +319,6 @@ class element( object ) :
 			self.id = int( json['id'] )
 			if 'keys' in json:
 				self.keys = json['keys']
-			self.parent_id = json['parent_id']
 			if json['parent_id']:
 				self.parent_id = int( json['parent_id'] )
 			if 'tags' in json:
