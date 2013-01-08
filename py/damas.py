@@ -40,6 +40,7 @@
     Michael Haussmann
 
   ChangeLog:
+	130108 id and parent_id forced to int
 	121116 added element.filecheck method
 	121113 reflected lock / unlock methods api changes
 	121112 some code cleanup (thanks Stephane Hoarau)
@@ -315,10 +316,12 @@ class element( object ) :
 		self.type = None
 		if json:
 			self.childcount = json['childcount']
-			self.id = json['id']
+			self.id = int( json['id'] )
 			if 'keys' in json:
 				self.keys = json['keys']
 			self.parent_id = json['parent_id']
+			if json['parent_id']:
+				self.parent_id = int( json['parent_id'] )
 			if 'tags' in json:
 				self.tags = json['tags']
 			self.type = json['type']
