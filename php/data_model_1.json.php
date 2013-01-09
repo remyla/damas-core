@@ -79,7 +79,8 @@ class model_json
 				"parent_id" => $row['parent_id'],
 				"type" => $row['type'],
 				"tags" => model::tags( $ids[$i] ),
-				"keys" => model::keys( $ids[$i] ),
+ 				// an empty array produces a json list instead of a hash so we force the result to be an object
+				"keys" => (object) model::keys( $ids[$i] ),
 				"childcount" => model::countChildren( $ids[$i] ),
 				"rlinks" => model::countRLinks( $ids[$i] )
 			);
