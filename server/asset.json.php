@@ -38,13 +38,13 @@ header('Content-type: application/json');
 switch( arg("cmd") )
 {
 	case "filecheck":
-		if( model::getKey( $id, 'file' ) )
+		if( model::getKey( arg('id'), 'file' ) )
 		{
-			$path = model::getKey( $id, 'file' );
+			$path = model::getKey( arg('id'), 'file' );
 		}
-		if( model::getKey( $id, 'dir' ) )
+		if( model::getKey( arg('id'), 'dir' ) )
 		{
-			$path = model::getKey( $id, 'dir' );
+			$path = model::getKey( arg('id'), 'dir' );
 		}
 		if( ! file_exists( $assetsLCL . $path ) )
 		{
