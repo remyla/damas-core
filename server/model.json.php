@@ -147,6 +147,14 @@ switch( arg("cmd") )
 			echo "setKey Error, please change your values";
 			exit;
 		}
+		if( arg("name") == 'dir' )
+		{
+			if( ! mkdir( $assetsLCL . arg("value"), 0755, true ) )
+			{
+				header("HTTP/1.1: 409 Conflict");
+				echo "Directory creation error, please change values";
+			}
+		}
 		break;
 	case "removeKey":
 		if( is_null( arg('id') ) || is_null( arg('name') ) )
