@@ -86,6 +86,38 @@ switch( arg("cmd") )
 			echo "Bad command";
 			exit;
 		}
+		if( model::getKey( arg("target"), "dir" ) )
+		{
+			if( model::getKey( arg("id"), "file" ) || model::getKey( arg("id"), "dir" ) )
+			{
+				$oldpath = null;
+				$newpath = null;
+				if( model::getKey( arg("id"), "file" ) )
+				{
+					$oldpath = model::getKey( arg("id"), "file" );
+				}
+				if( model::getKey( arg("id"), "dir" ) )
+				{
+					$oldpath = model::getKey( arg("id"), "dir" );
+				}
+				$newpath = model::getKey( arg("target"), "dir" ) . "/" . basename( $oldpath );
+				if( file_exists( $assetsLCL . $newpath ) )
+				{
+					header("HTTP/1.1: 409 Conflict");
+					echo "move error, file exists";
+					exit;
+				}
+				if( ! rename( $assetsLCL . $oldpath, $assetsLCL . $newpath ) )
+				{
+					header("HTTP/1.1: 409 Conflict");
+					echo "file rename error, move aborted";
+					exit;
+				}
+				model::setKeys( arg("id"), $oldpath, $newpath );
+			}
+		}
+/*
+		// move file to dir
 		if( model::getKey( arg("id"), "file" ) && model::getKey( arg("target"), "dir" ) )
 		{
 			$newfile = model::getKey( arg("target"), "dir" ) . "/" . basename( model::getKey( arg("id"), "file" ) );
@@ -103,6 +135,7 @@ switch( arg("cmd") )
 			}
 			model::setKey( arg("id"), "file", $newfile );
 		}
+*/
 		if( !model::move( arg("id"), arg("target") ) )
 		{
 			header("HTTP/1.1: 409 Conflict");
@@ -141,20 +174,51 @@ switch( arg("cmd") )
 			}
 		}
 		*/
+		$value = model::getKey( arg("id"), arg("name") );
+
+		// TRIGGER file rename
+		if( arg("name") == 'file' && $value )
+		{
+			if( ! rename( $assetsLCL . $value, $assetsLCL . arg("value") ) )
+			{
+				header("HTTP/1.1: 409 Conflict");
+				echo "File rename error, please change values";
+				exit;
+			}
+		}
+		// TRIGGER dir rename
+		if( arg("name") == 'dir' && $value )
+		{
+			if( ! rename( $assetsLCL . $value, $assetsLCL . arg("value") ) )
+			{
+				header("HTTP/1.1: 409 Conflict");
+				echo "Directory rename error, please change values";
+				exit;
+			}
+			$query = sprintf( "UPDATE `key` SET value = REPLACE( value,'%s','%s') WHERE value LIKE '%s%%';",
+						$value,
+						arg("value"),
+						$value );
+			$res = mysql_query( $query );
+		}
+		// TRIGGER END
 		if( !model::setKey( arg("id"), arg("name"), arg("value") ) )
 		{
 			header("HTTP/1.1: 409 Conflict");
 			echo "setKey Error, please change your values";
 			exit;
 		}
-		if( arg("name") == 'dir' )
+		// TRIGGER dir mkdir
+		if( arg("name") == 'dir' && ! $value  )
 		{
 			if( ! mkdir( $assetsLCL . arg("value"), 0755, true ) )
 			{
 				header("HTTP/1.1: 409 Conflict");
 				echo "Directory creation error, please change values";
+				exit;
 			}
 		}
+		// TRIGGER END
 		break;
 	case "removeKey":
 		if( is_null( arg('id') ) || is_null( arg('name') ) )
