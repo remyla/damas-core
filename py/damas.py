@@ -371,7 +371,7 @@ class element( object ) :
 
 	def backup( self ) :
 		"""Copy the asset to backupdir and make a new asset version. To run before overwriting the file"""
-		return element( self.project.command( { 'cmd': 'version_backup', 'id': self.id }, '/asset.json.php' )['json'], self )
+		return element( self.project.command( { 'cmd': 'version_backup', 'id': self.id }, '/asset.json.php' )['json'], self.project )
 
 	def increment( self, message ) :
 		"""Increment the asset. To run after a successful file overwrite"""
