@@ -1,14 +1,56 @@
 <?php
 /**
- * Author Remy Lalanne
- * Copyright (c) 2005-2010 Remy Lalanne
+ * Damas Server Configuration File
+ *
+ * macros : [DBNAME], [DBUSER], [DBPASSWORD], [PROJECTDIR]
  */
-session_start();
-header('Content-type: application/xml');
-echo '<?xml version="1.0" encoding="UTF-8"?>'."\n";
-include_once "service.php"; //$version
-echo "<xml>\n";
-echo '<error code="0"/>'."\n";
-echo "<version>$version</version>\n";
-echo "</xml>";
+
+
+/**
+ * MySQL database settings
+ */
+$db_server = "localhost";
+$db_name = "DBNAME";
+$db_username = "DBUSER";
+$db_passwd = "DBPASSWORD";
+
+
+/**
+ * Anonymous access
+ * Can unauthenticated users explore the project?
+ */
+$anonymous_access = false;
+
+
+/**
+ * User authentication method
+ * "Default" - authentication using 'damas:user' nodes in the project
+ * "MySQL" - authentication against a "user" table in the database of project
+ * "CAS"   - authentication against a Central Authentification Service
+ */
+$authentication = "MySQL";
+
+
+/**
+ * Central Authentification Service configuration
+ */
+# $CAS_version = "CAS_VERSION_2_0";
+# $CAS_url = "cas.domain.com";
+# $CAS_port = 443;
+
+
+/**
+ * Sometimes, we want to hide those who work on tasks and assets.
+ * The names of this list are replaced by "***" in server responses.
+ */
+$hidden_users = array();
+
+
+/**
+ * FileSystem Addon
+ * Unix path to project root.
+ * It should point a path in a mounted volume if the project is on a dedicated
+ * file server.
+ */
+$assetsLCL = "PROJECTDIR";
 ?>

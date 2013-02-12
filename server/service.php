@@ -22,14 +22,10 @@
  *
  */
 
-include_once "permissions.php";
-if (file_exists($_SERVER['DOCUMENT_ROOT']."/.damas/permissions.php"))
-	include_once $_SERVER['DOCUMENT_ROOT']."/.damas/permissions.php";
-
 $version = "2.2-beta6";
 
 /**
- * get a command argument from POST then GET methods
+ * Get a command argument from POST then GET methods
  * @param $name {String} name of the argument to get value from
  * @return {String} argument value or null if the argument is not found
  */
@@ -67,9 +63,31 @@ class damas_service
 	static function init_http()
 	{
 		global $assetsLCL;
+		global $mod;
 		#global $hidden_users;
 		#global $versions;
 
+		include "server.php";
+		if( file_exists( "/etc/damas/server.php" ) )
+		{
+			include "/etc/damas/server.php";
+		}
+		if( file_exists( $_SERVER['DOCUMENT_ROOT'] . "/.damas/server.php" )
+			&& is_readable( $_SERVER['DOCUMENT_ROOT'] . "/.damas/server.php" ) )
+		{
+			include $_SERVER['DOCUMENT_ROOT']."/.damas/server.php";
+		}
+		include_once "permissions.php";
+		if( file_exists( "/etc/damas/permissions.php" ) )
+		{
+			include "/etc/damas/permissions.php";
+		}
+		if( file_exists( $_SERVER['DOCUMENT_ROOT'] . "/.damas/permissions.php" )
+			&& is_readable( $_SERVER['DOCUMENT_ROOT'] . "/.damas/permissions.php" ) )
+		{
+			include_once $_SERVER['DOCUMENT_ROOT'] . "/.damas/permissions.php";
+		}
+		/*
 		if( !file_exists( $_SERVER['DOCUMENT_ROOT'] . "/.damas/server.php" ) )
 		{
 			header("HTTP/1.1: 500 Internal Server Error");
@@ -83,6 +101,7 @@ class damas_service
 			exit;
 		}
 		include $_SERVER['DOCUMENT_ROOT']."/.damas/server.php";
+		*/
 
 		if( !function_exists("mysql_connect") )
 		{
