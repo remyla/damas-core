@@ -162,8 +162,8 @@ class damas_service
 		global $mod;
 		if( ! is_array( $mod[$service_name] ) )
 		{
-			header("HTTP/1.1: 403 Forbidden"); //ERR_PERMISSION
-			echo "Permission denied";
+			header("HTTP/1.1: 403 Forbidden");
+			echo "The operation '" . $service_name . "' is not defined";
 			exit;
 		}
 		if( in_array("*", $mod[$service_name] ) )
@@ -174,8 +174,8 @@ class damas_service
 		{
 			return true;
 		}
-		header("HTTP/1.1: 403 Forbidden"); //ERR_PERMISSION
-		echo "Permission denied";
+		header("HTTP/1.1: 403 Forbidden");
+		echo "The operation is not allowed for the authenticated user";
 		exit;
 	}
 
