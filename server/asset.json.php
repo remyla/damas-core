@@ -270,6 +270,19 @@ switch( arg("cmd") )
 		echo json_encode( true );
 		break;
 	case "version_backup":
+		$path = model::getKey( arg('id'), 'file' );
+		if( ! file_exists( $assetsLCL . $path ) )
+		{
+			header("HTTP/1.1: 404 Not Found");
+			echo "File " . $path . " not found";
+			exit;
+		}
+		if( ! is_readable( $assetsLCL . $path ) )
+		{
+			header("HTTP/1.1: 403 Forbidden");
+			echo "The file is not readable";
+			exit;
+		}
 		$id = assets::version_backup( arg("id") );
 		if( !$id )
 		{
