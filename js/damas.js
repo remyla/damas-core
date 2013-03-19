@@ -138,23 +138,23 @@ damas.utils = {};
 // SORT AND FILTER ELEMENTS
 
 /**
- * Filter messages and tasks from an array of elements
+ * Remove the specified type from an array of elements
  * @param {Array} elements elements to filter
  * @returns {Array} the filtered array
  */
-damas.utils.filter = function ( elements )
+damas.utils.filter = function ( elements, type )
 {
 	var res = new Array();
 	for( var i=0; i< elements.length; i++ )
 	{
-		if( elements[i].type === 'message' ) continue;
+		if( elements[i].type === type ) continue;
 		res.push( elements[i] );
 	}
 	return res;
 }
 
 /**
- * Keep a specified type from an array of elements
+ * Keep the specified type from an array of elements
  * @param {Array} elements elements to parse
  * @param {String} type type name to keep
  * @returns {Array} the filtered array
