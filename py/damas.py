@@ -40,16 +40,18 @@
     Michael Haussmann
 
   ChangeLog:
-	130108 id and parent_id forced to int
-	121116 added element.filecheck method
-	121113 reflected lock / unlock methods api changes
-	121112 some code cleanup (thanks Stephane Hoarau)
-	120924 renamed dam.getChildren in dam.children
-       added dam.find
-       dam.getElementsBySQL replaced by dam.findSQL
-       removed dam.getElementById method
-       soap is replaced by json
-       xml.dom module import removed
+    130319 removed use of reserved words: type and id, fixed issues on links
+           (thanks stephane hoarau)
+    130108 id and parent_id forced to int
+    121116 added element.filecheck method
+    121113 reflected lock / unlock methods api changes
+    121112 some code cleanup (thanks Stephane Hoarau)
+    120924 renamed dam.getChildren in dam.children
+           added dam.find
+           dam.getElementsBySQL replaced by dam.findSQL
+           removed dam.getElementById method
+           soap is replaced by json
+           xml.dom module import removed
     120503 user authentication now use json
     120131 added element.write method
     120119 added link and unlink methods
@@ -57,7 +59,8 @@
     111202 fix: setKey value.encode('utf8') (thanks to sebastien courtois)
     111104 added recycle() method
     111014 fix: parent_id set to None if root element
-    111003 new methods cloneNode() createFromTemplate() move() setKeys() setTags() 
+    111003 new methods cloneNode() createFromTemplate() move() setKeys()
+           setTags()
     111003 element.id and element.parent_id are converted to integers
 
   Todo:
@@ -103,29 +106,29 @@ class project( object ) :
 
 	# MODEL METHODS
 
-	def ancestors( self, id ) :
+	def ancestors( self, idx ) :
 		'''
 		Retrieve the ancestors (parent and above) of a node
 		@param {Integer} id node index
 		@return {list} list of ancestors ids
 		'''
-		return self.readJSONElements( self.command( { 'cmd': 'ancestors', 'id': id } )['json'] )
+		return self.readJSONElements( self.command( { 'cmd': 'ancestors', 'id': idx } )['json'] )
 
-	def children( self, id ) :
+	def children( self, idx ) :
 		'''
 		Retrieve the children of a node
 		@param {Integer} id node index
 		@return {list} list of children elements
 		'''
-		return self.readJSONElements( self.command( { 'cmd': 'children', 'id': id } )['json'] )
+		return self.readJSONElements( self.command( { 'cmd': 'children', 'id': idx } )['json'] )
 
-	def cloneNode( self, id ) :
+	def cloneNode( self, idx ) :
 		'''
 		Make an exact copy of an element
 		@param {Integer} id Element Index
 		@returns {Element} element created on success, False otherwise
 		'''
-		res = self.command( { 'cmd': 'duplicate', 'id': id } )
+		res = self.command( { 'cmd': 'duplicate', 'id': idx } )
 		if res['status'] == 200:
 			return element( res['json'], self )
 		return False
@@ -152,7 +155,7 @@ class project( object ) :
 		except:
 			return { 'status': a.code, 'text': responseText, 'json': None }
 
-	def createFromTemplate( self, id, target, keys, tags ) :
+	def createFromTemplate( self, idx, target, keys, tags ) :
 		'''
 		Creates a node using an existing node as template.
 		@param {Integer} id Template node index
@@ -161,7 +164,7 @@ class project( object ) :
 		@param {String} tags Comma separated tags string
 		@returns {Element} the new element
 		'''
-		elem = self.cloneNode( id )
+		elem = self.cloneNode( idx )
 		elem.move( target )
 		for k, v in keys.items() :
 			elem.setKey( k, v )
@@ -169,14 +172,14 @@ class project( object ) :
 		elem.setTags( tags )
 		return elem
 
-	def createNode( self, id, nodeType ) :
+	def createNode( self, idx, nodeType ) :
 		'''
 		Creates a node of the specified type
 		@param {Integer} id Parent node index
 		@param {String} nodeType type of the new node
 		@returns {DamNode} New node on success, false otherwise
 		'''
-		res = self.command( { 'cmd': 'createNode', 'id': id, 'type': nodeType } )
+		res = self.command( { 'cmd': 'createNode', 'id': idx, 'type': nodeType } )
 		if res['status'] == 200:
 			return element( res['json'], self )
 		return False
@@ -199,13 +202,13 @@ class project( object ) :
 		'''
 		return self.command( { 'cmd': 'findSQL', 'query': query } )['json']
 
-	def getNode( self, id ) :
+	def getNode( self, idx ) :
 		'''
 		Retrieve a Damas element specifying its internal node index
 		@param {Integer} id the internal node index to search
 		@returns {Damas Element} DAMAS element or false on failure
 		'''
-		res = self.command( { 'cmd': 'single', 'id': id } )
+		res = self.command( { 'cmd': 'single', 'id': idx } )
 		if res['status'] == 200:
 			return element( res['json'], self )
 		return False
@@ -216,7 +219,7 @@ class project( object ) :
 		@param {Array} indexes array of node ids to retrieve
 		@returns {Array} array of Damas elements
 		'''
-		return self.readJSONElements( self.command( { 'cmd': 'multi', 'id': ','.join( str(id) for id in ids ) } )['json'] )
+		return self.readJSONElements( self.command( { 'cmd': 'multi', 'id': ','.join( str( idx ) for idx in ids ) } )['json'] )
 
 	def link( self, src_id, tgt_id ) :
 		'''
@@ -225,24 +228,27 @@ class project( object ) :
 		@param {Integer} tgt_id the target node internal id of the link
 		@returns the link id integer on success, False otherwise
 		'''
-		return int( self.command( { 'cmd': 'link', 'src': src_id, 'tgt': tgt_id } )['text'] ) | False
+		sResult = self.command( { 'cmd': 'link', 'src': src_id, 'tgt': tgt_id } )['text']
+		if sResult:
+			return int( sResult )
+		return False
 
-	def links( self, id ) :
+	def links( self, idx ) :
 		'''
 		Retrieve the elements linked to the specified element
 		@param {Array} indexes array of node ids to retrieve
 		@returns {Array} array of Damas elements
 		'''
-		return self.readJSONElements( self.command( { 'cmd': 'links', 'id': id } )['json'] )
+		return self.readJSONElements( self.command( { 'cmd': 'links', 'id': idx } )['json'] )
 
-	def move( self, id, target ) :
+	def move( self, idx, target ) :
 		'''
 		Move elements
 		@param {Integer} id Element index
 		@param {Integer} target Index of the new parent element
 		@returns {Boolean} true on success, false otherwise
 		'''
-		return self.command( { 'cmd': 'move', 'id': id, 'target': target } )['status'] == 200
+		return self.command( { 'cmd': 'move', 'id': idx, 'target': target } )['status'] == 200
 
 	def readJSONElements( self, json ) :
 		'''
@@ -255,15 +261,15 @@ class project( object ) :
 			elements.append( element( e, self ) )
 		return elements
 
-	def removeNode( self, id ) :
+	def removeNode( self, idx ) :
 		'''
 		Recursively delete the specified node
 		@param {Integer} id Element index to delete
 		@returns {Boolean} True on success, False otherwise
 		'''
-		return self.command( { 'cmd': 'removeNode', 'id': id } )['status'] == 200
+		return self.command( { 'cmd': 'removeNode', 'id': idx } )['status'] == 200
 
-	def setKey( self, id, name, value ) :
+	def setKey( self, idx, name, value ) :
 		'''
 		Adds a new attribute. If an attribute with that name is already present in
 		the element, its value is changed to be that of the value parameter
@@ -273,9 +279,9 @@ class project( object ) :
 		@returns {Boolean} True on success, False otherwise
 
 		'''
-		return self.command( { 'cmd': 'setKey', 'id': id, 'name': name, 'value': value } )['status'] == 200
+		return self.command( { 'cmd': 'setKey', 'id': idx, 'name': name, 'value': value } )['status'] == 200
 
-	def setKeys( self, id, old_pattern, new_pattern ) :
+	def setKeys( self, idx, old_pattern, new_pattern ) :
 		'''
 		Recursively modify a node, searching and replacing a specified pattern in its sub key values
 		@param {Integer} id Node index to modify
@@ -283,15 +289,15 @@ class project( object ) :
 		@param {String} value Value of the attribute
 		@returns {Boolean} True on success, False otherwise
 		'''
-		return self.command( { 'cmd': 'setKeys', 'id': id, 'old': old_pattern, 'new': new_pattern } )['status'] == 200
+		return self.command( { 'cmd': 'setKeys', 'id': idx, 'old': old_pattern, 'new': new_pattern } )['status'] == 200
 
-	def setTags( self, id, tags ) :
+	def setTags( self, idx, tags ) :
 		'''
 		Set multiple tags at a time on the specified element
 		@param {String} tags The coma separated tags to set
 		@returns {Boolean} True on success, False otherwise
 		'''
-		return self.command( { 'cmd': 'setTags', 'id': id, 'tags': tags } )['status'] == 200
+		return self.command( { 'cmd': 'setTags', 'id': idx, 'tags': tags } )['status'] == 200
 
 	def unlink( self, link_id ) :
 		'''
@@ -299,7 +305,7 @@ class project( object ) :
 		@param {Integer} the link id to remove
 		@returns True on success, False otherwise
 		'''
-		return self.command( { 'cmd': 'unlink', 'id': id } )['status'] == 200
+		return self.command( { 'cmd': 'unlink', 'id': link_id } )['status'] == 200
 
 
 class element( object ) :
@@ -314,6 +320,8 @@ class element( object ) :
 		self.project = project
 		self.tags = []
 		self.type = None
+		self.link_id = None
+
 		if json:
 			self.childcount = json['childcount']
 			self.id = int( json['id'] )
@@ -324,18 +332,21 @@ class element( object ) :
 			if 'tags' in json:
 				self.tags = json['tags']
 			self.type = json['type']
+			if 'link_id' in json:
+				self.link_id = int( json['link_id'] )
 
 	def __repr__( self ) :
-		txt  = "id= " + str( self.id )
-		txt += "\ntype= " + self.type
+		txt = "id= " + str( self.id )
+		txt += "\ntype= " + str( self.type )
 		txt += "\nparent_id= " + str( self.parent_id )
 		txt += "\nkeys= " + str( self.keys )
 		txt += "\ntags= " + str( self.tags )
 		txt += "\nchildren= " + str( self.children )
+		txt += "\nlink_id= " + str( self.links )
 		return txt
 
-	def createNode( self, type ) :
-		return self.project.createNode( self.id, type )
+	def createNode( self, nodeType ) :
+		return self.project.createNode( self.id, nodeType )
 
 	def getChildren( self ) :
 		self.children = self.project.children( self.id )
@@ -392,7 +403,7 @@ class element( object ) :
 	# DAM METHODS
 
 	def recycle( self ) :
-		return self.project.command( { 'cmd': 'recycle', 'id': id }, '/asset.json.php' )['status'] == 200
+		return self.project.command( { 'cmd': 'recycle', 'id': self.id }, '/asset.json.php' )['status'] == 200
 
 	def write( self, text ) :
 		'''
