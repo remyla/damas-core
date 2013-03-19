@@ -233,17 +233,14 @@ switch( arg("cmd") )
 		exit;
 */
 	case "upload":
-		if( model::hastag( arg( 'id' ), 'lock' ) )
+		if( model::getKey( arg( 'id' ), 'lock_user' ) != getUser() )
 		{
-			if( model::getKey( arg( 'id' ), 'lock_user' ) != getUser() )
-			{
-				//
-				// HTTP errors don't work with ajaxupload - we send error 200 then a response != true
-				//header("HTTP/1.1: 304 Not Modified Asset Not updated");
-				//
-				echo json_encode( 'The asset is locked, and was not updated' );
-				exit;
-			}
+			//
+			// HTTP errors don't work with ajaxupload - we send error 200 then a response != true
+			//header("HTTP/1.1: 304 Not Modified Asset Not updated");
+			//
+			echo json_encode( 'The asset is locked, and was not updated' );
+			exit;
 		}
 		$path = $_FILES['file']['tmp_name'];
 		if( !is_uploaded_file( $path ) )
