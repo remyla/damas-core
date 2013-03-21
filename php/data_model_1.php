@@ -230,7 +230,7 @@ class model
 	}
 
 	/**
- 	 * Move a node to a new container
+ 	 * Move a node to a new container. Does not check parent loops
 	 * @param {Integer} $id node index to move
 	 * @param {Integer} $target target id
 	 * @return {Boolean} true on success, false otherwise
@@ -294,15 +294,17 @@ class model
 	 */
 	static function find ( $keys )
 	{
-		$query = "SELECT DISTINCT node_id FROM `key` WHERE 1";
+		// original line changed to sort results using the label key if it exists
+		//$query = "SELECT DISTINCT node_id FROM `key` WHERE 1";
+		$query = "SELECT DISTINCT k1.node_id FROM `key` AS k1 LEFT JOIN `key` AS k2 ON k1.node_id=k2.node_id AND k2.name='label' WHERE 1";
         foreach( $keys as $k=>$v )
 		{
-			$query .= sprintf( " AND node_id IN ( SELECT node_id FROM `key` WHERE name='%s' AND value='%s' )",
+			$query .= sprintf( " AND k1.node_id IN ( SELECT node_id FROM `key` WHERE name='%s' AND value='%s' )",
 				mysql_real_escape_string($k),
 				mysql_real_escape_string($v) );
-			//$query .= ' AND node_id IN ( SELECT node_id FROM `key` WHERE name="' . $k . '" AND value="' . $v . '" ) ';
 		}
-		$query .= ";";
+		//$query .= ";";
+		$query .= " ORDER BY k2.value;";
 		$result = mysql_query( $query );
 		$matches = array();
 		while( $row = mysql_fetch_array( $result ) )
