@@ -120,17 +120,6 @@ damas.post = function ( url, args ) {
 }
 
 /**
- * Search database tags and keys for a specified text
- * @returns {Boolean} true on success, false otherwise
- */
-damas.search = function ( searchtext )
-{
-	document.fire('dam:submit.search', {'value': searchtext.substring(0, (searchtext.indexOf('&') == -1?searchtext.length: searchtext.indexOf('&')))} );
-}
-
-
-
-/**
  * Methods to process data, serialize/deserialize, filter, sort
  */
 damas.utils = {};
@@ -430,7 +419,7 @@ damas.project.findSQL = function ( query )
  */
 damas.project.findTag = function ( tagname )
 {
-	return project.findSQL( "SELECT node.id FROM node LEFT JOIN tag ON node.id=tag.node_id WHERE tag.name='" + tagname + "' ORDER BY node.type;" );
+	return project.findSQL( "SELECT tag.node_id AS id FROM tag LEFT JOIN `key` ON `key`.node_id=tag.node_id AND ( key.name='label' ) WHERE tag.name='" + tagname + "' ORDER BY `key`.value;" );
 }
 
 /**
