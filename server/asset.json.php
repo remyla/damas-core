@@ -233,7 +233,7 @@ switch( arg("cmd") )
 		exit;
 */
 	case "upload":
-		if( model::getKey( arg( 'id' ), 'lock' ) != getUser() )
+		if( model::getKey( arg( 'id' ), 'lock_user' ) != getUser() )
 		{
 			//
 			// HTTP errors don't work with ajaxupload - we send error 200 then a response != true
