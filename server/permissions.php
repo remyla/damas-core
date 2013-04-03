@@ -56,7 +56,7 @@ $mod["model::untag"] = array( "admin", "editor" );
 
 $mod["asset::empty_trashcan"] = array( "admin" );
 $mod["asset::filecheck"] = array( "*" );
-$mod["asset::getElementById"] = array( "*" );
+$mod["asset::settings"] = array( "*" );
 $mod["asset::lock"] = array( "admin", "editor", "user", "linker" );
 $mod["asset::recycle"] = array( "admin", "editor" );
 $mod["asset::time"] = array( "admin", "editor", "user", "linker" );
