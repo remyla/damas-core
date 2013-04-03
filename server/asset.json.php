@@ -37,6 +37,30 @@ header('Content-type: application/json');
 
 switch( arg("cmd") )
 {
+	case "settings":
+		//echo json_encode( ini_get_all( null, false ) ); // debug only
+		// helper from php.net:
+		function return_bytes($val)
+		{
+			$val = trim($val);
+			$last = strtolower($val[strlen($val)-1]);
+			switch($last) {
+				// The 'G' modifier is available since PHP 5.1.0
+				case 'g':
+					$val *= 1024;
+				case 'm':
+					$val *= 1024;
+				case 'k':
+					$val *= 1024;
+			}
+			return $val;
+		}
+		echo json_encode( array(
+			'post_max_size' => return_bytes( ini_get('post_max_size') ),
+			'upload_max_filesize' => return_bytes( ini_get('upload_max_filesize') ),
+			'max_file_uploads' => intval( ini_get('max_file_uploads') )
+		));
+		break;
 	case "filecheck":
 		if( model::getKey( arg('id'), 'file' ) )
 		{
@@ -132,48 +156,183 @@ switch( arg("cmd") )
 		echo json_encode( 'The file upload failed, the image was not updated' );
 		exit;
 	case "upload_create_asset":
+		//
+		// Error handling - must be successful for every file, else we abort
+		//
+		$error_detected = false;
+		$msg = '';
 		foreach( $_FILES as $file )
 		{
 			if( $file['error'] != 0 )
 			{
-				header("HTTP/1.1: 409 Conflict");
-				echo $file['name'] . ' was not uploaded: ';
+				$error_detected = true;
+				$msg .= $file['name'] . ': ';
 				switch ($file['error']) {
 					case UPLOAD_ERR_INI_SIZE:
-						echo 'The uploaded file exceeds the upload_max_filesize directive in php.ini';
+						$msg .= 'The uploaded file exceeds the upload_max_filesize directive in php.ini';
 						break;
 					case UPLOAD_ERR_FORM_SIZE:
-						echo 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form';
+						$msg .= 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form';
 						break;
 					case UPLOAD_ERR_PARTIAL:
-						echo 'The uploaded file was only partially uploaded';
+						$msg .= 'The uploaded file was only partially uploaded';
 						break;
 					case UPLOAD_ERR_NO_FILE:
-						echo 'No file was uploaded';
+						$msg .= 'No file was uploaded';
 						break;
 					case UPLOAD_ERR_NO_TMP_DIR:
-						echo 'Missing a temporary folder';
+						$msg .= 'Missing a temporary folder';
 						break;
 					case UPLOAD_ERR_CANT_WRITE:
-						echo 'Failed to write file to disk';
+						$msg .= 'Failed to write file to disk';
 						break;
 					case UPLOAD_ERR_EXTENSION:
-						echo 'File upload stopped by extension';
+						$msg .= 'File upload stopped by extension';
 						break;
 					default:
-						echo 'Unknown upload error';
+						$msg .= 'Unknown upload error';
 						break;
 				} 
-				echo '. ';
+				$msg .= '. ';
 				continue;
 			}
 			if( ! is_uploaded_file( $file['tmp_name'] ) )
 			{
-				header("HTTP/1.1: 409 Conflict");
-				echo "is_uploaded_file returned false. Possible break attempt";
-				exit;
+				$error_detected = true;
+				$msg .= $file['name'] . ": is_uploaded_file returned false. Possible break attempt";
+				continue;
+			}
+		}
+		if( $error_detected )
+		{
+			header("HTTP/1.1: 409 Conflict");
+			echo $msg . '. No change made.';
+			exit;
+		}
+		foreach( $_FILES as $file )
+		{
+			// we are in a dir
+			if( !is_writable( $assetsLCL . model::getKey( arg( 'id' ), 'dir' ) ) )
+			{
+				$error_detected = true;
+				$msg .= model::getKey( arg( 'id' ), 'dir' ) . " is not writable. ";
 			}
 			$path = model::getKey( arg( 'id' ), 'dir' ) . '/' . $file['name'];
+			$id =  array_shift( model::find( array( 'file' => $path ) ) );
+			if( $id )
+			{
+				// replacement checks
+				switch( model::getKey( arg('id'), 'mode' ) )
+				{
+					case '1':
+					default:
+						if( !is_writable( $assetsLCL . assets::getbackupfolder( $id ) ) )
+						{
+							$error_detected = true;
+							$msg .= assets::getbackupfolder( $id ) . " is not writable. ";
+						}
+						if( file_exists( $assetsLCL . assets::getbackuppath( $id ) ) )
+						{
+							$error_detected = true;
+							$msg .= assets::getbackuppath( $id ) . " exists. ";
+						}
+						if( !is_writable( $assetsLCL . model::getKey( $id, 'file' ) ) )
+						{
+							$error_detected = true;
+							$msg .= model::getKey( $id, 'file' ) . " is not writable. ";
+						}
+						break;
+				}
+			}
+		}
+		if( $error_detected )
+		{
+			header("HTTP/1.1: 409 Conflict");
+			echo $msg . 'No change made.';
+			exit;
+		}
+		//
+		// Perform the file(s) creation / replacement
+		//
+		foreach( $_FILES as $file )
+		{
+			$path = model::getKey( arg( 'id' ), 'dir' ) . '/' . $file['name'];
+			$id =  array_shift( model::find( array( 'file' => $path ) ) );
+			if( $id )
+			{
+				// replacement
+				switch( model::getKey( $id, 'mode' ) )
+				{
+					case '2':
+						$newid = assets::version_increment2( $id, "new version uploaded" );
+						if( !$newid )
+						{
+							$error_detected = true;
+							$msg .= model::getKey( $id, 'file' ) . " increment2 failed. ";
+							continue;
+						}
+						if( !move_uploaded_file( $file['tmp_name'], $assetsLCL . model::getKey( $newid, 'file' ) ) )
+						{
+							$error_detected = true;
+							$msg .= model::getKey( $id, 'file' ) . " move_uploaded_file failed (enough space?). ";
+							continue;
+						}
+						break;
+					case '1':
+					default:
+						$new_id = assets::version_backup( $id );
+						if( !$new_id )
+						{
+							$error_detected = true;
+							$msg .= model::getKey( $id, 'file' ) . " backup failed. ";
+							continue;
+						}
+						if( !move_uploaded_file( $file['tmp_name'], $assetsLCL . model::getKey( $id, 'file' ) ) )
+						{
+							unlink( $assetsLCL . model::getKey( $new_id, 'file' ) );
+							model::removeNode( $new_id );
+							$error_detected = true;
+							$msg .= model::getKey( $id, 'file' ) . " move_uploaded_file failed (enough space?). ";
+							continue;
+						}
+						if( !assets::version_increment( $id, "new version uploaded" ) )
+						{
+							$error_detected = true;
+							$msg .= model::getKey( $id, 'file' ) . " increment failed. ";
+							continue;
+						}
+						model::setKey( $id, 'bytes', $file['size'] );
+						break;
+				}
+				/*
+				if( !assets::asset_upload( $asset, $file['tmp_name'], "new version uploaded" ) )
+				{
+					header("HTTP/1.1: 304 Not Modified Asset Not updated");
+					echo json_encode('The file upload failed, the asset was not updated');
+					exit;
+				}
+				*/
+			}
+			else
+			{
+				// creation
+				if( move_uploaded_file( $file['tmp_name'], $assetsLCL . $path ) )
+				{
+					$asset = model::createNode( arg( 'id' ), "asset" );
+					model::setKey( $asset, 'file', $path );
+					model::setKey( $asset, 'text', 'initial version uploaded' );
+					model::setKey( $asset, 'user', getUser() );
+					model::setKey( $asset, 'time', time() );
+					model::setKey( $asset, 'bytes', $file['size'] );
+				}
+				else
+				{
+					$error_detected = true;
+					$msg .= $path . "move_uploaded_file failed (enough space?). ";
+					continue;
+				}
+			}
+/*
 			// overwrite an existing file!
 			if( move_uploaded_file( $file['tmp_name'], $assetsLCL . $path ) )
 			{
@@ -202,11 +361,17 @@ switch( arg("cmd") )
 				echo "move_uploaded_file failed. enough space?";
 				exit;
 			}
+*/
+		}
+		if( $error_detected )
+		{
+			header("HTTP/1.1: 409 Conflict");
+			echo $msg . 'No change made.';
+			exit;
 		}
 		break;
 
 /*
-
 		if( is_uploaded_file( $_FILES['file']['tmp_name'] ) )
 		{
 			$file = model::getKey( arg( 'id' ), 'dir' ) . '/' . $_FILES['file']['name'];
@@ -233,7 +398,7 @@ switch( arg("cmd") )
 		exit;
 */
 	case "upload":
-		if( model::getKey( arg( 'id' ), 'lock_user' ) != getUser() )
+		if( model::getKey( arg( 'id' ), 'lock' ) && model::getKey( arg( 'id' ), 'lock' ) != getUser() )
 		{
 			//
 			// HTTP errors don't work with ajaxupload - we send error 200 then a response != true
@@ -249,6 +414,7 @@ switch( arg("cmd") )
 			// HTTP errors don't work with ajaxupload - we send error 200 then a response != true
 			//header("HTTP/1.1: 304 Not Modified Asset Not updated");
 			//
+			//echo "is_uploaded_file returned false. Possible break attempt";
 			echo json_encode( 'The file upload failed, the asset was not updated' );
 			exit;
 		}

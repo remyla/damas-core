@@ -175,6 +175,7 @@ class assets
 		touch( $bpath, filemtime( $opath ) );
 		$new_id = model::createNode( $id, "asset" );
 		if( !$new_id ) return false;
+		model::setKey( $new_id, "bytes", model::getKey( $id, 'bytes' ) );
 		model::setKey( $new_id, "file", assets::getbackuppath( $id ) );
 		model::setKey( $new_id, "sha1", model::getKey( $id, 'sha1' ) );
 		model::setKey( $new_id, "text", model::getKey( $id, 'text' ) );
