@@ -138,6 +138,11 @@ class assets
 			case '1':
 			default:
 				global $assetsLCL;
+				if( !file_exists( $assetsLCL . assets::getbackupfolder( $id ) ) )
+				{
+					if( ! mkdir( $assetsLCL . assets::getbackupfolder( $id ), 0755, true ) )
+						return false;
+				}
 				if( !is_writable( $assetsLCL . assets::getbackupfolder( $id ) ) )
 					return false;
 				if( file_exists( $assetsLCL . assets::getbackuppath( $id ) ) )
