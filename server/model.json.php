@@ -86,6 +86,7 @@ switch( arg("cmd") )
 			echo "Bad command";
 			exit;
 		}
+/* move dir or file to dir - incomplete - case : node dir /animatic move to / does a conflict
 		if( model::getKey( arg("target"), "dir" ) )
 		{
 			if( model::getKey( arg("id"), "file" ) || model::getKey( arg("id"), "dir" ) )
@@ -116,6 +117,7 @@ switch( arg("cmd") )
 				model::setKeys( arg("id"), $oldpath, $newpath );
 			}
 		}
+*/
 /*
 		// move file to dir
 		if( model::getKey( arg("id"), "file" ) && model::getKey( arg("target"), "dir" ) )
@@ -174,8 +176,18 @@ switch( arg("cmd") )
 			}
 		}
 		*/
-		$value = model::getKey( arg("id"), arg("name") );
 
+		// TRIGGER unique keys
+		if( arg("name") == 'id' || arg("name") == 'file' || arg("name") == 'dir' || arg("name") == 'username' )
+		{
+			if( sizeof( model::find( array( arg("name") => arg("value") ) ) ) !== 0 )
+			{
+				header("HTTP/1.1: 409 Conflict");
+				echo "Key exists";
+				exit;
+			}
+		}
+		$value = model::getKey( arg("id"), arg("name") );
 		// TRIGGER file rename
 		if( arg("name") == 'file' && $value )
 		{
@@ -195,10 +207,11 @@ switch( arg("cmd") )
 				echo "Directory rename error, please change values";
 				exit;
 			}
-			$query = sprintf( "UPDATE `key` SET value = REPLACE( value,'%s','%s') WHERE value LIKE '%s%%';",
-						$value,
-						arg("value"),
-						$value );
+			$query = sprintf( "UPDATE `key` SET value = REPLACE( value,'%s','%s') WHERE value LIKE '%s%%' AND name='file';",
+						$value, arg("value"), $value );
+			$res = mysql_query( $query );
+			$query = sprintf( "UPDATE `key` SET value = REPLACE( value,'%s','%s') WHERE value LIKE '%s%%' AND name='dir';",
+						$value, arg("value"), $value );
 			$res = mysql_query( $query );
 		}
 		// TRIGGER END
@@ -369,7 +382,11 @@ switch( arg("cmd") )
 			header('HTTP/1.1: 400 Bad Request');
 			exit;
 		}
-		echo json_encode( model_json::multi( model::children( arg('id') ) ) );
+		// Here we implemented the children method to return indexes for performance, keeping the backward compatibility
+		if( arg("int") === '1' )
+			echo json_encode( model::children( arg('id') ) );
+		else
+			echo json_encode( model_json::multi( model::children( arg('id') ) ) );
 		break;
 	case "find":
 		$a = $_GET + $_POST;
