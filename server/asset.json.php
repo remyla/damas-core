@@ -243,6 +243,11 @@ switch( arg("cmd") )
 						}
 						break;
 				}
+				if( model::getKey( $id, 'lock' ) && model::getKey( arg( 'id' ), 'lock' ) != getUser() )
+				{
+					$error_detected = true;
+					$msg .= model::getKey( $id, 'file' ) . " is locked by " . model::getKey( $id, 'lock') . ". ";
+				}
 			}
 		}
 		if( $error_detected )
