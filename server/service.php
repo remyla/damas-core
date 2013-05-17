@@ -42,10 +42,18 @@ function arg ( $name )
 
 function auth_get_class ()
 {
-	$id = model::searchKey( 'username', getUser() );
-	return model::getKey( $id[0], 'class' );
+	if( function_exists( getUser ) )
+	{
+		$id = model::searchKey( 'username', getUser() );
+		return model::getKey( $id[0], 'class' );
+	}
+	else
+	{
+		return "guest";
+	}
 }
 
+/*
 function allowed ( $service_name )
 {
 	global $mod;
@@ -57,6 +65,7 @@ function allowed ( $service_name )
 		return true;
 	return false;
 }
+*/
 
 class damas_service
 {
@@ -66,6 +75,7 @@ class damas_service
 		global $mod;
 		#global $hidden_users;
 		#global $versions;
+		global $authentication;
 
 		include "server.php";
 		if( file_exists( "/etc/damas/server.php" ) )
@@ -106,19 +116,19 @@ class damas_service
 		if( !function_exists("mysql_connect") )
 		{
 			header("HTTP/1.1: 500 Internal Server Error");
-			echo "MySQL is not supported";
+			echo "MySQL is not installed";
 			exit;
 		}
 		if( !@mysql_connect($db_server, $db_username, $db_passwd) )
 		{
 			header("HTTP/1.1: 500 Internal Server Error");
-			echo "MySQL connect returned error";
+			echo "mysql_connect error: " . mysql_error();
 			exit;
 		}
 		if( !mysql_select_db($db_name) )
 		{
 			header("HTTP/1.1: 500 Internal Server Error");
-			echo "MySQL database select error";
+			echo "mysql_select_db error: " . mysql_error();
 			exit;
 		}
 
@@ -144,6 +154,9 @@ class damas_service
 	 */
 	static function accessGranted()
 	{
+		global $authentication;
+		if( $authentication == "None" )
+			return true;
 		global $anonymous_access;
 		if( $anonymous_access )
 			return true;
