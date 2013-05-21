@@ -509,7 +509,7 @@ switch( arg("cmd") )
 		exit;
 } // switch / case
 
-$nolog = array( 'single', 'children', 'multi', 'stats', 'types', 'tags', 'search' );
+$nolog = array( 'ancestors', 'single', 'children', 'links', 'multi', 'stats', 'types', 'tags', 'search' );
 if( !in_array( arg('cmd'), $nolog ) )
 	damas_service::log_event();
 ?>
