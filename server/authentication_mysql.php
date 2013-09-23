@@ -10,7 +10,7 @@
 function login ( $login, $password )
 {
 	global $_SESSION;
-	session_register();
+	#session_register(); # php < 5.4
 	if( mysql_get_server_info()>"5" )
 		$query = "SELECT login FROM user WHERE login='$login' AND password=OLD_PASSWORD('$password');";
 	else
@@ -24,7 +24,8 @@ function login ( $login, $password )
 
 function logout ()
 {
-	if( !session_is_registered("login") )
+	# if( !session_is_registered("login") ) # php < 5.4
+	if( !array_key_exists( 'login', $_SESSION ) )
 		return false;
 	session_destroy();
 	return true;
