@@ -22,7 +22,8 @@
  *
  */
 
-include $_SERVER['DOCUMENT_ROOT']."/.damas/server.php";
+include "server.php";
+#include $_SERVER['DOCUMENT_ROOT']."/.damas/server.php";
 
 $file = false;
 if( array_key_exists( "file", $_POST ) )
