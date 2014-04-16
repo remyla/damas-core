@@ -329,11 +329,12 @@ switch( arg("cmd") )
 					model::setKey( $asset, 'user', getUser() );
 					model::setKey( $asset, 'time', time() );
 					model::setKey( $asset, 'bytes', $file['size'] );
+					model::setKey( $asset, 'version', 1 );
 				}
 				else
 				{
 					$error_detected = true;
-					$msg .= $path . "move_uploaded_file failed (enough space?). ";
+					$msg .= $path . " move_uploaded_file failed (enough space?). ";
 					continue;
 				}
 			}
@@ -432,6 +433,7 @@ switch( arg("cmd") )
 			echo json_encode( 'The file upload failed, the asset was not updated' );
 			exit;
 		}
+		model::setKey( arg( 'id' ), 'bytes', $_FILES['file']['size'] );
 		//
 		// The result must be true for ajaxupload.js
 		//
