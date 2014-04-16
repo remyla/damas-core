@@ -6,7 +6,7 @@
  * Format:
  * $mod["COMMAND_NAME"] = array( "USERCLASS1", "USERCLASS2" );
  *
- * Copyright 2005-2012 Remy Lalanne
+ * Copyright 2005-2014 Remy Lalanne
  *
  * This file is part of damas-core.
  *

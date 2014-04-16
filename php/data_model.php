@@ -14,7 +14,7 @@
  *
  * @author Remy Lalanne
  *
- * Copyright 2005-2012 Remy Lalanne
+ * Copyright 2005-2014 Remy Lalanne
  *
  * This file is part of damas-core.
  *
@@ -297,7 +297,7 @@ class model
 		// original line changed to sort results using the label key if it exists
 		//$query = "SELECT DISTINCT node_id FROM `key` WHERE 1";
 		$query = "SELECT DISTINCT k1.node_id FROM `key` AS k1 LEFT JOIN `key` AS k2 ON k1.node_id=k2.node_id AND k2.name='label' WHERE 1";
-        foreach( $keys as $k=>$v )
+		foreach( $keys as $k=>$v )
 		{
 			$query .= sprintf( " AND k1.node_id IN ( SELECT node_id FROM `key` WHERE name='%s' AND value='%s' )",
 				mysql_real_escape_string($k),
@@ -673,8 +673,8 @@ class model
 	static function countRLinks ( $id )
 	{
 		$query = "SELECT COUNT(src_id) as count FROM link WHERE tgt_id='$id';";
-    	$row = mysql_fetch_array( mysql_query( $query ) );
-    	return intval( $row["count"] );
+		$row = mysql_fetch_array( mysql_query( $query ) );
+		return intval( $row["count"] );
 	}
 	
 }

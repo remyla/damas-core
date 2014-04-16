@@ -2,7 +2,7 @@
 /**
  * JSON web service of DAMAS (damas-software.org)
  *
- * Copyright 2005-2012 Remy Lalanne
+ * Copyright 2005-2014 Remy Lalanne
  *
  * This file is part of damas-core.
  *
@@ -27,7 +27,6 @@ include_once "../php/http_service.php";
 include_once "../php/data_model.json.php";
 include_once "../php/DAM.php";
 include_once "../php/asset.php";
-include_once "FileSystem/lib.file.php";
 
 damas_service::init_http();
 damas_service::accessGranted();

@@ -3,7 +3,7 @@
  * @fileoverview Methods for DAMAS web service (damas-software.org)
  * @author Remy Lalanne
  *
- * Copyright 2005-2012 Remy Lalanne
+ * Copyright 2005-2014 Remy Lalanne
  *
  * This file is part of damas-core.
  *

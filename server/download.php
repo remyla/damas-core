@@ -3,7 +3,7 @@
  * @fileoverview File retrieving service of DAMAS (damas-software.org)
  * @author Remy Lalanne
  *
- * Copyright 2006-2012 Remy Lalanne
+ * Copyright 2006-2014 Remy Lalanne
  *
  * This file is part of damas-core.
  *

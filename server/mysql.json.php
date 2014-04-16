@@ -2,7 +2,7 @@
 /**
  * JSON web service of DAMAS software (damas-software.org)
  *
- * Copyright 2005-2012 Remy Lalanne
+ * Copyright 2005-2014 Remy Lalanne
  *
  * This file is part of damas-core.
  *
