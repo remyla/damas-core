@@ -23,8 +23,8 @@
 
 session_start();
 
-include_once "service.php";
-include_once "../php/data_model_1.json.php";
+include_once "../php/http_service.php";
+include_once "../php/data_model.json.php";
 include_once "../php/DAM.php";
 include_once "asset.php";
 include_once "FileSystem/lib.file.php";

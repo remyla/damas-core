@@ -10,7 +10,7 @@
 session_start();
 
 include_once "service_deprecated.php"; //error_code()
-include_once "FileSystem/lib.file.php";
+include_once "../FileSystem/lib.file.php";
 
 damas_service::init_http();
 damas_service::accessGranted();

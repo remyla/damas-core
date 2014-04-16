@@ -6,7 +6,7 @@
  * errors = HTTP
  *
  * Author Remy Lalanne
- * Copyright 2005-2012 Remy Lalanne
+ * Copyright 2005-2014 Remy Lalanne
  *
  * This file is part of damas-core.
  *
@@ -27,8 +27,8 @@
 
 session_start();
 
-include_once "service.php";
-include_once "../php/data_model_1.json.php";
+include_once "../php/http_service.php";
+include_once "../php/data_model.json.php";
 
 damas_service::init_http();
 damas_service::accessGranted();
@@ -187,6 +187,7 @@ switch( arg("cmd") )
 				exit;
 			}
 		}
+		/*
 		$value = model::getKey( arg("id"), arg("name") );
 		// TRIGGER file rename
 		if( arg("name") == 'file' && $value )
@@ -215,6 +216,7 @@ switch( arg("cmd") )
 			$res = mysql_query( $query );
 		}
 		// TRIGGER END
+		*/
 		if( !model::setKey( arg("id"), arg("name"), arg("value") ) )
 		{
 			header("HTTP/1.1: 409 Conflict");

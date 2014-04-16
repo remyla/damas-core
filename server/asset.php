@@ -129,10 +129,10 @@ class assets
 				global $assetsLCL;
 				$newid = assets::version_increment2( $id, $message );
 				if( !$newid )
-        			return false;
-    			if( !move_uploaded_file( $path, $assetsLCL . model::getKey( $newid, 'file' ) ) )
+					return false;
+				if( !move_uploaded_file( $path, $assetsLCL . model::getKey( $newid, 'file' ) ) )
 				{
-        			return false;
+					return false;
 				}
 				break;
 			case '1':
@@ -152,11 +152,11 @@ class assets
 				$new_id = assets::version_backup( $id );
 				if( !$new_id )
 					return false;
-    			if( !move_uploaded_file( $path, $assetsLCL . model::getKey( $id, 'file' ) ) )
+				if( !move_uploaded_file( $path, $assetsLCL . model::getKey( $id, 'file' ) ) )
 				{
 					unlink( $assetsLCL . model::getKey( $new_id, 'file' ) );
 					model::removeNode( $new_id );
-        			return false;
+					return false;
 				}
 				if( !assets::version_increment( $id, $message ) )
 				{

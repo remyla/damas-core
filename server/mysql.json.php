@@ -22,7 +22,7 @@
  */
 session_start();
 
-include_once "service.php";
+include_once "../php/http_service.php";
 
 damas_service::init_http();
 damas_service::accessGranted();
