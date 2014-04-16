@@ -26,7 +26,7 @@ session_start();
 include_once "../php/http_service.php";
 include_once "../php/data_model.json.php";
 include_once "../php/DAM.php";
-include_once "asset.php";
+include_once "../php/asset.php";
 include_once "FileSystem/lib.file.php";
 
 damas_service::init_http();
