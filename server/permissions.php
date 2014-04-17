@@ -25,10 +25,13 @@
  *
  */
 
+$mod["model::create"] = array( "admin", "editor" );
+$mod["model::read"] = array( "*" );
+$mod["model::update"] = array( "admin", "editor" );
+$mod["model::delete"] = array( "admin", "editor" );
 
 $mod["model::ancestors"] = array( "*" );
 $mod["model::children"] = array( "*" );
-$mod["model::createNode"] = array( "admin", "editor" );
 $mod["model::duplicate"] = array( "admin", "editor" );
 $mod["model::export"] = array( "admin" ); // Axel
 $mod["model::find"] = array( "*" );
@@ -37,15 +40,8 @@ $mod["model::graph"] = array( "*" );
 $mod["model::link"] = array( "admin", "editor", "linker" );
 $mod["model::links"] = array( "*" );
 $mod["model::list"] = array( "*" );
-$mod["model::move"] = array( "admin", "editor" );
-$mod["model::multi"] = array( "*" );
-$mod["model::removeNode"] = array( "admin" );
-$mod["model::removeKey"] = array( "admin", "editor" );
-$mod["model::setKey"] = array( "admin", "editor" );
-$mod["model::setKeys"] = array( "admin", "editor" );
 $mod["model::setTags"] = array( "admin", "editor" );
 $mod["model::setType"] = array( "admin" );
-$mod["model::single"] = array( "*" );
 $mod["model::search"] = array( "*" ); // Axel
 $mod["model::stats"] = array( "*" );
 $mod["model::tag"] = array( "admin", "editor" );
@@ -53,6 +49,17 @@ $mod["model::types"] = array( "*" );
 $mod["model::tags"] = array( "*" );
 $mod["model::unlink"] = array( "admin", "editor", "linker" );
 $mod["model::untag"] = array( "admin", "editor" );
+
+
+$mod["model::createNode"] = array( "admin", "editor" );
+$mod["model::move"] = array( "admin", "editor" );
+$mod["model::multi"] = array( "*" );
+$mod["model::removeNode"] = array( "admin" );
+$mod["model::removeKey"] = array( "admin", "editor" );
+$mod["model::setKey"] = array( "admin", "editor" );
+$mod["model::setKeys"] = array( "admin", "editor" );
+$mod["model::single"] = array( "*" );
+
 
 $mod["asset::empty_trashcan"] = array( "admin" );
 $mod["asset::filecheck"] = array( "*" );

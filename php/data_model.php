@@ -171,6 +171,44 @@ class model
 	}
 
 	/**
+ 	 * Creates a node providing its internal type value. Doesn't check parent node existence.
+	 * @param {String} $type text type for the new node
+ 	 * @returns {Integer} the new node id on success, false otherwise
+ 	 */
+	static function create ( $type, $keys )
+	{
+		$query = sprintf("INSERT INTO node ( type, parent_id ) VALUES ( '%s', '%s' );",
+			mysql_real_escape_string($type),
+			'0'
+		);
+		if( $result = mysql_query($query)){
+			$id = mysql_insert_id();
+			model::update( $id, $keys );
+			return $id;
+		}
+		return $result;
+	}
+
+	/**
+	 * Update the keys of a node. Specified keys overwrite existing keys, others are left untouched.
+	 * A null key value removes the key.
+	 * @param {Integer} $id node index
+	 * @param {Array} $keys keys Array of key/value pairs to update (usually comming from json_decode)
+ 	 * @return {Boolean} true on success, false otherwise
+	 */
+	static function update ( $id, $keys )
+	{
+		foreach( $keys as $k=>$v )
+		{
+			if( $v === null)
+				model::removeKey( $id, $k );
+			else
+				model::setKey( $id, $k, $v );
+		}
+		return true;
+	}
+
+	/**
 	 * Retrieve a key value
 	 * @param {Integer} $id node index
 	 * @param {String} $name key name

@@ -47,6 +47,69 @@ $ret = false;
 
 switch( arg("cmd") )
 {
+	/* CRUD operations */
+	case "create":
+		if( is_null( arg('type') ) || is_null( arg('keys') ) )
+		{
+			header("HTTP/1.1: 400 Bad Request");
+			echo "Bad command";
+			exit;
+		}
+		$id = model::create( arg("type"), json_decode( arg("keys") ) );
+		if( !$id )
+		{
+			header("HTTP/1.1: 409 Conflict");
+			echo "create Error, please change your values";
+			exit;
+		}
+		echo json_encode( model_json::node( $id, 1, $NODE_TAG | $NODE_PRM ) );
+		break;
+	case "read":
+		if( is_null( arg('id') ) )
+		{
+			header('HTTP/1.1: 400 Bad Request');
+			exit;
+		}
+		if( strpos( arg("id"), "," ) === false )
+		{
+			$ret = model_json::node( arg( "id" ), 1, $NODE_TAG | $NODE_PRM );
+			if( !$ret )
+			{
+				header('HTTP/1.1: 404 Not Found');
+				exit;
+			}
+			echo json_encode( $ret );
+		}
+		else
+		{
+			echo json_encode( model_json::multi( split( ",", arg("id") ) ) );
+		}
+		break;
+	case "update":
+		if( is_null( arg('id') ) || is_null( arg('keys') ) )
+		{
+			header("HTTP/1.1: 400 Bad Request");
+			echo "Bad command";
+			exit;
+		}
+		$id = model::update( arg("id"), json_decode( arg("keys") ) );
+		echo json_encode( model_json::node( arg("id"), 1, $NODE_TAG | $NODE_PRM ) );
+		break;
+	case "delete":
+		if( is_null( arg('id') ) )
+		{
+			header("HTTP/1.1: 400 Bad Request");
+			echo "Bad command";
+			exit;
+		}
+		if( !model::removeNode( arg("id") ) )
+		{
+			header("HTTP/1.1: 409 Conflict");
+			echo "delete Error, please change your values";
+			exit;
+		}
+		break;
+	/* other operations */
 	case "createNode":
 		if( is_null( arg('id') ) || is_null( arg('type') ) )
 		{
