@@ -34,8 +34,7 @@
 /**
  * Static library with methods for Digital Asset Management
  * @namespace
- * @requires damas.serverRequest
- * @property {Array} errors DAMAS Error codes definitions
+ * @requires prototypejs
  * @property {String} server The currently connected DAMAS server URL
  * @property {Hash} types A Hash of the different Damas Element types defined
  * @property {String} version The version of DAMAS which is running
@@ -45,79 +44,6 @@ var damas = {};
 damas.server = '';
 damas.types = {};
 damas.version = '2.2-beta6';
-
-damas.errorCode = function ( text )
-{
-	return this.errors.indexOf( text );
-}
-
-damas.errorText = function ( code )
-{
-	return this.errors[code];
-}
-
-damas.errors = new Array();
-
-/* client */
-damas.errors[500] = "ERR_CONF";
-damas.errors[502] = "ERR_SERVER";
-damas.errors[504] = "ERR_SERVERRESPONSE";
-damas.errors[505] = "ERR_PLUGIN";
-damas.errors[506] = "ERR_AJAX";
-damas.errors[507] = "ERR_VERSION";
-
-/* server */
-damas.errors[0] = "ERR_NOERROR";
-//damas.errors[6] = "ERR_SERVER_CONF";
-damas.errors[1] = "ERR_COMMAND";
-//damas.errors[2] = "ERR_AUTHREQUIRED";
-damas.errors[3] = "ERR_PERMISSION";
-//damas.errors[4] = "ERR_AUTH";
-//damas.errors[5] = "ERR_LOGOUT";
-
-//damas.errors[10] = "ERR_MYSQL_SUPPORT";
-//damas.errors[11] = "ERR_MYSQL_SERVER";
-//damas.errors[12] = "ERR_MYSQL_CONNECT";
-//damas.errors[13] = "ERR_MYSQL_DB";
-damas.errors[14] = "ERR_MYSQL_QUERY";
-
-damas.errors[30] = "ERR_NODE_ID";
-damas.errors[31] = "ERR_NODE_CREATE";
-damas.errors[32] = "ERR_NODE_UPDATE";
-damas.errors[33] = "ERR_NODE_MOVE";
-damas.errors[34] = "ERR_NODE_DELETE";
-
-damas.errors[70] = "ERR_FILE_NOT_FOUND";
-damas.errors[71] = "ERR_FILE_PERMISSION";
-damas.errors[72] = "ERR_FILE_EMPTYDIR";
-damas.errors[73] = "ERR_FILE_UPLOAD";
-damas.errors[74] = "ERR_FILE_EXISTS";
-
-damas.errors[100] = "ERR_ASSET_LOCK";
-damas.errors[101] = "ERR_ASSET_UNLOCK";
-damas.errors[102] = "ERR_ASSET_SAVEABLE";
-damas.errors[103] = "ERR_ASSET_BACKUP";
-damas.errors[104] = "ERR_ASSET_UPDATE";
-damas.errors[105] = "ERR_ASSET_UNDOBACKUP";
-damas.errors[106] = "ERR_ASSET_ROLLBACK";
-damas.errors[107] = "ERR_ASSET_NOSHA1";
-damas.errors[108] = "ERR_ASSET_FILECHECK";
-damas.errors[109] = "ERR_ASSET_READONLY";
-
-/**
- * Communication
- * Errors handling
- * Events
- */
-damas.post = function ( url, args ) {
-	var req = new Ajax.Request( url, {
-		asynchronous: false,
-		parameters: args,
-		onFailure: damas.onFailure,
-		onException: damas.onException
-	});
-	return serverResponseHandle.decomposeResponse( req.transport.responseXML );
-}
 
 /**
  * Methods to process data, serialize/deserialize, filter, sort
@@ -317,6 +243,7 @@ damas.project.command_a = function ( args, callback )
  * @param {String} tags Comma separated tags string
  * @returns {Object} the newly created element
  */
+/*
 damas.project.createFromTemplate = function ( id, target, keys, tags )
 {
 	var newnode = project.duplicate( id );
@@ -334,21 +261,72 @@ damas.project.createFromTemplate = function ( id, target, keys, tags )
 	document.fire('dam:element.updated', { 'id': target } );
 	return newnode;
 }
+*/
 
 /**
  * Creates a node of the specified type
- * @param {Integer} id Parent node index
- * @param {String} tagName type of the new node
+ * @param {String} type type of the new node
+ * @param {Hash} keys Hash of key/value pairs
  * @returns {DamNode} New node on success, false otherwise
  */
-damas.project.createNode = function ( id, tagName )
+damas.project.create = function ( type, keys )
 {
+/*
 	var req = new Ajax.Request( this.server + "/model.json.php", {
 		asynchronous: false,
-		parameters: { 'cmd': 'createNode', 'id': id, 'type': tagName }
+		parameters: { 'cmd': 'create', 'type': type, 'keys': Object.toJSON(keys) }
 	});
 	return damas.utils.readJSONElement( JSON.parse( req.transport.responseText ) );
+*/
+	return damas.utils.readJSONElement( JSON.parse( this.command( { cmd: 'create', type: type, keys: Object.toJSON(keys) } ).text ) );
 }
+
+/**
+ * Retrieve one or many nodes specifying the internal index(es)
+ * @param {Integer} id internal node index(es) to read, comma separated
+ * @returns {damas.element} Damas element or false on failure
+ */
+damas.project.read = function ( id )
+{
+	var multi = false;
+	if( Array.isArray(id) )
+	{
+		id = id.join(',');
+		multi = true;
+	}
+	if( typeof(id) === 'string' && id.indexOf(',') != -1 )
+	{
+		multi = true;
+	}
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		method: "POST",
+		asynchronous: false,
+		parameters: { cmd: "read", id: id, depth: "1", flags: "4" }
+		//parameters: { 'cmd': 'read', 'id': id }
+	});
+	if( multi )
+		return damas.utils.readJSONElements( JSON.parse( req.transport.responseText ) );
+	else
+		return damas.utils.readJSONElement( JSON.parse( req.transport.responseText ) );
+}
+
+/**
+ * ok
+ */
+damas.project.update = function ( id, keys )
+{
+	return damas.utils.readJSONElement( JSON.parse( this.command( { cmd: 'update', id: id, keys: Object.toJSON(keys) } ).text ) );
+}
+
+/**
+ * ok
+ */
+damas.project.delete = function ( id )
+{
+	return this.command( { cmd: 'delete', id: id } ).status === 200;
+}
+
+
 
 /**
  * Make an exact copy of an element
@@ -397,6 +375,7 @@ damas.project.find = function ( keys )
 }
 
 /**
+ * OK
  * Find elements, specifying an SQL SELECT query.
  * The query must be formated to return results with an 'id' named column, which
  * contains elements indexes.
@@ -420,35 +399,6 @@ damas.project.findSQL = function ( query )
 damas.project.findTag = function ( tagname )
 {
 	return project.findSQL( "SELECT tag.node_id AS id FROM tag LEFT JOIN `key` ON `key`.node_id=tag.node_id AND ( key.name='label' ) WHERE tag.name='" + tagname + "' ORDER BY `key`.value;" );
-}
-
-/**
- * Retrieve an element specifying its internal node index
- * @param {Integer} index the internal node id to search
- * @returns {damas.element} Damas element or false on failure
- */
-damas.project.getNode = function ( index )
-{
-	var req = new Ajax.Request( this.server + "/model.json.php", {
-		asynchronous: false,
-		parameters: { 'cmd': 'single', 'id': index }
-	});
-	return damas.utils.readJSONElement( JSON.parse( req.transport.responseText ) );
-}
-
-/**
- * Retrieve elements specifying their internal node indexes
- * @param {Array} indexes array of node ids to retrieve
- * @returns {Array} array of Damas elements
- */
-damas.project.getNodes = function ( indexes )
-{
-	var req = new Ajax.Request( this.server + "/model.json.php", {
-		method: "POST",
-		asynchronous: false,
-		parameters: { cmd: "multi", id: indexes.join( "," ), depth: "1", flags: "4" }
-	});
-	return damas.utils.readJSONElements( JSON.parse( req.transport.responseText ) );
 }
 
 /**
@@ -494,6 +444,8 @@ damas.project.list = function ( key )
 }
 
 /**
+ * @OBSOLETE
+ * @deprecated
  * Move elements
  * @param {Integer} id Element index
  * @param {Integer} target Index of the new parent element
@@ -527,6 +479,8 @@ damas.project.recycle = function ( id )
 }
 
 /**
+ * @OBSOLETE
+ * @deprecated
  * Removes an attribute by name
  * @param {Integer} id Element index
  * @param {String} name Name of the attribute
@@ -556,6 +510,7 @@ damas.project.removeNode = function ( id )
 }
 
 /**
+ * OBSOLETE
  * Adds a new attribute. If an attribute with that name is already present in
  * the element, its value is changed to be that of the value parameter
  * @param {Integer} id Element index
@@ -565,11 +520,16 @@ damas.project.removeNode = function ( id )
  */
 damas.project.setKey = function ( id, name, value )
 {
+	var key = {};
+	key[name] = value;
+	return this.update( id, key );
+/*
 	var req = new Ajax.Request( this.server + "/model.json.php", {
 		asynchronous: false,
 		parameters: { cmd: 'setKey', id: id, name: name, value: value }
 	});
 	return req.transport.status == 200;
+*/
 }
 
 /**
@@ -785,11 +745,12 @@ damas.element.print = function ()
  * @param {String} type Type of the element
  * @returns {DAM Element} The newly created element.
  */
-damas.element.createNode = function ( type )
+damas.element.create = function ( type, keys )
 {
-	var res = project.createNode( this.id, type );
+	keys['#parent'] = this.id;
+	var res = project.create( type, keys );
 	if( res ) document.fire( 'dam:element.inserted', res );
-       return res;
+	return res;
 }
 
 /**
@@ -810,7 +771,7 @@ damas.element.move = function ( parent_id )
 {
 	var res =  project.move(this.id, parent_id);
 	if( res ) document.fire('dam:element.updated', this);
-       return res;
+	return res;
 }
 
 /**
@@ -821,7 +782,7 @@ damas.element.remove = function ()
 {
 	var res = project.removeNode( this.id );
 	if( res ) document.fire('dam:element.updated', this);
-       return res;
+	return res;
 }
 
 /**
@@ -833,7 +794,7 @@ damas.element.removeKey = function ( name )
 {
 	var res = project.removeKey( this.id, name );
 	if( res ) document.fire('dam:element.updated', this);
-       return res;
+	return res;
 }
 
 /**
@@ -846,7 +807,7 @@ damas.element.setKey = function ( name, value )
 {
 	var res = project.setKey( this.id, name, value );
 	if( res ) document.fire( 'dam:element.updated', this);
-       return res;
+	return res;
 }
 
 /**
@@ -858,7 +819,7 @@ damas.element.setTags = function ( tags )
 {
 	var res = project.setTags( this.id, tags );
 	if( res ) document.fire( 'dam:element.updated', this );
-       return res;
+	return res;
 }
 
 /**
@@ -949,122 +910,3 @@ damas.element.time = function ( )
 	}
 	return req.status == 200;
 }
-
-/**
- * @fileoverview SOAP messages and Ajax queries handling
- *
- * @author Remy Lalanne
- * Copyright 2005-2012 Remy Lalanne
- */
-
-/**
- * Handle XML responses and errors from server
- * @namespace
- * @requires errors
- * @requires serverResponse
- */
-serverResponseHandle = {
-	/**
-	 * Extract the version of server from its response
-	 * @param {object} XMLResponse XML response document from server
-	 * @return {Hash} Server response hash
-	 */
-	decomposeResponse: function ( responseXML ) {
-		var xml = false;
-		var txt = false;
-		var err = this.notifyError(responseXML);
-		if (damas.errorText(err) == "ERR_NOERROR"){
-			body = serverResponse.getServerReturnDom(responseXML);
-			txt = serverResponse.getServerReturn(responseXML);
-			return { 'bool':true, 'error':err, 'xml':responseXML, 'body':body, 'text':txt };
-		}
-		return { 'bool':false, 'error':err, 'xml':null, 'body':null, 'text':null }
-	},
-	notifyError: function ( responseXML ) {
-		var error_code = this.checkResponse(responseXML);
-		if ( damas.errorText(error_code)!="ERR_NOERROR" )
-		{
-			document.fire( 'err:all', error_code );
-		}
-		document.fire( 'err:' + damas.errorText(error_code), error_code );
-		return error_code;
-	},
-	checkResponse: function ( XMLResponse ) {
-		var err = damas.errorCode("ERR_NOERROR");
-		if( XMLResponse == null )
-			return damas.errorCode("ERR_SERVER");
-		var version = serverResponse.getServerVersion(XMLResponse);
-		if (!version)
-			return damas.errorCode("ERR_SERVERRESPONSE");
-		if ( version != damas.version )
-			return damas.errorCode("ERR_VERSION");
-		err = serverResponse.getServerError(XMLResponse);
-		if ( err === false)
-			return damas.errorCode("ERR_SERVERRESPONSE");
-		return err;
-	}
-};
-
-/**
- * Extract data from server's SOAP XML responses
- * @namespace
- */
-serverResponse = {
-	/**
-	 * Extract the version of server from its response
-	 * @param {object} XMLResponse XML response document from server
-	 * @returns {String} the version string, false on failure
-	 */
-	getServerVersion: function ( XMLResponse ) {
-		if (!XMLResponse) return false;
-		var tags = XMLResponse.getElementsByTagName('version');
-		if (tags.length==0) return false;
-		if (!tags[0].firstChild) return false;
-		return tags[0].firstChild.data;
-	},
-	/**
-	 * Extract the error code from a server response
-	 * @param {object} XMLResponse XML response document from server
-	 * @returns {Integer} the error code found in server response, or false on failure
-	 */
-	getServerError: function ( XMLResponse ) {
-		if (!XMLResponse) return false;
-		// *** XPATH disabled (HTML DOM method instead) ***
-		//var cod = XMLResponse.selectSingleNode("//error/@code");
-		//if (!cod) return false;
-		//return parseInt(cod.nodeValue);
-		var cod = false;
-		var err = XMLResponse.getElementsByTagName('error')[0];
-		for(var i=0; i<err.attributes.length; i++){
-			if (err.attributes[i].nodeName == "code")
-				return parseInt( err.attributes[i].nodeValue);
-		}
-		return false;
-
-	},
-	/**
-	 * Extract the returned value from a server response
-	 * @param {object} xmldoc returned server response
-	 * @returns {String} the return value found in server response
-	 */
-	getServerReturn: function ( XMLResponse ) {
-		if (!XMLResponse) return false;
-		var tags = XMLResponse.getElementsByTagName('returnvalue');
-		if (tags.length==0) return false;
-		if (!tags[0].firstChild) return false; // empty returnvalue
-		return tags[0].firstChild.data;
-	},
-	/**
-	 * Extract the returned value as DOM from a server response
-	 * @param {object} xmldoc returned server response
-	 * @returns {Dom} the return value found in server response, or false on failure
-	 */
-	getServerReturnDom: function ( XMLResponse ) {
-		if (!XMLResponse) return false;
-		var tags = XMLResponse.getElementsByTagName('returnvalue');
-		if (tags.length==0) return false;
-		//return tags[0];
-		//return DOMParser.parseFromString(Sarissa.xmlize(tags[0]),"text/xml");
-		return new DOMParser().parseFromString(new XMLSerializer().serializeToString(tags[0]),"text/xml");
-	}
-};

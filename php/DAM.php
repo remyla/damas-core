@@ -21,7 +21,7 @@
  *
  */
 
-include_once "data_model_1.php";
+include_once "data_model.php";
 
 class dam
 {
@@ -33,16 +33,12 @@ class dam
 	 */
 	static function write( $id, $text )
 	{
-		$newid = model::createNode( $id, "message" );
-		if( !$newid )
-			return false;
-		if( !model::setKey( $newid, "user", getUser() ) )
-			return false;
-		if( !model::setKey( $newid, "time", time() ) )
-			return false;
-		if( !model::setKey( $newid, "text", $text ) )
-			return false;
-		return $newid;
+		return model::create( "message", array(
+				'#parent' => $id,
+				'user' => getUser(),
+				'time' => time(),
+				'text' => $text
+		));
 	}
 
 	/**
@@ -56,9 +52,11 @@ class dam
 		$trashcan = $trashcan[0];
 		if( !$trashcan )
 		{
-			$trashcan = model::createNode( 0, 'folder' );
-			model::setKey( $trashcan, 'id', 'dam:trash' );
-			model::setKey( $trashcan, 'name', 'dam:trash' );
+			$trashcan = model::create( "folder", array(
+				'#parent' => '0',
+				'id' => 'dam:trash',
+				'name' => 'dam:trash'
+			));
 		}
 		return model::move( $id, $trashcan );
 	}
@@ -75,7 +73,7 @@ class dam
 		{
 			$children = model::children($trashcan);
 			for( $i=0; $i<sizeof($children); $i++ )
-				$res = model::removeNode( $children[$i] );
+				$res = model::delete( $children[$i] );
 			return true;
 		}
 		return false;

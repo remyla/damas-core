@@ -32,7 +32,9 @@ $mod["model::delete"] = array( "admin", "editor" );
 
 $mod["model::ancestors"] = array( "*" );
 $mod["model::children"] = array( "*" );
-$mod["model::duplicate"] = array( "admin", "editor" );
+$mod["model::move"] = array( "admin", "editor" );
+
+#$mod["model::duplicate"] = array( "admin", "editor" );
 $mod["model::export"] = array( "admin" ); // Axel
 $mod["model::find"] = array( "*" );
 $mod["model::findSQL"] = array( "*" );
@@ -50,16 +52,10 @@ $mod["model::tags"] = array( "*" );
 $mod["model::unlink"] = array( "admin", "editor", "linker" );
 $mod["model::untag"] = array( "admin", "editor" );
 
-
-$mod["model::createNode"] = array( "admin", "editor" );
-$mod["model::move"] = array( "admin", "editor" );
-$mod["model::multi"] = array( "*" );
-$mod["model::removeNode"] = array( "admin" );
-$mod["model::removeKey"] = array( "admin", "editor" );
-$mod["model::setKey"] = array( "admin", "editor" );
-$mod["model::setKeys"] = array( "admin", "editor" );
-$mod["model::single"] = array( "*" );
-
+#$mod["model::multi"] = array( "*" );
+#$mod["model::removeKey"] = array( "admin", "editor" );
+#$mod["model::setKey"] = array( "admin", "editor" );
+#$mod["model::setKeys"] = array( "admin", "editor" );
 
 $mod["asset::empty_trashcan"] = array( "admin" );
 $mod["asset::filecheck"] = array( "*" );

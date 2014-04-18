@@ -37,32 +37,6 @@ $NODE_LNK = 8;
 
 class model_json
 {
-	/*
-	 * Retrieve the children of a node
-	 * @param {Integer} $id node index
-	 * @return {Array} children nodes, empty array if no child found
-	 */
-/*
-	static function children ( $id )
-	{
-		$children = array();
-		$ids = model::children( $id );
-		for( $i = 0; $i < sizeof( $ids ); $i++ )
-		{
-			$row = mysql_fetch_array( mysql_query( "SELECT type FROM node WHERE id=" . $ids[$i] . ";" ) );
-			$children[] = array(
-				"id" => $ids[$i],
-				"type" => $row['type'],
-				"tags" => model::tags( $ids[$i] ),
-				"keys" => model::keys( $ids[$i] ),
-				"childcount" => model::countChildren( $ids[$i] ),
-				"rlinks" => model::countRLinks( $ids[$i] )
-			);
-		}
-		return $children;
-	}
-*/
-
 	/**
 	 * Retrieve nodes from a list of indexes
 	 * @param {Array} $ids array of indexes
@@ -73,10 +47,9 @@ class model_json
 		$nodes = array();
 		for( $i = 0; $i < sizeof( $ids ); $i++ )
 		{
-			$row = mysql_fetch_array( mysql_query( "SELECT parent_id, type FROM node WHERE id=" . $ids[$i] . ";" ) );
+			$row = mysql_fetch_array( mysql_query( "SELECT type FROM node WHERE id=" . $ids[$i] . ";" ) );
 			$nodes[] = array(
 				"id" => $ids[$i],
-				"parent_id" => $row['parent_id'],
 				"type" => $row['type'],
 				"tags" => model::tags( $ids[$i] ),
  				// an empty array produces a json list instead of a hash so we force the result to be an object
@@ -168,7 +141,6 @@ class model_json
 			$res = array ();
 			$res["id"] = 0; 
 			$res["type"] = "folder"; 
-			$res["parent_id"] = null; 
 			$res["childcount"] = model::countChildren( $id );
 			if( $contents )
 				return array_merge($res, $contents);
@@ -183,7 +155,6 @@ class model_json
 
 		$res = array ("id"=>$id, 
 			"type"=>$row["type"], 
-			"parent_id"=>$row["parent_id"], 
 			"childcount"=>model::countChildren( $id ), 
 			"rlinks"=>model::countRLinks( $id )
 		);

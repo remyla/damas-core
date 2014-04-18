@@ -4,10 +4,11 @@
  *
  * Simple library written in PHP to handle a key=value data model on top of
  * MySQL, supporting :
- * - Rooted tree management functions (ancestors, children, copyBranch, copyNode
- *    createNode, move, parent, removeNode, setType)
+ * - Functions for crud access ( create, find, update, delete)
  * - Text key and value pairs on nodes (keys, find, setKey, getKey, removeKey,
  *    searchKey, setKeys)
+ * - Rooted tree management functions (ancestors, children, copyBranch, copyNode
+ *    move)
  * - Simple directed acyclic graph (DAG) functions (link, unlink, links_r)
  * - Tagging (hastag, setTags, tag, untag)
  * - Element inheritance (prototype based) - beta
@@ -39,137 +40,6 @@
 
 class model
 {
-	/**
-	 * Retrieve the ancestors (parent and above) of a node
-	 * @param {Integer} $id node index
-	 * @return {Array} array of ancestors ids
-	 */
-	static function ancestors ( $id )
-	{
-		$query = "SELECT parent_id FROM node WHERE id='$id';";
-		$result = mysql_query($query);
-		$row = mysql_fetch_array($result);
-		if( ! is_null( $row["parent_id"] ) )
-		{
-			$a = model::ancestors( $row["parent_id"] );
-			$a[] = $row["parent_id"];
-			return $a;
-		}
-		return array();
-	}
-
-	/**
-	 * Retrieve the children of a node
-	 * @param {Integer} $id node index
-	 * @return {Array} array of children ids
-	 */
-	static function children ( $id )
-	{
-		$res = array();
-		// PROTOTYPE BEGIN
-		$protoname = model::getKey( $id, 'prototype' );
-		if( $protoname )
-		{
-			$proto = model::searchKey( 'id', $protoname );
-			$proto = $proto[0];
-			if( $proto )
-			{
-				$res = model::children( $proto );
-			}
-		}
-		// PROTOTYPE END
-
-		$query = "SELECT id FROM node WHERE parent_id='$id' ORDER BY type;";
-		$result = mysql_query( $query );
-		while( $row = mysql_fetch_array( $result ) )
-			$res[] = $row["id"];
-		return $res;
-	}
-
-	/**
- 	 * Recursively copy a node
-	 * @param {Integer} $id node index
-	 * @param {Integer} $tgt parent index for new node or false for same location
- 	 * @return {Boolean} true on success, false otherwise
- 	 */
-	static function copyBranch ( $id, $tgt )
-	{
-		$newid = model::copyNode( $id, $tgt );
-		$result = mysql_query( "SELECT id FROM node WHERE parent_id='$id';" );
-		while( $row = mysql_fetch_array( $result ) )
-		{
-			$res = model::copyBranch( $row["id"], $newid );
-		}
-		return $newid;
-	}
-
-	/**
- 	 * Copy a node - not recursive
-	 * @param {Integer} $id node index
-	 * @param {Integer} $tgt parent index for new node or false for same location
- 	 * @return {Boolean} true on success, false otherwise
- 	 */
-	static function copyNode ( $id, $tgt )
-	{
-		// copy node
-		$query = "SELECT type, parent_id FROM node WHERE id='$id';";
-		$result = mysql_query($query);
-		$row = mysql_fetch_array($result);
-		if( $tgt )
-			$newid = model::createNode( $tgt, $row["type"] );
-		else
-			$newid = model::createNode( $row["parent_id"], $row["type"] );
-		if( !$newid ) return false;
-
-		// copy keys
-		//$keys = model::keys($id);
-		//foreach( $keys as $key => $value )
-		//	model::setKey( $newid, $key, $value );
-		$result = mysql_query( "SELECT * FROM `key` WHERE node_id='$id';" );
-		while( $row = mysql_fetch_array( $result ) )
-		{
-			model::setKey( $newid, $row["name"], $row["value"] );
-		}
-
-		// copy tags
-		$query = "SELECT name FROM tag WHERE node_id='$id';";
-		$result = mysql_query($query);
-		while ($row = mysql_fetch_array($result)){
-			model::tag($newid, $row["name"]);
-		}
-		// copy references
-		$query = "SELECT src_id, tgt_id FROM link WHERE src_id='$id';";
-		$result = mysql_query($query);
-		while ($row = mysql_fetch_array($result)){
-			model::link( $newid, $row["tgt_id"] );
-		}
-		// copy referenced
-		$query = "SELECT src_id, tgt_id FROM link WHERE tgt_id='$id';";
-		$result = mysql_query($query);
-		while ($row = mysql_fetch_array($result)){
-			model::link( $row["src_id"], $newid);
-		}
-		return $newid;
-	}
-
-	/**
- 	 * Creates a node providing its internal type value. Doesn't check parent node existence.
-	 * @param {Integer} $parent_id parent node index
-	 * @param {String} $type text type for the new node
- 	 * @returns {Integer} the new node id on success, false otherwise
- 	 */
-	static function createNode ( $parent_id, $type )
-	{
-		$query = sprintf("INSERT INTO node ( type, parent_id ) VALUES ( '%s', '%s' );",
-			mysql_real_escape_string($type),
-			$parent_id
-		);
-		if( $result = mysql_query($query)){
-			return mysql_insert_id();
-		}
-		return $result;
-	}
-
 	/**
  	 * Creates a node providing its internal type value. Doesn't check parent node existence.
 	 * @param {String} $type text type for the new node
@@ -209,21 +79,78 @@ class model
 	}
 
 	/**
-	 * Retrieve a key value
-	 * @param {Integer} $id node index
-	 * @param {String} $name key name
- 	 * @return {String} key value on success
-	 */
-	static function getKey ( $id, $name )
+ 	 * Recursively delete a node - WARNING: this function doesn't check anything before removal
+ 	 * @return {Boolean} true on success, false otherwise
+ 	 */
+	static function delete ( $id )
 	{
-		$query = sprintf("SELECT value FROM `key` WHERE node_id='%s' AND name='%s';",
-			$id,
-			mysql_real_escape_string($name) );
-		$res = mysql_query($query);
-		$row = mysql_fetch_array($res);
-		return $row["value"];
-		# we don't want & char to become &amp; for file names
-		#return htmlspecialchars($row['value'],ENT_QUOTES);
+		$children = model::children($id);
+		$res = false;
+		for( $i=0;$i<sizeof($children);$i++)
+			$res = model::delete($children[$i]);
+		$query = "DELETE FROM node WHERE id='$id';";
+		$result = mysql_query($query);
+		if( mysql_affected_rows() == 0)
+			return false;
+		$query = "DELETE FROM link WHERE src_id='$id';";
+		mysql_query($query);
+		$query = "DELETE FROM link WHERE tgt_id='$id';";
+		mysql_query($query);
+		$query = "DELETE FROM `key` WHERE node_id='$id';";
+		mysql_query($query);
+		$query = "DELETE FROM tag WHERE node_id='$id';";
+		mysql_query($query);
+		return true;
+	}
+
+	/**
+	 * Find nodes wearing the specified key(s)
+	 * @param {Array} keys Array of key/value pairs to match
+	 * @returns {Array} array of matching node indexes
+	 */
+	static function find ( $keys )
+	{
+		// original line changed to sort results using the label key if it exists
+		//$query = "SELECT DISTINCT node_id FROM `key` WHERE 1";
+		$query = "SELECT DISTINCT k1.node_id FROM `key` AS k1 LEFT JOIN `key` AS k2 ON k1.node_id=k2.node_id AND k2.name='label' WHERE 1";
+		foreach( $keys as $k=>$v )
+		{
+			$query .= sprintf( " AND k1.node_id IN ( SELECT node_id FROM `key` WHERE name='%s' AND value='%s' )",
+				mysql_real_escape_string($k),
+				mysql_real_escape_string($v) );
+		}
+		//$query .= ";";
+		$query .= " ORDER BY k2.value;";
+		$result = mysql_query( $query );
+		$matches = array();
+		while( $row = mysql_fetch_array( $result ) )
+		{
+			$matches[] = intval( $row['node_id'] );
+		}
+		return $matches;
+	}
+
+	/**
+ 	 * Copy a node - not recursive
+	 * @param {Integer} $id node index
+	 * @param {Integer} $tgt parent index for new node or false for same location
+ 	 * @return {Boolean} true on success, false otherwise
+ 	 */
+	static function copy ( $id )
+	{
+		// copy node
+		$query = "SELECT type FROM node WHERE id='$id';";
+		$result = mysql_query($query);
+		$row = mysql_fetch_array($result);
+		$newid = model::create( $row["type"], model::keys($id) );
+		if( !$newid ) return false;
+		// copy tags
+		$query = "SELECT name FROM tag WHERE node_id='$id';";
+		$result = mysql_query($query);
+		while ($row = mysql_fetch_array($result)){
+			model::tag($newid, $row["name"]);
+		}
+		return $newid;
 	}
 
 	/**
@@ -268,91 +195,6 @@ class model
 	}
 
 	/**
- 	 * Move a node to a new container. Does not check parent loops
-	 * @param {Integer} $id node index to move
-	 * @param {Integer} $target target id
-	 * @return {Boolean} true on success, false otherwise
- 	 */
-	static function move ( $id, $target )
-	{
-		$query = "UPDATE node SET parent_id='$target' WHERE id='$id';";
-		$res = mysql_query($query);
-		if( $res)
-			return mysql_affected_rows() == 1;
-		return false;
-	}
-
-	/**
-	 * Remove a key
-	 * @param {Integer} $id node id
-	 * @param {String} $name key name
-	 * @return {Boolean} true on success, false otherwise
-	 */
-	static function removeKey ( $id, $name ) 
-	{
-		$query = sprintf( "DELETE FROM `key` WHERE node_id='%s' AND name='%s';",
-			$id,
-			mysql_real_escape_string($name)
-		);
-		$res = mysql_query($query);
-		if( $res)
-			return mysql_affected_rows() == 1;
-		return $res;
-	}
-
-	/**
- 	 * Recursively delete a node - WARNING: this function doesn't check anything before removal
- 	 * @return {Boolean} true on success, false otherwise
- 	 */
-	static function removeNode ( $id )
-	{
-		$children = model::children($id);
-		$res = false;
-		for( $i=0;$i<sizeof($children);$i++)
-			$res = model::removeNode($children[$i]);
-		$query = "DELETE FROM node WHERE id='$id';";
-		$result = mysql_query($query);
-		if( mysql_affected_rows() == 0)
-			return false;
-		$query = "DELETE FROM link WHERE src_id='$id';";
-		mysql_query($query);
-		$query = "DELETE FROM link WHERE tgt_id='$id';";
-		mysql_query($query);
-		$query = "DELETE FROM `key` WHERE node_id='$id';";
-		mysql_query($query);
-		$query = "DELETE FROM tag WHERE node_id='$id';";
-		mysql_query($query);
-		return true;
-	}
-
-	/**
-	 * Find nodes wearing the specified key(s)
-	 * @param {Array} keys Array of key/value pairs to match
-	 * @returns {Array} array of matching node indexes
-	 */
-	static function find ( $keys )
-	{
-		// original line changed to sort results using the label key if it exists
-		//$query = "SELECT DISTINCT node_id FROM `key` WHERE 1";
-		$query = "SELECT DISTINCT k1.node_id FROM `key` AS k1 LEFT JOIN `key` AS k2 ON k1.node_id=k2.node_id AND k2.name='label' WHERE 1";
-		foreach( $keys as $k=>$v )
-		{
-			$query .= sprintf( " AND k1.node_id IN ( SELECT node_id FROM `key` WHERE name='%s' AND value='%s' )",
-				mysql_real_escape_string($k),
-				mysql_real_escape_string($v) );
-		}
-		//$query .= ";";
-		$query .= " ORDER BY k2.value;";
-		$result = mysql_query( $query );
-		$matches = array();
-		while( $row = mysql_fetch_array( $result ) )
-		{
-			$matches[] = intval( $row['node_id'] );
-		}
-		return $matches;
-	}
-
-	/**
  	 * Search for nodes wearing a key/value pair
 	 * @param {String} $name key name
 	 * @param {String} $value key value
@@ -368,43 +210,6 @@ class model
 		while( $row = mysql_fetch_array($result) )
 			$res[] = $row["node_id"];
 		return $res;
-	}
-
-	/**
-	 * Set a key - when id is string, setKey on root!
-	 * @param {Integer} $id node index
-	 * @param {String} $name key name
-	 * @param {String} $value key value
- 	 * @return {Boolean} true on success, false otherwise
-	 */
-	static function setKey ( $id, $name, $value )
-	{
-		$query = sprintf( "REPLACE INTO `key` (node_id, name, value) VALUES ('%s','%s','%s');",
-			$id,
-			mysql_real_escape_string($name),
-			mysql_real_escape_string($value)
-		);
-		$res = mysql_query($query);
-		if( $res)
-			return mysql_affected_rows() > 0; // replace = delete + insert = 2
-		return true;
-	}
-
-	/**
-	 * Replace all substring occurences by another one in every keys on node and sub nodes.
-	 * @param {Integer} $id node index
-	 * @param {String} $old old substring value to replace
-	 * @param {String} $new new substring value
-	 */
-	static function setKeys ( $id, $old, $new )
-	{
-		$keys = model::keys( $id );
-		foreach( $keys as $key => $value )
-			model::setKey( $id, $key, str_replace( $old, $new, $value ) );
-		$children = model::children( $id );
-		for( $i=0; $i<sizeof($children); $i++ )
-			model::setKeys( $children[$i], $old, $new );
-		return true;
 	}
 
 	/**
@@ -539,19 +344,6 @@ class model
 	}
 
 	/**
-	 * Get the parent id of a node
-	 * @param {Integer} $id node id
-	 * @return parent id integer
-	 */
-	static function parent ( $id )
-	{
-		$query = "SELECT parent_id FROM node WHERE id='$id';";
-		$result = mysql_query($query);
-		$row = mysql_fetch_array($result);
-		return $row["parent_id"];
-	}
-
-	/**
 	 * Get the tags id of a node
 	 * @param {Integer} $id node id
 	 * @return {array} tags 
@@ -666,7 +458,6 @@ class model
 	{
 		$value = strtolower($value);
 		$query = "SELECT DISTINCT substring_index(LOWER (k.value), ' ', 2) as kvalue FROM `key` k WHERE LOWER(k.value) LIKE '$value%' ORDER BY k.value ASC LIMIT 10";
-		//$query1 = "SELECT DISTINCT k.name as kname FROM `key` k WHERE LOWER(k.name) like '%$value%' ORDER BY k.name ASC LIMIT 10";
 		$query2 = "SELECT DISTINCT substring_index(LOWER (t.name), ' ', 2) as tname FROM tag t WHERE LOWER(t.name) LIKE '$value%' ORDER BY t.name ASC LIMIT 10";
 		
 		$return = array();
@@ -674,12 +465,6 @@ class model
 		while( $row = mysql_fetch_array( $result ) ) {
 			$return[] = $row["kvalue"];
 		}
-		
-		/*
-		$result1 = mysql_query($query1);
-		while( $row1 = mysql_fetch_array( $result1 ) ) {
-			$return[] = $row1["kname"];
-		}// */
 		
 		$result2 = mysql_query($query2);
 		while( $row2 = mysql_fetch_array( $result2 ) ) {
@@ -699,10 +484,155 @@ class model
 		return $res;
 	}
 
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	// ROOTED TREE FUNCTIONS
+	// BASED ON #PARENT KEY
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+
+	/**
+	 * Retrieve the ancestors (parent and above) of a node
+	 * @param {Integer} $id node index
+	 * @return {Array} array of ancestors ids
+	 */
+	static function ancestors ( $id )
+	{
+		$parent = model::getKey( $id, '#parent' );
+		if( ! is_null( $parent ) )
+		{
+			$a = model::ancestors( $parent );
+			$a[] = $parent;
+			return $a;
+		}
+		return array();
+	}
+
+	/**
+	 * Retrieve the children of a node
+	 * @param {Integer} $id node index
+	 * @return {Array} array of children ids
+	 */
+	static function children ( $id )
+	{
+		$res = array();
+		// PROTOTYPE BEGIN
+		$protoname = model::getKey( $id, 'prototype' );
+		if( $protoname )
+		{
+			$proto = model::searchKey( 'id', $protoname );
+			$proto = $proto[0];
+			if( $proto )
+			{
+				$res = model::children( $proto );
+			}
+		}
+		// PROTOTYPE END
+		return $res + model::find( [ '#parent' => $id ] );
+	}
+
+	/**
+ 	 * Move a node to a new container. Does not check parent loops
+	 * @param {Integer} $id node index to move
+	 * @param {Integer} $target target id
+	 * @return {Boolean} true on success, false otherwise
+	 */
+	static function move ( $id, $target )
+	{
+		return model::setKey( $id, "#parent", $target );
+	}
+
+	/**
+	 * Empty a node. underscore because empty is a reserved word
+	 * @return {Boolean} true
+	 */
+	static function empty_( $id )
+	{
+		$children = model::children($id);
+		for( $i=0; $i<sizeof($children); $i++ )
+			model::delete( $children[$i] );
+		return true;
+	}
+
+	/**
+ 	 * Recursively copy a node
+	 * @param {Integer} $id node index
+	 * @param {Integer} $tgt parent index for new node or false for same location
+ 	 * @return {Boolean} true on success, false otherwise
+ 	 */
+/* PASSAGE au nouveau parent, disable for now
+	static function copyBranch ( $id, $tgt )
+	{
+		$newid = model::copyNode( $id, $tgt );
+		$children = model::children($id);
+		for( $i=0;$i<sizeof($children);$i++)
+		{
+			$res = model::copyBranch($children[$i], $newid );
+		}
+		return $newid;
+	}
+*/
+
+	/**
+	 * Replace all substring occurences by another one in every keys on node and sub nodes.
+	 * @param {Integer} $id node index
+	 * @param {String} $old old substring value to replace
+	 * @param {String} $new new substring value
+	 */
+	static function setKeys ( $id, $old, $new )
+	{
+		$keys = model::keys( $id );
+		foreach( $keys as $key => $value )
+			model::setKey( $id, $key, str_replace( $old, $new, $value ) );
+		$children = model::children( $id );
+		for( $i=0; $i<sizeof($children); $i++ )
+			model::setKeys( $children[$i], $old, $new );
+		return true;
+	}
+
+
+
+
+
+
+
+
+
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
 	// HELPER FUNCTIONS USEFUL FOR RENDERING
+	//
+	// (PRIVATE)
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
 
 	static function countChildren ( $id )
 	{
+		return count( model::find( [ '#parent' => $id ] ) );
 		$query = "SELECT COUNT(id) as count FROM node WHERE parent_id='$id';";
 		$row = mysql_fetch_array( mysql_query( $query ) );
 		return intval( $row["count"] );
@@ -714,6 +644,65 @@ class model
 		$row = mysql_fetch_array( mysql_query( $query ) );
 		return intval( $row["count"] );
 	}
+
+	/**
+	 * Retrieve a key value
+	 * @param {Integer} $id node index
+	 * @param {String} $name key name
+ 	 * @return {String} key value on success
+	 */
+	static function getKey ( $id, $name )
+	{
+		$query = sprintf("SELECT value FROM `key` WHERE node_id='%s' AND name='%s';",
+			$id,
+			mysql_real_escape_string($name) );
+		$res = mysql_query($query);
+		$row = mysql_fetch_array($res);
+		return $row["value"];
+		# we don't want & char to become &amp; for file names
+		#return htmlspecialchars($row['value'],ENT_QUOTES);
+	}
+
+	/**
+	 * Remove a key
+	 * @param {Integer} $id node id
+	 * @param {String} $name key name
+	 * @return {Boolean} true on success, false otherwise
+	 */
+	static function removeKey ( $id, $name ) 
+	{
+		$query = sprintf( "DELETE FROM `key` WHERE node_id='%s' AND name='%s';",
+			$id,
+			mysql_real_escape_string($name)
+		);
+		$res = mysql_query($query);
+		if( $res)
+			return mysql_affected_rows() == 1;
+		return $res;
+	}
+
+	/**
+	 * Set a key - when id is string, setKey on root!
+	 * @param {Integer} $id node index
+	 * @param {String} $name key name
+	 * @param {String} $value key value
+ 	 * @return {Boolean} true on success, false otherwise
+	 */
+	static function setKey ( $id, $name, $value )
+	{
+		$query = sprintf( "REPLACE INTO `key` (node_id, name, value) VALUES ('%s','%s','%s');",
+			$id,
+			mysql_real_escape_string($name),
+			mysql_real_escape_string($value)
+		);
+		$res = mysql_query($query);
+		if( $res )
+			return mysql_affected_rows() > 0; // replace = delete + insert = 2
+		return true;
+	}
+
+
+
 	
 }
 

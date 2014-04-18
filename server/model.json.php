@@ -102,7 +102,7 @@ switch( arg("cmd") )
 			echo "Bad command";
 			exit;
 		}
-		if( !model::removeNode( arg("id") ) )
+		if( !model::delete( arg("id") ) )
 		{
 			header("HTTP/1.1: 409 Conflict");
 			echo "delete Error, please change your values";
@@ -110,22 +110,7 @@ switch( arg("cmd") )
 		}
 		break;
 	/* other operations */
-	case "createNode":
-		if( is_null( arg('id') ) || is_null( arg('type') ) )
-		{
-			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
-			exit;
-		}
-		$id = model::createNode( arg("id"), arg("type") );
-		if( !$id )
-		{
-			header("HTTP/1.1: 409 Conflict");
-			echo "createNode Error, please change your values";
-			exit;
-		}
-		echo json_encode( model_json::node( $id, 1, $NODE_TAG | $NODE_PRM ) );
-		break;
+/* passage au nouveau parent, disable for now
 	case "duplicate":
 		if( is_null( arg('id') ) )
 		{
@@ -142,6 +127,7 @@ switch( arg("cmd") )
 		}
 		echo json_encode( model_json::node( $id, 1, $NODE_TAG | $NODE_PRM ) );
 		break;
+*/
 	case "move":
 		if( is_null( arg('id') ) || is_null( arg('target') ) )
 		{
@@ -205,20 +191,6 @@ switch( arg("cmd") )
 		{
 			header("HTTP/1.1: 409 Conflict");
 			echo "move Error, please change your values";
-			exit;
-		}
-		break;
-	case "removeNode":
-		if( is_null( arg('id') ) )
-		{
-			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
-			exit;
-		}
-		if( !model::removeNode( arg("id") ) )
-		{
-			header("HTTP/1.1: 409 Conflict");
-			echo "removeNode Error, please change your values";
 			exit;
 		}
 		break;
@@ -297,20 +269,6 @@ switch( arg("cmd") )
 			}
 		}
 		// TRIGGER END
-		break;
-	case "removeKey":
-		if( is_null( arg('id') ) || is_null( arg('name') ) )
-		{
-			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
-			exit;
-		}
-		if( !model::removeKey( arg("id"), arg("name") ) )
-		{
-			header("HTTP/1.1: 409 Conflict");
-			echo "removeKey Error, please change your values";
-			exit;
-		}
 		break;
 	case "tag":
 		if( is_null( arg('id') ) || is_null( arg('name') ) )

@@ -43,7 +43,7 @@ class assets
 				if( !move_uploaded_file( $path, $assetsLCL . model::getKey( $id, 'file' ) ) )
 				{
 					unlink( $assetsLCL . model::getKey( $new_id, 'file' ) );
-					model::removeNode( $new_id );
+					model::delete( $new_id );
 					return false;
 				}
 				if( !assets::version_increment( $id, $message ) )
@@ -66,6 +66,7 @@ class assets
 		if( !copy( $opath, $bpath ) )
 			return false;
 		touch( $bpath, filemtime( $opath ) );
+		/*
 		$new_id = model::createNode( $id, "asset" );
 		if( !$new_id ) return false;
 		model::setKey( $new_id, "bytes", model::getKey( $id, 'bytes' ) );
@@ -75,7 +76,17 @@ class assets
 		model::setKey( $new_id, "time", model::getKey( $id, 'time' ) );
 		model::setKey( $new_id, "user", model::getKey( $id, 'user' ) );
 		model::setKey( $new_id, "version", model::getKey( $id, 'version' ) ? model::getKey( $id, 'version' ) : "0" );
-		return $new_id;
+		*/
+		return model::create( "asset", array(
+				'#parent' => $id,
+				'bytes' => model::getKey( $id, 'bytes' ),
+				'file' => assets::getbackuppath( $id ),
+				'sha1' => model::getKey( $id, 'sha1' ),
+				'text' => model::getKey( $id, 'text' ),
+				'time' => model::getKey( $id, 'time' ),
+				'user' => model::getKey( $id, 'user' ),
+				'version' => model::getKey( $id, 'version' ) ? model::getKey( $id, 'version' ) : "0"
+		));
 	}
 
 	/**
@@ -100,10 +111,12 @@ class assets
 	}
 
 	/**
+	 * @deprecated NOT USED (STUDIO100)
 	 * Increment the asset after a successful commit. The path is incremented too. Not backup needed 
 	 * @param {Integer} asset node index
 	 * @param {String} user message for the new version
 	 */
+/*
 	static function version_increment2 ( $id, $message )
 	{
 		$file =  model::getKey( $id, 'file' );
@@ -121,6 +134,7 @@ class assets
 		model::setKey( $id, "version", model::getKey( $new_id, "version" ) );
 		return $new_id;
 	}
+*/
 
 
 	//
