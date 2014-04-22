@@ -10,11 +10,9 @@
  * MySQL database settings
  */
 $db_server = "localhost";
-$db_name = "damas";
-#$db_username = "damas";
-#$db_passwd = "Au$phoo4";
-$db_username = "root";
-$db_passwd = "shab_a5P";
+$db_name = "damasdb";
+$db_username = "";
+$db_passwd = "";
 
 
 /**

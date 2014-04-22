@@ -172,145 +172,6 @@ class model
 	}
 
 	/**
-	 * Get connected links. Recursive. Useful for graphs
-	 * @param {Integer} $id node index
-	 * @return {Array} or false
-	 */
-	static function links_r ( $id, $targets )
-	{
-		$query = "SELECT * FROM link WHERE src_id='$id';";
-		if( !$result = mysql_query( $query ) ) return array();
-		if( !mysql_num_rows( $result ) ) return array();
-		$a = array();
-		while( $row = mysql_fetch_array( $result ) )
-		{
-			$a[ $row["id"] ] = array( $row["src_id"], $row["tgt_id"] );
-			if( ! in_array( $row["tgt_id"], $targets ) )
-			{
-				$targets[] = $row["tgt_id"];
-				$a += model::links_r( $row["tgt_id"], $targets );
-			}
-		}
-		return $a;
-	}
-
-	/**
- 	 * Search for nodes wearing a key/value pair
-	 * @param {String} $name key name
-	 * @param {String} $value key value
-	 * @return {Array} array of matched node ids
- 	 */
-	static function searchKey ( $name, $value )
-	{
-		$query = sprintf( "SELECT node_id FROM `key` WHERE name='%s' AND value='%s';",
-			mysql_real_escape_string($name),
-			mysql_real_escape_string($value) );
-		$result = mysql_query($query);
-		$res = array();
-		while( $row = mysql_fetch_array($result) )
-			$res[] = $row["node_id"];
-		return $res;
-	}
-
-	/**
-	 * Set an element's tags. Trim values.
-	 * @param {Integer} $id node index
-	 * @param {String} $tags comma separated tags
-	 */
-	static function setTags ( $id, $tags )
-	{
-		$query = sprintf( "DELETE FROM tag WHERE node_id='%s';", $id );
-		$res = mysql_query( $query );
-		$ts = explode( ',' , $tags );
-		for( $i=0; $i<sizeof($ts); $i++ )
-		{
-			if( trim( $ts[$i] ) != '' )
-				model::tag( $id, trim( $ts[$i] ) );
-		}
-		return true;
-	}
-
-	/**
-	 * Tag a node
-	 * @param {Integer} $id index of node to tag
-	 * @param {String} $name tag name
-	 * @return {Boolean} true on success, false otherwise
-	 *
-	 */
-	static function tag ( $id, $name )
-	{
-		$query = sprintf( "INSERT INTO tag (node_id,name) VALUES ('%s','%s');",
-			$id,
-			mysql_real_escape_string( $name )
-		);
-		return mysql_query($query);
-	}
-
-	/**
-	 * Remove a tag
-	 * @param {Integer} $id index of node to untag
-	 * @param {String} $name tag name
-	 * @return {Boolean} true on success, false otherwise
-	 */
-	static function untag ( $id, $name ) 
-	{
-		$query = sprintf("DELETE FROM tag WHERE node_id='%s' AND name='%s';",
-			$id,
-			mysql_real_escape_string($name)
-		);
-		$res = mysql_query($query);
-		if( $res)
-			return mysql_affected_rows() == 1;
-		return false;
-	}
-
-	/**
-	 * Link 2 nodes
-	 * @param {Integer} $src_id node index
-	 * @param {Integer} $tgt_id node index
-	 * @return {Integer} link id on success, false otherwise
-	 */
-	static function link ( $src_id, $tgt_id )
-	{
-		if( !is_numeric($src_id) or !is_numeric($tgt_id))
-			return false;
-		$query = sprintf("INSERT INTO link (src_id, tgt_id) VALUES (%s, %s);",
-			$src_id,
-			$tgt_id
-		);
-		if($result = mysql_query($query))
-			return mysql_insert_id();
-		return false;
-	}
-
-	/**
-	 * Remove a link
-	 * @param {Integer} $id link index
-	 * @return {Boolean} true on success, false otherwise
-	 */
-	static function unlink ( $id ) 
-	{
-		$query = "DELETE FROM link WHERE id='$id';";
-		$res = mysql_query($query);
-		if( $res)
-			return mysql_affected_rows() == 1;
-		return $res;
-	}
-
-	/**
-	 * Change the type of a node
-	 * @param {Integer} $id node index
-	 * @param {String} $name new name
-	 * @return {Boolean} true on success, false otherwise. returns false if name is unchanged
-	 */
-	static function setType ( $id, $type )
-	{
-		$query = sprintf("UPDATE node SET type='$type' WHERE id='$id';",
-			mysql_real_escape_string($type), $id);
-		return mysql_query($query);
-	}
-
-	/**
 	 * Get keys on a node
 	 * @param {Integer} $id node id of keys
 	 * @return {Array} array of key=value pairs
@@ -373,82 +234,6 @@ class model
 		return $array;
 	}
 
-	/**
-	 * Get the links of a node
-	 * @param {Integer} $id node id
-	 * @return {array} links 
-	 */
-	static function links ( $id )
-	{
-		$array = array();
-
-		// PROTOTYPE BEGIN
-		$protoname = model::getKey( $id, 'prototype' );
-		if( $protoname )
-		{
-			$proto = model::searchKey( 'id', $protoname );
-			$proto = $proto[0];
-			if( $proto )
-			{
-				$array = model::links( $proto );
-			}
-		}
-		// PROTOTYPE END
-
-		$query = "SELECT link.id AS link_id, link.tgt_id, node.* FROM link LEFT JOIN node ON node.id=link.tgt_id WHERE src_id='$id' ORDER BY type;";
-		if( !$result = mysql_query( $query ) ) return $array;
-		if( !mysql_num_rows( $result ) ) return $array;
-
-		while( $row = mysql_fetch_array( $result ) )
-		{
-			$array[] = array(
-				"link_id" => $row["link_id"], 
-				"id" => $row["tgt_id"], 
-				"type" => ( ( $row["tgt_id"] == "0" )? "folder" : $row["type"] ),
-				"parent_id" => $row["parent_id"]
-			);
-		}
-		return $array;
-	}
-
-	/**
-	 * Get the reverse links of a node
-	 * @param {Integer} $id node id
-	 * @return {array} links 
-	 */
-	static function rlinks ( $id )
-	{
-		$array = array();
-
-		// PROTOTYPE BEGIN
-		$protoname = model::getKey( $id, 'prototype' );
-		if( $protoname )
-		{
-			$proto = model::searchKey( 'id', $protoname );
-			$proto = $proto[0];
-			if( $proto )
-			{
-				$array = model::rlinks( $proto );
-			}
-		}
-		// PROTOTYPE END
-
-		$query = "SELECT link.id AS link_id, link.src_id, node.* FROM link LEFT JOIN node ON node.id=link.src_id WHERE tgt_id='$id' ORDER BY type;";
-		if( !$result = mysql_query( $query ) ) return $array;
-		if( !mysql_num_rows( $result ) ) return $array;
-
-		while( $row = mysql_fetch_array( $result ) ) {
-
-			$res = array ("link_id"=>$row["link_id"], 
-					"id"=>$row["src_id"], 
-					"type"=>(($row["src_id"] == "0" )? "folder" : $row["type"]),
-					"parent_id"=>$row["parent_id"]);
-
-			$array[] = $res;
-		}
-		return $array;
-	}
-	
 	/**
 	 * Search key.value or tag.name beginning by $value in database, only return the first word
 	 * @param {String} $value string to search in the database
@@ -618,9 +403,7 @@ class model
 	//
 	//
 	//
-	// HELPER FUNCTIONS USEFUL FOR RENDERING
-	//
-	// (PRIVATE)
+	// INTERNALS
 	//
 	//
 	//
@@ -700,6 +483,241 @@ class model
 			return mysql_affected_rows() > 0; // replace = delete + insert = 2
 		return true;
 	}
+
+
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	// OTHERS
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+
+	/**
+	 * Link 2 nodes
+	 * @param {Integer} $src_id node index
+	 * @param {Integer} $tgt_id node index
+	 * @return {Integer} link id on success, false otherwise
+	 */
+	static function link ( $src_id, $tgt_id )
+	{
+		if( !is_numeric($src_id) or !is_numeric($tgt_id))
+			return false;
+		$query = sprintf("INSERT INTO link (src_id, tgt_id) VALUES (%s, %s);",
+			$src_id,
+			$tgt_id
+		);
+		if($result = mysql_query($query))
+			return mysql_insert_id();
+		return false;
+	}
+
+	/**
+	 * Remove a link
+	 * @param {Integer} $id link index
+	 * @return {Boolean} true on success, false otherwise
+	 */
+	static function unlink ( $id ) 
+	{
+		$query = "DELETE FROM link WHERE id='$id';";
+		$res = mysql_query($query);
+		if( $res)
+			return mysql_affected_rows() == 1;
+		return $res;
+	}
+
+	/**
+	 * Change the type of a node
+	 * @param {Integer} $id node index
+	 * @param {String} $name new name
+	 * @return {Boolean} true on success, false otherwise. returns false if name is unchanged
+	 */
+	static function setType ( $id, $type )
+	{
+		$query = sprintf("UPDATE node SET type='$type' WHERE id='$id';",
+			mysql_real_escape_string($type), $id);
+		return mysql_query($query);
+	}
+
+	/**
+	 * Get connected links. Recursive. Useful for graphs
+	 * @param {Integer} $id node index
+	 * @return {Array} or false
+	 */
+	static function links_r ( $id, $targets )
+	{
+		$query = "SELECT * FROM link WHERE src_id='$id';";
+		if( !$result = mysql_query( $query ) ) return array();
+		if( !mysql_num_rows( $result ) ) return array();
+		$a = array();
+		while( $row = mysql_fetch_array( $result ) )
+		{
+			$a[ $row["id"] ] = array( $row["src_id"], $row["tgt_id"] );
+			if( ! in_array( $row["tgt_id"], $targets ) )
+			{
+				$targets[] = $row["tgt_id"];
+				$a += model::links_r( $row["tgt_id"], $targets );
+			}
+		}
+		return $a;
+	}
+
+	/**
+ 	 * Search for nodes wearing a key/value pair
+	 * @param {String} $name key name
+	 * @param {String} $value key value
+	 * @return {Array} array of matched node ids
+ 	 */
+	static function searchKey ( $name, $value )
+	{
+		$query = sprintf( "SELECT node_id FROM `key` WHERE name='%s' AND value='%s';",
+			mysql_real_escape_string($name),
+			mysql_real_escape_string($value) );
+		$result = mysql_query($query);
+		$res = array();
+		while( $row = mysql_fetch_array($result) )
+			$res[] = $row["node_id"];
+		return $res;
+	}
+
+	/**
+	 * Set an element's tags. Trim values.
+	 * @param {Integer} $id node index
+	 * @param {String} $tags comma separated tags
+	 */
+	static function setTags ( $id, $tags )
+	{
+		$query = sprintf( "DELETE FROM tag WHERE node_id='%s';", $id );
+		$res = mysql_query( $query );
+		$ts = explode( ',' , $tags );
+		for( $i=0; $i<sizeof($ts); $i++ )
+		{
+			if( trim( $ts[$i] ) != '' )
+				model::tag( $id, trim( $ts[$i] ) );
+		}
+		return true;
+	}
+
+	/**
+	 * Tag a node
+	 * @param {Integer} $id index of node to tag
+	 * @param {String} $name tag name
+	 * @return {Boolean} true on success, false otherwise
+	 *
+	 */
+	static function tag ( $id, $name )
+	{
+		$query = sprintf( "INSERT INTO tag (node_id,name) VALUES ('%s','%s');",
+			$id,
+			mysql_real_escape_string( $name )
+		);
+		return mysql_query($query);
+	}
+
+	/**
+	 * Remove a tag
+	 * @param {Integer} $id index of node to untag
+	 * @param {String} $name tag name
+	 * @return {Boolean} true on success, false otherwise
+	 */
+	static function untag ( $id, $name ) 
+	{
+		$query = sprintf("DELETE FROM tag WHERE node_id='%s' AND name='%s';",
+			$id,
+			mysql_real_escape_string($name)
+		);
+		$res = mysql_query($query);
+		if( $res)
+			return mysql_affected_rows() == 1;
+		return false;
+	}
+
+	/**
+	 * Get the links of a node
+	 * @param {Integer} $id node id
+	 * @return {array} links 
+	 */
+	static function links ( $id )
+	{
+		$array = array();
+
+		// PROTOTYPE BEGIN
+		$protoname = model::getKey( $id, 'prototype' );
+		if( $protoname )
+		{
+			$proto = model::searchKey( 'id', $protoname );
+			$proto = $proto[0];
+			if( $proto )
+			{
+				$array = model::links( $proto );
+			}
+		}
+		// PROTOTYPE END
+
+		$query = "SELECT link.id AS link_id, link.tgt_id, node.* FROM link LEFT JOIN node ON node.id=link.tgt_id WHERE src_id='$id' ORDER BY type;";
+		if( !$result = mysql_query( $query ) ) return $array;
+		if( !mysql_num_rows( $result ) ) return $array;
+
+		while( $row = mysql_fetch_array( $result ) )
+		{
+			$array[] = array(
+				"link_id" => $row["link_id"], 
+				"id" => $row["tgt_id"], 
+				"type" => ( ( $row["tgt_id"] == "0" )? "folder" : $row["type"] ),
+				"parent_id" => $row["parent_id"]
+			);
+		}
+		return $array;
+	}
+
+	/**
+	 * Get the reverse links of a node
+	 * @param {Integer} $id node id
+	 * @return {array} links 
+	 */
+	static function rlinks ( $id )
+	{
+		$array = array();
+
+		// PROTOTYPE BEGIN
+		$protoname = model::getKey( $id, 'prototype' );
+		if( $protoname )
+		{
+			$proto = model::searchKey( 'id', $protoname );
+			$proto = $proto[0];
+			if( $proto )
+			{
+				$array = model::rlinks( $proto );
+			}
+		}
+		// PROTOTYPE END
+
+		$query = "SELECT link.id AS link_id, link.src_id, node.* FROM link LEFT JOIN node ON node.id=link.src_id WHERE tgt_id='$id' ORDER BY type;";
+		if( !$result = mysql_query( $query ) ) return $array;
+		if( !mysql_num_rows( $result ) ) return $array;
+
+		while( $row = mysql_fetch_array( $result ) ) {
+
+			$res = array ("link_id"=>$row["link_id"], 
+					"id"=>$row["src_id"], 
+					"type"=>(($row["src_id"] == "0" )? "folder" : $row["type"]),
+					"parent_id"=>$row["parent_id"]);
+
+			$array[] = $res;
+		}
+		return $array;
+	}
+	
 
 
 

@@ -32,7 +32,16 @@
  */
 
 /**
- * Static library with methods for Digital Asset Management
+ * Static library with methods for Digital Asset Management.
+ * Methods to interact with a remote DAMAS project.
+ *
+ * Usage:
+ * damas.server = "https://server/";
+ *
+ * @namespace
+ * @requires Ajax
+ * @requires damas.serverRequest
+ * @requires damas.element
  * @namespace
  * @requires prototypejs
  * @property {String} server The currently connected DAMAS server URL
@@ -45,12 +54,463 @@ damas.server = '';
 damas.types = {};
 damas.version = '2.2-beta6';
 
+
+//
+//
+//
+//
+// CRUD METHODS
+//
+//
+//
+//
+
+
+/**
+ * Creates a node of the specified type
+ * @param {String} type type of the new node
+ * @param {Hash} keys Hash of key/value pairs
+ * @returns {DamNode} New node on success, false otherwise
+ */
+damas.create = function ( type, keys )
+{
+	return damas.utils.readJSONElement( JSON.parse( damas.utils.command( { cmd: 'create', type: type, keys: Object.toJSON(keys) } ).text ) );
+}
+
+/**
+ * Retrieve one or many nodes specifying index(es)
+ * @param {Integer} id internal node index(es) to read, comma separated
+ * @returns {damas.element} Damas element or false on failure
+ */
+damas.read = function ( id )
+{
+	var multi = false;
+	if( Array.isArray(id) )
+	{
+		id = id.join(',');
+		multi = true;
+	}
+	if( typeof(id) === 'string' && id.indexOf(',') != -1 )
+	{
+		multi = true;
+	}
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		method: "POST",
+		asynchronous: false,
+		parameters: { cmd: "read", id: id, depth: "1", flags: "4" }
+	});
+	if( multi )
+		return damas.utils.readJSONElements( JSON.parse( req.transport.responseText ) );
+	else
+		return damas.utils.readJSONElement( JSON.parse( req.transport.responseText ) );
+}
+
+/**
+ * Update the keys of a node. The specified keys overwrite existing keys, others are left untouched. A null key value removes the key. 
+ * @param {Integer} id internal node index to update
+ * @returns {damas.element} Damas element or false on failure
+ */
+damas.update = function ( id, keys )
+{
+	return damas.utils.readJSONElement( JSON.parse( damas.utils.command( { cmd: 'update', id: id, keys: Object.toJSON(keys) } ).text ) );
+}
+
+/**
+ * Recursively delete the specified node
+ * @param {Integer} id Element index to delete
+ * @returns {Boolean} true on success, false otherwise
+ */
+damas.delete = function ( id )
+{
+	return damas.utils.command( { cmd: 'delete', id: id } ).status === 200;
+}
+
+//
+//
+//
+//
+// ROOTED TREE METHODS
+//
+//
+//
+//
+
+/**
+ * Retrieve the ancestors (parent and above) of a node
+ * @param {Integer} id node index
+ * @return {Array} array of ancestors ids
+ */
+damas.ancestors = function ( id )
+{
+	return damas.utils.readJSONElements( JSON.parse( damas.utils.command( { cmd: 'ancestors', id: id } ).text ) );
+}
+
+/**
+ * Retrieve the children of a node
+ * @param {Integer} id node index
+ * @return {Array} array of children elements
+ */
+damas.children = function ( id )
+{
+	return damas.utils.readJSONElements( JSON.parse( damas.utils.command( { cmd: 'children', id: id } ).text ) );
+}
+
+/**
+ * @OBSOLETE
+ * @deprecated
+ * Move elements
+ * @param {Integer} id Element index
+ * @param {Integer} target Index of the new parent element
+ * @returns {Boolean} true on success, false otherwise
+ */
+damas.move = function ( id, target )
+{
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'move', id: id, target: target }
+	});
+	return req.transport.status == 200;
+}
+
+//
+//
+//
+//
+// OTHER METHODS
+//
+//
+//
+//
+
+
+/**
+ * Remove every elements from the trashcan.
+ * Privileged 'admin' users only.
+ * @returns {Boolean} true on success, false otherwise
+ */
+damas.empty_trashcan = function ( )
+{
+	var req = new Ajax.Request( this.server + "/asset.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'empty_trashcan' }
+	});
+	if( req.transport.status == 200 )
+	{
+		document.fire( 'dam:element.updated', this.find( { 'id': 'dam:trash' } ) );
+	}
+	return req.transport.status == 200;
+}
+
+/**
+ * Find elements wearing the specified key(s)
+ * @param {Hash} keys Hash of key/value pairs to match
+ * @returns {Array} array of element indexes or null if no element found
+ */
+damas.find = function ( keys )
+{
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: Object.extend( keys, { cmd: 'find' } )
+	});
+	return JSON.parse( req.transport.responseText );
+}
+
+/**
+ * OK
+ * Find elements, specifying an SQL SELECT query.
+ * The query must be formated to return results with an 'id' named column, which
+ * contains elements indexes.
+ * @param {String} query SQL query to perform
+ * @returns {Array} array of element indexes
+ */
+damas.findSQL = function ( query )
+{
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'findSQL', query: query }
+	});
+	return JSON.parse( req.transport.responseText );
+}
+
+/**
+ * Search for elements wearing the specified tag
+ * @param {String} tagname Tag to search
+ * @returns {Array} array of node indexes
+ */
+damas.findTag = function ( tagname )
+{
+	return project.findSQL( "SELECT tag.node_id AS id FROM tag LEFT JOIN `key` ON `key`.node_id=tag.node_id AND ( key.name='label' ) WHERE tag.name='" + tagname + "' ORDER BY `key`.value;" );
+}
+
+/**
+ * Make a link
+ * @param {Integer} src_id Source element index
+ * @param {Integer} tgt_id Target element index
+ * @returns {Integer} link index on success, false otherwise
+ */
+damas.link = function ( src_id, tgt_id )
+{
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'link', src: src_id, tgt: tgt_id }
+	});
+	document.fire( 'damas:project.link' );
+	return req.transport.status == 200;
+}
+
+/**
+ * Retrieve the elements linked to the specified element
+ * @param {Array} indexes array of node ids to retrieve
+ * @returns {Array} array of Damas elements
+ */
+damas.links = function ( id )
+{
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: { 'cmd': 'links', 'id': id }
+	});
+	return damas.utils.readJSONElements( JSON.parse( req.transport.responseText ) );
+}
+
+/**
+ * List all distinct values for a key
+ */
+damas.list = function ( key )
+{
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: key? { 'cmd': 'list', 'key': key } : { 'cmd': 'list' }
+	});
+	return damas.utils.readJSONElements( JSON.parse( req.transport.responseText ) );
+}
+
+/**
+ * Move the specified element to trashcan element ( id=dam:trashcan ) .
+ * If trashcan is not found it is created under the root element.
+ * @returns {Boolean} true on success, false otherwise
+ */
+damas.recycle = function ( id )
+{
+	var req = new Ajax.Request( this.server + "/asset.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'recycle', id: id }
+	});
+	if( req.transport.status == 200 )
+	{
+		document.fire( 'dam:element.recycled', id );
+	}
+	return req.transport.status == 200;
+}
+
+/**
+ * Recursively modify a node, searching and replacing a specified pattern in its sub key values
+ * @param {Integer} id Node index to modify
+ * @param {String} old_pattern Name of the attribute
+ * @param {String} value Value of the attribute
+ * @returns {Boolean} true on success, false otherwise
+ */
+/*
+damas.setKeys = function ( id, old_pattern, new_pattern )
+{
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'setKeys', id: id, old: old_pattern, 'new': new_pattern }
+	});
+	if( req.transport.status == 200 )
+	{
+		document.fire('dam:element.updated', { 'id': id } );
+	}
+	return req.transport.status == 200;
+}
+*/
+
+/**
+ * Make an exact copy of an element
+ * @param {Integer} id Element Index
+ * @returns {DamNode} New node on success, false otherwise
+ */
+/*
+damas.duplicate = function ( id )
+{
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: { 'cmd': 'duplicate', 'id': id }
+	});
+	return damas.utils.readJSONElement( JSON.parse( req.transport.responseText ) );
+}
+*/
+
+/**
+ * Creates a node using an existing node as template.
+ * @param {Integer} id Template node index
+ * @param {Integer} target Parent node index
+ * @param {Hash} keys Hash of key/value pairs
+ * @param {String} tags Comma separated tags string
+ * @returns {Object} the newly created element
+ */
+/*
+damas.createFromTemplate = function ( id, target, keys, tags )
+{
+	var newnode = project.duplicate( id );
+	if( newnode.parent_id !== target )
+	{
+		newnode.move( target );
+	}
+	$H( keys ).each( function(pair) {
+		newnode.setKey( pair.key, pair.value );
+	});
+	$H( keys ).each( function(pair) {
+		project.setKeys( newnode.id, '{@' + pair.key + '}', pair.value );
+	});
+	newnode.setTags( tags );
+	document.fire('dam:element.updated', { 'id': target } );
+	return newnode;
+}
+*/
+
+
+/**
+ * Set multiple tags at a time on the specified element
+ * @param {String} tags The coma separated tags to set
+ * @returns {Boolean} true on success, false otherwise
+ */
+damas.setTags = function ( id, tags )
+{
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'setTags', id: id, tags: tags }
+	});
+	return req.transport.status == 200;
+}
+
+/**
+ * Tag elements
+ * @param {Integer} id Element index
+ * @param {String} name Tag name
+ * @returns {Boolean} true on success, false otherwise
+ */
+damas.tag = function ( id, name )
+{
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'tag', id: id, name: name }
+	});
+	return req.transport.status == 200;
+}
+
+/**
+ * Untag elements
+ * @param {Integer} id Element index
+ * @param {String} name Tag name
+ * @returns {Boolean} true on success, false otherwise
+ */
+damas.untag = function ( id, name )
+{
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'untag', id: id, name: name }
+	});
+	return req.transport.status == 200;
+}
+
+/**
+ * Remove a link
+ * @param {Integer} id Index of a link
+ * @returns {Boolean} true on success, false otherwise
+ */
+damas.unlink = function ( id )
+{
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'unlink', id: id }
+	});
+	document.fire( 'damas:project.unlink' );
+	return req.transport.status == 200;
+}
+
+/**
+ * Change an element type
+ * @param {Integer} id Element index
+ * @param {String} type New type
+ * @returns {Boolean} true on success, false otherwise
+ */
+damas.setType = function ( id, type )
+{
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'setType', id: id, type: type }
+	});
+	return req.transport.status == 200;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**
  * Methods to process data, serialize/deserialize, filter, sort
  */
 damas.utils = {};
 
+//
+//
+//
+//
+// COMMUNICATION WITH SERVER
+//
+//
+//
+//
+
+/**
+ * Send a command to the server
+ * Ajax commands are invoked synchronously in order to use the return value
+ * @param {Hash} args comment arguments
+ * @return {Hash} hash containing response status, text
+ */
+damas.utils.command = function ( args )
+{
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: args
+	});
+	return { 'status': req.transport.status, text: req.transport.responseText };
+}
+
+/**
+ * Send an asynchrone command to the server
+ * @param {Hash} args comment arguments
+ * @param {Function} callback the function to call on command success
+ */
+damas.utils.command_a = function ( args, callback )
+{
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: true,
+		parameters: args,
+		onSuccess: function( req ){
+			callback( { 'status': req.transport.status, text: req.transport.responseText } );
+		}
+	});
+}
+
+//
+//
+//
+//
 // SORT AND FILTER ELEMENTS
+//
+//
+//
+//
+//
 
 /**
  * Remove the specified type from an array of elements
@@ -135,6 +595,16 @@ damas.utils.sort_time_desc = function ( elements )
 	});
 }
 
+//
+//
+//
+//
+// PROCESS SERVER RESULTS
+//
+//
+//
+//
+
 /**
  * Deserialize JSON objects to Damas elements
  * @private
@@ -162,482 +632,13 @@ damas.utils.readJSONElement = function ( obj )
 	return Object.extend( obj, new damas.element() );
 }
 
-/**
- * Methods to interact with a remote DAMAS project.
- *
- * Usage:
- * var proj = new damas.project( "https://server/" );
- *
- * @namespace
- * @requires Ajax
- * @requires damas.serverRequest
- * @requires damas.element
- */
-damas.project = {};
-
-/**
- * Constructor
- * @param {String} url The server to connect to
- */
-damas.project.initialize = function ( url )
-{
-	this.server = url;
-}
-
-/**
- * Retrieve the ancestors (parent and above) of a node
- * @param {Integer} id node index
- * @return {Array} array of ancestors ids
- */
-damas.project.ancestors = function ( id )
-{
-	return damas.utils.readJSONElements( JSON.parse( this.command( { cmd: 'ancestors', id: id } ).text ) );
-}
-
-/**
- * Retrieve the children of a node
- * @param {Integer} id node index
- * @return {Array} array of children elements
- */
-damas.project.children = function ( id )
-{
-	return damas.utils.readJSONElements( JSON.parse( this.command( { cmd: 'children', id: id } ).text ) );
-}
-
-/**
- * Send a command to the server
- * Ajax commands are invoked synchronously in order to use the return value
- * @param {Hash} args comment arguments
- * @return {Hash} hash containing response status, text
- */
-damas.project.command = function ( args )
-{
-	var req = new Ajax.Request( this.server + "/model.json.php", {
-		asynchronous: false,
-		parameters: args
-	});
-	return { 'status': req.transport.status, text: req.transport.responseText };
-}
-
-/**
- * Send an asynchrone command to the server
- * @param {Hash} args comment arguments
- * @param {Function} callback the function to call on command success
- */
-damas.project.command_a = function ( args, callback )
-{
-	var req = new Ajax.Request( this.server + "/model.json.php", {
-		asynchronous: true,
-		parameters: args,
-		onSuccess: function( req ){
-			callback( { 'status': req.transport.status, text: req.transport.responseText } );
-		}
-	});
-}
-
-/**
- * Creates a node using an existing node as template.
- * @param {Integer} id Template node index
- * @param {Integer} target Parent node index
- * @param {Hash} keys Hash of key/value pairs
- * @param {String} tags Comma separated tags string
- * @returns {Object} the newly created element
- */
-/*
-damas.project.createFromTemplate = function ( id, target, keys, tags )
-{
-	var newnode = project.duplicate( id );
-	if( newnode.parent_id !== target )
-	{
-		newnode.move( target );
-	}
-	$H( keys ).each( function(pair) {
-		newnode.setKey( pair.key, pair.value );
-	});
-	$H( keys ).each( function(pair) {
-		project.setKeys( newnode.id, '{@' + pair.key + '}', pair.value );
-	});
-	newnode.setTags( tags );
-	document.fire('dam:element.updated', { 'id': target } );
-	return newnode;
-}
-*/
-
-/**
- * Creates a node of the specified type
- * @param {String} type type of the new node
- * @param {Hash} keys Hash of key/value pairs
- * @returns {DamNode} New node on success, false otherwise
- */
-damas.project.create = function ( type, keys )
-{
-/*
-	var req = new Ajax.Request( this.server + "/model.json.php", {
-		asynchronous: false,
-		parameters: { 'cmd': 'create', 'type': type, 'keys': Object.toJSON(keys) }
-	});
-	return damas.utils.readJSONElement( JSON.parse( req.transport.responseText ) );
-*/
-	return damas.utils.readJSONElement( JSON.parse( this.command( { cmd: 'create', type: type, keys: Object.toJSON(keys) } ).text ) );
-}
-
-/**
- * Retrieve one or many nodes specifying the internal index(es)
- * @param {Integer} id internal node index(es) to read, comma separated
- * @returns {damas.element} Damas element or false on failure
- */
-damas.project.read = function ( id )
-{
-	var multi = false;
-	if( Array.isArray(id) )
-	{
-		id = id.join(',');
-		multi = true;
-	}
-	if( typeof(id) === 'string' && id.indexOf(',') != -1 )
-	{
-		multi = true;
-	}
-	var req = new Ajax.Request( this.server + "/model.json.php", {
-		method: "POST",
-		asynchronous: false,
-		parameters: { cmd: "read", id: id, depth: "1", flags: "4" }
-		//parameters: { 'cmd': 'read', 'id': id }
-	});
-	if( multi )
-		return damas.utils.readJSONElements( JSON.parse( req.transport.responseText ) );
-	else
-		return damas.utils.readJSONElement( JSON.parse( req.transport.responseText ) );
-}
-
-/**
- * ok
- */
-damas.project.update = function ( id, keys )
-{
-	return damas.utils.readJSONElement( JSON.parse( this.command( { cmd: 'update', id: id, keys: Object.toJSON(keys) } ).text ) );
-}
-
-/**
- * ok
- */
-damas.project.delete = function ( id )
-{
-	return this.command( { cmd: 'delete', id: id } ).status === 200;
-}
-
-
-
-/**
- * Make an exact copy of an element
- * @param {Integer} id Element Index
- * @returns {DamNode} New node on success, false otherwise
- */
-damas.project.duplicate = function ( id )
-{
-	var req = new Ajax.Request( this.server + "/model.json.php", {
-		asynchronous: false,
-		parameters: { 'cmd': 'duplicate', 'id': id }
-	});
-	return damas.utils.readJSONElement( JSON.parse( req.transport.responseText ) );
-}
-
-/**
- * Remove every elements from the trashcan.
- * Privileged 'admin' users only.
- * @returns {Boolean} true on success, false otherwise
- */
-damas.project.empty_trashcan = function ( )
-{
-	var req = new Ajax.Request( this.server + "/asset.json.php", {
-		asynchronous: false,
-		parameters: { cmd: 'empty_trashcan' }
-	});
-	if( req.transport.status == 200 )
-	{
-		document.fire( 'dam:element.updated', this.find( { 'id': 'dam:trash' } ) );
-	}
-	return req.transport.status == 200;
-}
-
-/**
- * Find elements wearing the specified key(s)
- * @param {Hash} keys Hash of key/value pairs to match
- * @returns {Array} array of element indexes or null if no element found
- */
-damas.project.find = function ( keys )
-{
-	var req = new Ajax.Request( this.server + "/model.json.php", {
-		asynchronous: false,
-		parameters: Object.extend( keys, { cmd: 'find' } )
-	});
-	return JSON.parse( req.transport.responseText );
-}
-
-/**
- * OK
- * Find elements, specifying an SQL SELECT query.
- * The query must be formated to return results with an 'id' named column, which
- * contains elements indexes.
- * @param {String} query SQL query to perform
- * @returns {Array} array of element indexes
- */
-damas.project.findSQL = function ( query )
-{
-	var req = new Ajax.Request( this.server + "/model.json.php", {
-		asynchronous: false,
-		parameters: { cmd: 'findSQL', query: query }
-	});
-	return JSON.parse( req.transport.responseText );
-}
-
-/**
- * Search for elements wearing the specified tag
- * @param {String} tagname Tag to search
- * @returns {Array} array of node indexes
- */
-damas.project.findTag = function ( tagname )
-{
-	return project.findSQL( "SELECT tag.node_id AS id FROM tag LEFT JOIN `key` ON `key`.node_id=tag.node_id AND ( key.name='label' ) WHERE tag.name='" + tagname + "' ORDER BY `key`.value;" );
-}
-
-/**
- * Make a link
- * @param {Integer} src_id Source element index
- * @param {Integer} tgt_id Target element index
- * @returns {Integer} link index on success, false otherwise
- */
-damas.project.link = function ( src_id, tgt_id )
-{
-	var req = new Ajax.Request( this.server + "/model.json.php", {
-		asynchronous: false,
-		parameters: { cmd: 'link', src: src_id, tgt: tgt_id }
-	});
-	document.fire( 'damas:project.link' );
-	return req.transport.status == 200;
-}
-
-/**
- * Retrieve the elements linked to the specified element
- * @param {Array} indexes array of node ids to retrieve
- * @returns {Array} array of Damas elements
- */
-damas.project.links = function ( id )
-{
-	var req = new Ajax.Request( this.server + "/model.json.php", {
-		asynchronous: false,
-		parameters: { 'cmd': 'links', 'id': id }
-	});
-	return damas.utils.readJSONElements( JSON.parse( req.transport.responseText ) );
-}
-
-/**
- * List all distinct values for a key
- */
-damas.project.list = function ( key )
-{
-	var req = new Ajax.Request( this.server + "/model.json.php", {
-		asynchronous: false,
-		parameters: key? { 'cmd': 'list', 'key': key } : { 'cmd': 'list' }
-	});
-	return damas.utils.readJSONElements( JSON.parse( req.transport.responseText ) );
-}
-
-/**
- * @OBSOLETE
- * @deprecated
- * Move elements
- * @param {Integer} id Element index
- * @param {Integer} target Index of the new parent element
- * @returns {Boolean} true on success, false otherwise
- */
-damas.project.move = function ( id, target )
-{
-	var req = new Ajax.Request( this.server + "/model.json.php", {
-		asynchronous: false,
-		parameters: { cmd: 'move', id: id, target: target }
-	});
-	return req.transport.status == 200;
-}
-
-/**
- * Move the specified element to trashcan element ( id=dam:trashcan ) .
- * If trashcan is not found it is created under the root element.
- * @returns {Boolean} true on success, false otherwise
- */
-damas.project.recycle = function ( id )
-{
-	var req = new Ajax.Request( this.server + "/asset.json.php", {
-		asynchronous: false,
-		parameters: { cmd: 'recycle', id: id }
-	});
-	if( req.transport.status == 200 )
-	{
-		document.fire( 'dam:element.recycled', id );
-	}
-	return req.transport.status == 200;
-}
-
-/**
- * @OBSOLETE
- * @deprecated
- * Removes an attribute by name
- * @param {Integer} id Element index
- * @param {String} name Name of the attribute
- * @returns {Boolean} true on success, false otherwise
- */
-damas.project.removeKey = function ( id, name )
-{
-	var req = new Ajax.Request( this.server + "/model.json.php", {
-		asynchronous: false,
-		parameters: { cmd: 'removeKey', id: id, name: name }
-	});
-	return req.transport.status == 200;
-}
-
-/**
- * Recursively delete the specified node
- * @param {Integer} id Element index to delete
- * @returns {Boolean} true on success, false otherwise
- */
-damas.project.removeNode = function ( id )
-{
-	var req = new Ajax.Request( this.server + "/model.json.php", {
-		asynchronous: false,
-		parameters: { 'cmd': 'removeNode', 'id': id }
-	});
-	return req.transport.status == 200;
-}
-
-/**
- * OBSOLETE
- * Adds a new attribute. If an attribute with that name is already present in
- * the element, its value is changed to be that of the value parameter
- * @param {Integer} id Element index
- * @param {String} name Name of the attribute
- * @param {String} value Value of the attribute
- * @returns {Boolean} true on success, false otherwise
- */
-damas.project.setKey = function ( id, name, value )
-{
-	var key = {};
-	key[name] = value;
-	return this.update( id, key );
-/*
-	var req = new Ajax.Request( this.server + "/model.json.php", {
-		asynchronous: false,
-		parameters: { cmd: 'setKey', id: id, name: name, value: value }
-	});
-	return req.transport.status == 200;
-*/
-}
-
-/**
- * Recursively modify a node, searching and replacing a specified pattern in its sub key values
- * @param {Integer} id Node index to modify
- * @param {String} old_pattern Name of the attribute
- * @param {String} value Value of the attribute
- * @returns {Boolean} true on success, false otherwise
- */
-damas.project.setKeys = function ( id, old_pattern, new_pattern )
-{
-	var req = new Ajax.Request( this.server + "/model.json.php", {
-		asynchronous: false,
-		parameters: { cmd: 'setKeys', id: id, old: old_pattern, 'new': new_pattern }
-	});
-	if( req.transport.status == 200 )
-	{
-		document.fire('dam:element.updated', { 'id': id } );
-	}
-	return req.transport.status == 200;
-}
-
-/**
- * Set multiple tags at a time on the specified element
- * @param {String} tags The coma separated tags to set
- * @returns {Boolean} true on success, false otherwise
- */
-damas.project.setTags = function ( id, tags )
-{
-	var req = new Ajax.Request( this.server + "/model.json.php", {
-		asynchronous: false,
-		parameters: { cmd: 'setTags', id: id, tags: tags }
-	});
-	return req.transport.status == 200;
-}
-
-/**
- * Tag elements
- * @param {Integer} id Element index
- * @param {String} name Tag name
- * @returns {Boolean} true on success, false otherwise
- */
-damas.project.tag = function ( id, name )
-{
-	var req = new Ajax.Request( this.server + "/model.json.php", {
-		asynchronous: false,
-		parameters: { cmd: 'tag', id: id, name: name }
-	});
-	return req.transport.status == 200;
-}
-
-/**
- * Untag elements
- * @param {Integer} id Element index
- * @param {String} name Tag name
- * @returns {Boolean} true on success, false otherwise
- */
-damas.project.untag = function ( id, name )
-{
-	var req = new Ajax.Request( this.server + "/model.json.php", {
-		asynchronous: false,
-		parameters: { cmd: 'untag', id: id, name: name }
-	});
-	return req.transport.status == 200;
-}
-
-/**
- * Remove a link
- * @param {Integer} id Index of a link
- * @returns {Boolean} true on success, false otherwise
- */
-damas.project.unlink = function ( id )
-{
-	var req = new Ajax.Request( this.server + "/model.json.php", {
-		asynchronous: false,
-		parameters: { cmd: 'unlink', id: id }
-	});
-	document.fire( 'damas:project.unlink' );
-	return req.transport.status == 200;
-}
-
-/**
- * Change an element type
- * @param {Integer} id Element index
- * @param {String} type New type
- * @returns {Boolean} true on success, false otherwise
- */
-damas.project.setType = function ( id, type )
-{
-	var req = new Ajax.Request( this.server + "/model.json.php", {
-		asynchronous: false,
-		parameters: { cmd: 'setType', id: id, type: type }
-	});
-	return req.transport.status == 200;
-}
-
-
-damas.project = Class.create( damas.project );
-
-
 
 /**
  * Elements of a Damas project
  * custom events : dam:element.updated, inserted, recycled
  * @class
- * @requires damas.project
- * @requires ServerRequest
- * @requires errors
+ * @requires damas
+ * @requires prototypejs
  * @_param {Object} id Index, damas.element, or XML fragment
  * @property {Array} children children elements
  * @property {Integer} id Index number of the element
@@ -669,7 +670,6 @@ damas.element.initialize = function ( id )
 	if( Object.isString(id) || Object.isNumber(id))
 	{
 		this.id = id;
-		//this.getSingle();
 		return;
 	}
 	if( Object.isElement(id))
@@ -754,6 +754,14 @@ damas.element.create = function ( type, keys )
 }
 
 /**
+ * NEED DOC
+ */
+damas.element.update = function ( keys )
+{
+	return project.update( this.id, keys );
+}
+
+/**
  * Make an exact copy of the element
  * @returns {damNode} new node on success, false otherwise.
  */
@@ -771,42 +779,6 @@ damas.element.move = function ( parent_id )
 {
 	var res =  project.move(this.id, parent_id);
 	if( res ) document.fire('dam:element.updated', this);
-	return res;
-}
-
-/**
- * Delete the element
- * @returns {Boolean} true on success, false otherwise.
- */
-damas.element.remove = function ()
-{
-	var res = project.removeNode( this.id );
-	if( res ) document.fire('dam:element.updated', this);
-	return res;
-}
-
-/**
- * Remove a key from the element
- * @param {String} name Name of the attribute
- * @returns {Boolean} true on success, false otherwise.
- */
-damas.element.removeKey = function ( name )
-{
-	var res = project.removeKey( this.id, name );
-	if( res ) document.fire('dam:element.updated', this);
-	return res;
-}
-
-/**
- * Add a new key on the element. If an attribute with that name is already present in the element, its value is changed to be that of the value parameter. This value is a simple string; it is not parsed as it is being set. So any markup (such as syntax to be recognized as an entity reference) is treated as literal text, and needs to be appropriately escaped by the implementation when it is written out.
- * @param {String} name Name of the attribute
- * @param {String} value Value of the attribute
- * @returns {Boolean} true on success, false otherwise.
- */
-damas.element.setKey = function ( name, value )
-{
-	var res = project.setKey( this.id, name, value );
-	if( res ) document.fire( 'dam:element.updated', this);
 	return res;
 }
 

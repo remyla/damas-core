@@ -77,15 +77,15 @@ class damas_service
 		#global $versions;
 		global $authentication;
 
-		include "server.php";
-		if( file_exists( "/etc/damas/server.php" ) )
+		include "settings.php";
+		if( file_exists( "/etc/damas/settings.php" ) )
 		{
-			include "/etc/damas/server.php";
+			include "/etc/damas/settings.php";
 		}
-		if( file_exists( $_SERVER['DOCUMENT_ROOT'] . "/.damas/server.php" )
-			&& is_readable( $_SERVER['DOCUMENT_ROOT'] . "/.damas/server.php" ) )
+		if( file_exists( $_SERVER['DOCUMENT_ROOT'] . "/.damas/settings.php" )
+			&& is_readable( $_SERVER['DOCUMENT_ROOT'] . "/.damas/settings.php" ) )
 		{
-			include $_SERVER['DOCUMENT_ROOT']."/.damas/server.php";
+			include $_SERVER['DOCUMENT_ROOT']."/.damas/settings.php";
 		}
 		include_once "permissions.php";
 		if( file_exists( "/etc/damas/permissions.php" ) )
@@ -98,19 +98,19 @@ class damas_service
 			include_once $_SERVER['DOCUMENT_ROOT'] . "/.damas/permissions.php";
 		}
 		/*
-		if( !file_exists( $_SERVER['DOCUMENT_ROOT'] . "/.damas/server.php" ) )
+		if( !file_exists( $_SERVER['DOCUMENT_ROOT'] . "/.damas/settings.php" ) )
 		{
 			header("HTTP/1.1: 500 Internal Server Error");
-			echo "Configuration file .damas/server.php is missing";
+			echo "Configuration file .damas/settings.php is missing";
 			exit;
 		}
-		if( !is_readable( $_SERVER['DOCUMENT_ROOT'] . "/.damas/server.php" ) )
+		if( !is_readable( $_SERVER['DOCUMENT_ROOT'] . "/.damas/settings.php" ) )
 		{
 			header("HTTP/1.1: 500 Internal Server Error");
-			echo "Configuration file .damas/server.php is not readable";
+			echo "Configuration file .damas/settings.php is not readable";
 			exit;
 		}
-		include $_SERVER['DOCUMENT_ROOT']."/.damas/server.php";
+		include $_SERVER['DOCUMENT_ROOT']."/.damas/settings.php";
 		*/
 
 		if( !function_exists("mysql_connect") )

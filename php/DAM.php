@@ -69,14 +69,7 @@ class dam
 	{
 		$trashcan = model::searchKey( 'id', 'dam:trash' );
 		$trashcan = $trashcan[0];
-		if( $trashcan )
-		{
-			$children = model::children($trashcan);
-			for( $i=0; $i<sizeof($children); $i++ )
-				$res = model::delete( $children[$i] );
-			return true;
-		}
-		return false;
+		return model::empty_($trashcan);
 	}
 }
 
