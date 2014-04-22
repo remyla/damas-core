@@ -478,7 +478,7 @@ damas.utils = {};
  */
 damas.utils.command = function ( args )
 {
-	var req = new Ajax.Request( this.server + "/model.json.php", {
+	var req = new Ajax.Request( damas.server + "/model.json.php", {
 		asynchronous: false,
 		parameters: args
 	});
@@ -492,7 +492,7 @@ damas.utils.command = function ( args )
  */
 damas.utils.command_a = function ( args, callback )
 {
-	var req = new Ajax.Request( this.server + "/model.json.php", {
+	var req = new Ajax.Request( damas.server + "/model.json.php", {
 		asynchronous: true,
 		parameters: args,
 		onSuccess: function( req ){
