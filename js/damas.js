@@ -22,6 +22,7 @@
  *
  *
  *
+ * 2014-22-04 crud metods implementation - major changes
  * 2012-10-23 removed project.getElementByTagName()
  * 2012-09-12 added project.find()
  * 2012-09-12 added project.findTag()
@@ -33,17 +34,14 @@
 
 /**
  * Static library with methods for Digital Asset Management.
- * Methods to interact with a remote DAMAS project.
+ * Methods to interact with a remote DAMAS database.
  *
  * Usage:
  * damas.server = "https://server/";
  *
  * @namespace
- * @requires Ajax
- * @requires damas.serverRequest
+ * @requires prototypejs.Ajax
  * @requires damas.element
- * @namespace
- * @requires prototypejs
  * @property {String} server The currently connected DAMAS server URL
  * @property {Hash} types A Hash of the different Damas Element types defined
  * @property {String} version The version of DAMAS which is running
@@ -53,6 +51,100 @@ var damas = {};
 damas.server = '';
 damas.types = {};
 damas.version = '2.2-beta6';
+
+damas.username = false;
+damas.userclass = false;
+damas.user_id = false;
+
+//
+//
+//
+//
+// USER AUTHENTICATION METHODS
+//
+//
+//
+//
+
+/**
+ * Get user if authenticated, or false otherwise
+ * @return {Hash} User hash on success, false otherwise
+ */
+damas.getUser = function ()
+{
+	var req = new Ajax.Request( damas.server + "/authentication.php", {
+		asynchronous: false,
+		parameters: { cmd: "getUser" },
+		onFailure: function(req){
+			this.username = false;
+			this.userclass = false;
+			//document.fire('auth:required');
+			//damas.onFailure( req );
+		},
+		//onException: damas.onException,
+		onSuccess: function( req ){
+			var resp = JSON.parse( req.transport.responseText );
+			auth.username = resp.username;
+			auth.userclass = resp.userclass;
+			auth.user_id = resp.user_id;
+			document.fire('auth:success');
+		}
+	});
+}
+
+/**
+ * Sign the user in, using the default user authentication system
+ * @param {String} username the user id
+ * @param {String} password the user secret password
+ * @return true on success, false otherwise
+ */
+damas.signIn = function ( username, password )
+{
+	var ret = false;
+	var req = new Ajax.Request( damas.server + "/authentication.php", {
+		asynchronous: false,
+		parameters: {
+			"cmd": "login",
+			"user": username,
+			"password": password
+ 		},
+		onFailure: function(req){
+			document.fire('auth:failure');
+			ret = false;
+			damas.onFailure( req );
+		},
+		//onException: damas.onException,
+		onSuccess: function( req ){
+			ret = true;
+			document.fire('auth:success');
+		}
+	});
+	return ret;
+}
+
+/**
+ * Sign the user out, using the default user authentication system
+ * @return true on success, false otherwise
+ */
+damas.signOut = function()
+{
+	var ret = false;
+	var req = new Ajax.Request( damas.server + "/authentication.php", {
+		asynchronous: false,
+		parameters: {
+			"cmd": "logout"
+ 		},
+		onFailure: damas.onFailure,
+		//onException: damas.onException,
+		onSuccess: function( req ){
+			ret = true;
+			auth.username = false;
+			auth.userclass = false;
+			document.fire('auth:logout');
+		}
+	});
+	return ret;
+}
 
 
 //
@@ -64,7 +156,6 @@ damas.version = '2.2-beta6';
 //
 //
 //
-
 
 /**
  * Creates a node of the specified type
@@ -239,7 +330,7 @@ damas.findSQL = function ( query )
  */
 damas.findTag = function ( tagname )
 {
-	return project.findSQL( "SELECT tag.node_id AS id FROM tag LEFT JOIN `key` ON `key`.node_id=tag.node_id AND ( key.name='label' ) WHERE tag.name='" + tagname + "' ORDER BY `key`.value;" );
+	return damas.findSQL( "SELECT tag.node_id AS id FROM tag LEFT JOIN `key` ON `key`.node_id=tag.node_id AND ( key.name='label' ) WHERE tag.name='" + tagname + "' ORDER BY `key`.value;" );
 }
 
 /**
@@ -254,7 +345,7 @@ damas.link = function ( src_id, tgt_id )
 		asynchronous: false,
 		parameters: { cmd: 'link', src: src_id, tgt: tgt_id }
 	});
-	document.fire( 'damas:project.link' );
+	document.fire( 'damas:link' );
 	return req.transport.status == 200;
 }
 
@@ -351,7 +442,7 @@ damas.duplicate = function ( id )
 /*
 damas.createFromTemplate = function ( id, target, keys, tags )
 {
-	var newnode = project.duplicate( id );
+	var newnode = damas.duplicate( id );
 	if( newnode.parent_id !== target )
 	{
 		newnode.move( target );
@@ -360,7 +451,7 @@ damas.createFromTemplate = function ( id, target, keys, tags )
 		newnode.setKey( pair.key, pair.value );
 	});
 	$H( keys ).each( function(pair) {
-		project.setKeys( newnode.id, '{@' + pair.key + '}', pair.value );
+		damas.setKeys( newnode.id, '{@' + pair.key + '}', pair.value );
 	});
 	newnode.setTags( tags );
 	document.fire('dam:element.updated', { 'id': target } );
@@ -424,7 +515,7 @@ damas.unlink = function ( id )
 		asynchronous: false,
 		parameters: { cmd: 'unlink', id: id }
 	});
-	document.fire( 'damas:project.unlink' );
+	document.fire( 'damas:unlink' );
 	return req.transport.status == 200;
 }
 
@@ -634,7 +725,7 @@ damas.utils.readJSONElement = function ( obj )
 
 
 /**
- * Elements of a Damas project
+ * Damas node elements
  * custom events : dam:element.updated, inserted, recycled
  * @class
  * @requires damas
@@ -748,7 +839,7 @@ damas.element.print = function ()
 damas.element.create = function ( type, keys )
 {
 	keys['#parent'] = this.id;
-	var res = project.create( type, keys );
+	var res = damas.create( type, keys );
 	if( res ) document.fire( 'dam:element.inserted', res );
 	return res;
 }
@@ -758,7 +849,7 @@ damas.element.create = function ( type, keys )
  */
 damas.element.update = function ( keys )
 {
-	return project.update( this.id, keys );
+	return damas.update( this.id, keys );
 }
 
 /**
@@ -767,7 +858,7 @@ damas.element.update = function ( keys )
  */
 damas.element.duplicate = function ()
 {
-	return project.duplicate( this.id );
+	return damas.duplicate( this.id );
 }
 
 /**
@@ -777,8 +868,8 @@ damas.element.duplicate = function ()
  */
 damas.element.move = function ( parent_id )
 {
-	var res =  project.move(this.id, parent_id);
-	if( res ) document.fire('dam:element.updated', this);
+	var res =  damas.move(this.id, parent_id);
+	if( res ) document.fire('damas:element.updated', this);
 	return res;
 }
 
@@ -789,7 +880,7 @@ damas.element.move = function ( parent_id )
  */
 damas.element.setTags = function ( tags )
 {
-	var res = project.setTags( this.id, tags );
+	var res = damas.setTags( this.id, tags );
 	if( res ) document.fire( 'dam:element.updated', this );
 	return res;
 }
@@ -801,7 +892,7 @@ damas.element.setTags = function ( tags )
  */
 damas.element.setType = function ( newtype )
 {
-	var res = project.setType(this.id, newtype);
+	var res = damas.setType(this.id, newtype);
 	if( res ) document.fire('dam:element.updated', this);
 	return res;
 }
@@ -813,7 +904,7 @@ damas.element.setType = function ( newtype )
  */
 damas.element.tag = function ( name )
 {
-	var res = project.tag(this.id, name);
+	var res = damas.tag(this.id, name);
 	if( res ) document.fire('dam:element.updated', this);
 		return res;
 }
@@ -825,7 +916,7 @@ damas.element.tag = function ( name )
  */
 damas.element.untag = function ( name )
 {
-	var res = project.untag(this.id, name);
+	var res = damas.untag(this.id, name);
 	if( res ) document.fire('dam:element.updated', this);
        return res;
 }
@@ -837,7 +928,7 @@ damas.element.untag = function ( name )
  */
 damas.element.recycle = function ()
 {
-	var req = new Ajax.Request( project.server + "/asset.json.php", {
+	var req = new Ajax.Request( damas.server + "/asset.json.php", {
 		asynchronous: false,
 		parameters: { cmd: 'recycle', id: this.id }
 	});
@@ -855,7 +946,7 @@ damas.element.recycle = function ()
  */
 damas.element.write = function ( text )
 {
-	var req = new Ajax.Request( project.server + "/asset.json.php", {
+	var req = new Ajax.Request( damas.server + "/asset.json.php", {
 		asynchronous: false,
 		parameters: { cmd: 'write', id: this.id, text: text }
 	});
@@ -872,7 +963,7 @@ damas.element.write = function ( text )
  */
 damas.element.time = function ( )
 {
-	var req = new Ajax.Request( project.server + "/asset.json.php", {
+	var req = new Ajax.Request( damas.server + "/asset.json.php", {
 		asynchronous: false,
 		parameters: { cmd: 'time', id: this.id }
 	});
