@@ -138,8 +138,8 @@ damas.signOut = function()
 		//onException: damas.onException,
 		onSuccess: function( req ){
 			ret = true;
-			auth.username = false;
-			auth.userclass = false;
+			damas.username = false;
+			damas.userclass = false;
 			document.fire('auth:logout');
 		}
 	});
@@ -720,7 +720,8 @@ damas.utils.readJSONElement = function ( obj )
 {
 	obj.keys = $H( obj.keys );
 	obj.tags = $A( obj.tags );
-	return Object.extend( obj, new damas.element() );
+	//return Object.extend( obj, new damas.element() );
+	return Object.extend( obj, damas.element );
 }
 
 
