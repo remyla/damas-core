@@ -110,6 +110,109 @@ switch( arg("cmd") )
 		}
 		break;
 	/* other operations */
+
+	case "find":
+		echo json_encode( model::find( json_decode( arg("keys") ), arg("sortby"), arg("order"), arg("limit") ) );
+		break;
+	case "findSQL":
+		if( is_null( arg('query') ) )
+		{
+			header('HTTP/1.1: 400 Bad Request');
+			exit;
+		}
+		# Forbidden SQL manipulation keywords
+		if( stripos( arg('query'), 'ALTER' ) ||
+			stripos( arg('query'), 'CALL' ) ||
+			stripos( arg('query'), 'CREATE' ) ||
+			stripos( arg('query'), 'DELETE' ) ||
+			//stripos( arg('query'), 'DO' ) || // interferes to much
+			stripos( arg('query'), 'DROP' ) ||
+			stripos( arg('query'), 'HANDLER' ) ||
+			stripos( arg('query'), 'INSERT' ) ||
+			stripos( arg('query'), 'LOAD' ) ||
+			stripos( arg('query'), 'RENAME' ) ||
+			stripos( arg('query'), 'REPLACE' ) ||
+			stripos( arg('query'), 'TRUNCATE' ) ||
+			stripos( arg('query'), 'UPDATE' ) )
+		{
+			header('HTTP/1.1: 400 Bad Request');
+			exit;
+		}
+		$querystr = stripslashes( arg('query') );
+		$querystr = str_replace( "&", "&amp;", $querystr );
+		$querystr = str_replace( "<", "&lt;", $querystr );
+		$querystr = str_replace( ">", "&gt;", $querystr );
+		$result = mysql_query( $querystr );
+		$res = array();
+		while( $row = mysql_fetch_array( $result ) )
+		{
+			$res[] = intval( $row['id'] );
+		}
+		echo json_encode( $res );
+		break;
+	case "graph":
+		if( is_null( arg('id') ) )
+		{
+			header('HTTP/1.1: 400 Bad Request');
+			exit;
+		}
+		$ret = model_json::graph( arg("id") );
+		if (!$ret)
+		{
+			header('HTTP/1.1: 404 Not Found');
+			echo json_encode( $ret );
+			exit;
+		}
+		echo json_encode( $ret );
+		break;
+	case "links":
+		if( is_null( arg('id') ) )
+		{
+			header('HTTP/1.1: 400 Bad Request');
+			exit;
+		}
+		echo json_encode( model_json::links( arg("id") ) );
+		break;
+	case "list":
+		if( is_null( arg('key') ) )
+		{
+			$result = mysql_query( "SELECT DISTINCT name FROM `key` ORDER BY name;" );
+			$res = array();
+			while( $row = mysql_fetch_array( $result ) )
+			{
+				$res[] = $row['name'];
+			}
+			echo json_encode( $res );
+		}
+		else
+		{
+			$result = mysql_query( "SELECT DISTINCT value FROM `key` WHERE name='" . arg('key') . "' ORDER BY value;" );
+			$res = array();
+			while( $row = mysql_fetch_array( $result ) )
+			{
+				$res[] = $row['value'];
+			}
+			echo json_encode( $res );
+		}
+		break;
+	case "search":
+		if( is_null( arg('value') ) )
+		{
+			header('HTTP/1.1: 400 Bad Request');
+			exit;
+		}
+		echo json_encode( model::search( arg('value') ) );
+		break;
+
+
+
+
+
+
+
+
+
+
 /* passage au nouveau parent, disable for now
 	case "duplicate":
 		if( is_null( arg('id') ) )
@@ -128,148 +231,6 @@ switch( arg("cmd") )
 		echo json_encode( model_json::node( $id, 1, $NODE_TAG | $NODE_PRM ) );
 		break;
 */
-	case "move":
-		if( is_null( arg('id') ) || is_null( arg('target') ) )
-		{
-			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
-			exit;
-		}
-/* move dir or file to dir - incomplete - case : node dir /animatic move to / does a conflict
-		if( model::getKey( arg("target"), "dir" ) )
-		{
-			if( model::getKey( arg("id"), "file" ) || model::getKey( arg("id"), "dir" ) )
-			{
-				$oldpath = null;
-				$newpath = null;
-				if( model::getKey( arg("id"), "file" ) )
-				{
-					$oldpath = model::getKey( arg("id"), "file" );
-				}
-				if( model::getKey( arg("id"), "dir" ) )
-				{
-					$oldpath = model::getKey( arg("id"), "dir" );
-				}
-				$newpath = model::getKey( arg("target"), "dir" ) . "/" . basename( $oldpath );
-				if( file_exists( $assetsLCL . $newpath ) )
-				{
-					header("HTTP/1.1: 409 Conflict");
-					echo "move error, file exists";
-					exit;
-				}
-				if( ! rename( $assetsLCL . $oldpath, $assetsLCL . $newpath ) )
-				{
-					header("HTTP/1.1: 409 Conflict");
-					echo "file rename error, move aborted";
-					exit;
-				}
-				model::setKeys( arg("id"), $oldpath, $newpath );
-			}
-		}
-*/
-/*
-		// move file to dir
-		if( model::getKey( arg("id"), "file" ) && model::getKey( arg("target"), "dir" ) )
-		{
-			$newfile = model::getKey( arg("target"), "dir" ) . "/" . basename( model::getKey( arg("id"), "file" ) );
-			if( file_exists( $assetsLCL . $newfile ) )
-			{
-				header("HTTP/1.1: 409 Conflict");
-				echo "move error, file exists";
-				exit;
-			}
-			if( ! rename( $assetsLCL . model::getKey( arg("id"), "file" ), $assetsLCL . $newfile ) )
-			{
-				header("HTTP/1.1: 409 Conflict");
-				echo "file rename error, move aborted";
-				exit;
-			}
-			model::setKey( arg("id"), "file", $newfile );
-		}
-*/
-		if( !model::move( arg("id"), arg("target") ) )
-		{
-			header("HTTP/1.1: 409 Conflict");
-			echo "move Error, please change your values";
-			exit;
-		}
-		break;
-	case "setKey":
-		if( is_null( arg('id') ) || is_null( arg('name') ) || is_null( arg('value') ) )
-		{
-			header("HTTP/1.1: 400 Bad Request");
-			echo "Bad command";
-			exit;
-		}
-		/* EXPERIMENTAL
-		$ids = explode( ",", arg("id") );
-		if( $ids )
-		{
-			foreach( $ids as $id )
-			{
-				model::setKey( $id, arg("name"), arg("value") );
-			}
-		}
-		*/
-
-		// TRIGGER unique keys
-		if( arg("name") == 'id' || arg("name") == 'file' || arg("name") == 'dir' || arg("name") == 'username' )
-		{
-			if( sizeof( model::find( array( arg("name") => arg("value") ) ) ) !== 0 )
-			{
-				header("HTTP/1.1: 409 Conflict");
-				echo "Key exists";
-				exit;
-			}
-		}
-		/*
-		$value = model::getKey( arg("id"), arg("name") );
-		// TRIGGER file rename
-		if( arg("name") == 'file' && $value )
-		{
-			if( ! rename( $assetsLCL . $value, $assetsLCL . arg("value") ) )
-			{
-				header("HTTP/1.1: 409 Conflict");
-				echo "File rename error, please change values";
-				exit;
-			}
-		}
-		// TRIGGER dir rename
-		if( arg("name") == 'dir' && $value )
-		{
-			if( ! rename( $assetsLCL . $value, $assetsLCL . arg("value") ) )
-			{
-				header("HTTP/1.1: 409 Conflict");
-				echo "Directory rename error, please change values";
-				exit;
-			}
-			$query = sprintf( "UPDATE `key` SET value = REPLACE( value,'%s','%s') WHERE value LIKE '%s%%' AND name='file';",
-						$value, arg("value"), $value );
-			$res = mysql_query( $query );
-			$query = sprintf( "UPDATE `key` SET value = REPLACE( value,'%s','%s') WHERE value LIKE '%s%%' AND name='dir';",
-						$value, arg("value"), $value );
-			$res = mysql_query( $query );
-		}
-		// TRIGGER END
-		*/
-		if( !model::setKey( arg("id"), arg("name"), arg("value") ) )
-		{
-			header("HTTP/1.1: 409 Conflict");
-			echo "setKey Error, please change your values";
-			exit;
-		}
-		// TRIGGER dir mkdir
-		if( arg("name") == 'dir' && ! $value  )
-		{
-			if( ! mkdir( $assetsLCL . arg("value"), 0755, true ) )
-			{
-				header("HTTP/1.1: 409 Conflict");
-				echo "Directory creation error, please change values";
-				exit;
-			}
-		}
-		// TRIGGER END
-		break;
 	case "tag":
 		if( is_null( arg('id') ) || is_null( arg('name') ) )
 		{
@@ -411,128 +372,26 @@ switch( arg("cmd") )
 		else
 			echo json_encode( model_json::multi( model::children( arg('id') ) ) );
 		break;
-	case "find":
-		$a = $_GET + $_POST;
-		unset( $a['cmd'] );
-		echo json_encode( model::find( $a ) );
-		break;
-	case "findSQL":
-		if( is_null( arg('query') ) )
+	case "move":
+		if( is_null( arg('id') ) || is_null( arg('target') ) )
 		{
-			header('HTTP/1.1: 400 Bad Request');
+			header("HTTP/1.1: 400 Bad Request");
+			echo "Bad command";
 			exit;
 		}
-		# Forbidden SQL manipulation keywords
-		if( stripos( arg('query'), 'ALTER' ) ||
-			stripos( arg('query'), 'CALL' ) ||
-			stripos( arg('query'), 'CREATE' ) ||
-			stripos( arg('query'), 'DELETE' ) ||
-			//stripos( arg('query'), 'DO' ) || // interferes to much
-			stripos( arg('query'), 'DROP' ) ||
-			stripos( arg('query'), 'HANDLER' ) ||
-			stripos( arg('query'), 'INSERT' ) ||
-			stripos( arg('query'), 'LOAD' ) ||
-			stripos( arg('query'), 'RENAME' ) ||
-			stripos( arg('query'), 'REPLACE' ) ||
-			stripos( arg('query'), 'TRUNCATE' ) ||
-			stripos( arg('query'), 'UPDATE' ) )
+		if( !model::move( arg("id"), arg("target") ) )
 		{
-			header('HTTP/1.1: 400 Bad Request');
+			header("HTTP/1.1: 409 Conflict");
+			echo "move Error, please change your values";
 			exit;
 		}
-		$querystr = stripslashes( arg('query') );
-		$querystr = str_replace( "&", "&amp;", $querystr );
-		$querystr = str_replace( "<", "&lt;", $querystr );
-		$querystr = str_replace( ">", "&gt;", $querystr );
-		$result = mysql_query( $querystr );
-		$res = array();
-		while( $row = mysql_fetch_array( $result ) )
-		{
-			$res[] = intval( $row['id'] );
-		}
-		echo json_encode( $res );
-		break;
-	case "graph":
-		if( is_null( arg('id') ) )
-		{
-			header('HTTP/1.1: 400 Bad Request');
-			exit;
-		}
-		$ret = model_json::graph( arg("id") );
-		if (!$ret)
-		{
-			header('HTTP/1.1: 404 Not Found');
-			echo json_encode( $ret );
-			exit;
-		}
-		echo json_encode( $ret );
-		break;
-	case "links":
-		if( is_null( arg('id') ) )
-		{
-			header('HTTP/1.1: 400 Bad Request');
-			exit;
-		}
-		echo json_encode( model_json::links( arg("id") ) );
-		break;
-	case "list":
-		if( is_null( arg('key') ) )
-		{
-			$result = mysql_query( "SELECT DISTINCT name FROM `key` ORDER BY name;" );
-			$res = array();
-			while( $row = mysql_fetch_array( $result ) )
-			{
-				$res[] = $row['name'];
-			}
-			echo json_encode( $res );
-		}
-		else
-		{
-			$result = mysql_query( "SELECT DISTINCT value FROM `key` WHERE name='" . arg('key') . "' ORDER BY value;" );
-			$res = array();
-			while( $row = mysql_fetch_array( $result ) )
-			{
-				$res[] = $row['value'];
-			}
-			echo json_encode( $res );
-		}
-		break;
-	case "multi":
-		if( is_null( arg('id') ) )
-		{
-			header('HTTP/1.1: 400 Bad Request');
-			exit;
-		}
-		echo json_encode( model_json::multi( split( ",", arg("id") ) ) );
-		break;
-	case "search":
-		if( is_null( arg('value') ) )
-		{
-			header('HTTP/1.1: 400 Bad Request');
-			exit;
-		}
-		echo json_encode( model::search( arg('value') ) );
-		break;
-	case "single":
-		if( is_null( arg('id') ) )
-		{
-			header('HTTP/1.1: 400 Bad Request');
-			exit;
-		}
-		$ret = model_json::node( arg( "id" ), 1, $NODE_TAG | $NODE_PRM );
-		if( !$ret )
-		{
-			header('HTTP/1.1: 404 Not Found');
-			exit;
-		}
-		echo json_encode( $ret );
 		break;
 	default:
 		header('HTTP/1.1: 400 Bad Request');
 		exit;
 } // switch / case
 
-$nolog = array( 'ancestors', 'single', 'children', 'links', 'multi', 'stats', 'types', 'tags', 'search' );
+$nolog = array( 'read', 'ancestors', 'children', 'links', 'stats', 'types', 'tags', 'search' );
 if( !in_array( arg('cmd'), $nolog ) )
 	damas_service::log_event();
 ?>
