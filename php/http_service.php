@@ -42,7 +42,7 @@ function arg ( $name )
 
 function auth_get_class ()
 {
-	if( function_exists( getUser ) )
+	if( function_exists( 'getUser' ) )
 	{
 		$id = model::searchKey( 'username', getUser() );
 		return model::getKey( $id[0], 'class' );
