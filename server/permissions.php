@@ -52,9 +52,6 @@ $mod["model::tags"] = array( "*" );
 $mod["model::unlink"] = array( "admin", "editor", "linker" );
 $mod["model::untag"] = array( "admin", "editor" );
 
-#$mod["model::multi"] = array( "*" );
-#$mod["model::removeKey"] = array( "admin", "editor" );
-#$mod["model::setKey"] = array( "admin", "editor" );
 #$mod["model::setKeys"] = array( "admin", "editor" );
 
 $mod["asset::empty_trashcan"] = array( "admin" );
