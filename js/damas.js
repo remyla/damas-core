@@ -84,9 +84,9 @@ damas.getUser = function ()
 		//onException: damas.onException,
 		onSuccess: function( req ){
 			var resp = JSON.parse( req.transport.responseText );
-			auth.username = resp.username;
-			auth.userclass = resp.userclass;
-			auth.user_id = resp.user_id;
+			damas.username = resp.username;
+			damas.userclass = resp.userclass;
+			damas.user_id = resp.user_id;
 			document.fire('auth:success');
 		}
 	});
@@ -297,11 +297,11 @@ damas.empty_trashcan = function ( )
  * @param {Hash} keys Hash of key/value pairs to match
  * @returns {Array} array of element indexes or null if no element found
  */
-damas.find = function ( keys )
+damas.find = function ( keys, sortby, order, limit )
 {
 	var req = new Ajax.Request( this.server + "/model.json.php", {
 		asynchronous: false,
-		parameters: Object.extend( keys, { cmd: 'find' } )
+		parameters: { cmd: 'find', keys: Object.toJSON(keys), sortby: sortby || 'label', order: order || 'ASC', limit: limit }
 	});
 	return JSON.parse( req.transport.responseText );
 }
@@ -735,7 +735,6 @@ damas.utils.readJSONElement = function ( obj )
  * @property {Array} children children elements
  * @property {Integer} id Index number of the element
  * @property {Hash} keys Attributes of the element
- * @property {Integer} parent_id The index of the parent element, or undefined
  * @property {Array} tags Tags of the element
  * @property {String} type Type name of the element
  *
@@ -782,7 +781,6 @@ damas.element.copy = function ( elem )
 	if( !elem) return;
 	this.id = elem.id;
 	this.type = elem.type;
-	this.parent_id = elem.parent_id;
 	this.keys = $H(elem.keys);
 	this.tags = elem.tags;
 	this.single = elem.single;
@@ -867,9 +865,9 @@ damas.element.duplicate = function ()
  * @param {Integer} index number of the new parent or 0
  * @returns {Boolean} true on success, false otherwise.
  */
-damas.element.move = function ( parent_id )
+damas.element.move = function ( target )
 {
-	var res =  damas.move(this.id, parent_id);
+	var res =  damas.move(this.id, target);
 	if( res ) document.fire('damas:element.updated', this);
 	return res;
 }
