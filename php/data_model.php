@@ -4,7 +4,7 @@
  *
  * Simple library written in PHP to handle a key=value data model on top of
  * MySQL, supporting :
- * - Functions for crud access ( create, find, update, delete)
+ * - Functions for crud access ( create, update, delete)
  * - Text key and value pairs on nodes (keys, find, setKey, getKey, removeKey,
  *    searchKey, setKeys)
  * - Rooted tree management functions (ancestors, children, copyBranch, copyNode
@@ -47,9 +47,8 @@ class model
  	 */
 	static function create ( $type, $keys )
 	{
-		$query = sprintf("INSERT INTO node ( type, parent_id ) VALUES ( '%s', '%s' );",
-			mysql_real_escape_string($type),
-			'0'
+		$query = sprintf("INSERT INTO node ( type ) VALUES ( '%s' );",
+			mysql_real_escape_string($type)
 		);
 		if( $result = mysql_query($query)){
 			$id = mysql_insert_id();
@@ -106,21 +105,33 @@ class model
 	/**
 	 * Find nodes wearing the specified key(s)
 	 * @param {Array} keys Array of key/value pairs to match
+	 * @param {String} sortby key to use to sort the result
+	 * @param {String} order Sort result as ASC or DESC
+	 * @param {String} limit Limit and offset for result (MySQL Syntax)
 	 * @returns {Array} array of matching node indexes
 	 */
-	static function find ( $keys )
+	static function find ( $keys, $sortby = 'label', $order = 'DESC', $limit = NULL )
 	{
-		// original line changed to sort results using the label key if it exists
-		//$query = "SELECT DISTINCT node_id FROM `key` WHERE 1";
-		$query = "SELECT DISTINCT k1.node_id FROM `key` AS k1 LEFT JOIN `key` AS k2 ON k1.node_id=k2.node_id AND k2.name='label' WHERE 1";
+		$query = sprintf("SELECT DISTINCT k1.node_id FROM `key` AS k1 LEFT JOIN `key` AS k2 ON k1.node_id=k2.node_id AND k2.name='%s' WHERE 1",
+			mysql_real_escape_string($sortby)
+		);
 		foreach( $keys as $k=>$v )
 		{
 			$query .= sprintf( " AND k1.node_id IN ( SELECT node_id FROM `key` WHERE name='%s' AND value='%s' )",
 				mysql_real_escape_string($k),
-				mysql_real_escape_string($v) );
+				mysql_real_escape_string($v)
+			);
 		}
-		//$query .= ";";
-		$query .= " ORDER BY k2.value;";
+		$query .= sprintf(" ORDER BY k2.value %s",
+			mysql_real_escape_string($order)
+		);
+		if( $limit )
+		{
+			$query .= sprintf(" LIMIT %s;",
+				mysql_real_escape_string($limit)
+			);
+		}
+		$query .= ";";
 		$result = mysql_query( $query );
 		$matches = array();
 		while( $row = mysql_fetch_array( $result ) )
@@ -416,9 +427,6 @@ class model
 	static function countChildren ( $id )
 	{
 		return count( model::find( [ '#parent' => $id ] ) );
-		$query = "SELECT COUNT(id) as count FROM node WHERE parent_id='$id';";
-		$row = mysql_fetch_array( mysql_query( $query ) );
-		return intval( $row["count"] );
 	}
 
 	static function countRLinks ( $id )
@@ -673,8 +681,7 @@ class model
 			$array[] = array(
 				"link_id" => $row["link_id"], 
 				"id" => $row["tgt_id"], 
-				"type" => ( ( $row["tgt_id"] == "0" )? "folder" : $row["type"] ),
-				"parent_id" => $row["parent_id"]
+				"type" => ( ( $row["tgt_id"] == "0" )? "folder" : $row["type"] )
 			);
 		}
 		return $array;
@@ -710,9 +717,8 @@ class model
 
 			$res = array ("link_id"=>$row["link_id"], 
 					"id"=>$row["src_id"], 
-					"type"=>(($row["src_id"] == "0" )? "folder" : $row["type"]),
-					"parent_id"=>$row["parent_id"]);
-
+					"type"=>(($row["src_id"] == "0" )? "folder" : $row["type"])
+			);
 			$array[] = $res;
 		}
 		return $array;
