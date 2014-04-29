@@ -117,10 +117,20 @@ class model
 		);
 		foreach( $keys as $k=>$v )
 		{
-			$query .= sprintf( " AND k1.node_id IN ( SELECT node_id FROM `key` WHERE name='%s' AND value='%s' )",
-				mysql_real_escape_string($k),
-				mysql_real_escape_string($v)
-			);
+			if( $v != '*')
+			{
+				$query .= sprintf( " AND k1.node_id IN ( SELECT node_id FROM `key` WHERE name='%s' AND value='%s' )",
+					mysql_real_escape_string($k),
+					mysql_real_escape_string($v)
+				);
+			}
+			else
+			{
+				$query .= sprintf( " AND k1.node_id IN ( SELECT node_id FROM `key` WHERE name='%s' )",
+					mysql_real_escape_string($k),
+					mysql_real_escape_string($v)
+				);
+			}
 		}
 		$query .= sprintf(" ORDER BY k2.value %s",
 			mysql_real_escape_string($order)
