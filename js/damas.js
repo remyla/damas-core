@@ -76,12 +76,11 @@ damas.getUser = function ()
 		asynchronous: false,
 		parameters: { cmd: "getUser" },
 		onFailure: function(req){
-			this.username = false;
-			this.userclass = false;
+			damas.username = false;
+			damas.userclass = false;
+			damas.user_id = false;
 			//document.fire('auth:required');
-			//damas.onFailure( req );
 		},
-		//onException: damas.onException,
 		onSuccess: function( req ){
 			var resp = JSON.parse( req.transport.responseText );
 			damas.username = resp.username;
@@ -111,9 +110,7 @@ damas.signIn = function ( username, password )
 		onFailure: function(req){
 			document.fire('auth:failure');
 			ret = false;
-			damas.onFailure( req );
 		},
-		//onException: damas.onException,
 		onSuccess: function( req ){
 			ret = true;
 			document.fire('auth:success');
@@ -135,7 +132,6 @@ damas.signOut = function()
 			"cmd": "logout"
  		},
 		onFailure: damas.onFailure,
-		//onException: damas.onException,
 		onSuccess: function( req ){
 			ret = true;
 			damas.username = false;

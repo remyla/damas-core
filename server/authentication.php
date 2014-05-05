@@ -38,13 +38,10 @@ switch( arg("cmd") )
 	case "login":
 		if( ! login( arg("user"), arg("password") ) )
 		{
-   			header("HTTP/1.1: 401 Unauthorized"); //ERR_AUTHREQUIRED
+   			header("HTTP/1.1: 401 Unauthorized");
    			echo "Incorrect username and password";
    			exit;
 		}
-		#$_SESSION['user_id'] = getUserId( arg('user') );
-		#$res = model::searchKey( 'username', $login );
-		#return $res[0];
 		header('Content-type: application/json');
 		echo json_encode( true );
 		exit;
@@ -56,7 +53,7 @@ switch( arg("cmd") )
    			exit;
 		}
 		header('Content-type: application/json');
-   		header("HTTP/1.1: 401 Unauthorized"); //ERR_AUTHREQUIRED
+   		header("HTTP/1.1: 401 Unauthorized");
 		echo json_encode( true );
 		exit;
 	case "getUser":
@@ -82,7 +79,7 @@ switch( arg("cmd") )
 		));
 		break;
 	default:
-		header("HTTP/1.1: 400 Bad Request"); //ERR_COMMAND
+		header("HTTP/1.1: 400 Bad Request");
 		echo "Bad command";
 		exit;
 }

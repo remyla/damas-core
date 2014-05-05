@@ -136,7 +136,7 @@ class damas_service
 
 		if( $authentication == "Default" )
 		{
-			include "authentication_dev.php";
+			include "authentication_node.php";
 		}
 		if( $authentication == "MySQL" )
 		{
@@ -160,7 +160,8 @@ class damas_service
 		global $anonymous_access;
 		if( $anonymous_access )
 			return true;
-		if( checkAuthentication() )
+		#if( checkAuthentication() )
+		if( getUser() )
 			return true;
 		header("HTTP/1.1: 401 Unauthorized"); //ERR_AUTHREQUIRED
 		echo "User authentication required";
