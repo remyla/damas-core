@@ -63,12 +63,12 @@ class model_json
 
 	/**
 	 * Retrieve the graph from a node
-	 * @param {Integer} $id node index
+	 * @param {Array} $ids nodes indexes
 	 * @return {Array} array nodes (as "nodes") and links (as "links")
 	 */
-	static function graph ( $id )
+	static function graph ( $ids )
 	{
-		$links = model::links_r( $id, array() );
+		$links = model::links_r( $ids, array() );
 		$values = array_values( $links );
 		$nodes = array();
 		for( $i = 0; $i < sizeof( $links ); $i++ )
@@ -94,6 +94,11 @@ class model_json
 		$res["links"] = $links_json;
 		return $res;
 	} // done
+
+	static function graph_all ( )
+	{
+
+	}
 
 	/**
 	 * Gets a node and subnodes in array format

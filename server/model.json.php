@@ -156,7 +156,14 @@ switch( arg("cmd") )
 			header('HTTP/1.1: 400 Bad Request');
 			exit;
 		}
-		$ret = model_json::graph( arg("id") );
+		if( strpos( arg("id"), "," ) === false )
+		{
+			$ret = model_json::graph( array( arg("id") ) );
+		}
+		else
+		{
+			$ret = model_json::graph( split( ",", arg("id") ) );
+		}
 		if (!$ret)
 		{
 			header('HTTP/1.1: 404 Not Found');
@@ -203,14 +210,6 @@ switch( arg("cmd") )
 		}
 		echo json_encode( model::search( arg('value') ) );
 		break;
-
-
-
-
-
-
-
-
 
 
 /* passage au nouveau parent, disable for now

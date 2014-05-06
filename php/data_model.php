@@ -569,12 +569,13 @@ class model
 
 	/**
 	 * Get connected links. Recursive. Useful for graphs
-	 * @param {Integer} $id node index
+	 * @param {Array} $ids nodes indexes
 	 * @return {Array} or false
 	 */
-	static function links_r ( $id, $targets )
+	static function links_r ( $ids, $targets )
 	{
-		$query = "SELECT * FROM link WHERE src_id='$id';";
+		$query = sprintf( "SELECT * FROM link WHERE src_id IN ( %s );",
+			join(",", $ids));
 		if( !$result = mysql_query( $query ) ) return array();
 		if( !mysql_num_rows( $result ) ) return array();
 		$a = array();
@@ -584,7 +585,7 @@ class model
 			if( ! in_array( $row["tgt_id"], $targets ) )
 			{
 				$targets[] = $row["tgt_id"];
-				$a += model::links_r( $row["tgt_id"], $targets );
+				$a += model::links_r( array( $row["tgt_id"] ), $targets );
 			}
 		}
 		return $a;
