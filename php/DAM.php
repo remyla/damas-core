@@ -37,7 +37,8 @@ class dam
 				'#parent' => $id,
 				'user' => getUser(),
 				'time' => time(),
-				'text' => $text
+				'text' => $text,
+				'type' => 'message' 
 		));
 	}
 
