@@ -82,7 +82,7 @@ switch( arg("cmd") )
 		}
 		else
 		{
-			echo json_encode( model_json::multi( split( ",", arg("id") ) ) );
+			echo json_encode( model_json::multi( explode( ",", arg("id") ) ) );
 		}
 		break;
 	case "update":
@@ -162,7 +162,7 @@ switch( arg("cmd") )
 		}
 		else
 		{
-			$ret = model_json::graph( split( ",", arg("id") ) );
+			$ret = model_json::graph( explode( ",", arg("id") ) );
 		}
 		if (!$ret)
 		{

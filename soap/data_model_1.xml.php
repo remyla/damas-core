@@ -66,7 +66,7 @@ class model_xml
 
 	static function multi ( $ids, $depth, $flags )
 	{
-		$id_arr = split( ",", $ids );
+		$id_arr = explode( ",", $ids );
 		$xml = "";
 		for( $i=0; $i<sizeof($id_arr); $i++ )
 			$xml .= model_xml::node( $id_arr[$i], $depth, $flags );
