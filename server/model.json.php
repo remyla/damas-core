@@ -480,7 +480,7 @@ switch( arg("cmd") )
 			header('HTTP/1.1: 400 Bad Request');
 			exit;
 		}
-		echo json_encode( model_json::multi( split( ",", arg("id") ) ) );
+		echo json_encode( model_json::multi( explode( ",", arg("id") ) ) );
 		break;
 	case "search":
 		if( is_null( arg('value') ) )
