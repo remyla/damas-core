@@ -157,7 +157,7 @@ damas.signOut = function()
  * Creates a node of the specified type
  * @param {String} type type of the new node
  * @param {Hash} keys Hash of key/value pairs
- * @returns {DamNode} New node on success, false otherwise
+ * @returns {damas.element} New node on success, false otherwise
  */
 damas.create = function ( type, keys )
 {
@@ -770,7 +770,7 @@ damas.element.initialize = function ( id )
 /**
  * Copies properties from another element object
  * @private
- * @param {Object} elem Element to copy
+ * @param {damas.element} elem Element to copy
  */
 damas.element.copy = function ( elem )
 {
@@ -829,7 +829,7 @@ damas.element.print = function ()
 /**
  * Add a new sub node
  * @param {String} type Type of the element
- * @returns {DAM Element} The newly created element.
+ * @returns {damas.element} The newly created element.
  */
 damas.element.create = function ( type, keys )
 {
@@ -849,7 +849,7 @@ damas.element.update = function ( keys )
 
 /**
  * Make an exact copy of the element
- * @returns {damNode} new node on success, false otherwise.
+ * @returns {damas.element} new node on success, false otherwise.
  */
 damas.element.duplicate = function ()
 {
