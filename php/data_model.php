@@ -104,7 +104,7 @@ class model
 
 	/**
 	 * Find nodes wearing the specified key(s)
-	 * @param {Array} keys Array of key/value pairs to match
+	 * @param {Array} keys Array of key/term pairs to match
 	 * @param {String} sortby key to use to sort the result
 	 * @param {String} order Sort result as ASC or DESC
 	 * @param {String} limit Limit and offset for result (MySQL Syntax)
@@ -112,23 +112,28 @@ class model
 	 */
 	static function find ( $keys, $sortby = 'label', $order = 'DESC', $limit = NULL )
 	{
+		if( $keys === null )
+		{
+			return array();
+		}
 		$query = sprintf("SELECT DISTINCT k1.node_id FROM `key` AS k1 LEFT JOIN `key` AS k2 ON k1.node_id=k2.node_id AND k2.name='%s' WHERE 1",
 			mysql_real_escape_string($sortby)
 		);
 		foreach( $keys as $k=>$v )
 		{
-			if( $v != '*')
+			if( $k != '*')
 			{
-				$query .= sprintf( " AND k1.node_id IN ( SELECT node_id FROM `key` WHERE name='%s' AND value='%s' )",
+				$query .= sprintf( " AND k1.node_id IN ( SELECT node_id FROM `key` WHERE name = '%s' AND value %s )",
 					mysql_real_escape_string($k),
-					mysql_real_escape_string($v)
+					$v
+					//mysqli_real_escape_string($v)
 				);
 			}
 			else
 			{
-				$query .= sprintf( " AND k1.node_id IN ( SELECT node_id FROM `key` WHERE name='%s' )",
-					mysql_real_escape_string($k),
-					mysql_real_escape_string($v)
+				$query .= sprintf( " AND k1.node_id IN ( SELECT node_id FROM `key` WHERE value %s )",
+					$v
+					//mysql_real_escape_string($v)
 				);
 			}
 		}
@@ -346,7 +351,7 @@ class model
 			}
 		}
 		// PROTOTYPE END
-		return $res + model::find( [ '#parent' => $id ] );
+		return $res + model::find( [ '#parent' => '= '.$id ] );
 	}
 
 	/**
@@ -436,7 +441,7 @@ class model
 
 	static function countChildren ( $id )
 	{
-		return count( model::find( [ '#parent' => $id ] ) );
+		return count( model::find( [ '#parent' => '= '.$id ] ) );
 	}
 
 	static function countRLinks ( $id )

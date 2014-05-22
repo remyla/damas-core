@@ -217,7 +217,7 @@ switch( arg("cmd") )
 				$msg .= model::getKey( arg( 'id' ), 'dir' ) . " is not writable. ";
 			}
 			$path = model::getKey( arg( 'id' ), 'dir' ) . '/' . $file['name'];
-			$id =  array_shift( model::find( array( 'file' => $path ) ) );
+			$id =  array_shift( model::find( array( 'file' => "='".$path."'" ) ) );
 			if( $id )
 			{
 				// replacement checks
@@ -261,7 +261,7 @@ switch( arg("cmd") )
 		foreach( $_FILES as $file )
 		{
 			$path = model::getKey( arg( 'id' ), 'dir' ) . '/' . $file['name'];
-			$id =  array_shift( model::find( array( 'file' => $path ) ) );
+			$id =  array_shift( model::find( array( 'file' => "='".$path."'" ) ) );
 			if( $id )
 			{
 				// replacement

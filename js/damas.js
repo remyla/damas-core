@@ -167,9 +167,10 @@ damas.create = function ( type, keys )
 /**
  * Retrieve one or many nodes specifying index(es)
  * @param {Integer} id internal node index(es) to read, comma separated
+ * @param {Function} callback optional callback function to call for asynchrone mode. if undefined, fall back to synchrone mode.
  * @returns {damas.element} Damas element or false on failure
  */
-damas.read = function ( id )
+damas.read = function ( id, callback )
 {
 	var multi = false;
 	if( Array.isArray(id) )
@@ -181,15 +182,27 @@ damas.read = function ( id )
 	{
 		multi = true;
 	}
+	function req_callback( req ) {
+		if( multi )
+			return damas.utils.readJSONElements( JSON.parse( req.transport.responseText ) );
+		else
+			return damas.utils.readJSONElements( JSON.parse( req.transport.responseText ) )[0];
+	}
 	var req = new Ajax.Request( this.server + "/model.json.php", {
 		method: "POST",
-		asynchronous: false,
-		parameters: { cmd: "read", id: id, depth: "1", flags: "4" }
+		asynchronous: callback !== undefined,
+		parameters: { cmd: "read", id: id, depth: "1", flags: "4" },
+		onSuccess: function( req ){
+			if( callback )
+			{
+				callback( req_callback( req ) );
+			}
+		}
 	});
-	if( multi )
-		return damas.utils.readJSONElements( JSON.parse( req.transport.responseText ) );
-	else
-		return damas.utils.readJSONElement( JSON.parse( req.transport.responseText ) );
+	if( callback === undefined )
+	{
+		return req_callback( req );
+	}
 }
 
 /**
@@ -211,6 +224,62 @@ damas.delete = function ( id )
 {
 	return damas.utils.command( { cmd: 'delete', id: id } ).status === 200;
 }
+
+/**
+ * Find elements wearing the specified key(s)
+ * @param {Hash} keys Hash of key/value pairs to match
+ * @returns {Array} array of element indexes or null if no element found
+ */
+damas.find = function ( keys, sortby, order, limit, callback )
+{
+	function req_callback( req ) {
+		return JSON.parse( req.transport.responseText );
+	}
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: callback !== undefined,
+		parameters: { cmd: 'find', keys: Object.toJSON(keys), sortby: sortby || 'label', order: order || 'ASC', limit: limit },
+		onSuccess: function( req ){
+			if( callback )
+			{
+				callback( req_callback( req ) );
+			}
+		}
+	});
+	if( callback === undefined )
+	{
+		return req_callback( req );
+	}
+}
+
+/**
+ * OK
+ * Find elements, specifying an SQL SELECT query.
+ * The query must be formated to return results with an 'id' named column, which
+ * contains elements indexes.
+ * @param {String} query SQL query to perform
+ * @returns {Array} array of element indexes
+ */
+damas.findSQL = function ( query )
+{
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: false,
+		parameters: { cmd: 'findSQL', query: query }
+	});
+	return JSON.parse( req.transport.responseText );
+}
+
+/**
+ * Search for elements wearing the specified tag
+ * @param {String} tagname Tag to search
+ * @returns {Array} array of node indexes
+ */
+damas.findTag = function ( tagname )
+{
+	return damas.findSQL( "SELECT tag.node_id AS id FROM tag LEFT JOIN `key` ON `key`.node_id=tag.node_id AND ( key.name='label' ) WHERE tag.name='" + tagname + "' ORDER BY `key`.value;" );
+}
+
+
+
 
 //
 //
@@ -286,47 +355,6 @@ damas.empty_trashcan = function ( )
 		document.fire( 'dam:element.updated', this.find( { 'id': 'dam:trash' } ) );
 	}
 	return req.transport.status == 200;
-}
-
-/**
- * Find elements wearing the specified key(s)
- * @param {Hash} keys Hash of key/value pairs to match
- * @returns {Array} array of element indexes or null if no element found
- */
-damas.find = function ( keys, sortby, order, limit )
-{
-	var req = new Ajax.Request( this.server + "/model.json.php", {
-		asynchronous: false,
-		parameters: { cmd: 'find', keys: Object.toJSON(keys), sortby: sortby || 'label', order: order || 'ASC', limit: limit }
-	});
-	return JSON.parse( req.transport.responseText );
-}
-
-/**
- * OK
- * Find elements, specifying an SQL SELECT query.
- * The query must be formated to return results with an 'id' named column, which
- * contains elements indexes.
- * @param {String} query SQL query to perform
- * @returns {Array} array of element indexes
- */
-damas.findSQL = function ( query )
-{
-	var req = new Ajax.Request( this.server + "/model.json.php", {
-		asynchronous: false,
-		parameters: { cmd: 'findSQL', query: query }
-	});
-	return JSON.parse( req.transport.responseText );
-}
-
-/**
- * Search for elements wearing the specified tag
- * @param {String} tagname Tag to search
- * @returns {Array} array of node indexes
- */
-damas.findTag = function ( tagname )
-{
-	return damas.findSQL( "SELECT tag.node_id AS id FROM tag LEFT JOIN `key` ON `key`.node_id=tag.node_id AND ( key.name='label' ) WHERE tag.name='" + tagname + "' ORDER BY `key`.value;" );
 }
 
 /**

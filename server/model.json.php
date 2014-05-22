@@ -78,7 +78,7 @@ switch( arg("cmd") )
 				header('HTTP/1.1: 404 Not Found');
 				exit;
 			}
-			echo json_encode( $ret );
+			echo json_encode( array($ret) );
 		}
 		else
 		{
