@@ -343,7 +343,7 @@ switch( arg("cmd") )
 			echo "Bad command";
 			exit;
 		}
-		echo json_encode( model_json::multi( model::ancestors( arg('id') ) ) );
+		echo json_encode( model::ancestors( arg('id') ) );
 		break;
 	case "branch":
 		if( is_null( arg('id') ) )
