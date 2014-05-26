@@ -175,8 +175,15 @@ damas.read = function ( id, callback )
 	var multi = false;
 	if( Array.isArray(id) )
 	{
-		id = id.join(',');
-		multi = true;
+		if( id.length === 0 )
+		{
+			return callback([]);
+		}
+		else
+		{
+			id = id.join(',');
+			multi = true;
+		}
 	}
 	if( typeof(id) === 'string' && id.indexOf(',') != -1 )
 	{
