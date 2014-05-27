@@ -257,14 +257,14 @@ damas.delete = function ( id )
  * @param {Hash} keys Hash of key/value pairs to match
  * @returns {Array} array of element indexes or null if no element found
  */
-damas.find = function ( keys, sortby, order, limit, callback )
+damas.search = function ( keys, sortby, order, limit, callback )
 {
 	function req_callback( req ) {
 		return JSON.parse( req.transport.responseText );
 	}
 	var req = new Ajax.Request( this.server + "/model.json.php", {
 		asynchronous: callback !== undefined,
-		parameters: { cmd: 'find', keys: Object.toJSON(keys), sortby: sortby || 'label', order: order || 'ASC', limit: limit },
+		parameters: { cmd: 'search', keys: Object.toJSON(keys), sortby: sortby || 'label', order: order || 'ASC', limit: limit },
 		onSuccess: function( req ){
 			if( callback )
 			{
@@ -397,7 +397,7 @@ damas.empty_trashcan = function ( )
 	});
 	if( req.transport.status == 200 )
 	{
-		document.fire( 'dam:element.updated', this.find( { 'id': 'dam:trash' } ) );
+		document.fire( 'dam:element.updated', this.search( { 'id': 'dam:trash' } ) );
 	}
 	return req.transport.status == 200;
 }

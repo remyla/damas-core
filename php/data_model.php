@@ -4,8 +4,8 @@
  *
  * Simple library written in PHP to handle a key=value data model on top of
  * MySQL, supporting :
- * - Functions for crud access ( create, update, delete)
- * - Text key and value pairs on nodes (keys, find, setKey, getKey, removeKey,
+ * - Functions for scrud access ( search, create, update, delete)
+ * - Text key and value pairs on nodes (keys, setKey, getKey, removeKey,
  *    searchKey, setKeys)
  * - Rooted tree management functions (ancestors, children, copyBranch, copyNode
  *    move)
@@ -110,7 +110,7 @@ class model
 	 * @param {String} limit Limit and offset for result (MySQL Syntax)
 	 * @returns {Array} array of matching node indexes
 	 */
-	static function find ( $keys, $sortby = 'label', $order = 'DESC', $limit = NULL )
+	static function search ( $keys, $sortby = 'label', $order = 'DESC', $limit = NULL )
 	{
 		if( $keys === null )
 		{
@@ -212,7 +212,7 @@ class model
 		if( $row )
 		{
 			$proto = model::searchKey( 'id', $row["value"] );
-			//$proto = model::find( [ 'id' => $row["value"] ] );
+			//$proto = model::search( [ 'id' => $row["value"] ] );
 			$proto = $proto[0];
 			if( $proto )
 			{
@@ -265,7 +265,7 @@ class model
 	 * @param {String} $value string to search in the database
 	 * @return {Array} array of all corresponding words found in the database
 	 */
-	static function search ( $value )
+	static function searchsugg ( $value )
 	{
 		$value = strtolower($value);
 		$query = "SELECT DISTINCT substring_index(LOWER (k.value), ' ', 2) as kvalue FROM `key` k WHERE LOWER(k.value) LIKE '$value%' ORDER BY k.value ASC LIMIT 10";
@@ -351,7 +351,7 @@ class model
 			}
 		}
 		// PROTOTYPE END
-		return $res + model::find( [ '#parent' => '= '.$id ] );
+		return $res + model::search( [ '#parent' => '= '.$id ] );
 	}
 
 	/**
@@ -441,7 +441,7 @@ class model
 
 	static function countChildren ( $id )
 	{
-		return count( model::find( [ '#parent' => '= '.$id ] ) );
+		return count( model::search( [ '#parent' => '= '.$id ] ) );
 	}
 
 	static function countRLinks ( $id )

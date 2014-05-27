@@ -47,7 +47,10 @@ $ret = false;
 
 switch( arg("cmd") )
 {
-	/* CRUD operations */
+	/* SCRUD operations */
+	case "search":
+		echo json_encode( model::search( json_decode( arg("keys") ), arg("sortby"), arg("order"), arg("limit") ) );
+		break;
 	case "create":
 		if( is_null( arg('type') ) || is_null( arg('keys') ) )
 		{
@@ -111,9 +114,6 @@ switch( arg("cmd") )
 		break;
 	/* other operations */
 
-	case "find":
-		echo json_encode( model::find( json_decode( arg("keys") ), arg("sortby"), arg("order"), arg("limit") ) );
-		break;
 	case "findSQL":
 		if( is_null( arg('query') ) )
 		{
@@ -202,7 +202,7 @@ switch( arg("cmd") )
 			echo json_encode( $res );
 		}
 		break;
-	case "search":
+	case "searchsugg":
 		if( is_null( arg('value') ) )
 		{
 			header('HTTP/1.1: 400 Bad Request');
