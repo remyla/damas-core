@@ -217,9 +217,29 @@ damas.read = function ( id, callback )
  * @param {Integer} id internal node index to update
  * @returns {damas.element} Damas element or false on failure
  */
-damas.update = function ( id, keys )
+damas.update = function ( id, keys, callback )
 {
-	return damas.utils.readJSONElement( JSON.parse( damas.utils.command( { cmd: 'update', id: id, keys: Object.toJSON(keys) } ).text ) );
+	function req_callback( req ) {
+		return damas.utils.readJSONElement( JSON.parse( req.transport.responseText ));
+	}
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: callback !== undefined,
+		parameters: {
+			cmd: 'update',
+			id: id,
+			keys: Object.toJSON(keys) },
+		onSuccess: function( req ){
+			if( callback )
+			{
+				callback( req_callback( req ) );
+			}
+		}
+	});
+	if( callback === undefined )
+	{
+		return req_callback( req );
+	}
+	//return damas.utils.readJSONElement( JSON.parse( damas.utils.command( { cmd: 'update', id: id, keys: Object.toJSON(keys) } ).text ) );
 }
 
 /**
@@ -303,9 +323,27 @@ damas.findTag = function ( tagname )
  * @param {Integer} id node index
  * @return {Array} array of ancestors ids
  */
-damas.ancestors = function ( id )
+damas.ancestors = function ( id, callback )
 {
-	return damas.utils.readJSONElements( JSON.parse( damas.utils.command( { cmd: 'ancestors', id: id } ).text ) );
+	function req_callback( req ) {
+		return JSON.parse( req.transport.responseText );
+	}
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		asynchronous: callback !== undefined,
+		parameters: {
+			cmd: 'ancestors',
+			id: id },
+		onSuccess: function( req ){
+			if( callback )
+			{
+				callback( req_callback( req ) );
+			}
+		}
+	});
+	if( callback === undefined )
+	{
+		return req_callback( req );
+	}
 }
 
 /**
@@ -876,10 +914,11 @@ damas.element.create = function ( type, keys )
 
 /**
  * NEED DOC
+ * TODO MUST set update keys on node!!
  */
-damas.element.update = function ( keys )
+damas.element.update = function ( keys, callback )
 {
-	return damas.update( this.id, keys );
+	return damas.update( this.id, keys, callback );
 }
 
 /**
