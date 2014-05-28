@@ -208,7 +208,7 @@ switch( arg("cmd") )
 			header('HTTP/1.1: 400 Bad Request');
 			exit;
 		}
-		echo json_encode( model::search( arg('value') ) );
+		echo json_encode( model::searchsugg( arg('value') ) );
 		break;
 
 
