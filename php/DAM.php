@@ -56,7 +56,8 @@ class dam
 			$trashcan = model::create( "folder", array(
 				'#parent' => '0',
 				'id' => 'dam:trash',
-				'name' => 'dam:trash'
+				'name' => 'dam:trash',
+				'type' => 'folder'
 			));
 		}
 		return model::move( $id, $trashcan );
