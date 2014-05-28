@@ -328,6 +328,7 @@ switch( arg("cmd") )
 							'text' => 'initial version uploaded',
 							'user' => getUser(),
 							'time' => time(),
+							'type' => 'asset',
 							'bytes' => $file['size'], 
 							'version' => 1
 					));
