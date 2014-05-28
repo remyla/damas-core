@@ -4,7 +4,7 @@
  *
  * Simple library written in PHP to handle a key=value data model on top of
  * MySQL, supporting :
- * - Functions for scrud access ( search, create, update, delete)
+ * - Functions for scrud access (search, create, update, delete)
  * - Text key and value pairs on nodes (keys, setKey, getKey, removeKey,
  *    searchKey, setKeys)
  * - Rooted tree management functions (ancestors, children, copyBranch, copyNode
