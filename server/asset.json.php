@@ -413,6 +413,12 @@ switch(arg("cmd"))
 		exit;
 */
 	case "upload":
+		if( is_null( arg('id') ) || is_null( arg('message') ) )
+		{
+			header("HTTP/1.1: 400 Bad Request");
+			echo "Bad command";
+			exit;
+		}
 		$file = $_FILES['file'];
 		$msg = '';
 		if($file['error'] != 0)
@@ -522,7 +528,7 @@ switch(arg("cmd"))
 			switch( model::getKey( $id, 'mode' ) )
 			{
 				case '2':
-					$newid = assets::version_increment2( $id, "new version uploaded" );
+					$newid = assets::version_increment2( $id, arg('message') );
 					if( !$newid )
 					{
 						$error_detected = true;
@@ -553,7 +559,7 @@ switch(arg("cmd"))
 						$msg .= model::getKey( $id, 'file' ) . " move_uploaded_file failed (enough space?). ";
 						continue;
 					}
-					if( !assets::version_increment( $id, "new version uploaded" ) )
+					if( !assets::version_increment( $id, arg('message') ) )
 					{
 						$error_detected = true;
 						$msg .= model::getKey( $id, 'file' ) . " increment failed. ";
@@ -577,7 +583,7 @@ switch(arg("cmd"))
 				model::create( 'asset', array(
 						'#parent' => arg('id'),
 						'file' => $path,
-						'text' => 'initial version uploaded',
+						'text' => arg('message'),
 						'user' => getUser(),
 						'time' => time(),
 						'type' => 'asset',
