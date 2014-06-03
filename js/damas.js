@@ -617,6 +617,9 @@ damas.setType = function ( id, type )
 
 /**
  * Methods to process data, serialize/deserialize, filter, sort
+ * @namespace
+ * @requires prototypejs.Ajax
+ * @requires damas.element
  */
 damas.utils = {};
 
