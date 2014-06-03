@@ -3,11 +3,11 @@
  * file.php - Php interface to file system as a service
  *
  * Author Remy Lalanne
- * Copyright 2005-2012 Remy Lalanne
+ * Copyright 2005-2014 Remy Lalanne
  */
 session_start();
 
-include_once "service.php";
+include_once "../php/http_service.php";
 #include_once "FileSystem/lib.file.php";
 
 damas_service::init_http();

@@ -1,9 +1,9 @@
 <?php
 /**
- * @fileoverview Web service methods for DAMAS (damas-software.org)
+ * @fileoverview Methods for DAMAS web service (damas-software.org)
  * @author Remy Lalanne
  *
- * Copyright 2005-2012 Remy Lalanne
+ * Copyright 2005-2014 Remy Lalanne
  *
  * This file is part of damas-core.
  *
@@ -22,38 +22,13 @@
  *
  */
 
-include_once "errors.php";
-include_once "permissions.php";
-if (file_exists($_SERVER['DOCUMENT_ROOT']."/.damas/permissions.php"))
-	include_once $_SERVER['DOCUMENT_ROOT']."/.damas/permissions.php";
-
 $version = "2.2-beta6";
 
-function soaplike_head ( $cmd, $err )
-{
-	global $error;
-	global $version;
-	$txt = "";
-	$txt .= "\t\t<version>".$version."</version>\n";
-	$txt .= "\t\t<cmd>".$cmd."</cmd>\n";
-	$txt .= error_code($err, $error[$err]);
-	if ($err>0 && function_exists("mysql_error"))
-		$txt .= "\t\t<mysql_error>".mysql_error()."</mysql_error>\n";
-	$txt .= debug_args();
-	return $txt;
-}
-
-// Function error_code - gives error code to ajax client
-// code : int    - optionnal error code to return (default is 0, success)
-// text : string - optionnal text to provide
-function error_code ( $code = 0, $text = "" )
-{
-	return "\t\t".'<error code="'.$code.'">'.$text."</error>\n";
-}
-
-// Function arg - get a command argument from POST then GET methods
-// name : string - name of the argument
-// return value : argument value or false if argument is not found
+/**
+ * Get a command argument from POST then GET methods
+ * @param $name {String} name of the argument to get value from
+ * @return {String} argument value or null if the argument is not found
+ */
 function arg ( $name )
 {
 	global $_POST;
@@ -62,46 +37,23 @@ function arg ( $name )
 		return stripslashes( $_POST[$name] );
 	if( array_key_exists( $name, $_GET ) )
 		return stripslashes( $_GET[$name] );
-	return false;
+	return null;
 }
 
 function auth_get_class ()
 {
-	$id = model::searchKey( 'username', getUser() );
-	return model::getKey( $id[0], 'class' );
+	if( function_exists( 'getUser' ) )
+	{
+		$id = model::searchKey( 'username', getUser() );
+		return model::getKey( $id[0], 'class' );
+	}
+	else
+	{
+		return "guest";
+	}
 }
 
-function debug_args()
-{
-	global $_POST;
-	global $_GET;
-	global $_SESSION;
-	$txt = "\t\t<debug>\n";
-
-	$txt .= "\t\t\t<GET";
-	foreach ($_GET as $k => $v)
-		$txt .= " " . $k.'="'.htmlspecialchars($v).'"';
-	$txt .= "/>\n";
-
-	$txt .= "\t\t\t<POST";
-	foreach ($_POST as $k => $v)
-		$txt .= " " . $k.'="'.htmlspecialchars($v).'"';
-	$txt .= "/>\n";
-
-	$txt .= "\t\t\t<COOKIE";
-	foreach ($_COOKIE as $k => $v)
-		$txt .= " " . htmlspecialchars( $k ) . '="' . htmlspecialchars( $v ) . '"';
-	$txt .= "/>\n";
-
-	$txt .= "\t\t\t<SESSION";
-	foreach ($_SESSION as $k => $v)
-		$txt .= " " . $k.'="'.$v.'"';
-	$txt .= "/>\n";
-
-	$txt .= "\t\t</debug>\n";
-	return $txt;
-}
-
+/*
 function allowed ( $service_name )
 {
 	global $mod;
@@ -113,56 +65,78 @@ function allowed ( $service_name )
 		return true;
 	return false;
 }
+*/
 
 class damas_service
 {
-	//ERR_SERVER_CONF ERR_MYSQL_SUPPORT ERR_MYSQL_CONNECT ERR_MYSQL_DB
 	static function init_http()
 	{
 		global $assetsLCL;
+		global $mod;
 		#global $hidden_users;
 		#global $versions;
+		global $authentication;
 
-		if( !file_exists( $_SERVER['DOCUMENT_ROOT'] . "/.damas/server.php" ) )
+		include "settings.php";
+		if( file_exists( "/etc/damas/settings.php" ) )
+		{
+			include "/etc/damas/settings.php";
+		}
+		if( file_exists( $_SERVER['DOCUMENT_ROOT'] . "/.damas/settings.php" )
+			&& is_readable( $_SERVER['DOCUMENT_ROOT'] . "/.damas/settings.php" ) )
+		{
+			include $_SERVER['DOCUMENT_ROOT']."/.damas/settings.php";
+		}
+		include_once "permissions.php";
+		if( file_exists( "/etc/damas/permissions.php" ) )
+		{
+			include "/etc/damas/permissions.php";
+		}
+		if( file_exists( $_SERVER['DOCUMENT_ROOT'] . "/.damas/permissions.php" )
+			&& is_readable( $_SERVER['DOCUMENT_ROOT'] . "/.damas/permissions.php" ) )
+		{
+			include_once $_SERVER['DOCUMENT_ROOT'] . "/.damas/permissions.php";
+		}
+		/*
+		if( !file_exists( $_SERVER['DOCUMENT_ROOT'] . "/.damas/settings.php" ) )
 		{
 			header("HTTP/1.1: 500 Internal Server Error");
-			echo "Configuration file .damas/server.php is missing";
+			echo "Configuration file .damas/settings.php is missing";
 			exit;
 		}
-		if( !is_readable( $_SERVER['DOCUMENT_ROOT'] . "/.damas/server.php" ) )
+		if( !is_readable( $_SERVER['DOCUMENT_ROOT'] . "/.damas/settings.php" ) )
 		{
 			header("HTTP/1.1: 500 Internal Server Error");
-			echo "Configuration file .damas/server.php is not readable";
+			echo "Configuration file .damas/settings.php is not readable";
 			exit;
 		}
-		include $_SERVER['DOCUMENT_ROOT']."/.damas/server.php";
+		include $_SERVER['DOCUMENT_ROOT']."/.damas/settings.php";
+		*/
 
 		if( !function_exists("mysql_connect") )
 		{
 			header("HTTP/1.1: 500 Internal Server Error");
-			echo "MySQL is not supported";
+			echo "MySQL is not installed";
 			exit;
 		}
 		if( !@mysql_connect($db_server, $db_username, $db_passwd) )
 		{
 			header("HTTP/1.1: 500 Internal Server Error");
-			echo "MySQL connect returned error";
+			echo "mysql_connect error: " . mysql_error();
 			exit;
 		}
 		if( !mysql_select_db($db_name) )
 		{
 			header("HTTP/1.1: 500 Internal Server Error");
-			echo "MySQL database select error";
+			echo "mysql_select_db error: " . mysql_error();
 			exit;
 		}
 
 		mysql_query( "SET NAMES 'utf8'" );
-		#include "installer/mysql_prepare.php";
-		#echo "Main Database must be created!";
 
 		if( $authentication == "Default" )
 		{
-			include "authentication_dev.php";
+			include "authentication_node.php";
 		}
 		if( $authentication == "MySQL" )
 		{
@@ -180,10 +154,14 @@ class damas_service
 	 */
 	static function accessGranted()
 	{
+		global $authentication;
+		if( $authentication == "None" )
+			return true;
 		global $anonymous_access;
 		if( $anonymous_access )
 			return true;
-		if( checkAuthentication() )
+		#if( checkAuthentication() )
+		if( getUser() )
 			return true;
 		header("HTTP/1.1: 401 Unauthorized"); //ERR_AUTHREQUIRED
 		echo "User authentication required";
@@ -198,8 +176,8 @@ class damas_service
 		global $mod;
 		if( ! is_array( $mod[$service_name] ) )
 		{
-			header("HTTP/1.1: 403 Forbidden"); //ERR_PERMISSION
-			echo "Permission denied";
+			header("HTTP/1.1: 403 Forbidden");
+			echo "The operation '" . $service_name . "' is not defined";
 			exit;
 		}
 		if( in_array("*", $mod[$service_name] ) )
@@ -210,8 +188,8 @@ class damas_service
 		{
 			return true;
 		}
-		header("HTTP/1.1: 403 Forbidden"); //ERR_PERMISSION
-		echo "Permission denied";
+		header("HTTP/1.1: 403 Forbidden");
+		echo "The operation is not allowed for the authenticated user";
 		exit;
 	}
 

@@ -32,7 +32,6 @@ CREATE TABLE IF NOT EXISTS `link` (
 CREATE TABLE IF NOT EXISTS `node` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `type` varchar(255) NOT NULL DEFAULT '',
-  `parent_id` int(11) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=7 ;
 
@@ -51,24 +50,22 @@ CREATE TABLE IF NOT EXISTS `user` (
 INSERT INTO `user` (`login`, `password`) VALUES
 ('admin', '43e9a4ab75570f5b');
 
-INSERT INTO `node` (`id`, `type`, `parent_id`) VALUES
-(1, 'asset', 3),
-(2, 'asset', 0),
-(3, 'asset', 0),
-(4, 'asset', 0),
-(6, 'asset', 2);
+INSERT INTO `node` (`id`, `type`) VALUES
+(1, 'asset'),
+(2, 'asset'),
+(3, 'asset'),
 
 INSERT INTO `key` (`node_id`, `name`, `value`) VALUES
-(1, 'username', 'admin'),
-(1, 'class', 'admin'),
-(1, 'label', 'administrator'),
+(1, '#parent', '0'),
+(1, 'label', 'trash'),
 (1, 'style', 'color: #364E64'),
-(2, 'label', 'system'),
+(1, 'id', 'dam:trash'),
+(2, '#parent', '0'),
+(2, 'label', 'users'),
 (2, 'style', 'color: #364E64'),
-(3, 'label', 'users'),
+(3, '#parent', '2'),
+(3, 'class', 'admin'),
+(3, 'label', 'administrator'),
+(3, 'password', 'd033e22ae348aeb5660fc2140aec35850c4da997'),
 (3, 'style', 'color: #364E64'),
-(4, 'label', 'trash'),
-(4, 'style', 'color: #364E64'),
-(4, 'id', 'dam:trash'),
-(6, 'label', 'log'),
-(6, 'onload', 'damas.show2( project.getNodesBySQL("SELECT node_id AS id FROM `key` WHERE name=''time'' AND value!='' '' ORDER BY value DESC LIMIT 40;") );');
+(3, 'username', 'admin'),

@@ -10,9 +10,9 @@
  * MySQL database settings
  */
 $db_server = "localhost";
-$db_name = "DBNAME";
-$db_username = "DBUSER";
-$db_passwd = "DBPASSWORD";
+$db_name = "damasdb";
+$db_username = "";
+$db_passwd = "";
 
 
 /**
@@ -52,5 +52,5 @@ $hidden_users = array();
  * It should point a path in a mounted volume if the project is on a dedicated
  * file server.
  */
-$assetsLCL = "PROJECTDIR";
+$assetsLCL = "/home/damas/files";
 ?>

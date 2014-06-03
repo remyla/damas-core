@@ -2,7 +2,7 @@
 /**
  * JSON web service of DAMAS (damas-software.org)
  *
- * Copyright 2005-2012 Remy Lalanne
+ * Copyright 2005-2014 Remy Lalanne
  *
  * This file is part of damas-core.
  *
@@ -23,11 +23,10 @@
 
 session_start();
 
-include_once "service.php";
-include_once "../php/data_model_1.json.php";
+include_once "../php/http_service.php";
+include_once "../php/data_model.json.php";
 include_once "../php/DAM.php";
-include_once "asset.php";
-include_once "FileSystem/lib.file.php";
+include_once "../php/asset.php";
 
 damas_service::init_http();
 damas_service::accessGranted();
@@ -218,7 +217,7 @@ switch( arg("cmd") )
 				$msg .= model::getKey( arg( 'id' ), 'dir' ) . " is not writable. ";
 			}
 			$path = model::getKey( arg( 'id' ), 'dir' ) . '/' . $file['name'];
-			$id =  array_shift( model::find( array( 'file' => $path ) ) );
+			$id =  array_shift( model::search( array( 'file' => "='".$path."'" ) ) );
 			if( $id )
 			{
 				// replacement checks
@@ -262,7 +261,7 @@ switch( arg("cmd") )
 		foreach( $_FILES as $file )
 		{
 			$path = model::getKey( arg( 'id' ), 'dir' ) . '/' . $file['name'];
-			$id =  array_shift( model::find( array( 'file' => $path ) ) );
+			$id =  array_shift( model::search( array( 'file' => "='".$path."'" ) ) );
 			if( $id )
 			{
 				// replacement
@@ -295,7 +294,7 @@ switch( arg("cmd") )
 						if( !move_uploaded_file( $file['tmp_name'], $assetsLCL . model::getKey( $id, 'file' ) ) )
 						{
 							unlink( $assetsLCL . model::getKey( $new_id, 'file' ) );
-							model::removeNode( $new_id );
+							model::delete( $new_id );
 							$error_detected = true;
 							$msg .= model::getKey( $id, 'file' ) . " move_uploaded_file failed (enough space?). ";
 							continue;
@@ -323,13 +322,23 @@ switch( arg("cmd") )
 				// creation
 				if( move_uploaded_file( $file['tmp_name'], $assetsLCL . $path ) )
 				{
-					$asset = model::createNode( arg( 'id' ), "asset" );
-					model::setKey( $asset, 'file', $path );
-					model::setKey( $asset, 'text', 'initial version uploaded' );
-					model::setKey( $asset, 'user', getUser() );
-					model::setKey( $asset, 'time', time() );
-					model::setKey( $asset, 'bytes', $file['size'] );
-					model::setKey( $asset, 'version', 1 );
+					model::create( 'asset', array(
+							'#parent' => arg('id'),
+							'file' => $path,
+							'text' => 'initial version uploaded',
+							'user' => getUser(),
+							'time' => time(),
+							'type' => 'asset',
+							'bytes' => $file['size'], 
+							'version' => 1
+					));
+					//$asset = model::createNode( arg( 'id' ), "asset" );
+					//model::setKey( $asset, 'file', $path );
+					//model::setKey( $asset, 'text', 'initial version uploaded' );
+					//model::setKey( $asset, 'user', getUser() );
+					//model::setKey( $asset, 'time', time() );
+					//model::setKey( $asset, 'bytes', $file['size'] );
+					//model::setKey( $asset, 'version', 1 );
 				}
 				else
 				{
