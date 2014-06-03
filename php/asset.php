@@ -81,6 +81,7 @@ class assets
 			'sha1' => model::getKey( $id, 'sha1' ),
 			'text' => model::getKey( $id, 'text' ),
 			'time' => model::getKey( $id, 'time' ),
+			'type' => 'asset',
 			'user' => model::getKey( $id, 'user' ),
 			'version' => model::getKey( $id, 'version' ) ? model::getKey( $id, 'version' ) : "1"
 		));
@@ -122,6 +123,7 @@ class assets
 			//'sha1' => model::getKey( $id, 'sha1' ),
 			'text' => $message,
 			'time' => time(),
+			'type' => 'asset',
 			'user' => getUser(),
 			'version' => model::getKey( $id, "version" ) ? str_pad( model::getKey( $id, "version" ) + 1, 3, '0', STR_PAD_LEFT ) : "001"
 		));
