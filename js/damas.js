@@ -3,8 +3,9 @@
  *
  * @author Remy Lalanne
  *
- * Copyright 2005-2014 Remy Lalanne
+ * @copyright 2005-2014 Remy Lalanne
  *
+ * @license
  * This file is part of damas-core.
  *
  * damas-core is free software: you can redistribute it and/or modify
@@ -18,40 +19,29 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with damas-core.  If not, see <http://www.gnu.org/licenses/>.
- *
- *
- *
- * 2014-22-04 crud metods implementation - major changes
- * 2012-10-23 removed project.getElementByTagName()
- * 2012-09-12 added project.find()
- * 2012-09-12 added project.findTag()
- * 2012-09-12 added project.findSQL()
- * 2012-09-12 removed project.getElementsByTagName()
- * 2012-09-12 removed project.getNodesBySQL()
- * 2012-09-12 removed project.getNodesByTag()
+ * along with damas-core.  If not, see http://www.gnu.org/licenses/.
  */
 
 /**
  * Static library with methods for Digital Asset Management.
  * Methods to interact with a remote DAMAS database.
  *
- * Usage:
+ * @example
  * damas.server = "https://server/";
+ * damas.signIn("username", "password");
  *
  * @namespace
  * @requires prototypejs.Ajax
- * @requires damas.element
  * @property {String} server The currently connected DAMAS server URL
- * @property {Hash} types A Hash of the different Damas Element types defined
  * @property {String} version The version of DAMAS which is running
+ * @property {String} username The name of the authenticated user
+ * @property {String} userclass The class of the authenticated user
+ * @property {String} user_id The damas element id of the authenticated user
+ *
  */
 var damas = {};
-
 damas.server = '';
-damas.types = {};
 damas.version = '2.2-beta6';
-
 damas.username = false;
 damas.userclass = false;
 damas.user_id = false;
@@ -169,6 +159,11 @@ damas.create = function ( type, keys )
  * @param {Integer} id internal node index(es) to read, comma separated
  * @param {Function} callback optional callback function to call for asynchrone mode. if undefined, fall back to synchrone mode.
  * @returns {damas.element} Damas element or false on failure
+ *
+ * @example
+ * damas.read([456, 7658, 3231], function(nodes){
+ *     console.log(nodes.each.print());
+ * });
  */
 damas.read = function ( id, callback )
 {
@@ -590,6 +585,7 @@ damas.unlink = function ( id )
 
 /**
  * Change an element type
+ * @deprecated
  * @param {Integer} id Element index
  * @param {String} type New type
  * @returns {Boolean} true on success, false otherwise
@@ -603,23 +599,10 @@ damas.setType = function ( id, type )
 	return req.transport.status == 200;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 /**
  * Methods to process data, serialize/deserialize, filter, sort
  * @namespace
  * @requires prototypejs.Ajax
- * @requires damas.element
  */
 damas.utils = {};
 
@@ -731,14 +714,13 @@ damas.utils.keep_timed = function ( elements )
  */
 damas.utils.sort = function ( elements )
 {
-    elements = elements.sort( function( e1, e2 )
-    {
-        if( e1.type < e2.type ) return -1;
-        if( e1.type > e2.type ) return 1;
-        if( e1.label().toLowerCase() < e2.label().toLowerCase() ) return -1;
-        if( e1.label().toLowerCase() > e2.label().toLowerCase() ) return 1;
-        return 0;
-    });
+	elements = elements.sort( function( e1, e2 ){
+		if( e1.type < e2.type ) return -1;
+		if( e1.type > e2.type ) return 1;
+		if( e1.label().toLowerCase() < e2.label().toLowerCase() ) return -1;
+		if( e1.label().toLowerCase() > e2.label().toLowerCase() ) return 1;
+		return 0;
+	});
 	return elements;
 }
 
@@ -770,7 +752,6 @@ damas.utils.sort_time_desc = function ( elements )
 
 /**
  * Deserialize JSON objects to Damas elements
- * @private
  * @param {Object} obj json object to read
  * @return list of deserialized elements
  */
@@ -784,7 +765,6 @@ damas.utils.readJSONElements = function ( obj )
 
 /**
  * Deserialize a JSON object to a Damas element
- * @private
  * @param {Object} obj json object to read
  * @return the deserialized element
  */
@@ -801,7 +781,6 @@ damas.utils.readJSONElement = function ( obj )
  * Damas node elements
  * custom events : dam:element.updated, inserted, recycled
  * @class
- * @requires damas
  * @requires prototypejs
  * @_param {Object} id Index, damas.element, or XML fragment
  * @property {Array} children children elements
@@ -809,14 +788,7 @@ damas.utils.readJSONElement = function ( obj )
  * @property {Hash} keys Attributes of the element
  * @property {Array} tags Tags of the element
  * @property {String} type Type name of the element
- *
- * @ private:
- * @_property {XML Document} single XML fragment describing the element.
- * @_property {XML Document} children XML fragment describing the children of the element.
- *
- * @ obsolete:
- * @_property {Integer} previous_id The index of the element immediately preceding this element. If there is no such node, this is null.
- * @_property {Integer} next_id The index of the element immediately following this element. If there is no such node, this is null.
+ * @memberof damas
  */
 damas.element = {};
 
@@ -876,6 +848,7 @@ damas.element.extendme = function ()
 
 /**
  * Get a printable representation string of the element
+ * @returns {String} a string representing the element
  */
 damas.element.print = function ()
 {
@@ -904,7 +877,9 @@ damas.element.print = function ()
 
 /**
  * Add a new sub node
+ * @instance
  * @param {String} type Type of the element
+ * @param {Hash} keys the key/value pairs to set on the new node
  * @returns {damas.element} The newly created element.
  */
 damas.element.create = function ( type, keys )
@@ -940,7 +915,7 @@ damas.element.duplicate = function ()
  */
 damas.element.move = function ( target )
 {
-	var res =  damas.move(this.id, target);
+	var res = damas.move(this.id, target);
 	if( res ) document.fire('damas:element.updated', this);
 	return res;
 }
@@ -990,7 +965,7 @@ damas.element.untag = function ( name )
 {
 	var res = damas.untag(this.id, name);
 	if( res ) document.fire('dam:element.updated', this);
-       return res;
+	return res;
 }
 
 /**
