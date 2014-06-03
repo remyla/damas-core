@@ -121,9 +121,16 @@ class model
 		);
 		foreach( $keys as $k=>$v )
 		{
+			if($v == 'IS NULL' || $v == "='undefined'" )
+			{
+				$query .= sprintf( " AND k1.node_id NOT IN ( SELECT node_id FROM `key` WHERE name='%s' AND value IS NOT NULL )",
+					mysql_real_escape_string($k)
+				);
+				continue;
+			}
 			if( $k != '*')
 			{
-				$query .= sprintf( " AND k1.node_id IN ( SELECT node_id FROM `key` WHERE name = '%s' AND value %s )",
+				$query .= sprintf( " AND k1.node_id IN ( SELECT node_id FROM `key` WHERE name='%s' AND value %s )",
 					mysql_real_escape_string($k),
 					$v
 					//mysqli_real_escape_string($v)
@@ -147,6 +154,7 @@ class model
 			);
 		}
 		$query .= ";";
+		//echo $query;
 		$result = mysql_query( $query );
 		$matches = array();
 		while( $row = mysql_fetch_array( $result ) )
