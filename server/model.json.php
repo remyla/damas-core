@@ -52,20 +52,20 @@ switch( arg("cmd") )
 		echo json_encode( model::search( json_decode( arg("keys") ), arg("sortby"), arg("order"), arg("limit") ) );
 		break;
 	case "create":
-		if( is_null( arg('type') ) || is_null( arg('keys') ) )
+		if(is_null(arg('keys')))
 		{
 			header("HTTP/1.1: 400 Bad Request");
 			echo "Bad command";
 			exit;
 		}
-		$id = model::create( arg("type"), json_decode( arg("keys") ) );
-		if( !$id )
+		$id = model::create(json_decode(arg("keys")));
+		if(!$id)
 		{
 			header("HTTP/1.1: 409 Conflict");
 			echo "create Error, please change your values";
 			exit;
 		}
-		echo json_encode( model_json::node( $id, 1, $NODE_TAG | $NODE_PRM ) );
+		echo json_encode(model_json::node($id, 1, $NODE_TAG | $NODE_PRM));
 		break;
 	case "read":
 		if( is_null( arg('id') ) )

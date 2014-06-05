@@ -33,13 +33,12 @@ class dam
 	 */
 	static function write( $id, $text )
 	{
-		return model::create( "message", array(
-				'#parent' => $id,
-				'user' => getUser(),
-				'time' => time(),
-				'text' => $text,
-				'type' => 'message' 
-		));
+		return model::create(array(
+			'#parent' => $id,
+			'user' => getUser(),
+			'time' => time(),
+			'text' => $text,
+			'type' => 'message'));
 	}
 
 	/**
@@ -53,12 +52,11 @@ class dam
 		$trashcan = $trashcan[0];
 		if( !$trashcan )
 		{
-			$trashcan = model::create( "folder", array(
+			$trashcan = model::create(array(
 				'#parent' => '0',
 				'id' => 'dam:trash',
 				'name' => 'dam:trash',
-				'type' => 'folder'
-			));
+				'type' => 'folder'));
 		}
 		return model::move( $id, $trashcan );
 	}
