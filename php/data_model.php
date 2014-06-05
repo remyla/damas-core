@@ -45,10 +45,10 @@ class model
 	 * @param {String} $type text type for the new node
  	 * @returns {Integer} the new node id on success, false otherwise
  	 */
-	static function create ( $type, $keys )
+	static function create ( $keys )
 	{
 		$query = sprintf("INSERT INTO node ( type ) VALUES ( '%s' );",
-			mysql_real_escape_string($type)
+			'notype'
 		);
 		if( $result = mysql_query($query)){
 			$id = mysql_insert_id();

@@ -74,7 +74,7 @@ class assets
 		if( !copy( $opath, $bpath ) )
 			return false;
 		touch( $bpath, filemtime( $opath ) );
-		return model::create( "asset", array(
+		return model::create(array(
 			'#parent' => $id,
 			'bytes' => model::getKey( $id, 'bytes' ),
 			'file' => assets::getbackuppath( $id ),
@@ -83,8 +83,7 @@ class assets
 			'time' => model::getKey( $id, 'time' ),
 			'type' => 'asset',
 			'user' => model::getKey( $id, 'user' ),
-			'version' => model::getKey( $id, 'version' ) ? model::getKey( $id, 'version' ) : "1"
-		));
+			'version' => model::getKey( $id, 'version' ) ? model::getKey( $id, 'version' ) : "1"));
 	}
 
 	/**
@@ -116,7 +115,7 @@ class assets
 	{
 		$file =  model::getKey( $id, 'file' );
 		if( !$file ) return false;
-		return model::create( "asset", array(
+		return model::create(array(
 			'#parent' => $id,
 			//'bytes' => model::getKey( $id, 'bytes' ),
 			'file' => dirname(dirname($file)) . '/' . $version . '/' . basename($file),
@@ -125,8 +124,7 @@ class assets
 			'time' => time(),
 			'type' => 'asset',
 			'user' => getUser(),
-			'version' => model::getKey( $id, "version" ) ? str_pad( model::getKey( $id, "version" ) + 1, 3, '0', STR_PAD_LEFT ) : "001"
-		));
+			'version' => model::getKey( $id, "version" ) ? str_pad( model::getKey( $id, "version" ) + 1, 3, '0', STR_PAD_LEFT ) : "001"));
 /*
 		$file =  model::getKey( $id, 'file' );
 		if( !$file ) return false;

@@ -322,7 +322,7 @@ switch(arg("cmd"))
 				// creation
 				if( move_uploaded_file( $file['tmp_name'], $assetsLCL . $path ) )
 				{
-					model::create( 'asset', array(
+					model::create(array(
 							'#parent' => arg('id'),
 							'file' => $path,
 							'text' => 'initial version uploaded',
@@ -330,8 +330,7 @@ switch(arg("cmd"))
 							'time' => time(),
 							'type' => 'asset',
 							'bytes' => $file['size'], 
-							'version' => 1
-					));
+							'version' => 1));
 					//$asset = model::createNode( arg( 'id' ), "asset" );
 					//model::setKey( $asset, 'file', $path );
 					//model::setKey( $asset, 'text', 'initial version uploaded' );
@@ -580,7 +579,7 @@ switch(arg("cmd"))
 			// creation
 			if( move_uploaded_file( $file['tmp_name'], $assetsLCL . $path ) )
 			{
-				model::create( 'asset', array(
+				model::create(array(
 						'#parent' => arg('id'),
 						'file' => $path,
 						'text' => arg('message'),
@@ -588,8 +587,7 @@ switch(arg("cmd"))
 						'time' => time(),
 						'type' => 'asset',
 						'bytes' => $file['size'], 
-						'version' => 1
-				));
+						'version' => 1));
 			}
 			else
 			{
