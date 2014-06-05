@@ -153,13 +153,17 @@ damas.create = function ( keys, callback )
 {
 	//return damas.utils.readJSONElement( JSON.parse( damas.utils.command( { cmd: 'create', type: type, keys: Object.toJSON(keys) } ).text ) );
 	function req_callback( req ) {
-		return damas.utils.readJSONElement(JSON.parse(req.transport.responseText));
+		if(req.transport.status === 200)
+		{
+			return damas.utils.readJSONElement(JSON.parse(req.transport.responseText));
+		}
+		return false;
 	}
 	var req = new Ajax.Request( this.server + "/model.json.php", {
 		method: "POST",
 		asynchronous: callback !== undefined,
 		parameters: {cmd: "create", keys: Object.toJSON(keys)},
-		onSuccess: function( req ){
+		onComplete: function( req ){
 			if(callback)
 			{
 				callback(req_callback(req));
