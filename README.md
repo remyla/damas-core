@@ -8,7 +8,6 @@ Key value storage system with graph capabilities
 * Python bindings
 * MySQL database backend
 
-
 ## javascript
 ```html
 <script type="text/javascript" src="js/damas.js"></script>
@@ -19,13 +18,12 @@ Key value storage system with graph capabilities
 import('damas.py')
 ```
 
-
 ## Related Work
 See http://damas-software.org for more information.
 
-
 ## License
-Copyright 2005-2014 Remy Lalanne
+GPL License(GPLV3)
+Copyright(c) 2014 Remy Lalanne remy@primcode.com
 
 damas-core is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
