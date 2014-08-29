@@ -1,9 +1,9 @@
 <img src="http://www.damas-software.com/img/title.png" alt="damas-core"/>
 # damas-core
 
-A simple data storing system, graph oriented, key/value
+Key value storage system with graph capabilities
 
-* Php SCRUD web service
+* HTTP Php web service
 * Javascript bindings
 * Python bindings
 * MySQL database backend
@@ -11,7 +11,7 @@ A simple data storing system, graph oriented, key/value
 
 ## javascript
 ```html
-<script></script>
+<script type="text/javascript" src="js/damas.js"></script>
 ```
 
 ## python
