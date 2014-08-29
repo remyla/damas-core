@@ -1,5 +1,6 @@
 <img src="http://www.damas-software.com/img/title.png" alt="damas-core"/>
-
+damas-core
+----------
 * A simple data storing system, graph oriented, key/value, over MySQL
 * A SCRUD web service interface written in Php
 * APIs to access it from Javascript and Python languages
