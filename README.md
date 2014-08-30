@@ -23,6 +23,7 @@ See http://damas-software.org for more information.
 
 ## License
 GPL License(GPLV3)
+
 Copyright(c) 2014 Remy Lalanne remy@primcode.com
 
 damas-core is free software: you can redistribute it and/or modify
