@@ -568,19 +568,6 @@ class model
 	}
 
 	/**
-	 * Change the type of a node
-	 * @param {Integer} $id node index
-	 * @param {String} $name new name
-	 * @return {Boolean} true on success, false otherwise. returns false if name is unchanged
-	 */
-	static function setType ( $id, $type )
-	{
-		$query = sprintf("UPDATE node SET type='$type' WHERE id='$id';",
-			mysql_real_escape_string($type), $id);
-		return mysql_query($query);
-	}
-
-	/**
 	 * Get connected links. Recursive. Useful for graphs
 	 * @param {Array} $ids nodes indexes
 	 * @return {Array} or false
@@ -600,6 +587,26 @@ class model
 				$targets[] = $row["tgt_id"];
 				$a += model::links_r( array( $row["tgt_id"] ), $targets );
 			}
+		}
+		return $a;
+	}
+
+	/**
+	 * Get the links between a specified pool of nodes.
+	 * Links are returne as arrays of 3 values: link id, source node id, target node id
+	 * @param {Array} $ids nodes indexes
+	 * @return {Array} array of matching links
+	 */
+	static function links2 ( $ids )
+	{
+		$query = sprintf( "SELECT * FROM link WHERE src_id IN ( %s ) AND tgt_id IN ( %s );",
+			$ids, $ids);
+		if( !$result = mysql_query( $query ) ) return array();
+		if( !mysql_num_rows( $result ) ) return array();
+		$a = array();
+		while( $row = mysql_fetch_array( $result ) )
+		{
+			$a[] = array( $row["id"], $row["src_id"], $row["tgt_id"] );
 		}
 		return $a;
 	}

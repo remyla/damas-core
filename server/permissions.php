@@ -25,11 +25,11 @@
  *
  */
 
-$mod["model::search"] = array( "*" );
 $mod["model::create"] = array( "admin", "editor" );
 $mod["model::read"] = array( "*" );
 $mod["model::update"] = array( "admin", "editor" );
 $mod["model::delete"] = array( "admin", "editor" );
+$mod["model::search"] = array( "*" );
 
 $mod["model::ancestors"] = array( "*" );
 $mod["model::children"] = array( "*" );
@@ -39,11 +39,11 @@ $mod["model::move"] = array( "admin", "editor" );
 $mod["model::export"] = array( "admin" ); // Axel
 $mod["model::findSQL"] = array( "*" );
 $mod["model::graph"] = array( "*" );
+$mod["model::links2"] = array( "*" );
 $mod["model::link"] = array( "admin", "editor", "linker" );
 $mod["model::links"] = array( "*" );
 $mod["model::list"] = array( "*" );
 $mod["model::setTags"] = array( "admin", "editor" );
-$mod["model::setType"] = array( "admin" );
 $mod["model::searchsugg"] = array( "*" ); // Axel
 $mod["model::stats"] = array( "*" );
 $mod["model::tag"] = array( "admin", "editor" );

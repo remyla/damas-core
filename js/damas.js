@@ -606,22 +606,6 @@ damas.unlink = function ( id )
 }
 
 /**
- * Change an element type
- * @deprecated
- * @param {Integer} id Element index
- * @param {String} type New type
- * @returns {Boolean} true on success, false otherwise
- */
-damas.setType = function ( id, type )
-{
-	var req = new Ajax.Request( this.server + "/model.json.php", {
-		asynchronous: false,
-		parameters: { cmd: 'setType', id: id, type: type }
-	});
-	return req.transport.status == 200;
-}
-
-/**
  * Methods to process data, serialize/deserialize, filter, sort
  * @namespace
  * @requires prototypejs.Ajax
@@ -904,11 +888,11 @@ damas.element.print = function ()
  * @param {Hash} keys the key/value pairs to set on the new node
  * @returns {damas.element} The newly created element.
  */
-damas.element.create = function ( type, keys )
+damas.element.create = function ( keys )
 {
 	keys['#parent'] = this.id;
-	var res = damas.create( type, keys );
-	if( res ) document.fire( 'dam:element.inserted', res );
+	var res = damas.create(keys);
+	if( res ) document.fire('dam:element.inserted', res);
 	return res;
 }
 
@@ -956,6 +940,7 @@ damas.element.setTags = function ( tags )
 
 /**
  * Set the element type
+ * @deprecated
  * @param {String} newtype Type
  * @returns {Boolean} true on success, false otherwise.
  */
