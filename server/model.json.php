@@ -172,6 +172,14 @@ switch( arg("cmd") )
 		}
 		echo json_encode( $ret );
 		break;
+	case "links2":
+		if( is_null( arg('id') ) )
+		{
+			header('HTTP/1.1: 400 Bad Request');
+			exit;
+		}
+		echo json_encode( model::links2( arg("id") ) );
+		break;
 	case "links":
 		if( is_null( arg('id') ) )
 		{
@@ -283,20 +291,6 @@ switch( arg("cmd") )
 		{
 			header("HTTP/1.1: 409 Conflict"); //$err = $ERR_NODE_UPDATE;
 			echo "Unlink Error, please change your values";
-			exit;
-		}
-		break;
-	case "setType":
-		if( is_null( arg('id') ) || is_null( arg('type') ) )
-		{
-			header("HTTP/1.1: 400 Bad Request"); //ERR_COMMAND
-			echo "Bad command";
-			exit;
-		}
-		if( ! model::setType( arg("id"), arg("type") ) )
-		{
-			header("HTTP/1.1: 409 Conflict"); //$err = $ERR_NODE_UPDATE;
-			echo "setType Error, please change your values";
 			exit;
 		}
 		break;
