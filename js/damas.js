@@ -939,19 +939,6 @@ damas.element.setTags = function ( tags )
 }
 
 /**
- * Set the element type
- * @deprecated
- * @param {String} newtype Type
- * @returns {Boolean} true on success, false otherwise.
- */
-damas.element.setType = function ( newtype )
-{
-	var res = damas.setType(this.id, newtype);
-	if( res ) document.fire('dam:element.updated', this);
-	return res;
-}
-
-/**
  * Tag the element
  * @param {String} name Tag name
  * @returns {Boolean} true on success, false otherwise.
