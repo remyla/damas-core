@@ -52,20 +52,20 @@ switch( arg("cmd") )
 		echo json_encode( model::search( json_decode( arg("keys") ), arg("sortby"), arg("order"), arg("limit") ) );
 		break;
 	case "create":
-		if( is_null( arg('type') ) || is_null( arg('keys') ) )
+		if(is_null(arg('keys')))
 		{
 			header("HTTP/1.1: 400 Bad Request");
 			echo "Bad command";
 			exit;
 		}
-		$id = model::create( arg("type"), json_decode( arg("keys") ) );
-		if( !$id )
+		$id = model::create(json_decode(arg("keys")));
+		if(!$id)
 		{
 			header("HTTP/1.1: 409 Conflict");
 			echo "create Error, please change your values";
 			exit;
 		}
-		echo json_encode( model_json::node( $id, 1, $NODE_TAG | $NODE_PRM ) );
+		echo json_encode(model_json::node($id, 1, $NODE_TAG | $NODE_PRM));
 		break;
 	case "read":
 		if( is_null( arg('id') ) )
@@ -171,6 +171,14 @@ switch( arg("cmd") )
 			exit;
 		}
 		echo json_encode( $ret );
+		break;
+	case "links2":
+		if( is_null( arg('id') ) )
+		{
+			header('HTTP/1.1: 400 Bad Request');
+			exit;
+		}
+		echo json_encode( model::links2( arg("id") ) );
 		break;
 	case "links":
 		if( is_null( arg('id') ) )
@@ -283,20 +291,6 @@ switch( arg("cmd") )
 		{
 			header("HTTP/1.1: 409 Conflict"); //$err = $ERR_NODE_UPDATE;
 			echo "Unlink Error, please change your values";
-			exit;
-		}
-		break;
-	case "setType":
-		if( is_null( arg('id') ) || is_null( arg('type') ) )
-		{
-			header("HTTP/1.1: 400 Bad Request"); //ERR_COMMAND
-			echo "Bad command";
-			exit;
-		}
-		if( ! model::setType( arg("id"), arg("type") ) )
-		{
-			header("HTTP/1.1: 409 Conflict"); //$err = $ERR_NODE_UPDATE;
-			echo "setType Error, please change your values";
 			exit;
 		}
 		break;

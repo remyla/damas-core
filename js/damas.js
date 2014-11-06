@@ -149,9 +149,31 @@ damas.signOut = function()
  * @param {Hash} keys Hash of key/value pairs
  * @returns {damas.element} New node on success, false otherwise
  */
-damas.create = function ( type, keys )
+damas.create = function ( keys, callback )
 {
-	return damas.utils.readJSONElement( JSON.parse( damas.utils.command( { cmd: 'create', type: type, keys: Object.toJSON(keys) } ).text ) );
+	//return damas.utils.readJSONElement( JSON.parse( damas.utils.command( { cmd: 'create', type: type, keys: Object.toJSON(keys) } ).text ) );
+	function req_callback( req ) {
+		if(req.transport.status === 200)
+		{
+			return damas.utils.readJSONElement(JSON.parse(req.transport.responseText));
+		}
+		return false;
+	}
+	var req = new Ajax.Request( this.server + "/model.json.php", {
+		method: "POST",
+		asynchronous: callback !== undefined,
+		parameters: {cmd: "create", keys: Object.toJSON(keys)},
+		onComplete: function( req ){
+			if(callback)
+			{
+				callback(req_callback(req));
+			}
+		}
+	});
+	if(callback === undefined)
+	{
+		return req_callback(req);
+	}
 }
 
 /**
@@ -584,22 +606,6 @@ damas.unlink = function ( id )
 }
 
 /**
- * Change an element type
- * @deprecated
- * @param {Integer} id Element index
- * @param {String} type New type
- * @returns {Boolean} true on success, false otherwise
- */
-damas.setType = function ( id, type )
-{
-	var req = new Ajax.Request( this.server + "/model.json.php", {
-		asynchronous: false,
-		parameters: { cmd: 'setType', id: id, type: type }
-	});
-	return req.transport.status == 200;
-}
-
-/**
  * Methods to process data, serialize/deserialize, filter, sort
  * @namespace
  * @requires prototypejs.Ajax
@@ -882,11 +888,11 @@ damas.element.print = function ()
  * @param {Hash} keys the key/value pairs to set on the new node
  * @returns {damas.element} The newly created element.
  */
-damas.element.create = function ( type, keys )
+damas.element.create = function ( keys )
 {
 	keys['#parent'] = this.id;
-	var res = damas.create( type, keys );
-	if( res ) document.fire( 'dam:element.inserted', res );
+	var res = damas.create(keys);
+	if( res ) document.fire('dam:element.inserted', res);
 	return res;
 }
 
@@ -929,18 +935,6 @@ damas.element.setTags = function ( tags )
 {
 	var res = damas.setTags( this.id, tags );
 	if( res ) document.fire( 'dam:element.updated', this );
-	return res;
-}
-
-/**
- * Set the element type
- * @param {String} newtype Type
- * @returns {Boolean} true on success, false otherwise.
- */
-damas.element.setType = function ( newtype )
-{
-	var res = damas.setType(this.id, newtype);
-	if( res ) document.fire('dam:element.updated', this);
 	return res;
 }
 
