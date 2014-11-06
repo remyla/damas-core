@@ -4,12 +4,11 @@
  *
  * Simple library written in PHP to handle a key=value data model on top of
  * MySQL, supporting :
- * - Functions for scrud access (search, create, update, delete)
+ * - Functions for scrud access (create, read, update, delete, search)
  * - Text key and value pairs on nodes (keys, setKey, getKey, removeKey,
  *    searchKey, setKeys)
- * - Rooted tree management functions (ancestors, children, copyBranch, copyNode
- *    move)
- * - Simple directed acyclic graph (DAG) functions (link, unlink, links_r)
+ * - Rooted tree management functions (ancestors, children, copyBranch, copyNode, move)
+ * - Simple directed acyclic graph (DAG) functions (link, unlink, links_r, links, links2)
  * - Tagging (hastag, setTags, tag, untag)
  * - Element inheritance (prototype based) - beta
  *
@@ -31,10 +30,6 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with damas-core.  If not, see <http://www.gnu.org/licenses/>.
- *
- *
- * 121004 : removed islinked() function
- * 120221 : fixed graph redondant cycles
  *
  */
 
@@ -312,6 +307,7 @@ class model
 	//
 	//
 	// ROOTED TREE FUNCTIONS
+	//
 	// BASED ON #PARENT KEY
 	//
 	//
@@ -424,11 +420,6 @@ class model
 
 
 
-
-
-
-
-
 	//
 	//
 	//
@@ -515,24 +506,25 @@ class model
 		return true;
 	}
 
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	// LINKS
+	//
+	// BASED ON A 'link' TABLE
+	//
+	//
+	//
+	//
+	//
+	//
+	//
 
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	// OTHERS
-	//
-	//
-	//
-	//
-	//
-	//
-	//
-	//
 
 	/**
 	 * Link 2 nodes
@@ -570,6 +562,7 @@ class model
 	/**
 	 * Get connected links. Recursive. Useful for graphs
 	 * @param {Array} $ids nodes indexes
+	 * @param {Array} array of indexes of the linked nodes
 	 * @return {Array} or false
 	 */
 	static function links_r ( $ids, $targets )
@@ -592,8 +585,8 @@ class model
 	}
 
 	/**
-	 * Get the links between a specified pool of nodes.
-	 * Links are returne as arrays of 3 values: link id, source node id, target node id
+	 * Get the all the links within a specified pool of nodes.
+	 * Links are returned as arrays of 3 values: link id, source node id, target node id
 	 * @param {Array} $ids nodes indexes
 	 * @return {Array} array of matching links
 	 */
@@ -609,76 +602,6 @@ class model
 			$a[] = array( $row["id"], $row["src_id"], $row["tgt_id"] );
 		}
 		return $a;
-	}
-
-	/**
- 	 * Search for nodes wearing a key/value pair
-	 * @param {String} $name key name
-	 * @param {String} $value key value
-	 * @return {Array} array of matched node ids
- 	 */
-	static function searchKey ( $name, $value )
-	{
-		$query = sprintf( "SELECT node_id FROM `key` WHERE name='%s' AND value='%s';",
-			mysql_real_escape_string($name),
-			mysql_real_escape_string($value) );
-		$result = mysql_query($query);
-		$res = array();
-		while( $row = mysql_fetch_array($result) )
-			$res[] = $row["node_id"];
-		return $res;
-	}
-
-	/**
-	 * Set an element's tags. Trim values.
-	 * @param {Integer} $id node index
-	 * @param {String} $tags comma separated tags
-	 */
-	static function setTags ( $id, $tags )
-	{
-		$query = sprintf( "DELETE FROM tag WHERE node_id='%s';", $id );
-		$res = mysql_query( $query );
-		$ts = explode( ',' , $tags );
-		for( $i=0; $i<sizeof($ts); $i++ )
-		{
-			if( trim( $ts[$i] ) != '' )
-				model::tag( $id, trim( $ts[$i] ) );
-		}
-		return true;
-	}
-
-	/**
-	 * Tag a node
-	 * @param {Integer} $id index of node to tag
-	 * @param {String} $name tag name
-	 * @return {Boolean} true on success, false otherwise
-	 *
-	 */
-	static function tag ( $id, $name )
-	{
-		$query = sprintf( "INSERT INTO tag (node_id,name) VALUES ('%s','%s');",
-			$id,
-			mysql_real_escape_string( $name )
-		);
-		return mysql_query($query);
-	}
-
-	/**
-	 * Remove a tag
-	 * @param {Integer} $id index of node to untag
-	 * @param {String} $name tag name
-	 * @return {Boolean} true on success, false otherwise
-	 */
-	static function untag ( $id, $name ) 
-	{
-		$query = sprintf("DELETE FROM tag WHERE node_id='%s' AND name='%s';",
-			$id,
-			mysql_real_escape_string($name)
-		);
-		$res = mysql_query($query);
-		if( $res)
-			return mysql_affected_rows() == 1;
-		return false;
 	}
 
 	/**
@@ -758,7 +681,94 @@ class model
 
 
 
-	
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	// OTHERS
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+	//
+
+	/**
+ 	 * Search for nodes wearing a key/value pair
+	 * @param {String} $name key name
+	 * @param {String} $value key value
+	 * @return {Array} array of matched node ids
+ 	 */
+	static function searchKey ( $name, $value )
+	{
+		$query = sprintf( "SELECT node_id FROM `key` WHERE name='%s' AND value='%s';",
+			mysql_real_escape_string($name),
+			mysql_real_escape_string($value) );
+		$result = mysql_query($query);
+		$res = array();
+		while( $row = mysql_fetch_array($result) )
+			$res[] = $row["node_id"];
+		return $res;
+	}
+
+	/**
+	 * Set an element's tags. Trim values.
+	 * @param {Integer} $id node index
+	 * @param {String} $tags comma separated tags
+	 */
+	static function setTags ( $id, $tags )
+	{
+		$query = sprintf( "DELETE FROM tag WHERE node_id='%s';", $id );
+		$res = mysql_query( $query );
+		$ts = explode( ',' , $tags );
+		for( $i=0; $i<sizeof($ts); $i++ )
+		{
+			if( trim( $ts[$i] ) != '' )
+				model::tag( $id, trim( $ts[$i] ) );
+		}
+		return true;
+	}
+
+	/**
+	 * Tag a node
+	 * @param {Integer} $id index of node to tag
+	 * @param {String} $name tag name
+	 * @return {Boolean} true on success, false otherwise
+	 *
+	 */
+	static function tag ( $id, $name )
+	{
+		$query = sprintf( "INSERT INTO tag (node_id,name) VALUES ('%s','%s');",
+			$id,
+			mysql_real_escape_string( $name )
+		);
+		return mysql_query($query);
+	}
+
+	/**
+	 * Remove a tag
+	 * @param {Integer} $id index of node to untag
+	 * @param {String} $name tag name
+	 * @return {Boolean} true on success, false otherwise
+	 */
+	static function untag ( $id, $name ) 
+	{
+		$query = sprintf("DELETE FROM tag WHERE node_id='%s' AND name='%s';",
+			$id,
+			mysql_real_escape_string($name)
+		);
+		$res = mysql_query($query);
+		if( $res)
+			return mysql_affected_rows() == 1;
+		return false;
+	}
+
 }
 
 ?>
