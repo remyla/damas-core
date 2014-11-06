@@ -1,17 +1,33 @@
 <img src="http://www.damas-software.com/img/title.png" alt="damas-core"/>
+# damas-core
 
-* A simple data storing system, graph oriented, key/value, over MySQL
-* A SCRUD web service interface written in Php
-* APIs to access it from Javascript and Python languages
+Key value storage system with graph capabilities
 
-Related Work
-------------
-See http://damas-software.org for more information.
+* HTTP Php web service
+* Javascript bindings
+* Python bindings
+* MySQL database backend
 
-License
--------
+## javascript
+```html
+<script type="text/javascript" src="js/damas.js"></script>
+```
 
-Copyright 2005-2014 Remy Lalanne
+## python
+```python
+import('damas.py')
+```
+
+## Related Links
+
+http://primcode.com Company
+
+http://damas-software.org
+
+## License
+GPL License(GPLV3)
+
+Copyright(c) 2014 Remy Lalanne remy@primcode.com
 
 damas-core is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
