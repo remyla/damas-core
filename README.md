@@ -3,10 +3,9 @@
 
 Key value storage system with graph capabilities
 
-* HTTP Php web service
-* Javascript bindings
-* Python bindings
-* MySQL database backend
+* HTTP stateless server written in Php
+* Data model with MySQL driver
+* Client bindings of the API for Python and Javascript languages
 
 ## javascript
 ```html
@@ -20,9 +19,9 @@ import('damas.py')
 
 ## Related Links
 
-http://primcode.com Company
+http://primcode.com PRIMCODE is the company hosting the development, distribution and maintenance of damas-core
 
-http://damas-software.org
+http://damas-software.org the damas promotional website
 
 ## License
 GPL License(GPLV3)
