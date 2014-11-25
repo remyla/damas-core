@@ -219,3 +219,5 @@ class damas_service
 		return false;
 	}
 }
+
+?>
