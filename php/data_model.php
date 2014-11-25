@@ -355,7 +355,7 @@ class model
 			}
 		}
 		// PROTOTYPE END
-		return $res + model::search( [ '#parent' => '= '.$id ] );
+		return $res + model::search( array( '#parent' => '= '.$id ) );
 	}
 
 	/**
@@ -440,7 +440,7 @@ class model
 
 	static function countChildren ( $id )
 	{
-		return count( model::search( [ '#parent' => '= '.$id ] ) );
+		return count( model::search( array( '#parent' => '= '.$id ) ) );
 	}
 
 	static function countRLinks ( $id )
