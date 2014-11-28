@@ -563,8 +563,9 @@ class model
 
 	/**
 	 * Get connected links. Recursive. Useful for graphs
-	 * @param {Array} $ids nodes indexes
-	 * @param {Array} array of indexes of the linked nodes
+	 * Infinite loop check
+	 * @param {Array} $ids array of nodes indexes to query
+	 * @param {Array} $targets array of node indexes to filter
 	 * @return {Array} or false
 	 */
 	static function links_r ( $ids, $targets )
@@ -574,15 +575,17 @@ class model
 		if( !$result = mysql_query( $query ) ) return array();
 		if( !mysql_num_rows( $result ) ) return array();
 		$a = array();
+		$newids = array();
 		while( $row = mysql_fetch_array( $result ) )
 		{
-			$a[ $row["id"] ] = array( $row["src_id"], $row["tgt_id"] );
-			if( ! in_array( $row["tgt_id"], $targets ) )
+			$a[ intval($row["id"]) ] = array( intval($row["src_id"]), intval($row["tgt_id"]) );
+			if( ! in_array( intval($row["tgt_id"]), $targets ) )
 			{
-				$targets[] = $row["tgt_id"];
-				$a += model::links_r( array( $row["tgt_id"] ), $targets );
+				$newids[] = intval($row["tgt_id"]);
 			}
 		}
+		$targets += $newids;
+		$a += model::links_r( $newids, $targets );
 		return $a;
 	}
 
