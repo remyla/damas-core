@@ -381,6 +381,13 @@ class model
 		return true;
 	}
 
+	static function countChildren ( $id )
+	{
+		$query = "SELECT COUNT(node_id) as count FROM `key` WHERE name='#parent' AND value='$id';";
+		$row = mysql_fetch_array( mysql_query( $query ) );
+		return intval( $row["count"] );
+	}
+
 	/**
  	 * Recursively copy a node
 	 * @param {Integer} $id node index
@@ -437,11 +444,6 @@ class model
 	//
 	//
 	//
-
-	static function countChildren ( $id )
-	{
-		return count( model::search( array( '#parent' => '= '.$id ) ) );
-	}
 
 	static function countRLinks ( $id )
 	{
