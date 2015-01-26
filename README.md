@@ -1,4 +1,4 @@
-<img src="http://www.damas-software.com/img/title.png" alt="damas-core"/>
+<img src="http://www.damas-software.com/bin/logo.png" alt="damas-core"/>
 # damas-core
 
 Key value storage system with graph capabilities
@@ -16,6 +16,37 @@ Key value storage system with graph capabilities
 ```python
 import('damas.py')
 ```
+
+## API
+
+### Graphs
+
+- damas.graph()
+- damas.link()
+- damas.links()
+- damas.unlink()
+
+### Nodes
+
+- damas.create()
+- damas.read()
+- damas.update()
+- damas.delete()
+- damas.search()
+
+### Arborescences
+
+- damas.ancestors()
+- damas.children()
+- damas.move()
+
+### Fichiers
+
+- damas.backup()
+- damas.increment()
+- damas.upload()
+- damas.lock()
+- damas.unlock()
 
 ## Related Links
 
