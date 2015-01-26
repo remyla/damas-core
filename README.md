@@ -1,4 +1,4 @@
-<img src="http://www.damas-software.com/bin/logo.png" alt="damas-core"/>
+<img src="http://damas-software.com/bin/damas_logo.png" alt="damas-core"/>
 # damas-core
 
 Key value storage system with graph capabilities
