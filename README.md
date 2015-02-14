@@ -1,23 +1,25 @@
 <img src="http://damas-software.com/bin/damas_logo.png" alt="damas-core"/>
 # damas-core
 
-Key value storage system with graph capabilities
+damas-core contains a PHP server, a data model for MySQL, and the API implementation for Python an Javascript languages.
 
 * HTTP stateless server written in Php
-* Data model with MySQL driver
+* Key-value, graph data model for MySQL
 * Client bindings of the API for Python and Javascript languages
 
-## javascript
+## Javascript
 ```html
-<script type="text/javascript" src="js/damas.js"></script>
+<script type="text/javascript" src="damas.js"></script>
 ```
 
-## python
+## Python
 ```python
 import('damas.py')
 ```
 
 ## API
+
+The API below is new from december 2014, and is not supported by the Python client implementation yet. For a Python compatible API use 2.3-stable.
 
 ### Graphs
 
