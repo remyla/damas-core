@@ -59,7 +59,7 @@ http://damas-software.org the damas promotional website
 ## License
 GPL License(GPLV3)
 
-Copyright(c) 2014 Remy Lalanne remy@primcode.com
+Copyright(c) 2015 Remy Lalanne remy@primcode.com
 
 damas-core is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
