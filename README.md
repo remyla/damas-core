@@ -19,7 +19,7 @@ import('damas.py')
 
 ## API
 
-The API below is new from december 2014, and is not supported by the Python client implementation yet. For a Python compatible API use 2.3-stable.
+The API below is new from december 2014, and is not supported by the Python client implementation yet. For a Python compatible API, use the 2.2-stable release.
 
 ### Graphs
 
