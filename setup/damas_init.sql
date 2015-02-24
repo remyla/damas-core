@@ -53,7 +53,7 @@ INSERT INTO `user` (`login`, `password`) VALUES
 INSERT INTO `node` (`id`, `type`) VALUES
 (1, 'asset'),
 (2, 'asset'),
-(3, 'asset'),
+(3, 'asset');
 
 INSERT INTO `key` (`node_id`, `name`, `value`) VALUES
 (1, '#parent', '0'),
@@ -68,4 +68,4 @@ INSERT INTO `key` (`node_id`, `name`, `value`) VALUES
 (3, 'label', 'administrator'),
 (3, 'password', 'd033e22ae348aeb5660fc2140aec35850c4da997'),
 (3, 'style', 'color: #364E64'),
-(3, 'username', 'admin'),
+(3, 'username', 'admin');
