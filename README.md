@@ -1,21 +1,54 @@
-<img src="http://www.damas-software.com/img/title.png" alt="damas-core"/>
+<img src="http://damas-software.com/bin/damas_logo.png" alt="damas-core"/>
 # damas-core
 
-Key value storage system with graph capabilities
+damas-core contains a PHP server, a data model for MySQL, and the API implementation for Python an Javascript languages.
 
 * HTTP stateless server written in Php
-* Data model with MySQL driver
+* Key-value, graph data model for MySQL
 * Client bindings of the API for Python and Javascript languages
 
-## javascript
+## Javascript
 ```html
-<script type="text/javascript" src="js/damas.js"></script>
+<script type="text/javascript" src="damas.js"></script>
 ```
 
-## python
+## Python
 ```python
 import('damas.py')
 ```
+
+## API
+
+The API below is new from december 2014, and is not supported by the Python client implementation yet. For a Python compatible API, use the 2.2-stable release.
+
+### Graphs
+
+- damas.graph()
+- damas.link()
+- damas.links()
+- damas.unlink()
+
+### Nodes
+
+- damas.create()
+- damas.read()
+- damas.update()
+- damas.delete()
+- damas.search()
+
+### Arborescences
+
+- damas.ancestors()
+- damas.children()
+- damas.move()
+
+### Fichiers
+
+- damas.backup()
+- damas.increment()
+- damas.upload()
+- damas.lock()
+- damas.unlock()
 
 ## Related Links
 
@@ -26,7 +59,7 @@ http://damas-software.org the damas promotional website
 ## License
 GPL License(GPLV3)
 
-Copyright(c) 2014 Remy Lalanne remy@primcode.com
+Copyright(c) 2015 Remy Lalanne remy@primcode.com
 
 damas-core is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
