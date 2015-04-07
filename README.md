@@ -36,7 +36,7 @@ The API below is new from december 2014, and is not supported by the Python clie
 - damas.delete()
 - damas.search()
 
-### Trees
+### #parent key based trees
 
 - damas.ancestors()
 - damas.children()
