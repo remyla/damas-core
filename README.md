@@ -36,13 +36,13 @@ The API below is new from december 2014, and is not supported by the Python clie
 - damas.delete()
 - damas.search()
 
-### Arborescences
+### Trees
 
 - damas.ancestors()
 - damas.children()
 - damas.move()
 
-### Fichiers
+### Assets
 
 - damas.backup()
 - damas.increment()
