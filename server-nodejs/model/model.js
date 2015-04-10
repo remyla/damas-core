@@ -21,10 +21,10 @@ db.open(function(err, db) {
   }
 });
 
-this.find = function(req, res) {
+this.search = function(keys) {
   db.collection('node', function(err, collection) {
-    collection.find({},{"name": 0}).toArray(function(err, items) {
-      res.send(items);
+    collection.find(keys,{"_id": 1},function(err, items) {
+      return items;
     });
   });
 };
@@ -50,7 +50,7 @@ this.searchBy = function(req, res) {
   });
 };
 
-this.create = function(keys) {
+function create(keys) {
   console.log('Add: ' + JSON.stringify(keys));
   db.collection('node', function(err, collection) {
     collection.insert(keys, {safe:true}, function(err, result) {
@@ -65,7 +65,7 @@ this.create = function(keys) {
   });
 }
 
-this.update = function(id, keys) {
+function update(id, keys) {
   console.log('Updating: ' + id);
   db.collection('node', function(err, collection) {
     collection.findAndModify({'_id':new ObjectId(id)}, {$set: keys}, {safe:true}, function(err, result) {
@@ -81,7 +81,7 @@ this.update = function(id, keys) {
   });
 }
 
-this.removeKey= function(id, key){
+function removeKey(id, key){
   console.log('Removing: '+ key +' From '+ id);
   var keyToRemove={};
   keyToRemove[key]="";
@@ -100,7 +100,7 @@ this.delete = function(req, res) {
   var id = req.params.id;
   console.log('Deleting: ' + id);
   db.collection('nodes', function(err, collection) {
-    collection.remove({'_id':id}, {safe:true}, function(err, result) {
+    collection.remove({'_id':new ObjectId(id)}, {safe:true}, function(err, result) {
       if (err) {
         res.send({'error':'An error has occurred - ' + err});
       } else {
@@ -110,4 +110,51 @@ this.delete = function(req, res) {
     });
   });
 }
+
+function copy(id){
+  db.collection('nodes', function(err, collection) {
+    collection.findOne({'_id':new ObjectId(id)}, {safe:true}, function(err, result) {
+      if (err) {
+        res.send({'error':'An error has occurred - ' + err});
+      } else {
+        create(result);
+      }
+    });
+  });
+}
+
+function hastag(id, name){
+  db.collection('nodes', function(err, collection) {
+    collection.findOne({'_id':new ObjectId(id), 'tags':name}, {safe:true}, function(err, result) {
+      if (err) {
+        res.send({'error':'An error has occurred - ' + err});
+      } else {
+        return (result.length!=0);
+      }
+    });
+  });
+}
+
+function keys(id){
+  db.collection('node', function(err, collection) {
+    collection.findOne({'_id':new ObjectId(id)},{"_id": 0},function(err, item) {
+      return item;
+    });
+  });
+}
+
+function getKey(id, key){
+  var k= this.keys(id);
+  if(k[key])
+    return k[key];
+  return false;
+}
+
+function tags(id){
+  var k= this.keys(id);
+  if(k['tags'])
+    return k['tags'];
+  return false;
+}
+
 };
