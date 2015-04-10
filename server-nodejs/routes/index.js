@@ -1,7 +1,7 @@
 var express = require('express'),
     router=express.Router(),
-    mongooseMod= require('../model/model.js'),
-    mod= new mongooseMod();
+    mongoMod= require('../model/model.js'),
+    mod= new mongoMod();
 router.get('/', mod.search);
 
 //router.get('/:id', test.findById);
