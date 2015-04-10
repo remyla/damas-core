@@ -31,7 +31,6 @@ CREATE TABLE IF NOT EXISTS `link` (
 
 CREATE TABLE IF NOT EXISTS `node` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `type` varchar(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_bin AUTO_INCREMENT=7 ;
 
@@ -50,10 +49,10 @@ CREATE TABLE IF NOT EXISTS `user` (
 INSERT INTO `user` (`login`, `password`) VALUES
 ('admin', '43e9a4ab75570f5b');
 
-INSERT INTO `node` (`id`, `type`) VALUES
-(1, 'asset'),
-(2, 'asset'),
-(3, 'asset');
+INSERT INTO `node` (`id`) VALUES
+(1),
+(2),
+(3);
 
 INSERT INTO `key` (`node_id`, `name`, `value`) VALUES
 (1, '#parent', '0'),
