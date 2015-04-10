@@ -1,13 +1,10 @@
 # DAMAS Server - PHP / MySQL
 
-
-## Packages dependencies for GNU/Debian
-* apache2      (required)
-* php5         (required)
-* mysql-server (required)
-* php5-mysql   (required)
-* phpmyadmin   (optional)
-* cifs-utils # to mount files from a Microsoft server
+## GNU/Debian packages
+* apache2
+* php5
+* mysql-server
+* php5-mysql
 
 ## Setup damas-core
 
@@ -23,7 +20,7 @@ Create a database:
 
 	> CREATE DATABASE damasdb;
 
-Import the empty database:
+Import the table structure:
 
 	$ mysql damasdb < damas_init.sql
 
@@ -39,10 +36,10 @@ Rename the file settings_install.php to settings.php in the server directory or 
 ### Customize php.ini
 * Sessions timeout (90 days):
 
-	; After this number of seconds, stored data will be seen as 'garbage' and
-	; cleaned up by the garbage collection process.
-	;session.gc_maxlifetime = 1440
-	session.gc_maxlifetime = 7776000
+  ; After this number of seconds, stored data will be seen as 'garbage' and
+  ; cleaned up by the garbage collection process.
+  ;session.gc_maxlifetime = 1440
+  session.gc_maxlifetime = 7776000
 
 * Post size:
 
@@ -55,5 +52,3 @@ Rename the file settings_install.php to settings.php in the server directory or 
 	; Maximum allowed size for uploaded files.
 	;upload_max_filesize = 2M
 	upload_max_filesize = 200M
-
-
