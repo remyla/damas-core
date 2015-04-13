@@ -5,7 +5,7 @@ var express = require('express'),
 
 router.get('/:id', function(req, res){
   var id= req.params.id;
-  var result= mod.read(id, res);
+  mod.read(id, res);
 });
 
 router.post('/add', function(req, res){
@@ -13,10 +13,18 @@ router.post('/add', function(req, res){
   var result= mod.create(keys);
   res.send(keys._id);
 });
-/*
-router.put('/:id', mod.update);
 
-router.delete('/:id', mod.deleteNode);*/
+router.put('/:id', function(req, res){
+  var id = req.params.id;
+  var keys=req.body;
+  var result= mod.update(id,keys, res);
+  //res.send(keys._id);
+});
 
+router.delete('/:id', function(req, res){
+  var id = req.params.id;
+  var result= mod.deleteNode(id,res);
+  //res.send(keys._id);
+});
 
 module.exports = router;

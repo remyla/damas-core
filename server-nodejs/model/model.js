@@ -33,23 +33,7 @@ this.create= function(keys) {
   });
 }
 
-function update(id, keys) {
-  console.log('Updating: ' + id);
-  db.collection('node', function(err, collection) {
-    collection.findAndModify({'_id':new ObjectId(id)}, {$set: keys}, {safe:true}, function(err, result) {
-      if (err) {
-        console.log('Error updating: ' + err);
-        res.send({'error':'An error has occurred'});
-      } else {
-        for(var k in keys)
-          if(keys[k]===null)
-            this.removeKey(id, k);
-      }
-    });
-  });
-}
-
-function removeKey(id, key){
+this.removeKey= function(id, key){
   console.log('Removing: '+ key +' From '+ id);
   var keyToRemove={};
   keyToRemove[key]="";
@@ -64,16 +48,35 @@ function removeKey(id, key){
   });
 }
 
-function deleteNode(req, res) {
-  var id = req.params.id;
-  console.log('Deleting: ' + id);
-  db.collection('nodes', function(err, collection) {
-    collection.remove({$or:[{'_id':new ObjectId(id)},{'tgt_id':id},{'src_id':id},{'node_id':id}]}, {safe:true}, function(err, result) {
+this.update= function(id, keys, res) {
+  console.log('Updating: ' + id);
+  console.log(keys);
+  var self= this;
+  db.collection('node', function(err, collection) {
+    collection.update({'_id':new ObjectId(id)}, {$set:keys}, {safe:true}, function(err, result) {
       if (err) {
-        return false;
+        console.log('Error updating: ' + err);
+        res.send({'error':'An error has occurred'});
+      } else {
+        for(var k in keys)
+          if(keys[k]===null)
+            self.removeKey(id, k);
+      }
+      res.send(id+" Updated")
+    });
+  });
+}
+
+
+this.deleteNode=function(id, res) {
+  console.log('Deleting: ' + new ObjectId(id));
+  db.collection('node', function(err, collection) {
+    collection.remove({$or:[{'_id':new ObjectId(id)},{'tgt_id':id},{'src_id':id}]}, {safe:true}, function(err, result) {
+      if (err) {
+        res.send("error");
       } else {
         console.log('' + result + ' document(s) deleted');
-        return true;
+        res.send(result+ " documents deleted");
       }
     });
   });
