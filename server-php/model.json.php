@@ -27,8 +27,8 @@
 
 session_start();
 
-include_once "../php/http_service.php";
-include_once "../php/data_model.json.php";
+include_once "lib/http_service.php";
+include_once "lib/data_model.json.php";
 
 damas_service::init_http();
 damas_service::accessGranted();

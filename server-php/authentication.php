@@ -23,8 +23,8 @@
  */
 session_start();
 
-include_once "../php/http_service.php";
-include_once "../php/data_model.php";
+include_once "lib/http_service.php";
+include_once "lib/data_model.php";
 
 damas_service::init_http();
 
