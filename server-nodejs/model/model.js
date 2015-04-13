@@ -20,24 +20,6 @@ db.open(function(err, db) {
   }
 });
 
-this.search= function(keys, res) {
-  console.log(keys);
-  db.collection('node', function(err, collection) {
-    collection.find({},{"_id": 1},function(err, items) {
-      if(err){
-        console.log("Error");
-        return false;}
-      else{
-        console.log("Success");
-        var result='';
-        for(i in items)
-          result+=(items[i]['_id'])+'\r\n';
-        res.send(result);
-    }
-    });
-  });
-};
-
 this.create= function(keys) {
   console.log('Add: ' + JSON.stringify(keys));
   db.collection('node', function(err, collection) {
@@ -97,47 +79,12 @@ function deleteNode(req, res) {
   });
 }
 
-function copy(id){
-  db.collection('nodes', function(err, collection) {
-    collection.findOne({'_id':new ObjectId(id)}, {safe:true}, function(err, result) {
-      if (err) {
-        res.send({'error':'An error has occurred - ' + err});
-      } else {
-        create(result);
-      }
-    });
-  });
-}
-
-function hastag(id, name){
-  db.collection('nodes', function(err, collection) {
-    collection.findOne({'_id':new ObjectId(id), 'tags':name}, {safe:true}, function(err, result) {
-      if (err) {
-        res.send({'error':'An error has occurred - ' + err});
-      } else {
-        return (result.length!=0);
-      }
-    });
-  });
-}
-
-function keys(id){
+function read(id){
   db.collection('node', function(err, collection) {
-    collection.findOne({'_id':new ObjectId(id)},{"_id": 0},function(err, item) {
+    collection.findOne({'_id':new ObjectId(id)},function(err, item) {
       return item;
     });
   });
-}
-
-function getKey(id, key){
-  var k= this.keys(id);
-  if(k[key])
-    return k[key];
-  return false;
-}
-
-function tags(id){
-  return this.getKey(id,'tags');
 }
 
 };
