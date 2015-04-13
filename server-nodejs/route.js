@@ -1,11 +1,11 @@
 var express = require('express'),
     router=express.Router(),
-    mongoMod= require('../model/model.js'),
+    mongoMod= require('./model/model.js'),
     mod= new mongoMod();
 
 router.get('/:id', function(req, res){
-  var result= mod.read(id);
-  res.send(keys._id);
+  var id= req.params.id;
+  var result= mod.read(id, res);
 });
 
 router.post('/add', function(req, res){

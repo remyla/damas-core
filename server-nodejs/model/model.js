@@ -79,10 +79,10 @@ function deleteNode(req, res) {
   });
 }
 
-function read(id){
+this.read= function(id,res){
   db.collection('node', function(err, collection) {
     collection.findOne({'_id':new ObjectId(id)},function(err, item) {
-      return item;
+      res.json(item);
     });
   });
 }

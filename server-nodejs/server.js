@@ -6,7 +6,7 @@ var app = express();
 
 var https = require('https');
 var http = require('http');
-  var routes = require('./routes/index');
+  var routes = require('./route');
 app.use('/', routes);
 
 http.createServer(app).listen(8090);
