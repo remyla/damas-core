@@ -7,59 +7,45 @@ var Server = mongo.Server,
   ObjectId= mongo.ObjectID;
 
 var server = new Server('localhost', 27017, {auto_reconnect: true});
-db = new Db('Node', server);
+db = new Db('node', server);
 
 db.open(function(err, db) {
   if(!err) {
     console.log("Connected to 'Node' database");
     db.collection('node', {strict:true}, function(err, collection) {
       if (err) {
-        console.log("The collection doesn't exist. Creating it with sample data...");
-        populateDB();
+        console.log("The collection doesn't exist.");
       }
     });
   }
 });
 
-this.search = function(keys) {
+this.search= function(keys, res) {
+  console.log(keys);
   db.collection('node', function(err, collection) {
-    collection.find(keys,{"_id": 1},function(err, items) {
-      return items;
+    collection.find({},{"_id": 1},function(err, items) {
+      if(err){
+        console.log("Error");
+        return false;}
+      else{
+        console.log("Success");
+        var result='';
+        for(i in items)
+          result+=(items[i]['_id'])+'\r\n';
+        res.send(result);
+    }
     });
   });
 };
 
-this.searchById = function(req, res) {
-  var id = req.params.id;
-  console.log('Retrieving test: ' + id);
-  db.collection('node', function(err, collection) {
-    collection.findOne({'number':id}, function(err, item) {
-      res.send(item);
-    });
-  });
-};
-
-this.searchBy = function(req, res) {
-  var id = req.params.id;
-  var by = req.params.by;
-  var act={};
-  act[by]=id;
-  db.collection('node', function(err, collection) {
-        collection.findOne(act, function(err, item) {
-      res.send(item);
-  });
-};
-
-function create(keys) {
+this.create= function(keys) {
   console.log('Add: ' + JSON.stringify(keys));
   db.collection('node', function(err, collection) {
     collection.insert(keys, {safe:true}, function(err, result) {
       if (err) {
-        res.send({'error':'An error has occurred'});
-        return false;
+        console.log('error: An error has occurred');
       } else {
         console.log('Success: ' + JSON.stringify(result));
-        return keys._id;
       }
     });
   });
@@ -96,16 +82,16 @@ function removeKey(id, key){
   });
 }
 
-this.delete = function(req, res) {
+function deleteNode(req, res) {
   var id = req.params.id;
   console.log('Deleting: ' + id);
   db.collection('nodes', function(err, collection) {
-    collection.remove({'_id':new ObjectId(id)}, {safe:true}, function(err, result) {
+    collection.remove({$or:[{'_id':new ObjectId(id)},{'tgt_id':id},{'src_id':id},{'node_id':id}]}, {safe:true}, function(err, result) {
       if (err) {
-        res.send({'error':'An error has occurred - ' + err});
+        return false;
       } else {
         console.log('' + result + ' document(s) deleted');
-        res.send(req.body);
+        return true;
       }
     });
   });
@@ -151,10 +137,7 @@ function getKey(id, key){
 }
 
 function tags(id){
-  var k= this.keys(id);
-  if(k['tags'])
-    return k['tags'];
-  return false;
+  return this.getKey(id,'tags');
 }
 
 };
