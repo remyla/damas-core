@@ -1,16 +1,25 @@
 {
   "name": "damas-nodejs",
   "version": "0.0.1",
-  "description": "Damas server implemented in NodeJs",
+  "description": "damas server implemented in NodeJS",
   "main": "server.js",
+  "dependencies": {
+    "body-parser": "^1.12.2",
+    "mongodb": "^2.0.27"
+  },
+  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
-  "author": "",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/remyla/damas-core.git"
+  },
+  "author": "Remy Lalane",
   "license": "ISC",
-  "dependencies": {
-    "body-parser": "^1.12.2",
-    "mongodb": "^2.0.27"
-  }
+  "bugs": {
+    "url": "https://github.com/remyla/damas-core/issues"
+  },
+  "homepage": "https://github.com/remyla/damas-core"
 }
