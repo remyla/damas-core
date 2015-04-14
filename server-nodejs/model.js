@@ -24,18 +24,31 @@ db.open(function(err, db) {
   * Creates a node providing its internal type value. Doesn't check parent node existence.
   * @param {JSON Object} JSON Object containing the values of the fields to create for this node
   */
-this.create= function(keys) {
+this.create = function(keys, callback) {
   console.log('Add: ' + JSON.stringify(keys));
   db.collection('node', function(err, collection) {
-    collection.insert(keys, {safe:true}, function(err, result) {
-      if (err) {
-        console.log('error: An error has occurred');
-      } else {
-        console.log('Success: ' + JSON.stringify(result));
-      }
-    });
+    if (err) {
+      var msg_error = "Error " + err;
+      console.log(msg_error);
+      callback(msg_error);
+      throw err;
+    }
+    else {
+      collection.insert(keys, {safe:true}, function(err, result) {
+        if (err) {
+            var msg_error = "Error " + err;
+            console.log(msg_error);
+            throw err;
+        } else {
+            var msg_success = 'Success: ' + JSON.stringify(result);
+            console.log(msg_success);
+            else callback(null, msg_success);
+        }
+      });
+    }
   });
 }
+  
 
 /**
  * Remove a set of keys
@@ -109,7 +122,7 @@ this.deleteNode=function(id, res) {
  * @param {Integer} $id of the node
  * @return {JSON Object} key=value pairs
  */
-this.read= function(id,res,callback){
+this.read= function(id, callback){
   db.collection('node', function(err, collection) {
     if (err) {
       var msg_error = "Error " + err;
