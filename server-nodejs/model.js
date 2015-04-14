@@ -109,12 +109,25 @@ this.deleteNode=function(id, res) {
  * @param {Integer} $id of the node
  * @return {JSON Object} key=value pairs
  */
-this.read= function(id,res){
+this.read= function(id,res,callback){
   db.collection('node', function(err, collection) {
-    collection.findOne({'_id':new ObjectId(id)},function(err, item) {
-      res.json(item);
-    });
+    if (err) {
+      var msg_error = "Error " + err;
+      console.log(msg_error);
+      callback(msg_error);
+      throw err;
+    }
+    else {
+        collection.findOne({'_id':new ObjectId(id)},function(err, item) {
+          if (err) {
+            var msg_error = "Error " + err;
+            console.log(msg_error);
+            throw err;
+          }
+          else callback(null, item);
+        });
+    }
   });
-}
+};
 
 };

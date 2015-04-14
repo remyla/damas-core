@@ -5,7 +5,8 @@ var http     = require('http'),
 	app      = express(),
 	fs		 = require('fs'),
 	conf 	 = require('./conf.json'),
-	routes = require('./routes')(app);
+
+	routes = require('./route')(app);
 
 var confConn = conf.connection;
 
@@ -20,3 +21,4 @@ var options = {
 var serverhttp  = http.createServer(app).listen(confConn.portHttp);
 
     serverhttps = https.createServer(options, app).listen(confConn.portHttps);
+
