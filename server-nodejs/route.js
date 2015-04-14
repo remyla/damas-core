@@ -1,7 +1,8 @@
 module.exports = function(app){
 // var express = require('express'),
 //     //router  = express.Router(),
-var mongoMod = require('./model/model.js'),
+
+var mongoMod = require('./model.js'),
 
 	bodyParser = require('body-parser'),
 	mod      = new mongoMod();
