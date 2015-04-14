@@ -15,7 +15,14 @@ var mongoMod = require('./model/model.js'),
 
 read = function(req,res) {
 	var id= req.params.id;
-	var result= mod.read(id, res);
+	mod.read(id, res, function(error, doc){
+		if(error){
+			res.status(500).send(error);
+		}
+		else if (!error && doc){
+			res.json(doc);
+		}
+	});
 };
 
 create = function(req,res) {
