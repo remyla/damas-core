@@ -14,7 +14,7 @@ module.exports = function(app){
 			if(error){
 				res.status(500).send(error);
 			}
-			else if (!error && doc){
+			else if (error==null && doc){
 				res.json(doc);
 			}
 		});
@@ -26,7 +26,7 @@ module.exports = function(app){
 			if(error){
 				res.status(500).send(error);
 			}
-			else if (!error && doc){
+			else if (error==null && doc){
 				res.send(keys._id);
 			}
 		});
@@ -35,7 +35,14 @@ module.exports = function(app){
 	update= function(req, res){
 		var id = req.params.id;
 		var keys=req.body;
-		var result= mod.update(id,keys, res);
+		mod.update(id,keys,function(error,doc){
+			if(error && !doc){
+				res.status(500).send(error);
+			}
+			else if (error==null && doc){
+				res.send(keys._id);
+			}
+		});
 	};
 
 	deleteNode= function(req, res){
