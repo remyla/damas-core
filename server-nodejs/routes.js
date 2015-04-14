@@ -8,13 +8,15 @@ var mongoMod = require('./model.js'),
 
 read = function(req,res) {
 	var id= req.params.id;
-	mod.read(id, res, function(error, doc){
+	mod.read(id, function(error, doc){
 		if(error){
 			res.status(500).send(error);
 		}
 		else if (!error && doc){
 			res.json(doc);
 		}
+		else
+			res.send('Aucun document ne possede cet id.');
 	});
 };
 
@@ -27,12 +29,30 @@ create = function(req,res) {
 update= function(req, res){
   var id = req.params.id;
   var keys=req.body;
-  var result= mod.update(id,keys, res);
+  var result= mod.update(id,keys, function(error, doc){
+		if(error){
+			res.status(500).send(error);
+		}
+		else if (!error && doc){
+			res.json(doc);
+		}
+		else
+			res.send('Aucun document ne possede cet id.');
+	});
 };
 
 deleteNode= function(req, res){
   var id = req.params.id;
-  var result= mod.deleteNode(id,res);
+  var result= mod.deleteNode(id, function(error, doc){
+		if(error){
+			res.status(500).send(error);
+		}
+		else if (!error && doc){
+			res.json(doc);
+		}
+		else
+			res.send('Aucun document ne possede cet id.');
+	});
 };
 
 app.get('/:id', read);

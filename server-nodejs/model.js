@@ -61,7 +61,7 @@ this.removeKey= function(id, keys){
  * @param {Integer} $id node index
  * @param {Array} $keys keys Array of key/value pairs to update (usually comming from json_decode)
  */
-this.update= function(id, keys, res) {
+this.update= function(id, keys, callback) {
   console.log('Updating: ' + id);
   console.log(keys);
   var keyToRemove = {};
@@ -71,7 +71,7 @@ this.update= function(id, keys, res) {
     collection.update({'_id':new ObjectId(id)}, {$set:keys}, {safe:true}, function(err, result) {
       if (err) {
         console.log('Error updating: ' + err);
-        res.send({'error':'An error has occurred'});
+          callback(err, null);
       } else {
         for(var k in keys)
           if(keys[k]===null){
@@ -80,8 +80,8 @@ this.update= function(id, keys, res) {
           }
           if(keyNumber>0)
             self.removeKey(id, keyToRemove);
+          callback(null,id);
       }
-      res.send(id+" Updated")
     });
   });
 }
@@ -90,15 +90,15 @@ this.update= function(id, keys, res) {
   * Recursively delete a node - WARNING: this function doesn't check anything before removal
   * @return {Boolean} true on success, false otherwise
   */
-this.deleteNode=function(id, res) {
+this.deleteNode=function(id, callback) {
   console.log('Deleting: ' + new ObjectId(id));
   db.collection('node', function(err, collection) {
     collection.remove({$or:[{'_id':new ObjectId(id)},{'tgt_id':id},{'src_id':id}]}, {safe:true}, function(err, result) {
       if (err) {
-        res.send("error");
+        callback(err, null);
       } else {
         console.log('' + result + ' document(s) deleted');
-        res.send(result+ " documents deleted");
+        callback(null,result);
       }
     });
   });
@@ -109,7 +109,7 @@ this.deleteNode=function(id, res) {
  * @param {Integer} $id of the node
  * @return {JSON Object} key=value pairs
  */
-this.read= function(id,res,callback){
+this.read= function(id,callback){
   db.collection('node', function(err, collection) {
     if (err) {
       var msg_error = "Error " + err;
