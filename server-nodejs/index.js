@@ -5,12 +5,9 @@ var http     = require('http'),
 	app      = express(),
 	fs		 = require('fs'),
 	conf 	 = require('./conf.json'),
-<<<<<<< HEAD
 
-	routes = require('./route')(app);
-=======
 	routes = require('./routes')(app);
->>>>>>> mathieu/master
+
 
 var confConn = conf.connection;
 

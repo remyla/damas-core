@@ -10,7 +10,7 @@ var server = new Server('localhost', 27017, {auto_reconnect: true});
 db = new Db('node', server);
 
 db.open(function(err, db) {
-  if(!err) {
+  if(!err) {s
     console.log("Connected to 'Node' database");
     db.collection('node', {strict:true}, function(err, collection) {
       if (err) {
@@ -42,7 +42,7 @@ this.create = function(keys, callback) {
         } else {
             var msg_success = 'Success: ' + JSON.stringify(result);
             console.log(msg_success);
-            else callback(null, msg_success);
+            callback(null, msg_success);
         }
       });
     }
