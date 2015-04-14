@@ -1,14 +1,25 @@
-var express = require('express'),
-    bodyParser= require('body-parser');
-var app = express();
-  app.use(bodyParser.urlencoded({extended: true})),
-  app.use(bodyParser.json());
+var http     = require('http'),
+	https    = require('https'),
+	express  = require('express'),
+	app      = express(),
+	fs		 = require('fs'),
+	conf 	 = require('./conf.json'),
+	bodyParser = require('body-parser'),
+	routes = require('./route')(app);
 
-var https = require('https');
-var http = require('http');
-  var routes = require('./route');
-app.use('/', routes);
+// //Middlewares
+	app.use(bodyParser.urlencoded({extended : true}));
+	app.use(bodyParser.json());
 
-http.createServer(app).listen(8090);
-https.createServer(app).listen(443);
-console.log("Listening on ports 80 and 443");
+
+var confConn = conf.connection;
+
+//Options for https connection
+var options = {
+	key  : fs.readFileSync(confConn.pathKey + confConn.keyFile),
+	cert : fs.readFileSync(confConn.pathKey + confConn.cerFile)
+};
+
+//Creation server http & https
+var serverhttp  = http.createServer(app).listen(confConn.portHttp);
+    serverhttps = https.createServer(options, app).listen(confConn.portHttps);
