@@ -78,7 +78,7 @@ this.update= function(id, keys, res) {
             console.log(keyToRemove);
             self.removeKey(id, keyToRemove);
       }
-      res.send(id+" Updated")
+      //res.send(id+" Updated")
     });
   });
 }

@@ -4,13 +4,7 @@ var http     = require('http'),
 	app      = express(),
 	fs		 = require('fs'),
 	conf 	 = require('./conf.json'),
-	bodyParser = require('body-parser'),
 	routes = require('./route')(app);
-
-// //Middlewares
-	app.use(bodyParser.urlencoded({extended : true}));
-	app.use(bodyParser.json());
-
 
 var confConn = conf.connection;
 
