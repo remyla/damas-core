@@ -24,36 +24,28 @@ db.open(function(err, db) {
   * Creates a node providing its internal type value. Doesn't check parent node existence.
   * @param {JSON Object} JSON Object containing the values of the fields to create for this node
   */
-this.create= function(keys) {
+this.create= function(keys, callback) {
+  var self= this;
   console.log('Add: ' + JSON.stringify(keys));
   db.collection('node', function(err, collection) {
+    if (err) {
+      console.log(err);
+      callback(err);
+      throw err;
+    }
+    else {
     collection.insert(keys, {safe:true}, function(err, result) {
       if (err) {
         console.log('error: An error has occurred');
+        callback(err);
       } else {
         console.log('Success: ' + JSON.stringify(result));
+        self.read(keys._id, callback);
       }
     });
+  }
   });
 }
-
-/**
- * Remove a set of keys
- * @param {Integer} $id node id
- * @param {JSON Object} $name key name
- */
-this.removeKey= function(id, keys){
-  db.collection('node', function(err, collection) {
-    collection.update({'_id':new ObjectId(id)}, {$unset: keys}, {safe:true}, function(err, result) {
-      if (err) {
-        console.log('Error updating: ' + err);
-      } else {
-        console.log(keys+ " removed");
-      }
-    });
-  });
-}
-
 
 /**
  * Update the keys of a node. Specified keys overwrite existing keys, others are left untouched.
@@ -65,25 +57,59 @@ this.update= function(id, keys, callback) {
   console.log('Updating: ' + id);
   console.log(keys);
   var keyToRemove = {};
+  var keyToAdd = {};
+  var keyToRemoveNumber=0;
+  var keyToAddNumber=0;
+  for(var k in keys){
+    if(keys[k]===null){
+      keyToRemove[k]='';
+      ++keyToRemoveNumber;
+    }
+    else{
+      keyToAdd[k]=keys[k];
+      ++keyToAddNumber;
+    }
+  }
   var self= this;
-  var keyNumber=0;
   db.collection('node', function(err, collection) {
-    collection.update({'_id':new ObjectId(id)}, {$set:keys}, {safe:true}, function(err, result) {
+    if (err) {
+      console.log(err);
+      callback(err);
+      throw err;
+    }
+    else {
+    if(keyToAddNumber>0)
+    collection.updateOne({'_id':new ObjectId(id)}, {$set:keyToAdd}, {safe:true}, function(err, result) {
       if (err) {
         console.log('Error updating: ' + err);
           callback(err, null);
-      } else {
-        for(var k in keys)
-          if(keys[k]===null){
-            keyToRemove[k]='';
-            ++keyNumber;
+      }
+      else {
+        if(keyToRemoveNumber>0)
+          collection.updateOne({'_id':new ObjectId(id)}, {$unset: keyToRemove}, {safe:true}, function(err) {
+            if (err) {
+              console.log('Error updating: ' + err);
+              callback(err, null);
+            } else {
+              console.log(keys+ " removed");
+              self.read(id, callback);
+            }
+          });
+        else
+        self.read(id, callback);
+      }
+      });
+      else if(keyToRemoveNumber>0)
+        collection.updateOne({'_id':new ObjectId(id)}, {$unset:keyToRemove}, {safe:true}, function(err, result) {
+          if (err) {
+            console.log('Error updating: ' + err);
+              callback(err, null);
+          } else {
+            callback(null,id);
           }
-          if(keyNumber>0)
-            self.removeKey(id, keyToRemove);
-          callback(null,id);
+        });
       }
     });
-  });
 }
 
 /**
@@ -93,7 +119,13 @@ this.update= function(id, keys, callback) {
 this.deleteNode=function(id, callback) {
   console.log('Deleting: ' + new ObjectId(id));
   db.collection('node', function(err, collection) {
-    collection.remove({$or:[{'_id':new ObjectId(id)},{'tgt_id':id},{'src_id':id}]}, {safe:true}, function(err, result) {
+    if (err) {
+      console.log(err);
+      callback(err);
+      throw err;
+    }
+    else {
+    collection.deleteMany({$or:[{'_id':new ObjectId(id)},{'tgt_id':id},{'src_id':id}]}, {safe:true}, function(err, result) {
       if (err) {
         callback(err, null);
       } else {
@@ -101,7 +133,7 @@ this.deleteNode=function(id, callback) {
         callback(null,result);
       }
     });
-  });
+  }});
 }
 
 /**
@@ -112,20 +144,18 @@ this.deleteNode=function(id, callback) {
 this.read= function(id,callback){
   db.collection('node', function(err, collection) {
     if (err) {
-      var msg_error = "Error " + err;
-      console.log(msg_error);
-      callback(msg_error);
+      console.log(err);
+      callback(err);
       throw err;
     }
     else {
-        collection.findOne({'_id':new ObjectId(id)},function(err, item) {
-          if (err) {
-            var msg_error = "Error " + err;
-            console.log(msg_error);
-            throw err;
-          }
-          else callback(null, item);
-        });
+      collection.findOne({'_id':new ObjectId(id)},function(err, item) {
+        if (err) {
+          callback(err);
+          throw err;
+        }
+        else callback(null, item);
+      });
     }
   });
 };
