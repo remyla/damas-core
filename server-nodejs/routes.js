@@ -71,6 +71,7 @@ deleteNode= function(req, res){
 		id= req.params.id;
 	else if(req.body.id)
 		id= req.body.id;
+	if(id)
   var result= mod.deleteNode(id, function(error, doc){
 		if(error){
 			res.status(500).send(error);
@@ -81,6 +82,8 @@ deleteNode= function(req, res){
 		else
 			res.send('Aucun document ne possede cet id.');
 	});
+	else
+	res.status(400).send("Bad command");
 };
 
 app.get('/:id', read);
