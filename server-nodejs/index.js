@@ -22,4 +22,3 @@ var options = {
 var serverhttp  = http.createServer(app).listen(confConn.portHttp);
 
     serverhttps = https.createServer(options, app).listen(confConn.portHttps);
-

@@ -29,7 +29,7 @@ this.create = function(keys, callback) {
   console.log('Add: ' + JSON.stringify(keys));
   db.collection('node', function(err, collection) {
     if (err) {
-      var msg_error = "Error " + err;
+      var msg_error = "Error  coll" + err;
       console.log(msg_error);
       callback(msg_error);
       throw err;
@@ -37,11 +37,11 @@ this.create = function(keys, callback) {
     else {
       collection.insert(keys, {safe:true}, function(err, result) {
         if (err) {
-            var msg_error = "Error " + err;
+            var msg_error = "Error insert " + err;
             console.log(msg_error);
             throw err;
         } else {
-            var msg_success = 'Success: ' + JSON.stringify(result);
+            var msg_success = 'Success object created: ' + keys._id;
             console.log(msg_success);
             callback(null, msg_success);
         }
@@ -89,7 +89,8 @@ this.removeKey= function(id, keys, callback){
  * @param {Array} $keys keys Array of key/value pairs to update (usually comming from json_decode)
  * @param {function} callback - Function callback to routes.js
  */
-this.update= function(id, keys, res, callback) {
+
+this.update = function(id, keys, callback) {
   console.log('Updating: ' + id);
   console.log(keys);
   var keyToRemove = {};
@@ -104,23 +105,33 @@ this.update= function(id, keys, res, callback) {
     }
     collection.update({'_id':new ObjectId(id)}, {$set:keys}, {safe:true}, function(err, result) {
       if (err) {
+/*
         var msg_error = 'Error updating: ' + err;
             console.log(msg_error);
             callback(msg_error);
             throw err;
+*/
+        console.log('Error updating: ' + err);
+          callback(err, null);
+
       } else {
         for(var k in keys){
           if(keys[k]===null){
             keyToRemove[k]='';
             ++keyNumber;
           }
+/*
           if(keyNumber>0){
             self.removeKey(id, keyToRemove, function(doc){
               if(!doc) callback(doc);
             });
           }
         }
-        callback(null, id+" Updated");
+        callback(null, id+" Updated"); */
+          if(keyNumber>0)
+            self.removeKey(id, keyToRemove);
+          callback(null,id);
+        }
       }
     });
   });
@@ -130,15 +141,15 @@ this.update= function(id, keys, res, callback) {
   * Recursively delete a node - WARNING: this function doesn't check anything before removal
   * @return {Boolean} true on success, false otherwise
   */
-this.deleteNode=function(id, res) {
+this.deleteNode=function(id, callback) {
   console.log('Deleting: ' + new ObjectId(id));
   db.collection('node', function(err, collection) {
     collection.remove({$or:[{'_id':new ObjectId(id)},{'tgt_id':id},{'src_id':id}]}, {safe:true}, function(err, result) {
       if (err) {
-        res.send("error");
+        callback(err, null);
       } else {
         console.log('' + result + ' document(s) deleted');
-        res.send(result+ " documents deleted");
+        callback(null,result);
       }
     });
   });
@@ -149,7 +160,8 @@ this.deleteNode=function(id, res) {
  * @param {Integer} $id of the node
  * @return {JSON Object} key=value pairs
  */
-this.read= function(id, callback){
+
+this.read= function(id,callback){
   db.collection('node', function(err, collection) {
     if (err) {
       var msg_error = "Error " + err;
