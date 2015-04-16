@@ -1,1 +1,4 @@
 node_modules/
+server-nodejs/key-cert-https/test-cert.pem
+server-nodejs/key-cert-https/test-csr.pem
+server-nodejs/key-cert-https/test-key.pem

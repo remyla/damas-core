@@ -28,19 +28,15 @@ module.exports= function Model() {
 
   this.create= function(keys, callback) {
     var self= this;
-    console.log('Add: ' + JSON.stringify(keys));
     db.collection('node', function(err, collection) {
-      if (err) {
+      if (err)
         callback(err);
-      }
       else {
         collection.insert(keys, {safe:true}, function(err, result) {
-          if (err) {
+          if (err)
             callback(err);
-          } else {
-            console.log('Success: ' + JSON.stringify(result));
+          else
             self.read(keys._id, callback);
-          }
         });
       }
     });
@@ -53,16 +49,14 @@ module.exports= function Model() {
    */
    this.read= function(id,callback){
     db.collection('node', function(err, collection) {
-      if (err) {
-        console.log(err);
+      if (err)
         callback(err);
-      }
       else {
         collection.findOne({'_id':new ObjectId(id)},function(err, item) {
-          if (err) {
+          if (err)
             callback(err);
-          }
-          else callback(null, item);
+          else
+            callback(null, item);
         });
       }
     });
@@ -77,58 +71,47 @@ module.exports= function Model() {
    */
 
    this.update = function(id, keys, callback) {
-    console.log('Updating: ' + id);
-    console.log(keys);
     var keyToRemove = {};
     var keyToAdd = {};
-    var keyToRemoveNumber=0;
-    var keyToAddNumber=0;
+    var keyToRemoveExist=false;
+    var keyToAddExist=false;
     for(var k in keys){
       if(keys[k]===null){
         keyToRemove[k]='';
-        ++keyToRemoveNumber;
+        keyToRemoveExist= true;
       }
       else{
         keyToAdd[k]=keys[k];
-        ++keyToAddNumber;
+        keyToAddExist=true;
       }
     }
     var self= this;
     db.collection('node', function(err, collection) {
-      if (err) {
-        console.log(err);
+      if (err)
         callback(err);
-      }
       else {
-        if(keyToAddNumber>0)
-          collection.updateOne({'_id':new ObjectId(id)}, {$set:keyToAdd}, {safe:true}, function(err, result) {
-            if (err) {
-              console.log('Error updating: ' + err);
-              callback('error de update one '+err, null);
-            }
+        if(keyToAddExist)
+          collection.updateOne({'_id':new ObjectId(id)}, {$set:keyToAdd}, function(err, result) {
+            if (err)
+              callback(err, null);
             else {
-              if(keyToRemoveNumber>0)
-                collection.updateOne({'_id':new ObjectId(id)}, {$unset: keyToRemove}, {safe:true}, function(err) {
-                  if (err) {
-                    console.log('Error updating: ' + err);
-                    callback('error de update one2 '+err, null);
-                  } else {
-                    console.log(keys+ " removed");
+              if(keyToRemoveExist)
+                collection.updateOne({'_id':new ObjectId(id)}, {$unset: keyToRemove}, function(err) {
+                  if (err)
+                    callback(err, null);
+                  else
                     self.read(id, callback);
-                  }
                 });
               else
                 self.read(id, callback);
             }
           });
-        else if(keyToRemoveNumber>0)
-          collection.updateOne({'_id':new ObjectId(id)}, {$unset:keyToRemove}, {safe:true}, function(err, result) {
-            if (err) {
-              console.log('Error updating: ' + err);
+        else if(keyToRemoveExist)
+          collection.updateOne({'_id':new ObjectId(id)}, {$unset:keyToRemove}, function(err, result) {
+            if (err)
               callback(err, null);
-            } else {
-              callback(null,id);
-            }
+            else
+            self.read(id, callback);
           });
       }
     });
@@ -139,52 +122,16 @@ module.exports= function Model() {
     * @return {Boolean} true on success, false otherwise
   */
   this.deleteNode = function(id, callback) {
-    console.log('Deleting: ' +id);
     db.collection('node', function(err, collection) {
-      if (err) {
-        console.log(err);
+      if (err)
         callback(err);
-      }
       else {
-        console.log('Id '+id);
-        collection.deleteMany({$or:[{'_id':new ObjectId(id)},{'tgt_id':id},{'src_id':id}]}, {safe:true}, function(err, result) {
-          if (err) {
+        collection.deleteMany({$or:[{'_id':new ObjectId(id)},{'tgt_id':id},{'src_id':id}]}, function(err, result) {
+          if (err)
             callback(err, null);
-          } else {
-            console.log('' + result + ' document(s) deleted');
-            callback(null,result);
-          }
+          else{
+            callback(null,result);}
         });
       }});
-  }
-
-  /**
-   * Remove a set of keys
-   * @param {Integer} $id node id
-   * @param {JSON Object} $name key name
-   * @param {function} callback - Function callback to routes.js
-   */
-   this.removeKey= function(id, keys, callback){
-    db.collection('node', function(err, collection) {
-      if (err) {
-        var msg_error = "Error " + err;
-        console.log(msg_error);
-        callback(msg_error);
-        //throw err;
-      }
-      else {
-        collection.update({'_id':new ObjectId(id)}, {$unset: keys}, {safe:true}, function(err, result) {
-         if (err) {
-          var msg_error = 'Error deleting: ' + err;
-          console.log(msg_error);
-          callback(msg_error);
-          //throw err;
-        } else {
-          var msg_success = keys+ " removed";
-          console.log(msg_success);
-        }
-      });
-      }
-    });
   }
 };

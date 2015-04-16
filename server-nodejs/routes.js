@@ -95,7 +95,7 @@ module.exports = function(app){
 					res.status(409).send('delete Error, please change your values');
 				}
 				else{
-					res.json(doc);
+					res.send(doc.result.n+" documents deleted.");
 				}
 			});
 		else
