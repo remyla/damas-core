@@ -29,12 +29,11 @@ module.exports = function(app){
 		}
 		else {
 			var keys = req.body;
-			console.log(keys);
 			mod.create(keys, function(error, doc){
 				if(error){
 					res.status(409).send('create Error, please change your values');
 				}
-				if (error==null && doc){
+				else if (error==null && doc){
 					res.send(doc);
 				}
 			});
@@ -48,7 +47,7 @@ module.exports = function(app){
 		else if(req.body.id)
 			id= req.body.id;
 		mod.read(id, function(error, doc){
-			if(error && !doc){
+			if(error){
 				res.status(404).send('Id not found');
 			}
 			else if (error==null && doc){
@@ -73,7 +72,7 @@ module.exports = function(app){
 		}
 		else {
 		    mod.update(id, keys, function(error, doc){
-				if(error && !doc){
+				if(error){
 					res.status(409).send('Update Error, please change your values');
 				}
 				else{
@@ -91,7 +90,7 @@ module.exports = function(app){
 			id = req.body.id;
 		if(id)
 			mod.deleteNode(id, function(error, doc){
-				if(error && !doc){
+				if(error){
 					res.status(409).send('delete Error, please change your values');
 				}
 				else{

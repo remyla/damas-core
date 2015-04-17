@@ -45,7 +45,7 @@ module.exports= function Model() {
   /**
    * Get key->values combinations for a given node
    * @param {Integer} $id of the node
-   * @return {JSON Object} key=value pairs
+   * @param {function} callback - Function callback to routes.js
    */
    this.read= function(id,callback){
     db.collection('node', function(err, collection) {
@@ -73,16 +73,16 @@ module.exports= function Model() {
    this.update = function(id, keys, callback) {
     var keyToRemove = {};
     var keyToAdd = {};
-    var keyToRemoveExist=false;
-    var keyToAddExist=false;
+    var hasKeyToRemove=false;
+    var hasKeyToAdd=false;
     for(var k in keys){
       if(keys[k]===null){
         keyToRemove[k]='';
-        keyToRemoveExist= true;
+        hasKeyToRemove= true;
       }
       else{
         keyToAdd[k]=keys[k];
-        keyToAddExist=true;
+        hasKeyToAdd=true;
       }
     }
     var self= this;
@@ -90,28 +90,26 @@ module.exports= function Model() {
       if (err)
         callback(err);
       else {
-        if(keyToAddExist)
+        if(hasKeyToAdd && hasKeyToRemove)
+          collection.updateOne({'_id':new ObjectId(id)}, {$set:keyToAdd, $unset:keyToRemove}, function(err, result) {
+            if (err)
+              callback(err, null);
+            else
+              self.read(id, callback);
+          });
+        else if(hasKeyToAdd)
           collection.updateOne({'_id':new ObjectId(id)}, {$set:keyToAdd}, function(err, result) {
             if (err)
               callback(err, null);
-            else {
-              if(keyToRemoveExist)
-                collection.updateOne({'_id':new ObjectId(id)}, {$unset: keyToRemove}, function(err) {
-                  if (err)
-                    callback(err, null);
-                  else
-                    self.read(id, callback);
-                });
-              else
-                self.read(id, callback);
-            }
+            else
+              self.read(id, callback);
           });
-        else if(keyToRemoveExist)
+        else if(hasKeyToRemove)
           collection.updateOne({'_id':new ObjectId(id)}, {$unset:keyToRemove}, function(err, result) {
             if (err)
               callback(err, null);
             else
-            self.read(id, callback);
+              self.read(id, callback);
           });
       }
     });
@@ -119,7 +117,8 @@ module.exports= function Model() {
 
   /**
     * Recursively delete a node - WARNING: this function doesn't check anything before removal
-    * @return {Boolean} true on success, false otherwise
+    * @param {Integer} $id node index
+    * @param {function} callback - Function callback to routes.js
   */
   this.deleteNode = function(id, callback) {
     db.collection('node', function(err, collection) {
