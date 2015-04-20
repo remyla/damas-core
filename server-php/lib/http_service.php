@@ -33,11 +33,29 @@ function arg ( $name )
 {
 	global $_POST;
 	global $_GET;
+	global $_PUT;
+	global $_DELETE;
 	if( array_key_exists( $name, $_POST ) )
 		return stripslashes( $_POST[$name] );
 	if( array_key_exists( $name, $_GET ) )
 		return stripslashes( $_GET[$name] );
-	return null;
+	if ($_SERVER['REQUEST_METHOD'] == 'PUT')
+	{
+		if($_PUT==null){
+			parse_str(file_get_contents("php://input"), $_PUT);
+	    $_REQUEST = array_merge($_REQUEST, $_PUT);
+		}
+		return($_PUT[$name]);
+	}
+	if ($_SERVER['REQUEST_METHOD'] == 'DELETE')
+	{
+		if($_DELETE==null){
+			parse_str(file_get_contents("php://input"), $_DELETE);
+	    $_REQUEST = array_merge($_REQUEST, $_DELETE);
+		}
+		return $_DELETE[$name];
+	}
+  return null;
 }
 
 function auth_get_class ()
