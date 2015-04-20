@@ -47,10 +47,8 @@ class model_json
 		$nodes = array();
 		for( $i = 0; $i < sizeof( $ids ); $i++ )
 		{
-			$row = mysql_fetch_array( mysql_query( "SELECT type FROM node WHERE id=" . $ids[$i] . ";" ) );
 			$nodes[] = array(
 				"id" => $ids[$i],
-				"type" => $row['type'],
 				"tags" => model::tags( $ids[$i] ),
  				// an empty array produces a json list instead of a hash so we force the result to be an object
 				"keys" => (object) model::keys( $ids[$i] ),
@@ -140,7 +138,6 @@ class model_json
 		if( $id == 0 ) {
 			$res = array ();
 			$res["id"] = 0;
-			$res["type"] = "folder";
 			$res["childcount"] = model::countChildren( $id );
 			if( $contents )
 				return array_merge($res, $contents);
@@ -154,7 +151,6 @@ class model_json
 		$row = mysql_fetch_array( $result );
 
 		$res = array ("id"=>$id,
-			"type"=>$row["type"],
 			"childcount"=>model::countChildren( $id ),
 			"rlinks"=>model::countRLinks( $id )
 		);

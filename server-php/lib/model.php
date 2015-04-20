@@ -42,9 +42,7 @@ class model
  	 */
 	static function create ( $keys )
 	{
-		$query = sprintf("INSERT INTO node ( type ) VALUES ( '%s' );",
-			'notype'
-		);
+		$query = "INSERT INTO node ( ) VALUES ( );";
 		if( $result = mysql_query($query)){
 			$id = mysql_insert_id();
 			model::update( $id, $keys );
@@ -168,10 +166,7 @@ class model
 	static function copy ( $id )
 	{
 		// copy node
-		$query = "SELECT type FROM node WHERE id='$id';";
-		$result = mysql_query($query);
-		$row = mysql_fetch_array($result);
-		$newid = model::create( $row["type"], model::keys($id) );
+		$newid = model::create( model::keys($id) );
 		if( !$newid ) return false;
 		// copy tags
 		$query = "SELECT name FROM tag WHERE node_id='$id';";
