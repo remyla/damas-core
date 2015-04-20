@@ -21,7 +21,7 @@
  *
  */
 
-include_once "data_model.php";
+include_once "model.php";
 
 /*
 1 nodes

@@ -24,7 +24,7 @@
 session_start();
 
 include_once "lib/http_service.php";
-include_once "lib/data_model.php";
+include_once "lib/model.php";
 
 damas_service::init_http();
 

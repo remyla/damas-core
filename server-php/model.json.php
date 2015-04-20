@@ -28,7 +28,7 @@
 session_start();
 
 include_once "lib/http_service.php";
-include_once "lib/data_model.json.php";
+include_once "lib/model_json.php";
 
 damas_service::init_http();
 damas_service::accessGranted();
@@ -171,6 +171,9 @@ switch( arg("cmd") )
 			exit;
 		}
 		echo json_encode( $ret );
+		break;
+	case "roots":
+		echo json_encode( model::roots() );
 		break;
 	case "links2":
 		if( is_null( arg('id') ) )

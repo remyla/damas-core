@@ -590,6 +590,23 @@ class model
 	}
 
 	/**
+	 * Get the root nodes from the database: nodes that are link sources but not targets
+	 * @return {Array} array of indexes for matching nodes
+	 */
+	static function roots ( )
+	{
+		$query = "SELECT id FROM node WHERE id NOT IN (SELECT tgt_id FROM link) AND id IN (SELECT src_id FROM link);";
+		if( !$result = mysql_query( $query ) ) return array();
+		if( !mysql_num_rows( $result ) ) return array();
+		$a = array();
+		while( $row = mysql_fetch_array( $result ) )
+		{
+			$a[] = $row["id"];
+		}
+		return $a;
+	}
+
+	/**
 	 * Get the all the links within a specified pool of nodes.
 	 * Links are returned as arrays of 3 values: link id, source node id, target node id
 	 * @param {Array} $ids nodes indexes

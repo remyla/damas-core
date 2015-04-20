@@ -24,7 +24,7 @@
 session_start();
 
 include_once "lib/http_service.php";
-include_once "lib/data_model.json.php";
+include_once "lib/model_json.php";
 include_once "lib/DAM.php";
 include_once "lib/asset.php";
 

@@ -34,6 +34,7 @@ $mod["model::search"] = array( "*" );
 $mod["model::ancestors"] = array( "*" );
 $mod["model::children"] = array( "*" );
 $mod["model::move"] = array( "admin", "editor" );
+$mod["model::roots"] = array( "*" );
 
 #$mod["model::duplicate"] = array( "admin", "editor" );
 $mod["model::export"] = array( "admin" ); // Axel
