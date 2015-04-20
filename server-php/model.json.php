@@ -30,15 +30,14 @@ session_start();
 include_once "lib/http_service.php";
 include_once "lib/model_json.php";
 
-damas_service::init_http();/*
+damas_service::init_http();
 damas_service::accessGranted();
-damas_service::allowed( "model::" . arg("cmd") );*/
+damas_service::allowed( "model::" . arg("cmd") );
 
 header('Content-type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] == 'PUT')
 {
-	var_dump(arg('keys'));
 	if( is_null( arg('id') ) || is_null( arg('keys') ) )
 	{
 		header("HTTP/1.1: 400 Bad Request");
