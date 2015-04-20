@@ -1,0 +1,15 @@
+{
+	"connection" : {
+		"portHttp"  : 8090,
+		"portHttps" : 443,
+		"pathKey"	: "./key-cert-https/",
+		"keyFile"	: "test-key.pem",
+		"pathCert"	: "./key-cert-https/",
+		"cerFile"	: "test-cert.pem"
+	},
+	"mongoDB" : {
+		"host"   : "localhost",
+		"collection" : "node",
+		"port"   : 27017
+	}
+}
