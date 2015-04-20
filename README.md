@@ -1,7 +1,7 @@
 <img src="http://damas-software.com/bin/damas_logo.png" alt="damas-core"/>
 # damas-core
 
-damas-core contains a PHP server, a data model for MySQL, and the API implementation for Python an Javascript languages.
+damas-core contains a PHP server, a data model for MySQL, and the API implementation for Python and Javascript languages.
 
 * HTTP stateless server written in Php
 * Key-value, graph data model for MySQL
@@ -21,40 +21,41 @@ import('damas.py')
 
 The API below is new from december 2014, and is not supported by the Python client implementation yet. For a Python compatible API, use the 2.2-stable release.
 
-### Graphs
+### Node manipulation
 
-- damas.graph()
-- damas.link()
-- damas.links()
-- damas.unlink()
+- damas.create( keys )
+- damas.read( id )
+- damas.update( id, keys )
+- damas.delete( id )
+- damas.search( keys )
 
-### Nodes
+### Node graphs 
 
-- damas.create()
-- damas.read()
-- damas.update()
-- damas.delete()
-- damas.search()
+- damas.graph( id )
+- damas.link( sourceId , targetId )
+- damas.links( id )
+- damas.unlink( linkId )
 
-### Arborescences
 
-- damas.ancestors()
-- damas.children()
-- damas.move()
+### Trees, based on a #parent key
 
-### Fichiers
+- damas.ancestors( id )
+- damas.children( id )
+- damas.move( id, target )
 
-- damas.backup()
-- damas.increment()
-- damas.upload()
-- damas.lock()
-- damas.unlock()
+### Asset manipulation (version control)
+
+- damas.backup( id )
+- damas.increment( id )
+- damas.upload( files )
+- damas.lock( id )
+- damas.unlock( id )
 
 ## Related Links
 
-http://primcode.com PRIMCODE is the company hosting the development, distribution and maintenance of damas-core
+http://primcode.com PRIMCODE is the company leading the development, the distribution and the maintenance of damas-core
 
-http://damas-software.org the damas promotional website
+http://damas-software.org is the website dedicated to damas presentation, and show a few possible interfaces
 
 ## License
 GPL License(GPLV3)
