@@ -601,7 +601,7 @@ class model
 		$a = array();
 		while( $row = mysql_fetch_array( $result ) )
 		{
-			$a[] = $row["id"];
+			$a[] = intval( $row["id"] );
 		}
 		return $a;
 	}
