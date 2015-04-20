@@ -30,9 +30,9 @@ session_start();
 include_once "lib/http_service.php";
 include_once "lib/model_json.php";
 
-damas_service::init_http();
+damas_service::init_http();/*
 damas_service::accessGranted();
-damas_service::allowed( "model::" . arg("cmd") );
+damas_service::allowed( "model::" . arg("cmd") );*/
 
 header('Content-type: application/json');
 
