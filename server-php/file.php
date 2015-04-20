@@ -7,7 +7,7 @@
  */
 session_start();
 
-include_once "../php/http_service.php";
+include_once "lib/http_service.php";
 #include_once "FileSystem/lib.file.php";
 
 damas_service::init_http();

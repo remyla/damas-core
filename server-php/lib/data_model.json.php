@@ -85,8 +85,8 @@ class model_json
 		$links_json = array();
 		while( list( $key, $val ) = each( $links ) )
 		{
-			$links_json[] = array("link_id"=>$key, 
-					"src_id"=>$val[0], 
+			$links_json[] = array("link_id"=>$key,
+					"src_id"=>$val[0],
 					"tgt_id"=>$val[1]
 					);
 		}
@@ -94,11 +94,6 @@ class model_json
 		$res["links"] = $links_json;
 		return $res;
 	} // done
-
-	static function graph_all ( )
-	{
-
-	}
 
 	/**
 	 * Gets a node and subnodes in array format
@@ -137,15 +132,15 @@ class model_json
 	/**
 	 * Gets a node in array format
 	 * @param {Integer} $id node index
-	 * @param {Array} $contents array of tags and/or keys and/or links 
+	 * @param {Array} $contents array of tags and/or keys and/or links
 	 * @return {Array} array of nodes
 	 */
 	static function node_jsontag ( $id, $contents = false )
 	{
 		if( $id == 0 ) {
 			$res = array ();
-			$res["id"] = 0; 
-			$res["type"] = "folder"; 
+			$res["id"] = 0;
+			$res["type"] = "folder";
 			$res["childcount"] = model::countChildren( $id );
 			if( $contents )
 				return array_merge($res, $contents);
@@ -158,9 +153,9 @@ class model_json
 			return false;
 		$row = mysql_fetch_array( $result );
 
-		$res = array ("id"=>$id, 
-			"type"=>$row["type"], 
-			"childcount"=>model::countChildren( $id ), 
+		$res = array ("id"=>$id,
+			"type"=>$row["type"],
+			"childcount"=>model::countChildren( $id ),
 			"rlinks"=>model::countRLinks( $id )
 		);
 		if( $contents )
@@ -171,12 +166,12 @@ class model_json
 	/**
 	 * Get the links id of a node and its ancestors
 	 * @param {Integer} $id node id
-	 * @return {array} links 
+	 * @return {array} links
 	 */
 	static function links ( $id )
 	{
 		$array = array();
-	
+
 		$result = model::links($id);
 
 		for ($i = 0; $i < sizeof($result); $i++) {
@@ -194,7 +189,7 @@ class model_json
 	/**
 	 * Get the links id of a node
 	 * @param {Integer} $id node id
-	 * @return {array} links 
+	 * @return {array} links
 	 */
 	static function rlink ( $id )
 	{

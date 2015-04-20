@@ -23,10 +23,10 @@
 
 session_start();
 
-include_once "../php/http_service.php";
-include_once "../php/data_model.json.php";
-include_once "../php/DAM.php";
-include_once "../php/asset.php";
+include_once "lib/http_service.php";
+include_once "lib/data_model.json.php";
+include_once "lib/DAM.php";
+include_once "lib/asset.php";
 
 damas_service::init_http();
 damas_service::accessGranted();
