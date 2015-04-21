@@ -32,7 +32,6 @@ include_once "lib/model_json.php";
 
 damas_service::init_http();
 damas_service::accessGranted();
-damas_service::allowed( "model::" . arg("cmd") );
 
 header('Content-type: application/json');
 
@@ -42,13 +41,14 @@ $ret = false;
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST')
 {
-  if(is_null(arg('keys')))
+  damas_service::allowed( "model::create" );
+  if(is_null($_POST))
   {
     header("HTTP/1.1: 400 Bad Request");
     echo "Bad command";
     exit;
   }
-  $id = model::create(json_decode(arg("keys")));
+  $id = model::create($_POST);
   if(!$id)
   {
     header("HTTP/1.1: 409 Conflict");
@@ -62,14 +62,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET')
 {
-  if( is_null( arg('id') ) )
+  damas_service::allowed( "model::read" );
+  if( is_null( $_GET['id'] ) )
   {
     header('HTTP/1.1: 400 Bad Request');
     exit;
   }
-  if( strpos( arg("id"), "," ) === false )
+  if( strpos( $_GET['id'], "," ) === false )
   {
-    $ret = model_json::node( arg( "id" ), 1, $NODE_TAG | $NODE_PRM );
+    $ret = model_json::node( $_GET['id'], 1, $NODE_TAG | $NODE_PRM );
     if( !$ret )
     {
       header('HTTP/1.1: 404 Not Found');
@@ -79,20 +80,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET')
   }
   else
   {
-    echo json_encode( model_json::multi( explode( ",", arg("id") ) ) );
+    echo json_encode( model_json::multi( explode( ",", $_GET['id'] ) ) );
     exit;
   }
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'PUT')
 {
-	if( is_null( arg('id') ) || is_null( arg('keys') ) )
+  damas_service::allowed( "model::update" );
+	if( is_null( $_PUT['id'] ) || is_null( $_PUT['keys'] ) )
 	{
 		header("HTTP/1.1: 400 Bad Request");
 		echo "Bad command";
 		exit;
 	}
-	$id = model::update( arg("id"), json_decode( arg("keys") ) );
+	$id = model::update( $_PUT['id'], json_decode( $_PUT['keys'] ) );
 	echo json_encode( model_json::node( arg("id"), 1, $NODE_TAG | $NODE_PRM ) );
 	damas_service::log_event();
 	exit;
@@ -100,13 +102,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT')
 
 if ($_SERVER['REQUEST_METHOD'] == 'DELETE')
 {
-	if( is_null( arg("id") ) )
+  damas_service::allowed( "model::delete" );
+	if( is_null( $_DELETE['id'] ) )
 	{
 		header("HTTP/1.1: 400 Bad Request");
 		echo "Bad command";
 		exit;
 	}
-	if( !model::delete( arg("id") ) )
+	if( !model::delete( $_DELETE['id'] ) )
 	{
 		header("HTTP/1.1: 409 Conflict");
 		echo "delete Error, please change your values";
