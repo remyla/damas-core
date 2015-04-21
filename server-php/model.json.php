@@ -34,40 +34,6 @@ damas_service::init_http();
 damas_service::accessGranted();
 damas_service::allowed( "model::" . arg("cmd") );
 
-header('Content-type: application/json');
-
-if ($_SERVER['REQUEST_METHOD'] == 'PUT')
-{
-	if( is_null( arg('id') ) || is_null( arg('keys') ) )
-	{
-		header("HTTP/1.1: 400 Bad Request");
-		echo "Bad command";
-		exit;
-	}
-	$id = model::update( arg("id"), json_decode( arg("keys") ) );
-	echo json_encode( model_json::node( arg("id"), 1, $NODE_TAG | $NODE_PRM ) );
-	damas_service::log_event();
-	exit;
-}
-
-if ($_SERVER['REQUEST_METHOD'] == 'DELETE')
-{
-	if( is_null( arg("id") ) )
-	{
-		header("HTTP/1.1: 400 Bad Request");
-		echo "Bad command";
-		exit;
-	}
-	if( !model::delete( arg("id") ) )
-	{
-		header("HTTP/1.1: 409 Conflict");
-		echo "delete Error, please change your values";
-		exit;
-	}
-	damas_service::log_event();
-	exit;
-}
-
 if( !arg("cmd") )
 {
 	header("HTTP/1.1: 400 Bad Request");
@@ -75,6 +41,7 @@ if( !arg("cmd") )
 	exit;
 }
 
+header('Content-type: application/json');
 
 $ret = false;
 

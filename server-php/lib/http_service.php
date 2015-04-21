@@ -45,7 +45,8 @@ function arg ( $name )
 			parse_str(file_get_contents("php://input"), $_PUT);
 	    $_REQUEST = array_merge($_REQUEST, $_PUT);
 		}
-		return($_PUT[$name]);
+		if( array_key_exists( $name, $_PUT ) )
+			return stripslashes( $_PUT[$name] );
 	}
 	if ($_SERVER['REQUEST_METHOD'] == 'DELETE')
 	{
@@ -53,7 +54,8 @@ function arg ( $name )
 			parse_str(file_get_contents("php://input"), $_DELETE);
 	    $_REQUEST = array_merge($_REQUEST, $_DELETE);
 		}
-		return $_DELETE[$name];
+		if( array_key_exists( $name, $_DELETE ) )
+			return stripslashes( $_DELETE[$name] );
 	}
   return null;
 }
