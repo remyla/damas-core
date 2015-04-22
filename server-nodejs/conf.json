@@ -8,8 +8,11 @@
 		"cerFile"	: "test-cert.pem"
 	},
 	"mongoDB" : {
-		"host"   : "localhost",
+		"host"       : "localhost",
 		"collection" : "node",
-		"port"   : 27017
+		"port"       : 27017,
+		"options"    : {
+			"auto_reconnect" : true
+		}
 	}
 }
