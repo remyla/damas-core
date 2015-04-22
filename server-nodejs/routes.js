@@ -3,23 +3,28 @@ module.exports = function(app){
 	var mongoMod 	= require('./model.js'),
 		bodyParser 	= require('body-parser'),
 		methodOverride = require('method-override'),
-		mod      	= new mongoMod();
-		app.use(bodyParser.urlencoded({extended : true}));
-		app.use(bodyParser.json());
-		//Handle errors
-		app.use(function(err, req, res, next){
-			if(err)
-				console.log("An error has occurred: "+err);
-			next();
-		});
-		app.use(methodOverride(function(req, res){
-		  if (req.body && typeof req.body === 'object' && '_method' in req.body) {
-		    // look in urlencoded POST bodies and delete it
-		    var method = req.body._method
-		    delete req.body._method
-		    return method
-		  }
-		}));
+		mod      	= new mongoMod(),
+		morgan= require('morgan');
+
+	//Handle request log
+	app.use(morgan('combined'));
+
+	app.use(bodyParser.urlencoded({extended : true}));
+	app.use(bodyParser.json());
+	//Handle errors
+	app.use(function(err, req, res, next){
+		if(err)
+			console.log("An error has occurred: "+err);
+		next();
+	});
+	app.use(methodOverride(function(req, res){
+	  if (req.body && typeof req.body === 'object' && '_method' in req.body) {
+	    // look in urlencoded POST bodies and delete it
+	    var method = req.body._method
+	    delete req.body._method
+	    return method
+	  }
+	}));
 
 	/* CRUD operations */
 	create = function(req, res) {
