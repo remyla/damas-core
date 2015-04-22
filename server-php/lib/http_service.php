@@ -44,7 +44,7 @@ function arg ( $name )
 	if( array_key_exists( $name, $_DELETE ) )
 		return stripslashes( $_DELETE[$name] );
 
-  return null;
+	return null;
 }
 
 function auth_get_class ()

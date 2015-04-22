@@ -17,11 +17,11 @@
  *
  * damas-core is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with damas-core.  If not, see <http://www.gnu.org/licenses/>.
+ * along with damas-core.	If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -41,53 +41,53 @@ $ret = false;
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST')
 {
-  damas_service::allowed( "model::create" );
-  if(empty($_POST))
-  {
-    header("HTTP/1.1: 400 Bad Request");
-    echo "Bad command";
-    exit;
-  }
-  $id = model::create($_POST);
-  if(!$id)
-  {
-    header("HTTP/1.1: 409 Conflict");
-    echo "create Error, please change your values";
-    exit;
-  }
-  echo json_encode(model_json::node($id, 1, $NODE_TAG | $NODE_PRM));
+	damas_service::allowed( "model::create" );
+	if(empty($_POST))
+	{
+		header("HTTP/1.1: 400 Bad Request");
+		echo "Bad command";
+		exit;
+	}
+	$id = model::create($_POST);
+	if(!$id)
+	{
+		header("HTTP/1.1: 409 Conflict");
+		echo "create Error, please change your values";
+		exit;
+	}
+	echo json_encode(model_json::node($id, 1, $NODE_TAG | $NODE_PRM));
 	damas_service::log_event();
 	exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET')
 {
-  damas_service::allowed( "model::read" );
-  if( is_null( $_GET['id'] ) )
-  {
-    header('HTTP/1.1: 400 Bad Request');
-    exit;
-  }
-  if( strpos( $_GET['id'], "," ) === false )
-  {
-    $ret = model_json::node( $_GET['id'], 1, $NODE_TAG | $NODE_PRM );
-    if( !$ret )
-    {
-      header('HTTP/1.1: 404 Not Found');
-      exit;
-    }
-    echo json_encode( array($ret) );
-  }
-  else
-  {
-    echo json_encode( model_json::multi( explode( ",", $_GET['id'] ) ) );
-  }
-  exit;
+	damas_service::allowed( "model::read" );
+	if( is_null( $_GET['id'] ) )
+	{
+		header('HTTP/1.1: 400 Bad Request');
+		exit;
+	}
+	if( strpos( $_GET['id'], "," ) === false )
+	{
+		$ret = model_json::node( $_GET['id'], 1, $NODE_TAG | $NODE_PRM );
+		if( !$ret )
+		{
+			header('HTTP/1.1: 404 Not Found');
+			exit;
+		}
+		echo json_encode( array($ret) );
+	}
+	else
+	{
+		echo json_encode( model_json::multi( explode( ",", $_GET['id'] ) ) );
+	}
+	exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'PUT')
 {
-  damas_service::allowed( "model::update" );
+	damas_service::allowed( "model::update" );
 	if( isset( $_PUT['id'] ) || isset( $_PUT['keys'] ) )
 	{
 		header("HTTP/1.1: 400 Bad Request");
@@ -102,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'PUT')
 
 if ($_SERVER['REQUEST_METHOD'] == 'DELETE')
 {
-  damas_service::allowed( "model::delete" );
+	damas_service::allowed( "model::delete" );
 	if( is_null( $_DELETE['id'] ) )
 	{
 		header("HTTP/1.1: 400 Bad Request");
