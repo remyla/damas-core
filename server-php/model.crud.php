@@ -42,7 +42,7 @@ $ret = false;
 if ($_SERVER['REQUEST_METHOD'] == 'POST')
 {
   damas_service::allowed( "model::create" );
-  if(is_null($_POST))
+  if(empty($_POST))
   {
     header("HTTP/1.1: 400 Bad Request");
     echo "Bad command";
@@ -81,14 +81,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET')
   else
   {
     echo json_encode( model_json::multi( explode( ",", $_GET['id'] ) ) );
-    exit;
   }
+  exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'PUT')
 {
   damas_service::allowed( "model::update" );
-	if( is_null( $_PUT['id'] ) || is_null( $_PUT['keys'] ) )
+	if( isset( $_PUT['id'] ) || isset( $_PUT['keys'] ) )
 	{
 		header("HTTP/1.1: 400 Bad Request");
 		echo "Bad command";
