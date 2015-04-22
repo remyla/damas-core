@@ -33,10 +33,17 @@ function arg ( $name )
 {
 	global $_POST;
 	global $_GET;
+	global $_PUT;
+	global $_DELETE;
 	if( array_key_exists( $name, $_POST ) )
 		return stripslashes( $_POST[$name] );
 	if( array_key_exists( $name, $_GET ) )
 		return stripslashes( $_GET[$name] );
+	if( array_key_exists( $name, $_PUT ) )
+		return stripslashes( $_PUT[$name] );
+	if( array_key_exists( $name, $_DELETE ) )
+		return stripslashes( $_DELETE[$name] );
+
 	return null;
 }
 
@@ -76,6 +83,8 @@ class damas_service
 		#global $hidden_users;
 		#global $versions;
 		global $authentication;
+		global $_PUT;
+		global $_DELETE;
 
 		include "settings.php";
 		if( file_exists( "/etc/damas/settings.php" ) )
@@ -146,6 +155,16 @@ class damas_service
 		{
 			include "authCAS/lib.authCAS.php";
 		}
+
+		if ($_SERVER['REQUEST_METHOD'] == 'PUT')
+		{
+			parse_str(file_get_contents("php://input"), $_PUT);
+		}
+		if ($_SERVER['REQUEST_METHOD'] == 'DELETE')
+		{
+			parse_str(file_get_contents("php://input"), $_DELETE);
+		}
+
 		return true;
 	}
 
