@@ -247,7 +247,7 @@
 	}
 
 	/**
-	 * Update the keys of a node. The specified keys overwrite existing keys, others are left untouched. A null key value removes the key. 
+	 * Update the keys of a node. The specified keys overwrite existing keys, others are left untouched. A null key value removes the key.
 	 * @param {Integer} id internal node index to update
 	 * @returns {damas.element} Damas element or false on failure
 	 */
@@ -661,6 +661,7 @@
 	 */
 	damas.utils.command_a = function ( args, callback )
 	{
+/*
 		var req = new Ajax.Request( damas.server + "/model.json.php", {
 			asynchronous: true,
 			parameters: args,
@@ -668,6 +669,23 @@
 				callback( { 'status': req.transport.status, text: req.transport.responseText } );
 			}
 		});
+*/
+		// THIS IS THE REPLACEMENT FOR PROTOTYPE AJAX:
+		var qs = Object.keys(args).map(function(key){
+			return encodeURIComponent(key) + '=' + encodeURIComponent(args[key]);
+		}).join('&');
+		var req = new XMLHttpRequest();
+		req.open('GET', damas.server + '/model.json.php?' + qs, true);
+		req.onreadystatechange = function(e){
+			if(req.readyState == 4)
+			{
+				if(req.status == 200)
+				{
+					callback( { 'status': req.status, text: req.responseText } );
+				}
+			}
+		}
+		req.send();
 	}
 
 	//
