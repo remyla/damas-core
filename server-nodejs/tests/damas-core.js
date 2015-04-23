@@ -68,31 +68,54 @@ describe('Damas-core - Server NodeJs [API]', function() {
 		var notExistId = '552fdc00d0bc266248e1eb08';
 		var validId    = '5535b33d6b4e27a35fc7a54c';
 		var badId      = '5535b3';
+		var notExistIdJSON = {"id" : "552fdc00d0bc266248e1eb08"};
+		var validIdJSON    = {"id": "55379f1af6d6bdcd2d799e4b"};
+		var badIdJSON      = {"id": "5535b3"};
 
-		it('should throw an error 404 (id valid but not found in db)', function(done) {
+		it('should throw an error 404 (id valid but not found in db) - ID through URL', function(done) {
 			request
 				.get('/' + notExistId)
 				.set('Accept', 'application/json')
 				.expect(404)
 				.end(done)
 		});
-		it('should get a document from db (id exists)', function(done) {
+		it('should throw an error 404 (id valid but not found in db) - ID  through body', function(done) {
+			request
+				.get('/')
+				.set('Accept', 'application/json')
+				.send(notExistIdJSON)
+				.expect(404)
+				.end(done)
+		});
+		it('should get a document from db (id exists) - ID through URL', function(done) {
 			request
 				.get('/' + validId)
 				.set('Accept', 'application/json')
 				.expect('Content-Type', /application\/json/)
 				.expect(200)
 				.end(done)
-				// .end( function(err, res){
-				// 	var body = res.body;
-				// 	console.log(body);
-				// 	done(err);
-				// })
 		});
-		it('should throw an error 404 (id not valid)', function(done) {
+		it('should get a document from db (id exists) - ID  through body', function(done) {
+			request
+				.get('/')
+				.set('Accept', 'application/json')
+				.send(validIdJSON)
+				.expect('Content-Type', /application\/json/)
+				.expect(200)
+				.end(done)
+		});
+		it('should throw an error 404 (id not valid) - ID through URL', function(done) {
 			request
 				.get('/' + badId)
 				.set('Accept', 'application/json')
+				.expect(404)
+				.end(done)
+		});
+		it('should throw an error 404 (id not valid) - ID through body', function(done) {
+			request
+				.get('/')
+				.set('Accept', 'application/json')
+				.send(badIdJSON)
 				.expect(404)
 				.end(done)
 		});
@@ -185,7 +208,7 @@ describe('Damas-core - Server NodeJs [API]', function() {
 	**/
 	describe(' CRUD - Delete', function() {
 		var validId      = '5535b4c700d38aaf602c1e58';
-		var invalidId    = '111111111111111111111111';
+		var invalidId    = '11111111wa1w1we11q1r1s11';
 		var idEmpty      = "";
 		var idValidButNotInDb = "5527f052a23a84b74a548792";
 
