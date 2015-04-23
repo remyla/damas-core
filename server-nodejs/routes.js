@@ -3,7 +3,7 @@ module.exports = function(app){
 	var mongoMod 	= require('./model.js'),
 		bodyParser 	= require('body-parser'),
 		methodOverride = require('method-override'),
-		mod      	= new mongoMod(),
+		mod				= new mongoMod(),
 		morgan= require('morgan');
 
 	//Handle request log
@@ -18,12 +18,12 @@ module.exports = function(app){
 		next();
 	});
 	app.use(methodOverride(function(req, res){
-	  if (req.body && typeof req.body === 'object' && '_method' in req.body) {
-	    // look in urlencoded POST bodies and delete it
-	    var method = req.body._method
-	    delete req.body._method
-	    return method
-	  }
+		if (req.body && typeof req.body === 'object' && '_method' in req.body) {
+			// look in urlencoded POST bodies and delete it
+			var method = req.body._method
+			delete req.body._method
+			return method
+		}
 	}));
 
 	/* CRUD operations */
@@ -76,7 +76,7 @@ module.exports = function(app){
 			res.status(400).send('Bad command');
 		}
 		else {
-		    mod.update(id, keys, function(error, doc){
+				mod.update(id, keys, function(error, doc){
 				if(error){
 					res.status(409).send('Update Error, please change your values');
 				}
