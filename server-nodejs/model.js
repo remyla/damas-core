@@ -1,13 +1,13 @@
 var mongo    = require('mongodb'),
-    conf     = require('./conf'),
-    Server   = mongo.Server,
-    Db       = mongo.Db,
-    ObjectId = mongo.ObjectID;
+    conf     = require('./conf');
 
 module.exports = function Model() {
   // Data about connection is in the file conf.json
   var dataMongo = conf.mongoDB,
       self      = this,
+      Server    = mongo.Server,
+      Db        = mongo.Db,
+      ObjectId  = mongo.ObjectID,
       conn;
   
   //START: --------------MONGODB--------------
