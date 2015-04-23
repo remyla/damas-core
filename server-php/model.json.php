@@ -36,7 +36,7 @@ damas_service::allowed( "model::" . arg("cmd") );
 
 if( !arg("cmd") )
 {
-	header("HTTP/1.1: 400 Bad Request"); 
+	header("HTTP/1.1: 400 Bad Request");
 	echo "Bad command";
 	exit;
 }
@@ -329,7 +329,7 @@ switch( arg("cmd") )
 	/**
 	 *
 	 * json output functions
-	 * model_json namespace 
+	 * model_json namespace
 	 *
 	 */
 
