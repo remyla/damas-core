@@ -5,12 +5,12 @@ var host    = process.env.API_TEST_HOST || api;
 request = request(host);
 /**
  * Its important to set up the vars according your data in the database, particulary in the vars with valid data 
-**/
+ */
 
 describe('Damas-core - Server NodeJs [API]', function() {
 	/**
-	* Tests for method create
-	**/
+	 * Tests for method create
+	 */
 	describe(' CRUD - Create', function() {
 		var dataOk = {
 			"node" : {
@@ -62,29 +62,29 @@ describe('Damas-core - Server NodeJs [API]', function() {
 	}); 
 
 	/**
-	* Tests for method Read
-	**/
+	 * Tests for method Read
+	 */
 	describe(' CRUD - Read', function() {
 		var notExistId = '552fdc00d0bc266248e1eb08';
-		var validId    = '5535b33d6b4e27a35fc7a54c';
+		var validId    = '5537a22677d0099b2f886a77';
 		var badId      = '5535b3';
 		var notExistIdJSON = {"id" : "552fdc00d0bc266248e1eb08"};
 		var validIdJSON    = {"id": "55379f1af6d6bdcd2d799e4b"};
 		var badIdJSON      = {"id": "5535b3"};
 
-		it('should throw an error 404 (id valid but not found in db) - ID through URL', function(done) {
+		it('should throw an error 409 (id valid but not found in db) - ID through URL', function(done) {
 			request
 				.get('/' + notExistId)
 				.set('Accept', 'application/json')
-				.expect(404)
+				.expect(409)
 				.end(done)
 		});
-		it('should throw an error 404 (id valid but not found in db) - ID  through body', function(done) {
+		it('should throw an error 409 (id valid but not found in db) - ID  through body', function(done) {
 			request
 				.get('/')
 				.set('Accept', 'application/json')
 				.send(notExistIdJSON)
-				.expect(404)
+				.expect(409)
 				.end(done)
 		});
 		it('should get a document from db (id exists) - ID through URL', function(done) {
@@ -128,11 +128,11 @@ describe('Damas-core - Server NodeJs [API]', function() {
 		});
 	});
 	/**
-	* Tests for method update
-	**/
+	 * Tests for method update
+	 */
 	describe(' CRUD - Update', function() {
 		var idEmpty    = "";
-		var validId    = '5535b33d6b4e27a35fc7a54c';
+		var validId    = '5537a27077d0099b2f886a79';
 		var invalidId    = '111111111111111111111111';
 		var validData = {
 			"nodeUpdated" : {
@@ -204,10 +204,10 @@ describe('Damas-core - Server NodeJs [API]', function() {
 		});
 	});
 	/**
-	* Tests for method delete
-	**/
+	 * Tests for method delete
+	 */
 	describe(' CRUD - Delete', function() {
-		var validId      = '5535b4c700d38aaf602c1e58';
+		var validId      = '55379ffaf6d6bdcd2d799e4e';
 		var invalidId    = '11111111wa1w1we11q1r1s11';
 		var idEmpty      = "";
 		var idValidButNotInDb = "5527f052a23a84b74a548792";
