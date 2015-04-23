@@ -2,7 +2,7 @@ DEFAULT:
 	make test
 
 test:
-	./node_modules/.bin/mocha $(ARGS) test/
+	./node_modules/.bin/mocha $(ARGS) tests/
 
 .PHONY: \
 	DEFAULT \
