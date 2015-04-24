@@ -197,7 +197,6 @@
 
 	damas.create_rest = function ( keys, callback )
 	{
-		//return damas.utils.readJSONElement( JSON.parse( damas.utils.command( { cmd: 'create', type: type, keys: Object.toJSON(keys) } ).text ) );
 		function req_callback( req ) {
 			if(req.status === 200)
 			{
@@ -211,12 +210,9 @@
 		req.onreadystatechange = function(e){
 			if(req.readyState == 4)
 			{
-				if(req.status == 200)
+				if(callback)
 				{
-					if(callback)
-					{
-						callback(req_callback(req));
-					}
+					callback(req_callback(req));
 				}
 			}
 		}
@@ -311,12 +307,9 @@
 		req.onreadystatechange = function(e){
 			if(req.readyState == 4)
 			{
-				if(req.status == 200)
+				if( callback )
 				{
-					if( callback )
-					{
-						callback( req_callback( req ) );
-					}
+					callback( req_callback( req ) );
 				}
 			}
 		}
@@ -369,12 +362,9 @@
 		req.onreadystatechange = function(e){
 			if(req.readyState == 4)
 			{
-				if(req.status == 200)
+				if(callback)
 				{
-					if(callback)
-					{
-						callback(req_callback(req));
-					}
+					callback(req_callback(req));
 				}
 			}
 		}
