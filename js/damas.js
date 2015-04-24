@@ -216,7 +216,7 @@
 				}
 			}
 		}
-		req.send("keys="+Object.toJSON(keys));
+		req.send(keys);
 		if(callback === undefined)
 		{
 			return req_callback(req);
