@@ -58,7 +58,7 @@
 	 */
 	var damas = {};
 	damas.server = '';
-	damas.version = '2.2-beta6';
+	damas.version = '2.3.1';
 	damas.username = false;
 	damas.userclass = false;
 	damas.user_id = false;
