@@ -200,7 +200,7 @@
 		function req_callback( req ) {
 			if(req.status === 200)
 			{
-				return damas.utils.readJSONElement(req.responseText);
+				return damas.utils.readJSONElement( JSON.Parse(req.responseText));
 			}
 			return false;
 		}
