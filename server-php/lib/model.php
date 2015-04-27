@@ -447,6 +447,13 @@ class model
 		return intval( $row["count"] );
 	}
 
+	static function countTargets ( $id )
+	{
+		$query = "SELECT COUNT(tgt_id) as count FROM link WHERE src_id='$id';";
+		$row = mysql_fetch_array( mysql_query( $query ) );
+		return intval( $row["count"] );
+	}
+
 	/**
 	 * Retrieve a key value
 	 * @param {Integer} $id node index

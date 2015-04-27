@@ -53,6 +53,7 @@ class model_json
  				// an empty array produces a json list instead of a hash so we force the result to be an object
 				"keys" => (object) model::keys( $ids[$i] ),
 				"childcount" => model::countChildren( $ids[$i] ),
+				"targets" => model::countTargets( $ids[$i] ),
 				"rlinks" => model::countRLinks( $ids[$i] )
 			);
 		}
