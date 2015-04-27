@@ -200,13 +200,13 @@
 		function req_callback( req ) {
 			if(req.status === 200)
 			{
-				return damas.utils.readJSONElement(JSON.parse(req.responseText));
+				return damas.utils.readJSONElement(req.responseText);
 			}
 			return false;
 		}
 		var req = new XMLHttpRequest();
 		req.open('POST', this.server + "/model.crud.php",callback !== undefined);
-		req.setRequestHeader("Content-type","application/json");
+		req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 		req.onreadystatechange = function(e){
 			if(req.readyState == 4)
 			{
@@ -298,9 +298,9 @@
 		}
 		function req_callback( req ) {
 			if( multi )
-				return damas.utils.readJSONElements( JSON.parse( req.transport.responseText ) );
+				return damas.utils.readJSONElements( JSON.parse( req.responseText ) );
 			else
-				return damas.utils.readJSONElements( JSON.parse( req.transport.responseText ) )[0];
+				return damas.utils.readJSONElements( JSON.parse( req.responseText ) )[0];
 		}
 		var req = new XMLHttpRequest();
 		req.open('GET', this.server + "/model.crud.php?id="+id,callback !== undefined);
@@ -354,11 +354,11 @@
 	damas.update_rest = function ( id, keys, callback )
 	{
 		function req_callback( req ) {
-			return damas.utils.readJSONElement( JSON.parse( req.transport.responseText ));
+			return damas.utils.readJSONElement( JSON.parse( req.responseText ));
 		}
 		var req = new XMLHttpRequest();
 		req.open('PUT', this.server + "/model.crud.php",callback !== undefined);
-		req.setRequestHeader("Content-type","application/json");
+		req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 		req.onreadystatechange = function(e){
 			if(req.readyState == 4)
 			{
@@ -392,7 +392,7 @@
 	{
 		var req = new XMLHttpRequest();
 		req.open('DELETE', this.server + "/model.crud.php", false);
-		xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+		req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 		req.send("id="+id);
 		return req.status===200;
 	}
