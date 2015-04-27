@@ -22,7 +22,7 @@
  *
  */
 
-$version = "2.2-beta6";
+$version = "2.3.1";
 
 /**
  * Get a command argument from POST then GET methods
