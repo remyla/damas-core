@@ -16,7 +16,7 @@ php5 php5-mysql mysql-server apache2
 
 2. in MySQL, create a database:
 
-	> CREATE DATABASE damasdb;
+	&gt; CREATE DATABASE damasdb;
 
 ⋅⋅⋅and import the table structure: 
 
