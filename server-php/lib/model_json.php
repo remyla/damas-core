@@ -69,17 +69,16 @@ class model_json
 	{
 		$links = model::links_r( $ids, array() );
 		$values = array_values( $links );
-		$nodes = array();
 		for( $i = 0; $i < sizeof( $links ); $i++ )
 		{
-			$nodes[] = $values[$i][0];
-			$nodes[] = $values[$i][1];
+			$ids[] = $values[$i][0];
+			$ids[] = $values[$i][1];
 		}
-		$nodes = array_values( array_unique( $nodes ) );
+		$ids = array_values( array_unique( $ids ) );
 		$array = array();
-		for( $i = 0; $i < sizeof( $nodes ); $i++ )
+		for( $i = 0; $i < sizeof( $ids ); $i++ )
 		{
-			$array[] = model_json::node( $nodes[$i], 1, 7 );
+			$array[] = model_json::node( $ids[$i], 1, 7 );
 		}
 		$links_json = array();
 		while( list( $key, $val ) = each( $links ) )
