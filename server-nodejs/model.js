@@ -68,7 +68,7 @@ module.exports = function Model()
 							callback( true );
 						}
 						else
-						{ 
+						{
 						//console.log('Success: ' + JSON.stringify(records));
 						self.read( keys._id, callback );
 						}
@@ -264,4 +264,75 @@ module.exports = function Model()
 			}
 		});
 	}; //End deleteNode
-}
+
+	this.links_r=function(ids, links, callback){
+		var newIds=[];
+		var self= this;
+		if(links==null)
+			links=[];
+		this.connection( function(err, database )
+		{
+			if( err )
+			{
+				callback(true);
+			}
+			else
+			{
+				database.collection(dataMongo.collection, function(err, collection) {
+					if (err)
+						callback(err);
+					else {
+						collection.find({'src_id':{$in:ids}}).toArray(function(err, results) {
+							if (err)
+								callback(err);
+							else{
+								for(r in results){
+									if(links[results[r]._id]==undefined){
+										if(ids.indexOf(results[r].tgt_id)<0 && (results[r].tgt_id)!=undefined)
+											newIds.push(results[r].tgt_id);
+										links[results[r]._id]=results[r];
+									}
+								}
+								if(newIds.length<1)
+									callback(null, links);
+								else
+									self.links_r(newIds, links, callback);
+							}
+						});
+					}
+				});
+			}
+		});
+	};
+
+	this.nodes=function(ids, callback){
+		var array=[];
+		this.connection( function(err, database )
+		{
+			if( err )
+			{
+				callback(true);
+			}
+			else
+			{
+				database.collection(dataMongo.collection, function(err, collection) {
+					if (err)
+						callback(err);
+					else {
+						for(i in ids){
+							collection.findOne({'_id':new ObjectId(ids[i])},function(err, item) {
+								if (err)
+									callback(err);
+								else{
+									array.push(item);
+									if(ids.length == array.length)
+										callback(null,array);
+									}
+							});
+						}
+					}
+				});
+			}
+		});
+	}
+};

@@ -194,6 +194,42 @@ module.exports = function(app){
 		}
 	};
 
+graph = function(req,res) {
+		var ids=[];
+		var nodeIds=[];
+		var id= req.params.id;
+		ids.push(id);
+		mod.links_r(ids,null ,function(error, links){
+			if(error){
+				res.status(404).send('Id not found');
+			}
+			else if (error==null && links){
+				nodeIds[id]=id;
+				for(l in links){
+					if(links[l].tgt_id!=undefined){
+						nodeIds[(links[l].tgt_id)]=links[l].tgt_id;
+						nodeIds.length ++;
+						}
+					}
+				mod.nodes(nodeIds, function(error, nodes){
+					if(error){
+						res.status(404).send('Id not found');
+					}
+					else if(nodes){
+						for(l in links)
+							nodes.push(links[l]);
+						var result=links.concat(nodes);
+						res.json(nodes);
+					}
+					else
+						res.status(404).send('Id not found');
+				});
+			}
+			else
+				res.status(404).send('Id not found');
+		});
+	};
+
 	/**
 	 * Check if an object is a valid json
 	 * @param {JSON Object} JSON Object containing the keys - values
@@ -216,6 +252,7 @@ module.exports = function(app){
 		return true;
 	}
 
+	app.get('/graph/:id', graph);
 	app.get('/:id', read);
 	app.get('/', read);
 	app.post('/', create);
