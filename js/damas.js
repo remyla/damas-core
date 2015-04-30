@@ -371,7 +371,7 @@
 				}
 			}
 		}
-		req.send("id="+id+"&keys="+keys);
+		req.send("id="+id+"&keys="+JSON.stringify(keys));
 		if(callback === undefined)
 		{
 			return req_callback(req);
@@ -391,7 +391,7 @@
 	}
 
 //Rest version
-	damas.delete_rest = function ( id )
+	damas.delete_rest = function ( id, callback)
 	{
 		function req_callback( req ) {
 			return req.status==200;
