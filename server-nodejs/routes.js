@@ -220,7 +220,6 @@ graph = function(req,res) {
 					else if(nodes){
 						for(l in links)
 							nodes.push(links[l]);
-						var result=links.concat(nodes);
 						res.json(nodes);
 					}
 					else
