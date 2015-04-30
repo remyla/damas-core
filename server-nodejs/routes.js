@@ -4,12 +4,14 @@ module.exports = function(app){
 	bodyParser = require( 'body-parser' ),
 	methodOverride = require( 'method-override' ),
 	ObjectId = mongo.ObjectID;
-	mod = new mongoModel();
+	mod = new mongoModel(),
+	morgan= require('morgan');
 
 	//Middlewares
+-	app.use(morgan('combined'));
 	app.use( bodyParser.urlencoded( { extended : true } ) );
 	app.use( bodyParser.json() );
-	
+
 	app.use(methodOverride( function(req, res)
 	{
 		if ( req.body && typeof req.body === 'object' && '_method' in req.body )
@@ -53,9 +55,9 @@ module.exports = function(app){
 				res.status(409);
 				res.send('create Error, please change your values');
 			}
-			
+
 			//Correct Format - keys
-			else 
+			else
 			{
 				mod.create(keys, function(error, doc)
 				{
@@ -64,12 +66,12 @@ module.exports = function(app){
 						res.status(409);
 						res.send('create Error, please change your values');
 					}
-					else 
+					else
 					{
 						res.status(201);
 						res.send(doc);
 					}
-				});	
+				});
 			}
 		}
 	};
@@ -106,7 +108,7 @@ module.exports = function(app){
 						res.status(409);
 						res.send('Read Error, please change your values');
 					}
-					else 
+					else
 					{
 						res.status(200);
 						res.send(doc);
@@ -135,14 +137,14 @@ module.exports = function(app){
 			res.status(400);
 			res.send('Bad command');
 		}
-		else 
+		else
 		{
 			if(! ObjectId.isValid( id ))
 			{
 				res.status(404);
 				res.send('Id not found');
 			}
-			else 
+			else
 			{
 				mod.update(id, keys, function(error, doc)
 				{
@@ -176,7 +178,7 @@ module.exports = function(app){
 			res.status(400);
 			res.send("Bad command");
 		}
-		else 
+		else
 		{
 			mod.deleteNode(id, function( error, doc )
 			{
