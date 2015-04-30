@@ -216,13 +216,10 @@
 				}
 			}
 		}
-		var result = '';
-		for(key in keys) {
-			result += key + '=' + keys[key] + '&';
-		}
-		result = result.slice(0, result.length - 1);
-		console.log((result));
-		req.send(result);
+		var qs = Object.keys(keys).map(function(key){
+			return encodeURIComponent(key) + '=' + encodeURIComponent(keys[key]);
+		}).join('&');
+		req.send(qs);
 		if(callback === undefined)
 		{
 			return req_callback(req);

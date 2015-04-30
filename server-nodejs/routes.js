@@ -205,7 +205,7 @@ graph = function(req,res) {
 			if(error){
 				res.status(404).send('Id not found');
 			}
-			else if (error==null && links){
+			else if (error===null && links){
 				nodeIds[id]=id;
 				for(l in links){
 					if(links[l].tgt_id!=undefined){

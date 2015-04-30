@@ -288,7 +288,7 @@ module.exports = function Model()
 							else{
 								for(r in results){
 									if(links[results[r]._id]==undefined){
-										if(ids.indexOf(results[r].tgt_id)<0 && (results[r].tgt_id)!=undefined)
+										if((ids.indexOf(results[r].tgt_id)<0 && (results[r].tgt_id)!=undefined)&& newIds.indexOf(results[r].tgt_id)<0)
 											newIds.push(results[r].tgt_id);
 										links[results[r]._id]=results[r];
 									}
