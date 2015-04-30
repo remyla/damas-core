@@ -280,11 +280,11 @@ module.exports = function Model()
 			{
 				database.collection(dataMongo.collection, function(err, collection) {
 					if (err)
-						callback(err);
+						callback(true);
 					else {
 						collection.find({'src_id':{$in:ids}}).toArray(function(err, results) {
 							if (err)
-								callback(err);
+								callback(true);
 							else{
 								for(r in results){
 									if(links[results[r]._id]==undefined){
@@ -294,7 +294,7 @@ module.exports = function Model()
 									}
 								}
 								if(newIds.length<1)
-									callback(null, links);
+									callback(false, links);
 								else
 									self.links_r(newIds, links, callback);
 							}
@@ -317,22 +317,58 @@ module.exports = function Model()
 			{
 				database.collection(dataMongo.collection, function(err, collection) {
 					if (err)
-						callback(err);
+						callback(true);
 					else {
 						for(i in ids){
 							collection.findOne({'_id':new ObjectId(ids[i])},function(err, item) {
 								if (err)
-									callback(err);
+									callback(true);
 								else{
 									array.push(item);
 									if(ids.length == array.length)
-										callback(null,array);
+										callback(false,array);
 									}
 							});
 						}
 					}
 				});
 			}
+		});
+	}
+
+	this.graph= function(id, callback){
+		var ids=[];
+		var self= this;
+		ids.push(id);
+		self.links_r(ids,null ,function(error, links){
+			if(error){
+				callback(true);
+			}
+			else if (links){
+				ids.length=0;
+				ids[id]=id;
+				for(l in links){
+					if(links[l].tgt_id!=undefined){
+						ids[(links[l].tgt_id)]=links[l].tgt_id;
+						ids.length ++;
+						}
+					}
+				self.nodes(ids, function(error, nodes){
+					if(error){
+						callback(true);
+					}
+					else if(nodes){
+						for(l in links)
+							nodes.push(links[l]);
+						var result=links.concat(nodes);
+						callback(false,nodes);
+					}
+					else
+						callback(true);
+				});
+			}
+			else
+				callback(true);
 		});
 	}
 };

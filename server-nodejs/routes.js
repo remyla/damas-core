@@ -196,39 +196,34 @@ module.exports = function(app){
 		}
 	};
 
-graph = function(req,res) {
-		var ids=[];
-		var nodeIds=[];
-		var id= req.params.id;
-		ids.push(id);
-		mod.links_r(ids,null ,function(error, links){
-			if(error){
-				res.status(404).send('Id not found');
-			}
-			else if (error===null && links){
-				nodeIds[id]=id;
-				for(l in links){
-					if(links[l].tgt_id!=undefined){
-						nodeIds[(links[l].tgt_id)]=links[l].tgt_id;
-						nodeIds.length ++;
-						}
-					}
-				mod.nodes(nodeIds, function(error, nodes){
-					if(error){
-						res.status(404).send('Id not found');
-					}
-					else if(nodes){
-						for(l in links)
-							nodes.push(links[l]);
-						res.json(nodes);
-					}
-					else
-						res.status(404).send('Id not found');
-				});
-			}
-			else
-				res.status(404).send('Id not found');
-		});
+	graph = function(req,res) {
+		var id;
+		if( req.params.id )
+		{
+			id = req.params.id;
+		}
+		else if( req.body.id )
+		{
+			id = req.body.id;
+		}
+		console.log(id);
+		if( !id || id=="undefined" )
+		{
+			res.status(400);
+			res.send('Bad command');
+		}
+		else{
+			mod.graph(id, function(error, nodes){
+				if(error){
+					res.status(404).send('Id not found');
+				}
+				else if (nodes){
+					res.json(nodes);
+				}
+				else
+					res.status(404).send('Id not found');
+			});
+		}
 	};
 
 	/**
@@ -254,6 +249,7 @@ graph = function(req,res) {
 	}
 
 	app.get('/graph/:id', graph);
+	app.get('/graph/', graph);
 	app.get('/:id', read);
 	app.get('/', read);
 	app.post('/', create);
