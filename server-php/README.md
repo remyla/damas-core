@@ -1,54 +1,49 @@
-# DAMAS Server - PHP / MySQL
+<img src="http://damas-software.com/bin/damas_logo.png" alt="damas-core"/>
 
-## GNU/Debian packages
-* apache2
-* php5
-* mysql-server
-* php5-mysql
+http://damas-software.org
 
-## Setup damas-core
+# damas-core/server-php
 
-### Get damas-core
+## Installation
 
-clone the damas-core repository using git:
+GNU/Debian packages:
+
+php5 php5-mysql mysql-server apache2
+
+1. retrieve damas-core using git:
 
 	$ git clone https://github.com/remyla/damas-core.git
 
-### MySQL database
+2. in MySQL, create a database:
 
-Create a database:
+	&gt; CREATE DATABASE damasdb;
 
-	> CREATE DATABASE damasdb;
-
-Import the table structure:
+⋅⋅⋅and import the table structure: 
 
 	$ mysql damasdb < damas_init.sql
 
-### Apache web server
-
-Specify the path to damas-core in your Apache configuration file:
+3. in Apache, expose the path to damas-core (either httpd.conf or virtual host)
 
 	Alias /damas/server      "/path/to/damas-core/server-php/"
 
-### Setup Damas
-Rename the file settings_install.php to settings.php in the server directory or copy it tothe /etc/damas directory. Follow the instructions inside the file.
+4. rename settings_install.php to settings.php and edit it to match your configuration
 
-### Customize php.ini
-* Sessions timeout (90 days):
+5. customize Php to match your needs (in php.ini):
+* Increase the duration of sessions to 90 before timeout:
 
-  ; After this number of seconds, stored data will be seen as 'garbage' and
-  ; cleaned up by the garbage collection process.
-  ;session.gc_maxlifetime = 1440
-  session.gc_maxlifetime = 7776000
+        ; After this number of seconds, stored data will be seen as 'garbage' and
+        ; cleaned up by the garbage collection process.
+        ;session.gc_maxlifetime = 1440
+        session.gc_maxlifetime = 7776000
 
-* Post size:
+* Increase the maximum post size:
 
-	; Maximum size of POST data that PHP will accept.
-	;post_max_size = 8M
-	post_max_size = 200M
+        ; Maximum size of POST data that PHP will accept.
+        ;post_max_size = 8M
+        post_max_size = 200M
 
-* File size:
+* Increase the maximum file size allowed:
 
-	; Maximum allowed size for uploaded files.
-	;upload_max_filesize = 2M
-	upload_max_filesize = 200M
+        ; Maximum allowed size for uploaded files.
+        ;upload_max_filesize = 2M
+        upload_max_filesize = 200M
