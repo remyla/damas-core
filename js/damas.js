@@ -200,7 +200,7 @@
 		function req_callback( req ) {
 			if(req.status === 200)
 			{
-				return damas.utils.readJSONElement(req.responseText);
+				return damas.utils.readJSONElement(JSON.parse(req.responseText));
 			}
 			return false;
 		}
@@ -304,9 +304,9 @@
 		}
 		function req_callback( req ) {
 			if( multi )
-				return damas.utils.readJSONElements(req.responseText );
+				return damas.utils.readJSONElements(JSON.parse(req.responseText) );
 			else
-				return damas.utils.readJSONElements(req.responseText )[0];
+				return damas.utils.readJSONElements(JSON.parse(req.responseText) )[0];
 		}
 		var req = new XMLHttpRequest();
 		req.open('GET', this.server + "/model.crud.php?id="+id,callback !== undefined);
