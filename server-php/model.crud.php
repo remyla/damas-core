@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET')
 if ($_SERVER['REQUEST_METHOD'] == 'PUT')
 {
 	damas_service::allowed( "model::update" );
-	if(( !isset( $_PUT['id'] ) || !isset( $_PUT['keys'] ) )||( $_PUT['id']=='' || $_PUT['keys']==''	))
+	if(( !isset( $_PUT['id'] ) || !isset( $_PUT['keys'] ) )||( $_PUT['id']=='' || $_PUT['keys']==''	|| $_PUT['keys'] === "{}"))
 	{
 		header("HTTP/1.1: 400 Bad Request");
 		echo "Bad command";
@@ -104,6 +104,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'DELETE')
 {
 	damas_service::allowed( "model::delete" );
 	if( !isset( $_DELETE['id']) || $_DELETE['id']=='' )
+	{
+		header("HTTP/1.1: 400 Bad Request");
+		echo "Bad command";
+		exit;
+	}
+	if( is_null( $_DELETE['id'] ) )
 	{
 		header("HTTP/1.1: 400 Bad Request");
 		echo "Bad command";
