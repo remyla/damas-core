@@ -57,7 +57,7 @@ module.exports = function(app){
 			//Correct Format - keys
 			else 
 			{
-				mod.create(keys, function(error, doc)
+				mod.create(keys, res, function(error, doc)
 				{
 					if( error )
 					{
@@ -66,7 +66,7 @@ module.exports = function(app){
 					}
 					else 
 					{
-						res.status(201);
+						res.status(200);
 						res.send(doc);
 					}
 				});	
@@ -85,7 +85,7 @@ module.exports = function(app){
 		{
 			id = req.body.id;
 		}
-		if( !id || id=="undefined" )
+		if( !id || id === "undefined" )
 		{
 			res.status(400);
 			res.send('Bad command');
@@ -99,7 +99,7 @@ module.exports = function(app){
 			}
 			else
 			{
-				mod.read( id, function( error, doc )
+				mod.read( id, res, function( error, doc )
 				{
 					if( error )
 					{
@@ -120,42 +120,69 @@ module.exports = function(app){
 	{
 		var id,
 		keys = req.body;
-
+		var err = false;
 		if( req.params.id )
 		{
 			id = req.params.id;
 		}
-		else if( keys.id )
+		else 
 		{
 			id = keys.id;
 			delete keys.id;
 		}
-		if( Object.keys( keys ).length === 0 || id === "undefined" )
+		if( id === "undefined" || !id  || id ==='')
 		{
 			res.status(400);
 			res.send('Bad command');
 		}
-		else 
+		else if(typeof(keys) === "object" || typeof(keys) === "string")
 		{
-			if(! ObjectId.isValid( id ))
+			if(typeof(keys) === "object")
 			{
-				res.status(404);
-				res.send('Id not found');
-			}
-			else 
-			{
-				mod.update(id, keys, function(error, doc)
+				if( Object.keys(keys).length === 0 || !isValidJson( (keys) ))
 				{
-					if( error )
+					err = true;
+				}
+
+			}
+			else if(typeof(keys) === "string")
+			{
+				if( keys === "" || keys === "{}" || keys === "undefined" )
+				{
+					err = true;
+				}
+			}
+			else
+			{
+				err = true;
+			}
+			if(err)
+			{
+				res.status(400);
+				res.send('Bad command');
+			}
+			else
+			{
+				if(! ObjectId.isValid( id ))
+				{
+					res.status(404);
+					res.send('Id not found');
+				}
+				else 
+				{
+					mod.update(id, keys, res, function(error, doc)
 					{
-						res.status(409);
-						res.send('Update Error, please change your values');
-					}
-					else
-					{
-						res.json( doc );
-					}
-				});
+						if( error )
+						{
+							res.status(409);
+							res.send('Update Error, please change your values');
+						}
+						else
+						{
+							res.json( doc );
+						}
+					});
+				}
 			}
 		}
 	};
@@ -171,10 +198,15 @@ module.exports = function(app){
 		{
 			id = req.body.id;
 		}
-		if(! ObjectId.isValid( id ) || !id)
+		if(id === "undefined" || !id  || id ==='' )
 		{
 			res.status(400);
-			res.send("Bad command");
+			res.send('Bad command');
+		}
+		else if(! ObjectId.isValid( id ) )
+		{
+			res.status(409);
+			res.send("Delete Error, please change your values");
 		}
 		else 
 		{
@@ -183,7 +215,7 @@ module.exports = function(app){
 				if( error )
 				{
 					res.status(409);
-					res.send('delete Error, please change your values');
+					res.send('Delete Error, please change your values');
 				}
 				else
 				{
@@ -207,7 +239,7 @@ module.exports = function(app){
 			if( Object.prototype.hasOwnProperty.call( keys,  val ) )
 			{
 				y = keys[val];
-				if(y = '' || y=== null || y==='')
+				if(y === '' || y === null || y ==='{}')
 				{
 					return false;
 				}

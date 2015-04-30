@@ -1,41 +1,24 @@
 {
 	"http" : { "port" : 8090 },
 	"https" : { "port" : 443 },
-	"host" : "localhost",
-	"path" : "/",
+	"host" : "damas-server.com",
+	"path" : "crud",
 	"args" : 
 	{
-		"idNotFoundinDb" : "5527f052a23a84b74a548792",
-		"idFoundInDb" : "5537a42f8c297c5630906522",
-		"idInvalid" :  "5535b3",
-		"idEmpty" : "",
+		"idNotFoundinDb" : 100000001,
+		"idFoundInDb" : 15,
+		"idInvalid" :  "5535b3a",
+		"idInvalidBadFormat" :  {"id": "5535b3" },
+		"idOkDataIncorrect": { "id" : 10, "keys" : "{}" },
+		"idEmpty" : {"id": "" },
 		"string" : "Foo",
 		"jsonEmpty" : {},
-		"dataOk" : 
-		{
-			"node" : 
-			{
-				"type" : "node Test", 
-				"link" : 
-				{
-					"type_link" :"typeTest", 
-					"src_id": 123,
-					"tgt_id": 456 
-				}
-			}
-		},
+		"validKeys" : "{\"type_link\":\"typeTestUpdated Okkkk\"}",
 		"dataUpdated" :
 		{
-			"node" : 
-			{
-				"type" : "node Test UPDATED", 
-				"link" : 
-				{
-					"type_link" :"typeTestUPDATED", 
-					"src_id": 123,
-					"tgt_id": 456 
-				}
-			}
+			"type_linkkk" : "typeTestUpdated", 
+			"src_iddd": 12345,
+			"tgt_iddd": 45678 
 		}
 	},
 	"expects" :
