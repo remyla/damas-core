@@ -58,7 +58,7 @@
 	 */
 	var damas = {};
 	damas.server = '';
-	damas.version = '2.2-beta6';
+	damas.version = '2.3.1';
 	damas.username = false;
 	damas.userclass = false;
 	damas.user_id = false;
@@ -193,6 +193,36 @@
 		}
 	}
 
+	//Rest version
+
+	damas.create_rest = function ( keys, callback )
+	{
+		function req_callback( req ) {
+			if(req.status === 200)
+			{
+				return damas.utils.readJSONElement( JSON.parse(req.responseText));
+			}
+			return false;
+		}
+		var req = new XMLHttpRequest();
+		req.open('POST', this.server + "/model.crud.php",callback !== undefined);
+		req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+		req.onreadystatechange = function(e){
+			if(req.readyState == 4)
+			{
+				if(callback)
+				{
+					callback(req_callback(req));
+				}
+			}
+		}
+		req.send(keys);
+		if(callback === undefined)
+		{
+			return req_callback(req);
+		}
+	}
+
 	/**
 	 * Retrieve one or many nodes specifying index(es)
 	 * @param {Integer} id internal node index(es) to read, comma separated
@@ -246,8 +276,52 @@
 		}
 	}
 
+//Rest version
+	damas.read_rest = function ( id, callback )
+	{
+		var multi = false;
+		if( Array.isArray(id) )
+		{
+			if( id.length === 0 )
+			{
+				return callback([]);
+			}
+			else
+			{
+				id = id.join(',');
+				multi = true;
+			}
+		}
+		if( typeof(id) === 'string' && id.indexOf(',') != -1 )
+		{
+			multi = true;
+		}
+		function req_callback( req ) {
+			if( multi )
+				return damas.utils.readJSONElements( JSON.parse( req.responseText ) );
+			else
+				return damas.utils.readJSONElements( JSON.parse( req.responseText ) )[0];
+		}
+		var req = new XMLHttpRequest();
+		req.open('GET', this.server + "/model.crud.php?id="+id,callback !== undefined);
+		req.onreadystatechange = function(e){
+			if(req.readyState == 4)
+			{
+				if( callback )
+				{
+					callback( req_callback( req ) );
+				}
+			}
+		}
+		req.send();
+		if( callback === undefined )
+		{
+			return req_callback( req );
+		}
+	}
+
 	/**
-	 * Update the keys of a node. The specified keys overwrite existing keys, others are left untouched. A null key value removes the key. 
+	 * Update the keys of a node. The specified keys overwrite existing keys, others are left untouched. A null key value removes the key.
 	 * @param {Integer} id internal node index to update
 	 * @returns {damas.element} Damas element or false on failure
 	 */
@@ -276,6 +350,33 @@
 		//return damas.utils.readJSONElement( JSON.parse( damas.utils.command( { cmd: 'update', id: id, keys: Object.toJSON(keys) } ).text ) );
 	}
 
+//Rest version
+	damas.update_rest = function ( id, keys, callback )
+	{
+		function req_callback( req ) {
+			return damas.utils.readJSONElement( JSON.parse( req.responseText ));
+		}
+		var req = new XMLHttpRequest();
+		req.open('PUT', this.server + "/model.crud.php",callback !== undefined);
+		req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+		req.onreadystatechange = function(e){
+			if(req.readyState == 4)
+			{
+				if(callback)
+				{
+					callback(req_callback(req));
+				}
+			}
+		}
+		req.send("id="+id+"&keys="+Object.toJSON(keys));
+		if(callback === undefined)
+		{
+			return req_callback(req);
+		}
+		//return damas.utils.readJSONElement( JSON.parse( damas.utils.command( { cmd: 'update', id: id, keys: Object.toJSON(keys) } ).text ) );
+	}
+
+
 	/**
 	 * Recursively delete the specified node
 	 * @param {Integer} id Element index to delete
@@ -284,6 +385,16 @@
 	damas.delete = function ( id )
 	{
 		return damas.utils.command( { cmd: 'delete', id: id } ).status === 200;
+	}
+
+//Rest version
+	damas.delete_rest = function ( id )
+	{
+		var req = new XMLHttpRequest();
+		req.open('DELETE', this.server + "/model.crud.php", false);
+		req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+		req.send("id="+id);
+		return req.status===200;
 	}
 
 	/**
@@ -670,6 +781,7 @@
 			}
 		});
 */
+	// THIS IS THE REPLACEMENT FOR PROTOTYPE AJAX:
 		var qs = Object.keys(args).map(function(key){
 			return encodeURIComponent(key) + '=' + encodeURIComponent(args[key]);
 		}).join('&');
