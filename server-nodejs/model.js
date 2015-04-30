@@ -42,7 +42,7 @@ module.exports = function Model()
 	 * @param {function} callback - Function callback to routes.js
 	 */
 
-	this.create = function( keys, callback )
+	this.create = function( keys, res, callback )
 	{
 		this.connection( function( err, database )
 		{
@@ -70,7 +70,7 @@ module.exports = function Model()
 						else
 						{ 
 						//console.log('Success: ' + JSON.stringify(records));
-						self.read( keys._id, callback );
+						self.read( keys._id, res, callback );
 						}
 					});
 				}
@@ -84,9 +84,8 @@ module.exports = function Model()
 	 * @param {Integer} $id of the node
 	 * @param {function} callback - Function callback to routes.js
 	 */
-	this.read = function( id, callback )
+	this.read = function( id, res, callback )
 	{
-	//console.log('ok');
 		this.connection( function(err, database )
 		{
 			if( err )
@@ -111,9 +110,10 @@ module.exports = function Model()
 							}
 							else
 							{
-								if( item == null)
+								if( item === null)
 								{
-									return callback( true )
+									res.status(404);
+									res.send('Id not found');
 								}
 								else
 								{
@@ -134,7 +134,7 @@ module.exports = function Model()
 	 * @param {Array} $keys keys Array of key/value pairs to update (usually comming from json_decode)
 	 * @param {function} callback - Function callback to routes.js
 	 */
-	this.update = function( id, keys, callback )
+	this.update = function( id, keys, res, callback )
 	{
 		var keyToRemove = {},
 		keyToAdd = {},
@@ -180,7 +180,7 @@ module.exports = function Model()
 								}
 								else
 								{
-									self.read( id, callback );
+									self.read( id, res, callback );
 								}
 							});
 						}
@@ -194,7 +194,7 @@ module.exports = function Model()
 								}
 								else
 								{
-									self.read( id, callback );
+									self.read( id, res, callback );
 								}
 							});
 						}
@@ -208,7 +208,7 @@ module.exports = function Model()
 								}
 								else
 								{
-									self.read( id, callback );
+									self.read( id, res, callback );
 								}
 							});
 						}

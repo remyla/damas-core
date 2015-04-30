@@ -56,7 +56,7 @@ describe('Damas-core - Server NodeJs [API]', function() {
 				.set('Accept', 'application/json')
 				.send(dataOk)
 				.expect('Content-Type', /application\/json/)
-				.expect(201)
+				.expect(200)
 				.end(done);
 		});
 	}); 
@@ -72,19 +72,19 @@ describe('Damas-core - Server NodeJs [API]', function() {
 		var validIdJSON    = {"id": "55379f1af6d6bdcd2d799e4b"};
 		var badIdJSON      = {"id": "5535b3"};
 
-		it('should throw an error 409 (id valid but not found in db) - ID through URL', function(done) {
+		it('should throw an error 404 (id valid but not found in db) - ID through URL', function(done) {
 			request
 				.get('/' + notExistId)
 				.set('Accept', 'application/json')
-				.expect(409)
+				.expect(404)
 				.end(done)
 		});
-		it('should throw an error 409 (id valid but not found in db) - ID  through body', function(done) {
+		it('should throw an error 404 (id valid but not found in db) - ID  through body', function(done) {
 			request
 				.get('/')
 				.set('Accept', 'application/json')
 				.send(notExistIdJSON)
-				.expect(409)
+				.expect(404)
 				.end(done)
 		});
 		it('should get a document from db (id exists) - ID through URL', function(done) {
@@ -212,11 +212,11 @@ describe('Damas-core - Server NodeJs [API]', function() {
 		var idEmpty      = "";
 		var idValidButNotInDb = "5527f052a23a84b74a548792";
 
-		it('should throw an error 400 (id - not valid)', function(done) {
+		it('should throw an error 409 (id - not valid)', function(done) {
 			request
 				.delete('/' + invalidId)
 				.set('Accept', 'application/json')
-				.expect(400)
+				.expect(409)
 				.end(done)
 		});
 		it('should throw an error 400 (id empty)', function(done) {
