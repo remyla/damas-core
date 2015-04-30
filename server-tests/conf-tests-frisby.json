@@ -1,42 +1,11 @@
 {
-	"http" : { "port" : 8090 },
-	"https" : { "port" : 443 },
-	"host" : "localhost",
-	"path" : "/",
 	"args" : 
 	{
 		"idNotFoundinDb" : "5527f052a23a84b74a548792",
-		"idFoundInDb" : "5537a42f8c297c5630906522",
-		"idInvalid" :  "5535b3",
-		"idEmpty" : "",
+		"idInvalid" :  "5535b3a",
+		"idEmpty" : {"id": "" },
 		"string" : "Foo",
-		"jsonEmpty" : {},
-		"dataOk" : 
-		{
-			"node" : 
-			{
-				"type" : "node Test", 
-				"link" : 
-				{
-					"type_link" :"typeTest", 
-					"src_id": 123,
-					"tgt_id": 456 
-				}
-			}
-		},
-		"dataUpdated" :
-		{
-			"node" : 
-			{
-				"type" : "node Test UPDATED", 
-				"link" : 
-				{
-					"type_link" :"typeTestUPDATED", 
-					"src_id": 123,
-					"tgt_id": 456 
-				}
-			}
-		}
+		"jsonEmpty" : {}
 	},
 	"expects" :
 	{
