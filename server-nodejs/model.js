@@ -68,7 +68,7 @@ module.exports = function Model()
 							callback( true );
 						}
 						else
-						{ 
+						{
 						//console.log('Success: ' + JSON.stringify(records));
 						self.read( keys._id, callback );
 						}
@@ -264,4 +264,101 @@ module.exports = function Model()
 			}
 		});
 	}; //End deleteNode
-}
+
+	this.links_r=function(ids, links, database, callback){
+		var newIds=[];
+		var self= this;
+		if(links==null)
+			links=[];
+		database.collection(dataMongo.collection, function(err, collection) {
+			if (err)
+				callback(true);
+			else {
+				collection.find({'src_id':{$in:ids}}).toArray(function(err, results) {
+					if (err)
+						callback(true);
+					else{
+						for(r in results){
+							if(links[results[r]._id]==undefined){
+								if(ids.indexOf(results[r].tgt_id)<0 && (results[r].tgt_id)!=undefined)
+									newIds.push(results[r].tgt_id);
+								links[results[r]._id]=results[r];
+							}
+						}
+						if(newIds.length<1)
+							callback(false, links);
+						else
+							self.links_r(newIds, links, database, callback);
+					}
+				});
+			}
+		});
+	};
+
+	this.nodes=function(ids, database, callback){
+		var array=[];
+		database.collection(dataMongo.collection, function(err, collection) {
+			if (err)
+				callback(true);
+			else {
+				for(i in ids){
+					collection.findOne({'_id':new ObjectId(ids[i])},function(err, item) {
+						if (err)
+							callback(true);
+						else{
+							array.push(item);
+							if(ids.length == array.length)
+								callback(false,array);
+							}
+					});
+				}
+			}
+		});
+	}
+
+	this.graph= function(id, callback){
+		var ids=[];
+		var self= this;
+		ids.push(id);
+		this.connection( function(err, database )
+		{
+			if( err )
+			{
+				callback(true);
+			}
+			else
+			{
+				self.links_r(ids,null , database, function(error, links){
+					if(error){
+						callback(true);
+					}
+					else if (links){
+						ids.length=0;
+						ids[id]=id;
+						for(l in links){
+							if(links[l].tgt_id!=undefined){
+								ids[(links[l].tgt_id)]=links[l].tgt_id;
+								ids.length ++;
+								}
+							}
+						self.nodes(ids, database, function(error, nodes){
+							if(error){
+								callback(true);
+							}
+							else if(nodes){
+								for(l in links)
+									nodes.push(links[l]);
+								var result=links.concat(nodes);
+								callback(false,nodes);
+							}
+							else
+								callback(true);
+						});
+					}
+					else
+						callback(true);
+				});
+			}
+		});
+	};
+};

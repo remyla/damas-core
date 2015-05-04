@@ -200,7 +200,7 @@
 		function req_callback( req ) {
 			if(req.status === 200)
 			{
-				return damas.utils.readJSONElement( JSON.parse(req.responseText));
+				return damas.utils.readJSONElement(JSON.parse(req.responseText));
 			}
 			return false;
 		}
@@ -216,7 +216,10 @@
 				}
 			}
 		}
-		req.send(keys);
+		var qs = Object.keys(keys).map(function(key){
+			return encodeURIComponent(key) + '=' + encodeURIComponent(keys[key]);
+		}).join('&');
+		req.send(qs);
 		if(callback === undefined)
 		{
 			return req_callback(req);
@@ -298,9 +301,9 @@
 		}
 		function req_callback( req ) {
 			if( multi )
-				return damas.utils.readJSONElements( JSON.parse( req.responseText ) );
+				return damas.utils.readJSONElements(JSON.parse(req.responseText) );
 			else
-				return damas.utils.readJSONElements( JSON.parse( req.responseText ) )[0];
+				return damas.utils.readJSONElements(JSON.parse(req.responseText) )[0];
 		}
 		var req = new XMLHttpRequest();
 		req.open('GET', this.server + "/model.crud.php?id="+id,callback !== undefined);
@@ -368,7 +371,7 @@
 				}
 			}
 		}
-		req.send("id="+id+"&keys="+Object.toJSON(keys));
+		req.send("id="+id+"&keys="+JSON.stringify(keys));
 		if(callback === undefined)
 		{
 			return req_callback(req);
@@ -388,13 +391,28 @@
 	}
 
 //Rest version
-	damas.delete_rest = function ( id )
+	damas.delete_rest = function ( id, callback)
 	{
+		function req_callback( req ) {
+			return req.status==200;
+		}
 		var req = new XMLHttpRequest();
-		req.open('DELETE', this.server + "/model.crud.php", false);
+		req.open('DELETE', this.server + "/model.crud.php",callback !== undefined);
 		req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+		req.onreadystatechange = function(e){
+			if(req.readyState == 4)
+			{
+				if(callback)
+				{
+					callback(req_callback(req));
+				}
+			}
+		}
 		req.send("id="+id);
-		return req.status===200;
+		if(callback === undefined)
+		{
+			return req_callback(req);
+		}
 	}
 
 	/**
