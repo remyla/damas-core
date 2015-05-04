@@ -4,7 +4,7 @@ express = require('express'),
 app = express(),
 fs = require('fs'),
 conf = require('./conf.json'),
-routes = require('./routes')(app);
+routes = require('./routes')(app, express);
 
 //Shortcut conf json
 var confConn = conf.connection;
