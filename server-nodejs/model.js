@@ -265,6 +265,34 @@ module.exports = function Model()
 		});
 	}; //End deleteNode
 
+	this.search=function(keys, callback){
+		this.connection( function(err, database )
+		{
+			if( err )
+			{
+				console.log(err);
+				//callback(true);
+			}
+			else
+			{
+				database.collection(dataMongo.collection, function(err, collection) {
+					if (err)
+					console.log(err);
+						//callback(true);
+					else {
+						collection.find(keys).toArray(function(err, results) {
+							if (err)
+								callback(true);
+							else{
+								callback(false, results);
+							}
+						});
+					}
+				});
+			}
+		});
+	};
+
 	this.links_r=function(ids, links, database, callback){
 		var newIds=[];
 		var self= this;
