@@ -15,7 +15,7 @@ module.exports = function(app, express){
 	//Static routes
 	for(var route in conf.statics)
 	{
-		app.use( express.static( conf.statics[route] ) );	
+		app.use( express.static( conf.statics[route] ) );
 	}
 
 	app.use(methodOverride( function(req, res)
@@ -232,6 +232,52 @@ module.exports = function(app, express){
 		}
 	};
 
+	search=function(req, res){
+		var q;
+		if( req.params.query )
+		{
+			q = req.params.query;
+		}
+		else if( req.body.query )
+		{
+			q = req.body.query;
+		}
+		var arr = q.split(" ");
+		var temp=[];
+		var result="{\"";
+		var j;
+		for(i in arr){
+			temp=arr[i].split(":");
+			if(temp.length===1)
+				if(i===0)
+					result+=temp[0];
+				else
+					result+=" "+temp[0];
+			else{
+				if(i!==0)
+					result+= "\",\"";
+				result+=temp[0]+"\":\"";
+				for(j=1;j<temp.length-1;j++)
+					result+=temp[j]+":";
+				result+=temp[j];
+			}
+		}
+		result+="\"}";
+		mod.search( JSON.parse(result), function( error, doc )
+		{
+			if( error )
+			{
+				res.status(409);
+				res.send('Read Error, please change your values');
+			}
+			else
+			{
+				res.status(200);
+				res.send(doc);
+			}
+		});
+	}
+
 	/**
 	 * Check if an object is a valid json
 	 * @param {JSON Object} JSON Object containing the keys - values
@@ -254,6 +300,8 @@ module.exports = function(app, express){
 		return true;
 	}
 
+	app.get('/search/:query',search);
+	app.get('/search',search);
 	app.get('/graph/:id', graph);
 	app.get('/graph/', graph);
 	app.get('/:id', read);
