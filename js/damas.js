@@ -799,7 +799,7 @@
 			}
 		});
 */
-		// THIS IS THE REPLACEMENT FOR PROTOTYPE AJAX:
+	// THIS IS THE REPLACEMENT FOR PROTOTYPE AJAX:
 		var qs = Object.keys(args).map(function(key){
 			return encodeURIComponent(key) + '=' + encodeURIComponent(args[key]);
 		}).join('&');
