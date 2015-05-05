@@ -249,16 +249,16 @@ module.exports = function(app, express){
 		for(i in arr){
 			temp=arr[i].split(":");
 			if(temp.length===1)
-				if(i==0)
+				if(i===0)
 					result+=temp[0];
 				else
 					result+=" "+temp[0];
 			else{
-				if(i!=0)
+				if(i!==0)
 					result+= "\",\"";
 				result+=temp[0]+"\":\"";
 				for(j=1;j<temp.length-1;j++)
-				result+=temp[j]+":";
+					result+=temp[j]+":";
 				result+=temp[j];
 			}
 		}
