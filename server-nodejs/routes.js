@@ -15,7 +15,7 @@ module.exports = function(app, express){
 	//Static routes
 	for(var route in conf.statics)
 	{
-		app.use( express.static( conf.statics[route] ) );	
+		app.use( express.static( conf.statics[route] ) );
 	}
 
 	app.use(methodOverride( function(req, res)
@@ -260,7 +260,6 @@ module.exports = function(app, express){
       }
     }
     result+="\"}";
-		console.log(result);
 		mod.search( JSON.parse(result), function( error, doc )
 		{
 			if( error )

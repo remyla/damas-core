@@ -270,15 +270,13 @@ module.exports = function Model()
 		{
 			if( err )
 			{
-				console.log(err);
-				//callback(true);
+				callback(true);
 			}
 			else
 			{
 				database.collection(dataMongo.collection, function(err, collection) {
 					if (err)
-					console.log(err);
-						//callback(true);
+						callback(true);
 					else {
 						collection.find(keys).toArray(function(err, results) {
 							if (err)
