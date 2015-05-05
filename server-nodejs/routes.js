@@ -1,8 +1,9 @@
-module.exports = function(app){
+module.exports = function(app, express){
 	var mongo = require( 'mongodb' ),
 	mongoModel = require( './model.js' ),
 	bodyParser = require( 'body-parser' ),
 	methodOverride = require( 'method-override' ),
+	conf = require( './conf.json' ),
 	ObjectId = mongo.ObjectID;
 	mod = new mongoModel(),
 	morgan= require('morgan');
@@ -11,6 +12,11 @@ module.exports = function(app){
 -	app.use(morgan('combined'));
 	app.use( bodyParser.urlencoded( { extended : true } ) );
 	app.use( bodyParser.json() );
+	//Static routes
+	for(var route in conf.statics)
+	{
+		app.use( express.static( conf.statics[route] ) );	
+	}
 
 	app.use(methodOverride( function(req, res)
 	{
