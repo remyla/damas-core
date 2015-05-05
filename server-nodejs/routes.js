@@ -236,7 +236,7 @@ module.exports = function(app, express){
 		var q;
 		if( req.params.query )
 		{
-			q = req.params.query;
+			q = decodeURIComponent(req.params.query);
 		}
 		else if( req.body.query )
 		{
@@ -254,7 +254,7 @@ module.exports = function(app, express){
 				else
 					result+=" "+temp[0];
 			else{
-				if(i!==0)
+				if(i!=0)
 					result+= "\",\"";
 				result+=temp[0]+"\":\"";
 				for(j=1;j<temp.length-1;j++)
