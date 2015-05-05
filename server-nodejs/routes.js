@@ -243,23 +243,26 @@ module.exports = function(app, express){
 			q = req.body.query;
 		}
 		var arr = q.split(" ");
-    var temp=[];
-    var result="{\"";
+		var temp=[];
+		var result="{\"";
 		var j;
-    for(i in arr){
-      temp=arr[i].split(":");
-      if(temp.length==1)
-         if(i==0) result+=temp[0];
-         else     result+=" "+temp[0];
-      else{
-         if(i!=0) result+= "\",\"";
-      result+=temp[0]+"\":\"";
-      for(j=1;j<temp.length-1;j++)
-         result+=temp[j]+":";
-      result+=temp[j];
-      }
-    }
-    result+="\"}";
+		for(i in arr){
+			temp=arr[i].split(":");
+			if(temp.length===1)
+				if(i==0)
+					result+=temp[0];
+				else
+					result+=" "+temp[0];
+			else{
+				if(i!=0)
+					result+= "\",\"";
+				result+=temp[0]+"\":\"";
+				for(j=1;j<temp.length-1;j++)
+				result+=temp[j]+":";
+				result+=temp[j];
+			}
+		}
+		result+="\"}";
 		mod.search( JSON.parse(result), function( error, doc )
 		{
 			if( error )
