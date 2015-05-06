@@ -212,7 +212,6 @@ module.exports = function(app, express){
 		{
 			id = req.body.id;
 		}
-		console.log(id);
 		if( !id || id=="undefined" )
 		{
 			res.status(400);
@@ -243,27 +242,44 @@ module.exports = function(app, express){
 			q = req.body.query;
 		}
 		var arr = q.split(" ");
-		var temp=[];
-		var result="{\"";
+		var temp;
+		var result={};
 		var j;
+		var tempField;
 		for(i in arr){
 			temp=arr[i].split(":");
-			if(temp.length===1)
-				if(i===0)
-					result+=temp[0];
-				else
-					result+=" "+temp[0];
+			if(temp[0]===''){}
+			else if((temp.length===1)&&(temp[0].indexOf('<=')>0)){
+				temp=temp[0].split('<=');
+				result[temp[0]]={$lte:temp[1]};
+			}
+			else if((temp.length===1)&&(temp[0].indexOf('<')>0)){
+				temp=temp[0].split('<');
+				result[temp[0]]={$lt:temp[1]};
+			}
+			else if((temp.length===1)&&(temp[0].indexOf('>=')>0)){
+				temp=temp[0].split('>=');
+				result[temp[0]]={$gte:temp[1]};
+			}
+			else if((temp.length===1)&&(temp[0].indexOf('>')>0)){
+				temp=temp[0].split('>');
+				result[temp[0]]={$gt:temp[1]};
+			}
+			else if((temp.length===1)&&i==0){}
+			else if((temp.length===1)&&(i>0)&result[tempField]!='')
+				result[tempField]+= " "+temp[0];
+			else if((temp.length===1)&&(i>0)&result[tempField]==='')
+				result[tempField]+=temp[0];
 			else{
-				if(i!=0)
-					result+= "\",\"";
-				result+=temp[0]+"\":\"";
+				tempField=temp[0];
+				result[tempField]="";
 				for(j=1;j<temp.length-1;j++)
-					result+=temp[j]+":";
-				result+=temp[j];
+					result[tempField]+=temp[j]+":";
+				if(temp[j]!='')
+					result[tempField]+=temp[j];
 			}
 		}
-		result+="\"}";
-		mod.search( JSON.parse(result), function( error, doc )
+		mod.search( result, function( error, doc )
 		{
 			if( error )
 			{
