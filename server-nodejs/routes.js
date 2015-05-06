@@ -161,6 +161,7 @@ module.exports = function(app, express){
 					}
 					else
 					{
+						res.status(200);
 						res.json( doc );
 					}
 				});
