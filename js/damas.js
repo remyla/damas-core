@@ -198,14 +198,15 @@
 	damas.create_rest = function ( keys, callback )
 	{
 		function req_callback( req ) {
-			if(req.status === 200)
+			if(req.status === 201)
 			{
-				return damas.utils.readJSONElement(JSON.parse(req.responseText));
+				//return damas.utils.readJSONElement(JSON.parse(req.responseText));
+				return JSON.parse(req.responseText);
 			}
 			return false;
 		}
 		var req = new XMLHttpRequest();
-		req.open('POST', this.server + "/model.crud.php",callback !== undefined);
+		req.open('POST', this.server, callback !== undefined);
 		req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 		req.onreadystatechange = function(e){
 			if(req.readyState == 4)
@@ -440,6 +441,59 @@
 			return req_callback( req );
 		}
 	}
+
+
+	damas.search_rest = function ( query, callback )
+	{
+		var req = new XMLHttpRequest();
+		req.open('GET', this.server + 'search/' + encodeURIComponent(query), callback !== undefined);
+		req.onreadystatechange = function(e){
+			if(req.readyState == 4)
+			{
+				if(req.status == 200)
+				{
+					//callback( { 'status': req.status, text: req.responseText } );
+					callback(JSON.parse(req.responseText));
+				}
+			}
+		}
+		req.send();
+	}
+
+	damas.graph_rest = function ( ids, callback )
+	{
+		var req = new XMLHttpRequest();
+		req.open('GET', this.server + 'graph/' + encodeURIComponent(ids), callback !== undefined);
+		req.onreadystatechange = function(e){
+			if(req.readyState == 4)
+			{
+				if(req.status == 200)
+				{
+					//callback( { 'status': req.status, text: req.responseText } );
+					callback(JSON.parse(req.responseText));
+				}
+			}
+		}
+		req.send();
+	}
+
+	damas.get_rest = function ( query, callback )
+	{
+		var req = new XMLHttpRequest();
+		req.open('GET', this.server + encodeURIComponent(query), callback !== undefined);
+		req.onreadystatechange = function(e){
+			if(req.readyState == 4)
+			{
+				if(req.status == 200)
+				{
+					callback(JSON.parse(req.responseText));
+				}
+			}
+		}
+		req.send();
+	}
+
+
 
 	/**
 	 * OK
