@@ -241,6 +241,7 @@ module.exports = function(app, express){
 		{
 			q = req.body.query;
 		}
+		q= q.replace(/\s+/g,' ').trim();
 		var arr = q.split(" ");
 		var temp;
 		var result={};
