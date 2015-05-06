@@ -231,47 +231,43 @@ module.exports = function(app, express){
 			var j;
 			var tempField;
 			for(i in arr){
-				temp=arr[i].split(":");
-				if(temp[0]===''){
+				if(arr[i].indexOf('<=')>0){
+					temp=arr[i].split('<=');
+					result[temp[0]]={$lte:temp[1]};
 					continue;
 				}
-				if(temp.length===1){
-					if(temp[0].indexOf('<=')>0){
-						temp=temp[0].split('<=');
-						result[temp[0]]={$lte:temp[1]};
-						continue;
-					}
-					if(temp[0].indexOf('<')>0){
-						temp=temp[0].split('<');
-						result[temp[0]]={$lt:temp[1]};
-						continue;
-					}
-					if(temp[0].indexOf('>=')>0){
-						temp=temp[0].split('>=');
-						result[temp[0]]={$gte:temp[1]};
-						continue;
-					}
-					if(temp[0].indexOf('>')>0){
-						temp=temp[0].split('>');
-						result[temp[0]]={$gt:temp[1]};
-						continue;
-					}
-					if(i==0){
-						continue;
-					}
-					if(result[tempField]!='')
-						result[tempField]+= " "+temp[0];
-					else
-						result[tempField]+=temp[0];
+				if(arr[i].indexOf('<')>0){
+					temp=arr[i].split('<');
+					result[temp[0]]={$lt:temp[1]};
+					continue;
 				}
-				else{
+				if(arr[i].indexOf('>=')>0){
+					temp=arr[i].split('>=');
+					result[temp[0]]={$gte:temp[1]};
+					continue;
+				}
+				if(arr[i].indexOf('>')>0){
+					temp=arr[i].split('>');
+					result[temp[0]]={$gt:temp[1]};
+					continue;
+				}
+				if(arr[i].indexOf(':')>0){
+					temp=arr[i].split(':');
 					tempField=temp[0];
 					result[tempField]="";
 					for(j=1;j<temp.length-1;j++)
 						result[tempField]+=temp[j]+":";
 					if(temp[j]!='')
 						result[tempField]+=temp[j];
+					continue;
 				}
+				if(i==0){
+					continue;
+				}
+				if(result[tempField]!='')
+					result[tempField]+= " "+arr[i];
+				else
+					result[tempField]+=arr[i];
 			}
 			mod.search( result, function( error, doc )
 			{
