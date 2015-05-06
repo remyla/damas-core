@@ -278,7 +278,7 @@ module.exports = function Model()
 					if (err)
 						callback(true);
 					else {
-						collection.find(keys).toArray(function(err, results) {
+						collection.find(keys,{"_id":1}).toArray(function(err, results) {
 							if (err)
 								callback(true);
 							else{

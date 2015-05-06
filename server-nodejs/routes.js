@@ -85,14 +85,7 @@ module.exports = function(app, express){
 	read = function( req,res )
 	{
 		var id;
-		if( req.params.id )
-		{
-			id = req.params.id;
-		}
-		else if( req.body.id )
-		{
-			id = req.body.id;
-		}
+		id = req.params.id || req.body.id;
 		if( !id || id=="undefined" )
 		{
 			res.status(400);
@@ -172,14 +165,7 @@ module.exports = function(app, express){
 	deleteNode = function(req, res)
 	{
 		var id;
-		if( req.params.id )
-		{
-			id = req.params.id;
-		}
-		else if( req.body.id )
-		{
-			id = req.body.id;
-		}
+		id = req.params.id || req.body.id;
 		if(! ObjectId.isValid( id ) || !id)
 		{
 			res.status(400);
@@ -205,15 +191,7 @@ module.exports = function(app, express){
 
 	graph = function(req,res) {
 		var id;
-		if( req.params.id )
-		{
-			id = req.params.id;
-		}
-		else if( req.body.id )
-		{
-			id = req.body.id;
-		}
-		console.log(id);
+		id = req.params.id || req.body.id;
 		if( !id || id=="undefined" )
 		{
 			res.status(400);
@@ -235,48 +213,77 @@ module.exports = function(app, express){
 
 	search=function(req, res){
 		var q;
-		if( req.params.query )
+		var q = req.params.query || req.body.query;
+		if(!q || q=="undefined")
 		{
-			q = decodeURIComponent(req.params.query);
+			res.status(400);
+			res.send('Bad command');
 		}
-		else if( req.body.query )
-		{
-			q = req.body.query;
-		}
-		var arr = q.split(" ");
-		var temp=[];
-		var result="{\"";
-		var j;
-		for(i in arr){
-			temp=arr[i].split(":");
-			if(temp.length===1)
-				if(i===0)
-					result+=temp[0];
+		else{
+			q= q.replace(/\s+/g,' ').trim();
+			q= q.replace('< ','<');
+			q= q.replace('<= ','<=');
+			q= q.replace('>= ','>=');
+			q= q.replace('> ','>');
+			q= q.replace(': ',':');
+			var arr = q.split(" ");
+			var temp;
+			var result={};
+			var j;
+			var tempField;
+			for(i in arr){
+				if(arr[i].indexOf('<=')>0){
+					temp=arr[i].split('<=');
+					result[temp[0]]={$lte:temp[1]};
+					continue;
+				}
+				if(arr[i].indexOf('<')>0){
+					temp=arr[i].split('<');
+					result[temp[0]]={$lt:temp[1]};
+					continue;
+				}
+				if(arr[i].indexOf('>=')>0){
+					temp=arr[i].split('>=');
+					result[temp[0]]={$gte:temp[1]};
+					continue;
+				}
+				if(arr[i].indexOf('>')>0){
+					temp=arr[i].split('>');
+					result[temp[0]]={$gt:temp[1]};
+					continue;
+				}
+				if(arr[i].indexOf(':')>0){
+					temp=arr[i].split(':');
+					tempField=temp[0];
+					result[tempField]="";
+					for(j=1;j<temp.length-1;j++)
+						result[tempField]+=temp[j]+":";
+					if(temp[j]!='')
+						result[tempField]+=temp[j];
+					continue;
+				}
+				if(i==0){
+					continue;
+				}
+				if(result[tempField]!='')
+					result[tempField]+= " "+arr[i];
 				else
-					result+=" "+temp[0];
-			else{
-				if(i!=0)
-					result+= "\",\"";
-				result+=temp[0]+"\":\"";
-				for(j=1;j<temp.length-1;j++)
-					result+=temp[j]+":";
-				result+=temp[j];
+					result[tempField]+=arr[i];
 			}
+			mod.search( result, function( error, doc )
+			{
+				if( error )
+				{
+					res.status(409);
+					res.send('Read Error, please change your values');
+				}
+				else
+				{
+					res.status(200);
+					res.send(doc);
+				}
+			});
 		}
-		result+="\"}";
-		mod.search( JSON.parse(result), function( error, doc )
-		{
-			if( error )
-			{
-				res.status(409);
-				res.send('Read Error, please change your values');
-			}
-			else
-			{
-				res.status(200);
-				res.send(doc);
-			}
-		});
 	}
 
 	/**
