@@ -85,14 +85,7 @@ module.exports = function(app, express){
 	read = function( req,res )
 	{
 		var id;
-		if( req.params.id )
-		{
-			id = req.params.id;
-		}
-		else if( req.body.id )
-		{
-			id = req.body.id;
-		}
+		id = req.params.id || req.body.id;
 		if( !id || id=="undefined" )
 		{
 			res.status(400);
@@ -171,14 +164,7 @@ module.exports = function(app, express){
 	deleteNode = function(req, res)
 	{
 		var id;
-		if( req.params.id )
-		{
-			id = req.params.id;
-		}
-		else if( req.body.id )
-		{
-			id = req.body.id;
-		}
+		id = req.params.id || req.body.id;
 		if(! ObjectId.isValid( id ) || !id)
 		{
 			res.status(400);
@@ -204,14 +190,7 @@ module.exports = function(app, express){
 
 	graph = function(req,res) {
 		var id;
-		if( req.params.id )
-		{
-			id = req.params.id;
-		}
-		else if( req.body.id )
-		{
-			id = req.body.id;
-		}
+		id = req.params.id || req.body.id;
 		if( !id || id=="undefined" )
 		{
 			res.status(400);
@@ -233,7 +212,7 @@ module.exports = function(app, express){
 
 	search=function(req, res){
 		var q;
-		var q = req.params.query | req.body.query;
+		var q = req.params.query || req.body.query;
 		if(!q || q=="undefined")
 		{
 			res.status(400);
