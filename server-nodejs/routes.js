@@ -233,66 +233,81 @@ module.exports = function(app, express){
 
 	search=function(req, res){
 		var q;
-		if( req.params.query )
+		var q = req.params.query | req.body.query;
+		if(!q || q=="undefined")
 		{
-			q = req.params.query;
+			res.status(400);
+			res.send('Bad command');
 		}
-		else if( req.body.query )
-		{
-			q = req.body.query;
-		}
-		q= q.replace(/\s+/g,' ').trim();
-		var arr = q.split(" ");
-		var temp;
-		var result={};
-		var j;
-		var tempField;
-		for(i in arr){
-			temp=arr[i].split(":");
-			if(temp[0]===''){}
-			else if((temp.length===1)&&(temp[0].indexOf('<=')>0)){
-				temp=temp[0].split('<=');
-				result[temp[0]]={$lte:temp[1]};
+		else{
+			q= q.replace(/\s+/g,' ').trim();
+			q= q.replace('< ','<');
+			q= q.replace('<= ','<=');
+			q= q.replace('>= ','>=');
+			q= q.replace('> ','>');
+			q= q.replace(': ',':');
+			var arr = q.split(" ");
+			var temp;
+			var result={};
+			var j;
+			var tempField;
+			for(i in arr){
+				temp=arr[i].split(":");
+				if(temp[0]===''){
+					continue;
+				}
+				if(temp.length===1){
+					if(temp[0].indexOf('<=')>0){
+						temp=temp[0].split('<=');
+						result[temp[0]]={$lte:temp[1]};
+						continue;
+					}
+					if(temp[0].indexOf('<')>0){
+						temp=temp[0].split('<');
+						result[temp[0]]={$lt:temp[1]};
+						continue;
+					}
+					if(temp[0].indexOf('>=')>0){
+						temp=temp[0].split('>=');
+						result[temp[0]]={$gte:temp[1]};
+						continue;
+					}
+					if(temp[0].indexOf('>')>0){
+						temp=temp[0].split('>');
+						result[temp[0]]={$gt:temp[1]};
+						continue;
+					}
+					if(i==0){
+						continue;
+					}
+					if(result[tempField]!='')
+						result[tempField]+= " "+temp[0];
+					else
+						result[tempField]+=temp[0];
+				}
+				else{
+					tempField=temp[0];
+					result[tempField]="";
+					for(j=1;j<temp.length-1;j++)
+						result[tempField]+=temp[j]+":";
+					if(temp[j]!='')
+						result[tempField]+=temp[j];
+				}
 			}
-			else if((temp.length===1)&&(temp[0].indexOf('<')>0)){
-				temp=temp[0].split('<');
-				result[temp[0]]={$lt:temp[1]};
-			}
-			else if((temp.length===1)&&(temp[0].indexOf('>=')>0)){
-				temp=temp[0].split('>=');
-				result[temp[0]]={$gte:temp[1]};
-			}
-			else if((temp.length===1)&&(temp[0].indexOf('>')>0)){
-				temp=temp[0].split('>');
-				result[temp[0]]={$gt:temp[1]};
-			}
-			else if((temp.length===1)&&i==0){}
-			else if((temp.length===1)&&(i>0)&result[tempField]!='')
-				result[tempField]+= " "+temp[0];
-			else if((temp.length===1)&&(i>0)&result[tempField]==='')
-				result[tempField]+=temp[0];
-			else{
-				tempField=temp[0];
-				result[tempField]="";
-				for(j=1;j<temp.length-1;j++)
-					result[tempField]+=temp[j]+":";
-				if(temp[j]!='')
-					result[tempField]+=temp[j];
-			}
-		}
-		mod.search( result, function( error, doc )
-		{
-			if( error )
+			mod.search( result, function( error, doc )
 			{
-				res.status(409);
-				res.send('Read Error, please change your values');
-			}
-			else
-			{
-				res.status(200);
-				res.send(doc);
-			}
-		});
+				if( error )
+				{
+					res.status(409);
+					res.send('Read Error, please change your values');
+				}
+				else
+				{
+					res.status(200);
+					res.send(doc);
+				}
+			});
+		}
 	}
 
 	/**
