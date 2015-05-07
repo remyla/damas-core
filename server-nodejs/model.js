@@ -282,7 +282,10 @@ module.exports = function Model()
 							if (err)
 								callback(true);
 							else{
-								callback(false, results);
+								var ids=[];
+								for(r in results)
+									ids.push(results[r]._id);
+								callback(false, ids);
 							}
 						});
 					}
