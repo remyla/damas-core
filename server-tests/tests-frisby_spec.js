@@ -29,7 +29,7 @@ jsonEmpty = conf.args.jsonEmpty,
 dataOk = conf.args.dataOk,
 dataInvalid = conf.args.dataInvalid,
 dataUpdated = conf.args.dataUpdated,
-json = conf.expects.contentType.json;
+tjson = conf.expects.contentType.json;
 //END: ----------------VARIABLES--------------
 
 
