@@ -363,11 +363,11 @@ module.exports = function Model()
 					}
 					else if (links){
 						ids.length=0;
-						ids[id]=id;
+						ids.push(id);
 						for(l in links){
 							if(links[l].tgt_id!=undefined){
-								ids[(links[l].tgt_id)]=links[l].tgt_id;
-								ids.length ++;
+								if(ids.indexOf(links[l].tgt_id)<0)
+									ids.push(links[l].tgt_id);
 								}
 							}
 						self.nodes(ids, database, function(error, nodes){
