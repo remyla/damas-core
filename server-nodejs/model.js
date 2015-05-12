@@ -16,9 +16,9 @@ module.exports = function Model()
 	{
 		//console.log(this);
 		//Check if there is an active connection to db
-		if(this.conn)
+		if(conn)
 		{
-			callback( false, this.conn );
+			callback( false, conn );
 			return;
 		}
 		server = new Server( dataMongo.host, dataMongo.port, dataMongo.options ),
@@ -30,7 +30,7 @@ module.exports = function Model()
 				return callback( true );
 			}
 			console.log('connected');
-			this.conn = databaseConnection;
+			conn = databaseConnection;
 			callback( false, databaseConnection );
 		});
 	}
