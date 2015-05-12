@@ -480,17 +480,19 @@
 	damas.get_rest = function ( query, callback )
 	{
 		var req = new XMLHttpRequest();
-		req.open('GET', this.server + encodeURIComponent(query), callback !== undefined);
+		req.open('GET', this.server + query, callback !== undefined);
 		req.onreadystatechange = function(e){
 			if(req.readyState == 4)
 			{
 				if(req.status == 200)
 				{
-					callback(JSON.parse(req.responseText));
+					if(callback)
+						callback(JSON.parse(req.responseText));
 				}
 			}
 		}
 		req.send();
+		return req.responseText;
 	}
 
 
@@ -962,6 +964,27 @@
 			if( m1.keys.get( 'time' ) > m2.keys.get( 'time' ) ) return -1;
 			return 0;
 		});
+	}
+
+	damas.utils.getWorkdirs = function(){
+		var workdirs=JSON.parse(localStorage["workdirs"]);
+		return workdirs;
+	}
+
+	damas.utils.removeWorkdirs = function(wd){
+		var workdirs=JSON.parse(localStorage["workdirs"]);
+		var index=workdirs.indexOf(wd);
+		if(index>-1)
+			workdirs.splice(index,1);
+		localStorage["workdirs"]=JSON.stringify(workdirs);
+		console.log(localStorage["workdirs"]);
+	}
+
+	damas.utils.addWorkdirs = function(wd){
+		var workdirs=JSON.parse(localStorage["workdirs"]);
+		workdirs.push(wd);
+		localStorage["workdirs"]=JSON.stringify(workdirs);
+		console.log(localStorage["workdirs"]);
 	}
 
 	//
