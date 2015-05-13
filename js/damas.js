@@ -966,33 +966,6 @@
 		});
 	}
 
-	damas.utils.getWorkdirs = function(){
-		var workdirs=localStorage["workdirs"];
-		return workdirs;
-	}
-
-	damas.utils.removeWorkdirs = function(wd){
-		var workdirs=JSON.parse(localStorage["workdirs"]);
-		var index=workdirs.indexOf(wd);
-		if(index>-1)
-			workdirs.splice(index,1);
-		localStorage["workdirs"]=JSON.stringify(workdirs);
-		console.log(localStorage["workdirs"]);
-	}
-
-	damas.utils.addWorkdirs = function(wd){
-		var workdirs=JSON.parse(localStorage["workdirs"]);
-		workdirs.push(wd);
-		localStorage["workdirs"]=JSON.stringify(workdirs);
-		console.log(localStorage["workdirs"]);
-	}
-	damas.utils.loadConfJSON=function() {
-		var xobj = new XMLHttpRequest();
-				xobj.overrideMimeType("application/json");
-		xobj.open('GET', '/conf.json', false); // Replace 'my_data' with the path to your file
-		xobj.send(null);
-		return xobj.responseText;
- }
 	//
 	//
 	//

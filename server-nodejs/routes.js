@@ -286,10 +286,6 @@ module.exports = function(app, express){
 		}
 	}
 
-	getWorkdirs= function(req,res){
-		res.send(conf.workdirs);
-	}
-
 	/**
 	 * Check if an object is a valid json
 	 * @param {JSON Object} JSON Object containing the keys - values
@@ -316,7 +312,6 @@ module.exports = function(app, express){
 	app.get('/search',search);
 	app.get('/graph/:id', graph);
 	app.get('/graph/', graph);
-	app.get('/workdirs/', getWorkdirs);
 	app.get('/:id', read);
 	app.get('/', read);
 	app.post('/', create);
