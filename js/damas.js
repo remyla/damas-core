@@ -967,7 +967,7 @@
 	}
 
 	damas.utils.getWorkdirs = function(){
-		var workdirs=JSON.parse(localStorage["workdirs"]);
+		var workdirs=localStorage["workdirs"];
 		return workdirs;
 	}
 
@@ -986,7 +986,13 @@
 		localStorage["workdirs"]=JSON.stringify(workdirs);
 		console.log(localStorage["workdirs"]);
 	}
-
+	damas.utils.loadConfJSON=function() {
+    var xobj = new XMLHttpRequest();
+        xobj.overrideMimeType("application/json");
+    xobj.open('GET', '/conf.json', false); // Replace 'my_data' with the path to your file
+    xobj.send(null);
+		return xobj.responseText;
+ }
 	//
 	//
 	//

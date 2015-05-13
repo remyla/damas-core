@@ -18,9 +18,5 @@
 	"statics" :
 	[
 		"static", "/home/damas/files/"
-	],
-	"workdirs" :
-	[
-		"/E:/stage/damas2/damas-flow/scripts", "flex"
 	]
 }
