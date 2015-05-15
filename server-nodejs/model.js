@@ -44,6 +44,10 @@ module.exports = function Model()
 
 	this.create = function( keys, callback )
 	{
+		if(keys.tgt_id!= undefined){
+			keys.tgt_id=new ObjectId(keys.tgt_id);
+			keys.src_id=new ObjectId(keys.src_id);
+		}
 		this.connection( function( err, database )
 		{
 			if( err )
@@ -348,6 +352,8 @@ module.exports = function Model()
 	this.graph= function(id, callback){
 		var ids=[];
 		var self= this;
+		if(typeof(id)==="string")
+			id=new ObjectId(id);
 		ids.push(id);
 		this.connection( function(err, database )
 		{
