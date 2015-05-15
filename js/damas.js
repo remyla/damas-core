@@ -486,13 +486,11 @@
 			{
 				if(req.status == 200)
 				{
-					if(callback)
-						callback(JSON.parse(req.responseText));
+					callback(JSON.parse(req.responseText));
 				}
 			}
 		}
 		req.send();
-		return req.responseText;
 	}
 
 
