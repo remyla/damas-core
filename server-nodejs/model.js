@@ -348,6 +348,9 @@ module.exports = function Model()
 	this.graph= function(id, callback){
 		var ids=[];
 		var self= this;
+		if (typeof(id) === "string"){
+			id = new ObjectId(id);
+		}
 		ids.push(id);
 		this.connection( function(err, database )
 		{
