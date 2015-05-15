@@ -6,12 +6,15 @@ module.exports = function(app, express){
 	conf = require( './conf.json' ),
 	ObjectId = mongo.ObjectID;
 	mod = new mongoModel(),
+
+	mod.connection( function(){});
 	morgan= require('morgan');
 
 	//Middlewares
--	app.use(morgan('combined'));
-	app.use( bodyParser.urlencoded( { extended : true } ) );
-	app.use( bodyParser.json() );
+	app.use(morgan('combined'));
+	app.use( bodyParser.json({limit: '50mb'}));
+	app.use( bodyParser.urlencoded( { limit: '50mb', extended : true } ) );
+	//app.use( bodyParser.urlencoded({limit: '50mb', extended: true}));
 	//Static routes
 	for(var route in conf.statics)
 	{
@@ -308,15 +311,86 @@ module.exports = function(app, express){
 		return true;
 	}
 
-	app.get('/search/:query',search);
-	app.get('/search',search);
-	app.get('/graph/:id', graph);
-	app.get('/graph/', graph);
-	app.get('/:id', read);
-	app.get('/', read);
+
+	/**
+	 * Import a JSON graph commit from our current Php Server
+	 *
+	 */
+	importJSON = function( req, res )
+	{
+		var json = JSON.parse(req.body.text);
+		json.nodes.forEach( function(node, i, nodes){
+			var keys = node.keys;
+			keys.mysqlid = node.id;
+			mod.search({mysqlid:keys.mysqlid}, function(err, res){
+				if(err)
+				{
+					console.log('ERROR');
+					return;
+				}
+				if(res.length === 0)
+				{
+					mod.create( keys, function(err, n){
+						if(err) console.log('ERROR create')
+					});
+				}
+				else
+				{
+					console.log('found mysqlid:'+keys.mysqlid);
+				}
+				if (i===nodes.length -1){  // we finished inserting nodes
+					json.links.forEach( function(link){
+						console.log( link );
+						mod.search({mysqlid:link.src_id.toString()}, function(err, res1){
+							if (!err){
+								mod.search({mysqlid:link.tgt_id.toString()}, function(err, res2){
+									if (!err)
+									{
+										mod.create({src_id: res1[0], tgt_id: res2[0]}, function(){});
+									}
+									else
+									{
+										console.log('LINK ERR');
+									}
+								});
+							}
+							else
+							{
+								console.log('LINK ERR');
+							}
+						});
+					});
+
+				}
+			})
+		}, json);
+		res.status(200);
+		res.send();
+	};
+
+	//
+	// CRUDS operations
+	//
 	app.post('/', create);
+	app.get('/:id', read);
 	app.put('/:id', update);
-	app.put('/', update);
 	app.delete('/:id', deleteNode);
+	app.get('/search/:query',search);
+
+	//
+	// Extra operations
+	//
+	app.get('/graph/:id', graph);
+	app.post('/import', importJSON);
+
+	//
+	// Alternative Operations ()
+	//
+	app.get('/search',search);
+	app.get('/graph/', graph);
+	app.get('/', read);
+	app.put('/', update);
 	app.delete('/', deleteNode);
+
+
 }
