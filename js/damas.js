@@ -481,6 +481,7 @@
 	{
 		var req = new XMLHttpRequest();
 		req.open('GET', this.server + query, callback !== undefined);
+		//req.open('GET', this.server + encodeURIComponent(query), callback !== undefined);
 		req.onreadystatechange = function(e){
 			if(req.readyState == 4)
 			{

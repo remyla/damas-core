@@ -65,6 +65,12 @@ module.exports = function Model()
 				}
 				else
 				{
+					if (keys.tgt_id != undefined){
+						keys.tgt_id = new ObjectId(keys.tgt_id);
+					}
+					if (keys.src_id != undefined){
+						keys.src_id = new ObjectId(keys.src_id);
+					}
 					collection.insert( keys, {safe:true}, function( err, records )
 					{
 						if( err )
@@ -352,8 +358,9 @@ module.exports = function Model()
 	this.graph= function(id, callback){
 		var ids=[];
 		var self= this;
-		if(typeof(id)==="string")
-			id=new ObjectId(id);
+		if (typeof(id) === "string"){
+			id = new ObjectId(id);
+		}
 		ids.push(id);
 		this.connection( function(err, database )
 		{
