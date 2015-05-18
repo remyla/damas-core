@@ -61,6 +61,12 @@ module.exports = function Model()
 				}
 				else
 				{
+					if (keys.tgt_id != undefined){
+						keys.tgt_id = new ObjectId(keys.tgt_id);
+					}
+					if (keys.src_id != undefined){
+						keys.src_id = new ObjectId(keys.src_id);
+					}
 					collection.insert( keys, {safe:true}, function( err, records )
 					{
 						if( err )
