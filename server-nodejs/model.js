@@ -44,10 +44,6 @@ module.exports = function Model()
 
 	this.create = function( keys, callback )
 	{
-		if(keys.tgt_id!= undefined){
-			keys.tgt_id=new ObjectId(keys.tgt_id);
-			keys.src_id=new ObjectId(keys.src_id);
-		}
 		this.connection( function( err, database )
 		{
 			if( err )
