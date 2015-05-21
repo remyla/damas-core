@@ -305,7 +305,7 @@ module.exports = function Model()
 	};
 
 	this.getSubdirs=function(path, callback){
-		var pattern= "^"+path;
+		var pattern= "^"+path+"/";
 		this.connection( function(err, database )
 		{
 			if( err )
