@@ -289,6 +289,40 @@ module.exports = function(app, express){
 		}
 	}
 
+	getSubdirs=function(req,res){
+		var path=req.params.path || "";
+		if(path)
+			path="/"+path;
+		mod.getSubdirs(path, function( error, result )
+		{
+			if( error )
+			{
+				res.status(409);
+				res.send('Read Error, please change your values');
+			}
+			else
+			{
+				var input=result;
+				var output = {};
+				var temp= [];
+				for (var i = 0; i < input.length; i++) {
+					input[i]=input[i].replace(path,"");
+					if(input[i].indexOf("/")==0)
+						var chain = "/"+(input[i].split("/",2))[1];
+					else
+						var chain = (input[i].split("/",1))[0];
+
+					//if(temp.indexOf(chain)<0){
+						output[path+chain]=chain;
+					//	temp.push(chain);
+					//	}
+				}
+				res.status(200);
+				res.send(output);
+			}
+		});
+	}
+
 	/**
 	 * Check if an object is a valid json
 	 * @param {JSON Object} JSON Object containing the keys - values
@@ -369,19 +403,12 @@ module.exports = function(app, express){
 	};
 
 	//
-	// CRUDS operations
-	//
-	app.post('/', create);
-	app.get('/:id', read);
-	app.put('/:id', update);
-	app.delete('/:id', deleteNode);
-	app.get('/search/:query',search);
-
-	//
 	// Extra operations
 	//
 	app.get('/graph/:id', graph);
 	app.post('/import', importJSON);
+	app.get('/subdirs/:path',getSubdirs);
+	app.get('/subdirs',getSubdirs);
 
 	//
 	// Alternative Operations ()
@@ -391,6 +418,15 @@ module.exports = function(app, express){
 	app.get('/', read);
 	app.put('/', update);
 	app.delete('/', deleteNode);
+
+	//
+	// CRUDS operations
+	//
+	app.post('/', create);
+	app.get('/:id', read);
+	app.put('/:id', update);
+	app.delete('/:id', deleteNode);
+	app.get('/search/:query',search);
 
 
 }
