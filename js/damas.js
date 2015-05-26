@@ -398,7 +398,7 @@
 			return req.status==200;
 		}
 		var req = new XMLHttpRequest();
-		req.open('DELETE', this.server + "/model.crud.php",callback !== undefined);
+		req.open('DELETE', this.server, callback !== undefined);
 		req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 		req.onreadystatechange = function(e){
 			if(req.readyState == 4)
