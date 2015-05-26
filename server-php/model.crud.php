@@ -66,6 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET')
 	if(empty($_GET)|| ( $_GET['id']=='' ))
 	{
 		header('HTTP/1.1: 400 Bad Request');
+		echo "Bad command";
 		exit;
 	}
 	if( strpos( $_GET['id'], "," ) === false )
