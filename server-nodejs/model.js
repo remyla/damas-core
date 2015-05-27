@@ -315,15 +315,13 @@ module.exports = function Model()
 		{
 			if( err )
 			{
-				console.log(err);
-				//callback(true);
+				callback(true);
 			}
 			else
 			{
 				database.collection(dataMongo.collection, function(err, collection) {
 					if (err)
-					console.log(err);
-						//callback(true);
+						callback(true);
 					else {
 						collection.distinct("file",{"file":{$regex:pattern}},function(err, results) {
 							if (err)
@@ -440,19 +438,15 @@ module.exports = function Model()
 
 this.createFolder=function(path, collection,self){
 	var name=path.match(/[^\/]*$/);
-	console.log("Path:  "+path);
 	collection.find({file:path}).toArray(function(err, rec)
 	{
 		if(err){
-			console.log(err);
 			callback (true);}
 		else{
 				if(rec.length===0)
 					{
 						collection.insert({file:path}, function(err){
-							console.log(rec.length);
 							path=path.replace(new RegExp("/"+name+"$"),"");
-							console.log("Path:  "+path);
 							if(path)
 									self.createFolder(path, collection,self);});
 					}
