@@ -44,6 +44,7 @@ module.exports = function Model()
 
 	this.create = function( keys, callback )
 	{
+		var self = this;
 		this.connection( function( err, database )
 		{
 			if( err )
@@ -61,6 +62,14 @@ module.exports = function Model()
 				}
 				else
 				{
+
+					//START FOLDER MANAGEMENT
+					if(keys.file != undefined){
+						var path= keys.file;
+						path=path.replace(/\/[^\/]*$/,"");
+						self.createFolder(path,collection,self);
+					}
+					//END FOLDER MANAGEMENT
 					if (keys.tgt_id != undefined){
 						keys.tgt_id = new ObjectId(keys.tgt_id);
 					}
@@ -300,6 +309,35 @@ module.exports = function Model()
 		});
 	};
 
+	this.getSubdirs=function(path, callback){
+		var pattern= new RegExp("^"+path+"\/[^\/]*$");
+		this.connection( function(err, database )
+		{
+			if( err )
+			{
+				console.log(err);
+				//callback(true);
+			}
+			else
+			{
+				database.collection(dataMongo.collection, function(err, collection) {
+					if (err)
+					console.log(err);
+						//callback(true);
+					else {
+						collection.distinct("file",{"file":{$regex:pattern}},function(err, results) {
+							if (err)
+								callback(true);
+							else{
+								callback(false, results);
+							}
+						});
+					}
+				});
+			}
+		});
+	};
+
 	this.links_r=function(ids, links, database, callback){
 		var newIds=[];
 		var self= this;
@@ -399,4 +437,26 @@ module.exports = function Model()
 			}
 		});
 	};
+
+this.createFolder=function(path, collection,self){
+	var name=path.match(/[^\/]*$/);
+	console.log("Path:  "+path);
+	collection.find({file:path}).toArray(function(err, rec)
+	{
+		if(err){
+			console.log(err);
+			callback (true);}
+		else{
+				if(rec.length===0)
+					{
+						collection.insert({file:path}, function(err){
+							console.log(rec.length);
+							path=path.replace(new RegExp("/"+name+"$"),"");
+							console.log("Path:  "+path);
+							if(path)
+									self.createFolder(path, collection,self);});
+					}
+					return;
+		}
+	});
 };
