@@ -85,6 +85,9 @@ module.exports = function Model()
 						else
 						{
 						//console.log('Success: ' + JSON.stringify(records));
+						if(keys.file != undefined){
+							self.createFolder((keys.file).replace(/\/[^\/]*$/,""),collection,self);
+						}
 						self.read( keys._id, callback );
 						}
 					});
@@ -151,6 +154,7 @@ module.exports = function Model()
 	 */
 	this.update = function( id, keys, callback )
 	{
+		var self=this;
 		var keyToRemove = {},
 		keyToAdd = {},
 		hasKeyToRemove = false,
@@ -185,6 +189,27 @@ module.exports = function Model()
 					}
 					else
 					{
+						if(keys.file != undefined){
+							self.createFolder((keys.file).replace(/\/[^\/]*$/,""),collection,self);
+							collection.findOne({'_id': new ObjectId(id)},{"_id":0,"file":1}, function(err,item)
+							{
+								if(err)
+								{
+									callback( true );
+								}
+								else
+								{
+									if( item == null)
+									{
+										return callback( true )
+									}
+									else
+									{
+										self.removeFolder((item.file).replace(/\/[^\/]*$/,""), collection, self);
+									}
+								}
+							});
+						}
 						if( hasKeyToAdd && hasKeyToRemove )
 						{
 							collection.updateOne( {'_id':new ObjectId( id )}, {$set:keyToAdd, $unset:keyToRemove}, function( err, result)
@@ -240,6 +265,7 @@ module.exports = function Model()
 	 */
 	this.deleteNode = function( id, callback )
 	{
+		var self= this;
 		this.connection( function(err, database )
 		{
 			if( err )
@@ -255,6 +281,24 @@ module.exports = function Model()
 						callback( true );
 					}
 					else {
+						collection.findOne({'_id': new ObjectId(id)},{"_id":0,"file":1}, function(err,item)
+						{
+							if(err)
+							{
+								callback( true );
+							}
+							else
+							{
+								if( item == null)
+								{
+									return callback( true )
+								}
+								else
+								{
+									self.removeFolder((item.file).replace(/\/[^\/]*$/,""), collection, self);
+								}
+							}
+						});
 						collection.remove( {$or:[ {'_id':new ObjectId(id)}, {'tgt_id':id},{'src_id':id}] }, function( err, result )
 						{
 							if( err )
@@ -436,8 +480,9 @@ module.exports = function Model()
 		});
 	};
 
+//SUBDIRECTORIES CREATION AND DELETION
+
 this.createFolder=function(path, collection,self){
-	var name=path.match(/[^\/]*$/);
 	collection.find({file:path}).toArray(function(err, rec)
 	{
 		if(err){
@@ -446,7 +491,7 @@ this.createFolder=function(path, collection,self){
 				if(rec.length===0)
 					{
 						collection.insert({file:path}, function(err){
-							path=path.replace(new RegExp("/"+name+"$"),"");
+							path=path.replace(/\/[^\/]*$/,"");
 							if(path)
 									self.createFolder(path, collection,self);});
 					}
@@ -454,3 +499,33 @@ this.createFolder=function(path, collection,self){
 		}
 	});
 };
+
+this.removeFolder=function(path, collection,self){
+	collection.find({file:{$regex: new RegExp("^"+path+"/")}}).toArray(function(err, rec)
+	{
+		if(err){
+			callback (true);}
+		else{
+				if(rec.length===0)
+					{
+						collection.remove({file:path}, function(err){
+							path=path.replace(/\/[^\/]*$/,"");
+							if(path)
+									self.removeFolder(path, collection,self);});
+					}
+					return;
+		}
+	});
+};
+
+};
+/*
+ids.length=0;
+ids.push(id);
+for(l in links){
+	if(links[l].tgt_id!=undefined){
+		if(ids.indexOf(links[l].tgt_id)<0)
+			ids.push(links[l].tgt_id);
+		}
+	}
+*/
