@@ -105,8 +105,18 @@ module.exports = function(app, express){
 			}
 			else
 			{
-				res.status(200);
-				res.send(doc);
+				if(doc.length===0){
+					res.status(404);
+					res.send('Id not found');
+				}
+				if(doc.length===1){
+					res.status(200);
+					res.send(doc[0]);
+				}
+				else{
+					res.status(200);
+					res.send(doc);
+				}
 			}
 		});
 	};
