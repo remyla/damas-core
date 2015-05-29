@@ -89,35 +89,26 @@ module.exports = function(app, express){
 	{
 		var id;
 		id = req.params.id || req.body.id;
-		if( !id || id=="undefined" )
+		if(id)
+			id=id.split(",");
+		else
 		{
 			res.status(400);
 			res.send('Bad command');
 		}
-		else
+		mod.read( id, function( error, doc )
 		{
-			if( !ObjectId.isValid( id ) )
+			if( error )
 			{
-				res.status(404);
-				res.send('Id not found');
+				res.status(409);
+				res.send('Read Error, please change your values');
 			}
 			else
 			{
-				mod.read( id, function( error, doc )
-				{
-					if( error )
-					{
-						res.status(409);
-						res.send('Read Error, please change your values');
-					}
-					else
-					{
-						res.status(200);
-						res.send(doc);
-					}
-				});
+				res.status(200);
+				res.send(doc);
 			}
-		}
+		});
 	};
 
 	update = function( req, res )

@@ -103,24 +103,18 @@ module.exports = function Model()
 					}
 					else
 					{
-						collection.findOne({'_id': new ObjectId(id)}, function(err,item)
-						{
-							if(err)
-							{
-								callback( true );
+							var array=[];
+							for(i in id){
+								collection.findOne({'_id':new ObjectId(id[i])},function(err, item) {
+									if (err)
+										callback(true);
+									else{
+										array.push(item);
+										if(id.length == array.length)
+											callback(false,array);
+										}
+								});
 							}
-							else
-							{
-								if( item == null)
-								{
-									return callback( true )
-								}
-								else
-								{
-									callback( false, item );
-								}
-							}
-						});
 					}
 				});
 			}
@@ -324,27 +318,6 @@ module.exports = function Model()
 		});
 	};
 
-	this.nodes=function(ids, database, callback){
-		var array=[];
-		database.collection(dataMongo.collection, function(err, collection) {
-			if (err)
-				callback(true);
-			else {
-				for(i in ids){
-					collection.findOne({'_id':new ObjectId(ids[i])},function(err, item) {
-						if (err)
-							callback(true);
-						else{
-							array.push(item);
-							if(ids.length == array.length)
-								callback(false,array);
-							}
-					});
-				}
-			}
-		});
-	}
-
 	this.graph= function(id, callback){
 		var ids=[];
 		var self= this;
@@ -370,7 +343,7 @@ module.exports = function Model()
 									ids.push(links[l].src_id);
 								}
 							}
-						self.nodes(ids, database, function(error, nodes){
+						self.read(ids, function(error, nodes){
 							if(error){
 								callback(true);
 							}
