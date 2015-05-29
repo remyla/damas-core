@@ -70,7 +70,7 @@ module.exports = function Model()
 						else
 						{
 						//console.log('Success: ' + JSON.stringify(records));
-						self.read( keys._id, callback );
+						self.read( (keys._id).toString().split(","), callback );
 						}
 					});
 				}
