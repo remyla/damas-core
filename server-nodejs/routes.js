@@ -89,6 +89,8 @@ module.exports = function(app, express){
 	{
 		var id;
 		id = req.params.id || req.body.id;
+		if(id.indexOf(",")>0)
+			id=id.split(",");
 		if( !id || id=="undefined" )
 		{
 			res.status(400);
@@ -96,7 +98,7 @@ module.exports = function(app, express){
 		}
 		else
 		{
-			if( !ObjectId.isValid( id ) )
+			if( !ObjectId.isValid( id ) && id.length===1)
 			{
 				res.status(404);
 				res.send('Id not found');
