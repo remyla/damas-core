@@ -103,27 +103,6 @@ module.exports = function Model()
 					}
 					else
 					{
-						if(typeof(id)==='string'){
-							collection.findOne({'_id': new ObjectId(id)}, function(err,item)
-							{
-								if(err)
-								{
-									callback( true );
-								}
-								else
-								{
-									if( item == null)
-									{
-										return callback( true )
-									}
-									else
-									{
-										callback( false, item );
-									}
-								}
-							});
-						}
-						else {
 							var array=[];
 							for(i in id){
 								collection.findOne({'_id':new ObjectId(id[i])},function(err, item) {
@@ -136,7 +115,6 @@ module.exports = function Model()
 										}
 								});
 							}
-						}
 					}
 				});
 			}
