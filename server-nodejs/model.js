@@ -309,14 +309,14 @@ module.exports = function Model()
 			if (err)
 				callback(true);
 			else {
-				collection.find({'src_id':{$in:ids}}).toArray(function(err, results) {
+				collection.find({'tgt_id':{$in:ids}}).toArray(function(err, results) {
 					if (err)
 						callback(true);
 					else{
 						for(r in results){
 							if(links[results[r]._id]==undefined){
-								if(ids.indexOf(results[r].tgt_id)<0 && (results[r].tgt_id)!=undefined)
-									newIds.push(results[r].tgt_id);
+								if(ids.indexOf(results[r].src_id)<0 && (results[r].src_id)!=undefined)
+									newIds.push(results[r].src_id);
 								links[results[r]._id]=results[r];
 							}
 						}
@@ -374,9 +374,9 @@ module.exports = function Model()
 						ids.length=0;
 						ids.push(id);
 						for(l in links){
-							if(links[l].tgt_id!=undefined){
-								if(ids.indexOf(links[l].tgt_id)<0)
-									ids.push(links[l].tgt_id);
+							if(links[l].src_id!=undefined){
+								if(ids.indexOf(links[l].src_id)<0)
+									ids.push(links[l].src_id);
 								}
 							}
 						self.nodes(ids, database, function(error, nodes){

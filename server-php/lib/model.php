@@ -572,7 +572,7 @@ class model
 	 */
 	static function links_r ( $ids, $targets )
 	{
-		$query = sprintf( "SELECT * FROM link WHERE src_id IN ( %s );",
+		$query = sprintf( "SELECT * FROM link WHERE tgt_id IN ( %s );",
 			join(",", $ids));
 		if( !$result = mysql_query( $query ) ) return array();
 		if( !mysql_num_rows( $result ) ) return array();
@@ -581,9 +581,9 @@ class model
 		while( $row = mysql_fetch_array( $result ) )
 		{
 			$a[ intval($row["id"]) ] = array( intval($row["src_id"]), intval($row["tgt_id"]) );
-			if( ! in_array( intval($row["tgt_id"]), $targets ) )
+			if( ! in_array( intval($row["src_id"]), $targets ) )
 			{
-				$newids[] = intval($row["tgt_id"]);
+				$newids[] = intval($row["src_id"]);
 			}
 		}
 		$targets += $newids;
