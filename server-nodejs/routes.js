@@ -78,7 +78,7 @@ module.exports = function(app, express){
 					else
 					{
 						res.status(201);
-						res.send(doc);
+						res.send(doc[0]);
 					}
 				});
 			}
