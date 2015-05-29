@@ -369,15 +369,6 @@ module.exports = function(app, express){
 	};
 
 	//
-	// CRUDS operations
-	//
-	app.post('/', create);
-	app.get('/:id', read);
-	app.put('/:id', update);
-	app.delete('/:id', deleteNode);
-	app.get('/search/:query',search);
-
-	//
 	// Extra operations
 	//
 	app.get('/graph/:id', graph);
@@ -391,6 +382,15 @@ module.exports = function(app, express){
 	app.get('/', read);
 	app.put('/', update);
 	app.delete('/', deleteNode);
+
+	//
+	// CRUDS operations
+	//
+	app.post('/', create);
+	app.get('/:id', read);
+	app.put('/:id', update);
+	app.delete('/:id', deleteNode);
+	app.get('/search/:query',search);
 
 
 }

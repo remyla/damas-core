@@ -307,7 +307,7 @@
 				return damas.utils.readJSONElements(JSON.parse(req.responseText) )[0];
 		}
 		var req = new XMLHttpRequest();
-		req.open('GET', this.server + "/model.crud.php?id="+id,callback !== undefined);
+		req.open('GET', this.server +id,callback !== undefined);
 		req.onreadystatechange = function(e){
 			if(req.readyState == 4)
 			{
@@ -361,7 +361,7 @@
 			return damas.utils.readJSONElement( JSON.parse( req.responseText ));
 		}
 		var req = new XMLHttpRequest();
-		req.open('PUT', this.server + "/model.crud.php",callback !== undefined);
+		req.open('PUT', this.server+id,callback !== undefined);
 		req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 		req.onreadystatechange = function(e){
 			if(req.readyState == 4)
@@ -372,7 +372,10 @@
 				}
 			}
 		}
-		req.send("id="+id+"&keys="+JSON.stringify(keys));
+		var qs = Object.keys(keys).map(function(key){
+			return encodeURIComponent(key) + '=' + encodeURIComponent(keys[key]);
+		}).join('&');
+		req.send(qs);
 		if(callback === undefined)
 		{
 			return req_callback(req);
@@ -398,7 +401,7 @@
 			return req.status==200;
 		}
 		var req = new XMLHttpRequest();
-		req.open('DELETE', this.server + "/model.crud.php",callback !== undefined);
+		req.open('DELETE', this.server + id,callback !== undefined);
 		req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 		req.onreadystatechange = function(e){
 			if(req.readyState == 4)
@@ -409,7 +412,7 @@
 				}
 			}
 		}
-		req.send("id="+id);
+		req.send();
 		if(callback === undefined)
 		{
 			return req_callback(req);
