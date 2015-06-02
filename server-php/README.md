@@ -13,40 +13,39 @@ GNU/Debian packages:
 
 php5 php5-mysql mysql-server apache2
 
-1. retrieve damas-core using git:
-
-	$ git clone https://github.com/remyla/damas-core.git
-
-2. in MySQL, create a database:
-
-	&gt; CREATE DATABASE damasdb;
-
+* retrieve damas-core using git:
+```sh
+$ git clone https://github.com/remyla/damas-core.git
+```
+* in MySQL, create a database:
+```
+&gt; CREATE DATABASE damasdb;
+```
 ⋅⋅⋅and import the table structure: 
+```
+$ mysql damasdb < damas_init.sql
+```
+* in Apache, expose the path to damas-core (either httpd.conf or virtual host)
+```
+Alias /damas/server      "/path/to/damas-core/server-php/"
+```
+* rename settings_install.php to settings.php and edit it to match your configuration
 
-	$ mysql damasdb < damas_init.sql
+* customize Php to match your needs (in php.ini). Increase the duration of sessions to 90 days before timeout, maximum post size and file size to 200M:
 
-3. in Apache, expose the path to damas-core (either httpd.conf or virtual host)
+```ini
+; After this number of seconds, stored data will be seen as 'garbage' and
+; cleaned up by the garbage collection process.
+;session.gc_maxlifetime = 1440
+session.gc_maxlifetime = 7776000
 
-	Alias /damas/server      "/path/to/damas-core/server-php/"
+; Maximum size of POST data that PHP will accept.
+; post_max_size = 8M
+post_max_size = 200M
 
-4. rename settings_install.php to settings.php and edit it to match your configuration
+; Maximum allowed size for uploaded files.
+; upload_max_filesize = 2M
+upload_max_filesize = 200M
+```
 
-5. customize Php to match your needs (in php.ini):
-* Increase the duration of sessions to 90 before timeout:
-
-        ; After this number of seconds, stored data will be seen as 'garbage' and
-        ; cleaned up by the garbage collection process.
-        ;session.gc_maxlifetime = 1440
-        session.gc_maxlifetime = 7776000
-
-* Increase the maximum post size:
-
-        ; Maximum size of POST data that PHP will accept.
-        ;post_max_size = 8M
-        post_max_size = 200M
-
-* Increase the maximum file size allowed:
-
-        ; Maximum allowed size for uploaded files.
-        ;upload_max_filesize = 2M
-        upload_max_filesize = 200M
+Then restart Apache and the REST server should be listening for incoming queries. According to your configuration, you can access it specifying its URL, such as http://server/damas/server/model.json.php. You can check that it is running using a web browser or curl command line utility.
