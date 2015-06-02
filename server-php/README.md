@@ -4,6 +4,9 @@ http://damas-software.org
 
 # damas-core/server-php
 
+* RESTful HTTP stateless server written in Php
+* Key-value data model and directed graph for MySQL
+
 ## Installation
 
 GNU/Debian packages:
