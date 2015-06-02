@@ -4,14 +4,12 @@ http://damas-software.org
 
 # damas-core
 
-damas-core contains the server and the clients for Python and Javascript languages.
-
-* RESTful HTTP stateless server written in Php
-* Key-value data model and directed graph for MySQL
-* Client bindings of the API for Python and Javascript languages
+Digital asset management server source code
 
 ## Usage
-Install the server using the instructions then include the library in your code to access the server.
+Choose a server to run (either the Php or the NodeJS server) and use the Python or Javascript libraries to access it.
+
+The NodeJS is currently under development. For stable versions (currently Php only) please have a look at the releases.
 
 ### Javascript
 ```html
