@@ -283,7 +283,6 @@
 //Rest version
 	damas.read_rest = function ( id, callback )
 	{
-		var multi = false;
 		if( Array.isArray(id) )
 		{
 			if( id.length === 0 )
@@ -293,18 +292,10 @@
 			else
 			{
 				id = id.join(',');
-				multi = true;
 			}
 		}
-		if( typeof(id) === 'string' && id.indexOf(',') != -1 )
-		{
-			multi = true;
-		}
 		function req_callback( req ) {
-			if( multi )
-				return damas.utils.readJSONElements(JSON.parse(req.responseText) );
-			else
-				return damas.utils.readJSONElements(JSON.parse(req.responseText) )[0];
+			return damas.utils.readJSONElements(JSON.parse(req.responseText) );
 		}
 		var req = new XMLHttpRequest();
 		req.open('GET', this.server +id,callback !== undefined);
