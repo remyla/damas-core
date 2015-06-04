@@ -25,13 +25,10 @@ $ git clone https://github.com/remyla/damas-core.git
 ```
 $ mysql damasdb < damas_init.sql
 ```
-* in Apache, expose the path to damas-core (either httpd.conf or virtual host)
-```
-Alias /damas/server      "/path/to/damas-core/server-php/"
-```
+
 * rename settings_install.php to settings.php and edit it to match your configuration
 
-* customize Php to match your needs (in php.ini). Increase the duration of sessions to 90 days before timeout, maximum post size and file size to 200M:
+* customize your php.ini to match your needs (Increase the duration of sessions to 90 days before timeout, maximum post size and file size to 200M):
 
 ```ini
 ; After this number of seconds, stored data will be seen as 'garbage' and
@@ -48,4 +45,21 @@ post_max_size = 200M
 upload_max_filesize = 200M
 ```
 
+* in Apache configuration, expose the path to damas-core (either httpd.conf or virtual host or htaccess).
+
+```
+Alias /damas/server      "/path/to/damas-core/server-php/"
+```
+
+*  in Apache configuration you can provide the URL rewriting rules in order to access the server operations differently. The following rules are examples to provide the same access to operations as in the incoming server-nodejs version
+
+```.htaccess
+<IfModule mod_rewrite.c>
+    RewriteEngine on
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    Rewriterule ^([0-9]+)$ model.crud.php?id=$1 [QSA,L]
+    Rewriterule ^(.*)$ model.crud.php [QSA,L]
+</IfModule>
+```
 Then restart Apache and the REST server should be listening for incoming queries. According to your configuration, you can access it specifying its URL, such as http://server/damas/server/model.json.php. You can check that it is running using a web browser or curl command line utility.
