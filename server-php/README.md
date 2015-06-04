@@ -51,7 +51,7 @@ upload_max_filesize = 200M
 Alias /damas/server      "/path/to/damas-core/server-php/"
 ```
 
-*  in Apache configuration you can provide the URL rewriting rules in order to access the server operations differently. The following rules are examples to provide the same access to operations as in the incoming server-nodejs version
+*  in a .htacess you can provide the Apache URL rewriting rules in order to access the server operations differently. The following rules are examples to provide the same access to operations as in the incoming server-nodejs version
 
 ```.htaccess
 <IfModule mod_rewrite.c>
@@ -62,4 +62,4 @@ Alias /damas/server      "/path/to/damas-core/server-php/"
     Rewriterule ^(.*)$ model.crud.php [QSA,L]
 </IfModule>
 ```
-Then restart Apache and the REST server should be listening for incoming queries. According to your configuration, you can access it specifying its URL, such as http://server/damas/server/model.json.php. You can check that it is running using a web browser or curl command line utility.
+Then make Apache reload your configuration files if needed and the REST server should be listening for incoming queries. According to your configuration, you can access it specifying its URL, such as http://server/damas/server/model.json.php. You can check that it is running using a web browser or curl command line utility.
