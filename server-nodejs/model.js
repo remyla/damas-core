@@ -138,7 +138,7 @@ module.exports = function Model()
 		ids.push(id);
 		for( var k in keys )
 		{
-			if( keys[k] === null )
+			if( keys[k] === "null" )
 			{
 				keyToRemove[k] = '';
 				hasKeyToRemove = true;
