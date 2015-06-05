@@ -353,7 +353,8 @@
 		}
 		var req = new XMLHttpRequest();
 		req.open('PUT', this.server+id,callback !== undefined);
-		req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+		req.setRequestHeader("Content-type","application/json");
+		req.setRequestHeader("Accept","application/json");
 		req.onreadystatechange = function(e){
 			if(req.readyState == 4)
 			{
@@ -363,7 +364,7 @@
 				}
 			}
 		}
-		req.send("keys="+JSON.stringify(keys));
+		req.send(JSON.stringify(keys));
 		if(callback === undefined)
 		{
 			return req_callback(req);
