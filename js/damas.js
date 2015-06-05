@@ -353,7 +353,8 @@
 		}
 		var req = new XMLHttpRequest();
 		req.open('PUT', this.server+id,callback !== undefined);
-		req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+		req.setRequestHeader("Content-type","application/json");
+		req.setRequestHeader("Accept","application/json");
 		req.onreadystatechange = function(e){
 			if(req.readyState == 4)
 			{
@@ -363,10 +364,7 @@
 				}
 			}
 		}
-		var qs = Object.keys(keys).map(function(key){
-			return encodeURIComponent(key) + '=' + encodeURIComponent(keys[key]);
-		}).join('&');
-		req.send(qs);
+		req.send(JSON.stringify(keys));
 		if(callback === undefined)
 		{
 			return req_callback(req);
