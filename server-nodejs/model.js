@@ -131,10 +131,11 @@ module.exports = function Model()
 	this.update = function( id, keys, callback )
 	{
 		var keyToRemove = {},
+		ids=[],
 		keyToAdd = {},
 		hasKeyToRemove = false,
 		hasKeyToAdd = false;
-
+		ids.push(id);
 		for( var k in keys )
 		{
 			if( keys[k] === null )
@@ -174,7 +175,7 @@ module.exports = function Model()
 								}
 								else
 								{
-									self.read( id, callback );
+									self.read( ids, callback );
 								}
 							});
 						}
@@ -188,7 +189,7 @@ module.exports = function Model()
 								}
 								else
 								{
-									self.read( id, callback );
+									self.read( ids, callback );
 								}
 							});
 						}
@@ -202,7 +203,7 @@ module.exports = function Model()
 								}
 								else
 								{
-									self.read( id, callback );
+									self.read( ids, callback );
 								}
 							});
 						}
