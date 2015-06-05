@@ -363,10 +363,7 @@
 				}
 			}
 		}
-		var qs = Object.keys(keys).map(function(key){
-			return encodeURIComponent(key) + '=' + encodeURIComponent(keys[key]);
-		}).join('&');
-		req.send(qs);
+		req.send("keys="+JSON.stringify(keys));
 		if(callback === undefined)
 		{
 			return req_callback(req);

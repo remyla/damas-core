@@ -120,7 +120,7 @@ module.exports = function(app, express){
 	update = function( req, res )
 	{
 		var id,
-		keys = req.body;
+		keys = JSON.parse(req.body.keys);
 
 		if( req.params.id )
 		{
