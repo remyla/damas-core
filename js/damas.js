@@ -295,7 +295,7 @@
 			}
 		}
 		function req_callback( req ) {
-			return damas.utils.readJSONElements(JSON.parse(req.responseText) );
+			return JSON.parse(req.responseText);
 		}
 		var req = new XMLHttpRequest();
 		req.open('GET', this.server +id,callback !== undefined);
@@ -349,7 +349,7 @@
 	damas.update_rest = function ( id, keys, callback )
 	{
 		function req_callback( req ) {
-			return damas.utils.readJSONElement( JSON.parse( req.responseText ));
+			return JSON.parse( req.responseText );
 		}
 		var req = new XMLHttpRequest();
 		req.open('PUT', this.server+id,callback !== undefined);
