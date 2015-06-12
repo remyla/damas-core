@@ -24,7 +24,6 @@ module.exports = function(app, express){
 	app.use(morgan('combined'));
 	app.use( bodyParser.json({limit: '50mb'}));
 	app.use( bodyParser.urlencoded( { limit: '50mb', extended : true } ) );
-	//app.use( bodyParser.urlencoded({limit: '50mb', extended: true}));
 
 	app.use(multer({
 	onError: function (error, next) {
@@ -42,7 +41,6 @@ module.exports = function(app, express){
 	},
 	onFileUploadData: function (file, data, req, res) {
 		checksum.update(data);
-		//console.log(data.length + ' of ' + file.fieldname + ' arrived'+done)
 	}
 	}));
 
@@ -454,7 +452,6 @@ stream.pipe(res);
 			var dest=decodeURIComponent(req.body.path);
 			dest=fileSystem+dest.replace(/:/g,"");
 			dest=dest.replace(/\/+/g,"/");
-			console.log(dest);
 			mkdirp(dest.replace(/\/[^\/]*$/,""),function(err){
 				ncp(tempFile.path,dest, function (err) {
 					if (err) {
