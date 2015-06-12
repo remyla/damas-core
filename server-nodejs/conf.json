@@ -16,5 +16,6 @@
 	"statics" :
 	[
 		"static", "/home/damas/files/"
-	]
+	],
+	"fileSystem": "./fileSystem/"
 }

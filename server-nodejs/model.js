@@ -131,11 +131,12 @@ module.exports = function Model()
 	this.update = function( id, keys, callback )
 	{
 		var keyToRemove = {},
-		ids=[],
 		keyToAdd = {},
 		hasKeyToRemove = false,
 		hasKeyToAdd = false;
+		var ids=[];
 		ids.push(id);
+
 		for( var k in keys )
 		{
 			if( keys[k] === null )
@@ -145,7 +146,7 @@ module.exports = function Model()
 			}
 			else
 			{
-				keyToAdd[k] = keys[k];
+				keyToAdd[k] = decodeURIComponent(keys[k]);
 				hasKeyToAdd = true;
 			}
 		}
