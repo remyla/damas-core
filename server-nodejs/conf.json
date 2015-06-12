@@ -2,9 +2,7 @@
 	"connection" :
 	{
 		"portHttp" : 8090,
-		"portHttps" : 443,
-		"keyFile" : "./key-cert-https/test-key.pem",
-		"cerFile" : "./key-cert-https/test-cert.pem"
+		"portHttps" : 443
 	},
 	"mongoDB" : 
 	{
