@@ -4,46 +4,62 @@ http://damas-software.org
 
 # damas-core/server-php
 
+* RESTful HTTP stateless server written in Php
+* Key-value data model and directed graph for MySQL
+
 ## Installation
 
 GNU/Debian packages:
 
 php5 php5-mysql mysql-server apache2
 
-1. retrieve damas-core using git:
-
-	$ git clone https://github.com/remyla/damas-core.git
-
-2. in MySQL, create a database:
-
-	&gt; CREATE DATABASE damasdb;
-
+* retrieve damas-core using git:
+```sh
+$ git clone https://github.com/remyla/damas-core.git
+```
+* in MySQL, create a database:
+```
+&gt; CREATE DATABASE damasdb;
+```
 ⋅⋅⋅and import the table structure: 
+```
+$ mysql damasdb < damas_init.sql
+```
 
-	$ mysql damasdb < damas_init.sql
+* rename settings_install.php to settings.php and edit it to match your configuration
 
-3. in Apache, expose the path to damas-core (either httpd.conf or virtual host)
+* customize your php.ini to match your needs (Increase the duration of sessions to 90 days before timeout, maximum post size and file size to 200M):
 
-	Alias /damas/server      "/path/to/damas-core/server-php/"
+```ini
+; After this number of seconds, stored data will be seen as 'garbage' and
+; cleaned up by the garbage collection process.
+;session.gc_maxlifetime = 1440
+session.gc_maxlifetime = 7776000
 
-4. rename settings_install.php to settings.php and edit it to match your configuration
+; Maximum size of POST data that PHP will accept.
+; post_max_size = 8M
+post_max_size = 200M
 
-5. customize Php to match your needs (in php.ini):
-* Increase the duration of sessions to 90 before timeout:
+; Maximum allowed size for uploaded files.
+; upload_max_filesize = 2M
+upload_max_filesize = 200M
+```
 
-        ; After this number of seconds, stored data will be seen as 'garbage' and
-        ; cleaned up by the garbage collection process.
-        ;session.gc_maxlifetime = 1440
-        session.gc_maxlifetime = 7776000
+* in Apache configuration, expose the path to damas-core (either httpd.conf or virtual host or htaccess).
 
-* Increase the maximum post size:
+```
+Alias /damas/server      "/path/to/damas-core/server-php/"
+```
 
-        ; Maximum size of POST data that PHP will accept.
-        ;post_max_size = 8M
-        post_max_size = 200M
+*  in a .htacess you can provide the Apache URL rewriting rules in order to access the server operations differently. The following rules are examples to provide the same access to operations as in the incoming server-nodejs version
 
-* Increase the maximum file size allowed:
-
-        ; Maximum allowed size for uploaded files.
-        ;upload_max_filesize = 2M
-        upload_max_filesize = 200M
+```.htaccess
+<IfModule mod_rewrite.c>
+    RewriteEngine on
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    Rewriterule ^([0-9]+)$ model.crud.php?id=$1 [QSA,L]
+    Rewriterule ^(.*)$ model.crud.php [QSA,L]
+</IfModule>
+```
+Then make Apache reload your configuration files if needed and the REST server should be listening for incoming queries. According to your configuration, you can access it specifying its URL, such as http://server/damas/server/model.json.php. You can check that it is running using a web browser or curl command line utility.
