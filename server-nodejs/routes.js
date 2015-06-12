@@ -405,13 +405,9 @@ module.exports = function(app, express){
 	};
 
 
-	getImage= function(req,res){
-		//res.writeHead(200, {'Content-Type': 'image/png' });
-		/*var path= (fileSystem+(decodeURIComponent(req.params.path)).replace(":",""));
-		console.log(path);
-		res.sendfile(path);*/
+	getFile= function(req,res){
 		res.writeHead(200);
-		var stream = fs.createReadStream((fileSystem+(decodeURIComponent(req.params.path)).replace(":","")), { bufferSize: 64 * 1024});
+		var stream = fs.createReadStream((fileSystem+(decodeURIComponent(req.params.path)).replace(/:/g,"").replace(/\/+/g,"/")), { bufferSize: 64 * 1024});
 stream.pipe(res);
 
 	};
@@ -498,7 +494,7 @@ stream.pipe(res);
 	app.put('/upload', uploadNewVersion);
 	app.get('/subdirs/:path',getSubdirs);
 	app.get('/subdirs',getSubdirs);
-	app.get('/image/:path',getImage);
+	app.get('/file/:path',getFile);
 
 	//
 	// Alternative Operations ()
