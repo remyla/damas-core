@@ -77,7 +77,11 @@
 	 * @returns {object|boolean|undefined} New node on success, false otherwise (or nothing if async)
 	 *
 	 * @example
-	 * // example to provide
+	 * //Create a set of keys for our node
+	 * var keys= {name:'test',type:'char'};
+	 *
+	 * //Create a new node using this set of keys
+	 * var newNode= damas.create(keys);
 	 */
 	damas.create = function ( keys, callback )
 	{
@@ -117,7 +121,13 @@
 	 * @returns {object|object[]|undefined} Node or array of nodes
 	 *
 	 * @example
-	 * // example to provide to read 1 node or many
+	 * var ids=[id1,id2];
+	 *
+	 * //Get one node
+	 * var node= damas.read(id1);
+	 *
+	 * //Get a group of nodes
+	 * var nodes= damas.read(ids);
 	 */
 	damas.read = function ( id, callback )
 	{
@@ -166,7 +176,11 @@
 	 * @returns {object|undefined} Node or nothing in case of asynchronous call
 	 *
 	 * @example
-	 * // example to provide
+	* //Create a set of keys for our node
+	 * var keys= {name:'test2',newKey:'name'};
+	 *
+	 * //Update the node id with this set of keys
+	 * var node= damas.update(id, keys);
 	 */
 	damas.update = function ( id, keys, callback )
 	{
@@ -200,7 +214,7 @@
 	 * @returns {boolean} true on success, false otherwise
 	 *
 	 * @example
-	 * // example to provide
+	 * damas.delete(id);
 	 */
 	damas.delete = function ( id, callback)
 	{
