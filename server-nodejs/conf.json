@@ -1,18 +1,17 @@
 {
-	"connection" :
-	{
+	"connection" : {
 		"portHttp" : 8090,
 		"portHttps" : 443
 	},
-	"mongoDB" : 
-	{
+	"mongoDB" : {
 		"host" : "localhost",
 		"collection" : "node",
 		"port" : 27017,
 		"options" : { "auto_reconnect" : true }
 	},
-	"statics" :
-	[
-		"static", "/home/damas/files/"
-	]
+	"statics" : [
+		"static",
+		"/home/damas/files/"
+	],
+	"fileSystem": "./fileSystem/"
 }

@@ -24,6 +24,7 @@ $anonymous_access = false;
 
 /**
  * User authentication method
+ * "None" - no user authentication
  * "Default" - authentication using 'damas:user' nodes in the project
  * "MySQL" - authentication against a "user" table in the database of project
  * "CAS"   - authentication against a Central Authentification Service
