@@ -4,22 +4,45 @@ module.exports = function(app, express){
 	bodyParser = require( 'body-parser' ),
 	methodOverride = require( 'method-override' ),
 	conf = require( './conf.json' ),
+	fs  = require('fs'),
+	multer  = require('multer'),
+	ncp= require('ncp').ncp;
 	ObjectId = mongo.ObjectID;
 	mod = new mongoModel(),
+	mkdirp= require('mkdirp'),
+	crypto= require('crypto'),
 
 	mod.connection( function(){});
 	morgan= require('morgan');
 
+	ncp.limit=16;
+	var checksum;
+	var done=false;
+	var tempFile;
+	var fileSystem=conf.fileSystem;
 	//Middlewares
 	app.use(morgan('combined'));
 	app.use( bodyParser.json({limit: '50mb'}));
 	app.use( bodyParser.urlencoded( { limit: '50mb', extended : true } ) );
-	//app.use( bodyParser.urlencoded({limit: '50mb', extended: true}));
-	//Static routes
-	for(var route in conf.statics)
-	{
-		app.use( express.static( conf.statics[route] ) );
+
+	app.use(multer({
+	onError: function (error, next) {
+		console.log(error);
+		next(error);
+	},
+	onFileUploadStart: function (file) {
+		done=false;
+		checksum= crypto.createHash('sha1');
+	},
+	onFileUploadComplete: function (file) {
+		tempFile=file;
+		checksum=checksum.digest('hex');
+	  done=true;
+	},
+	onFileUploadData: function (file, data, req, res) {
+		checksum.update(data);
 	}
+	}));
 
 	app.use(methodOverride( function(req, res)
 	{
@@ -31,6 +54,12 @@ module.exports = function(app, express){
 			return method;
 		}
 	}));
+
+	//Static routes
+	for(var route in conf.statics)
+	{
+		app.use( express.static( conf.statics[route] ) );
+	}
 
 	//Handle errors
 	app.use( function(err, req, res, next)
@@ -68,6 +97,11 @@ module.exports = function(app, express){
 			//Correct Format - keys
 			else
 			{
+				for(k in keys)
+					keys[k]= decodeURIComponent(keys[k]);
+				if(keys.user===undefined)
+					keys.user=req.connection.remoteAddress;
+				keys.time=Date.now();
 				mod.create(keys, function(error, doc)
 				{
 					if( error )
@@ -131,6 +165,9 @@ module.exports = function(app, express){
 			id = keys.id;
 			delete keys.id;
 		}
+		if(keys.user===undefined)
+			keys.user=req.connection.remoteAddress;
+		keys.time=Date.now();
 		if( Object.keys( keys ).length === 0 || id === "undefined" )
 		{
 			res.status(400);
@@ -234,22 +271,22 @@ module.exports = function(app, express){
 			for(i in arr){
 				if(arr[i].indexOf('<=')>0){
 					temp=arr[i].split('<=');
-					result[temp[0]]={$lte:temp[1]};
+					result[temp[0]]={$lte:decodeURIComponent(temp[1])};
 					continue;
 				}
 				if(arr[i].indexOf('<')>0){
 					temp=arr[i].split('<');
-					result[temp[0]]={$lt:temp[1]};
+					result[temp[0]]={$lt:decodeURIComponent(temp[1])};
 					continue;
 				}
 				if(arr[i].indexOf('>=')>0){
 					temp=arr[i].split('>=');
-					result[temp[0]]={$gte:temp[1]};
+					result[temp[0]]={$gte:decodeURIComponent(temp[1])};
 					continue;
 				}
 				if(arr[i].indexOf('>')>0){
 					temp=arr[i].split('>');
-					result[temp[0]]={$gt:temp[1]};
+					result[temp[0]]={$gt:decodeURIComponent(temp[1])};
 					continue;
 				}
 				if(arr[i].indexOf(':')>0){
@@ -257,9 +294,9 @@ module.exports = function(app, express){
 					tempField=temp[0];
 					result[tempField]="";
 					for(j=1;j<temp.length-1;j++)
-						result[tempField]+=temp[j]+":";
+						result[tempField]+=decodeURIComponent(temp[j])+":";
 					if(temp[j]!='')
-						result[tempField]+=temp[j];
+						result[tempField]+=decodeURIComponent(temp[j]);
 					continue;
 				}
 				if(i==0){
@@ -365,11 +402,96 @@ module.exports = function(app, express){
 		res.send();
 	};
 
+
+	getFile= function(req,res){
+		res.writeHead(200);
+		var stream = fs.createReadStream((fileSystem+(decodeURIComponent(req.params.path)).replace(/:/g,"").replace(/\/+/g,"/")), { bufferSize: 64 * 1024});
+stream.pipe(res);
+
+	};
+
+	//Upload Management
+	upload=function (req, res){
+		if(done){
+			var dest=decodeURIComponent(req.body.path);
+			dest=fileSystem+dest.replace(/:/g,"");
+			dest=dest.replace(/\/+/,"/");
+			mkdirp(dest.replace(/\/[^\/]*$/,""),function(err){
+				ncp(tempFile.path,dest, function (err) {
+					if (err) {
+						return console.error(err);
+					}
+					else {
+						fs.unlinkSync(tempFile.path);
+					}
+				});
+			});
+			var keys={};
+			keys.user=req.connection.remoteAddress;
+			keys.time=Date.now();
+			keys.file=decodeURIComponent(req.body.path);
+			keys.checksum=checksum;
+			mod.create(keys, function(error, doc)
+			{
+				if( error )
+				{
+					res.status(409);
+					res.send('create Error, please change your values');
+				}
+				else
+				{
+					res.status(201);
+					res.send(doc[0]);
+				}
+			});
+		}
+	};
+
+	uploadNewVersion=function (req, res){
+		if(done){
+			var dest=decodeURIComponent(req.body.path);
+			dest=fileSystem+dest.replace(/:/g,"");
+			dest=dest.replace(/\/+/g,"/");
+			mkdirp(dest.replace(/\/[^\/]*$/,""),function(err){
+				ncp(tempFile.path,dest, function (err) {
+					if (err) {
+						return console.error(err);
+					}
+					else {
+						fs.unlinkSync(tempFile.path);
+					}
+				});
+			});
+			var keys={};
+			keys.user=req.connection.remoteAddress;
+			keys.time=Date.now();
+			keys.checksum=checksum;
+			mod.update(req.body.id,keys, function(error, doc)
+			{
+				if( error )
+				{
+					res.status(409);
+					res.send('Update Error, please change your values');
+				}
+				else
+				{
+					res.status(201);
+					res.send(doc);
+				}
+			});
+		}
+	};
+
 	//
 	// Extra operations
 	//
 	app.get('/graph/:id', graph);
 	app.post('/import', importJSON);
+	app.post('/upload', upload);
+	app.put('/upload', uploadNewVersion);
+	app.get('/subdirs/:path',getSubdirs);
+	app.get('/subdirs',getSubdirs);
+	app.get('/file/:path',getFile);
 
 	//
 	// Alternative Operations ()
