@@ -301,7 +301,7 @@
 	damas.graph = function ( ids, callback )
 	{
 		function req_callback( req ) {
-			JSON.parse(req.responseText);
+			return JSON.parse(req.responseText);
 		}
 		var req = new XMLHttpRequest();
 		req.open('GET', this.server + 'graph/' + encodeURIComponent(ids), callback !== undefined);
