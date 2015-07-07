@@ -74,6 +74,7 @@ module.exports = function(app, express){
 		}
 	});
 
+
 	/* CRUD operations */
 	create = function( req, res )
 	{
@@ -404,10 +405,21 @@ module.exports = function(app, express){
 
 
 	getFile= function(req,res){
-		res.writeHead(200);
-		var stream = fs.createReadStream((fileSystem+(decodeURIComponent(req.params.path)).replace(/:/g,"").replace(/\/+/g,"/")), { bufferSize: 64 * 1024});
-stream.pipe(res);
-
+		//console.log(req.params.path );
+		var path = fileSystem+decodeURIComponent(req.params.path).replace(/:/g,"").replace(/\/+/g,"/");
+		fs.exists(path, function(exists){
+			if(exists)
+			{
+				var stream = fs.createReadStream( path, { bufferSize: 64 * 1024});
+				res.writeHead(200);
+				stream.pipe(res);
+			}
+			else
+			{
+				res.status(404);
+				res.send('File not found');
+			}
+		});
 	};
 
 	//Upload Management
@@ -486,12 +498,12 @@ stream.pipe(res);
 	// Extra operations
 	//
 	app.get('/graph/:id', graph);
+	app.get('/file/:path(*)',getFile);
 	app.post('/import', importJSON);
 	app.post('/upload', upload);
 	app.put('/upload', uploadNewVersion);
-	app.get('/subdirs/:path',getSubdirs);
-	app.get('/subdirs',getSubdirs);
-	app.get('/file/:path',getFile);
+	//app.get('/subdirs/:path',getSubdirs);
+	//app.get('/subdirs',getSubdirs);
 
 	//
 	// Alternative Operations ()
@@ -510,6 +522,4 @@ stream.pipe(res);
 	app.put('/:id', update);
 	app.delete('/:id', deleteNode);
 	app.get('/search/:query',search);
-
-
 }
