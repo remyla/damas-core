@@ -4,7 +4,7 @@ http://damas-software.org
 
 # damas-core
 
-Digital asset management server source code
+Digital asset management server and API
 
 ## Usage
 Choose a server to run (either the Php or the NodeJS server) and use the Python or Javascript libraries to access it.
@@ -22,7 +22,7 @@ require('damas.js');
 
 ### Python
 ```python
-import('damas.py')
+import damas
 ```
 
 ## API
@@ -35,7 +35,7 @@ The API below is new from december 2014, and is not supported by the Python clie
 - damas.read( id )
 - damas.update( id, keys )
 - damas.delete( id )
-- damas.search( keys )
+- damas.search( query )
 
 ### Node graphs 
 
