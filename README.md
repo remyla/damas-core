@@ -4,7 +4,7 @@ http://damas-software.org
 
 # damas-core
 
-Digital asset management server source code
+Digital asset management server and API
 
 ## Usage
 Choose a server to run (either the Php or the NodeJS server) and use the Python or Javascript libraries to access it.
