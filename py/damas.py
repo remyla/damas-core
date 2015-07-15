@@ -45,38 +45,38 @@ class http_connection( object ) :
 			return json.loads(r.text)
 		return None
 
-	def read( self, id ) :
+	def read( self, id_ ) :
 		'''
 		Retrieve a node specifying its internal node index
-		@param {String} id the internal node index to search
+		@param {String} id_ the internal node index to search
 		@returns {Hash} node or false on failure
 		'''
-		r = requests.get(self.serverURL+'/'+id )
+		r = requests.get(self.serverURL+'/'+id_ )
 		if r.status_code == 200:
 			return json.loads(r.text)
 		return None
 
-	def update( self, id, keys ) :
+	def update( self, id_, keys ) :
 		'''
 		Modify a node. If an attribute with that name is already present in
 		the element, its value is changed to be that of the value parameter.
 		Specifying a null value for a key will remove the key from the node
-		@param {String} id Element index
+		@param {String} id_ Element index
 		@param {Hash} keys to add and remove
 		@returns {Hash} updated node or false on failure
 		'''
-		r = requests.put(self.serverURL+'/'+id, keys )
+		r = requests.put(self.serverURL+'/'+id_, keys )
 		if r.status_code == 200:
 			return json.loads(r.text)
 		return None
 
-	def delete( self, id ) :
+	def delete( self, id_ ) :
 		'''
 		Delete a node
-		@param {String} id the internal node index to delete
+		@param {String} id_ the internal node index to delete
 		@returns {Boolean} True on success, False otherwise
 		'''
-		r = requests.delete(self.serverURL, id )
+		r = requests.delete(self.serverURL, id_ )
 		return r.status_code == 200
 
 	def search( self, query ) :
