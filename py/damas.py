@@ -43,7 +43,7 @@ class http_connection( object ) :
 		r = requests.post(self.serverURL, keys )
 		if r.status_code == 201:
 			return json.loads(r.text)
-		return False
+		return None
 
 	def read( self, id ) :
 		'''
@@ -54,7 +54,7 @@ class http_connection( object ) :
 		r = requests.get(self.serverURL+'/'+id )
 		if r.status_code == 200:
 			return json.loads(r.text)
-		return False
+		return None
 
 	def update( self, id, keys ) :
 		'''
@@ -65,10 +65,10 @@ class http_connection( object ) :
 		@param {Hash} keys to add and remove
 		@returns {Hash} updated node or false on failure
 		'''
-		r = requests.put(self.serverURL, id, keys )
+		r = requests.put(self.serverURL+'/'+id, keys )
 		if r.status_code == 200:
 			return json.loads(r.text)
-		return False
+		return None
 
 	def delete( self, id ) :
 		'''
@@ -77,7 +77,7 @@ class http_connection( object ) :
 		@returns {Boolean} True on success, False otherwise
 		'''
 		r = requests.delete(self.serverURL, id )
-		return res.status_code == 200
+		return r.status_code == 200
 
 	def search( self, query ) :
 		'''
@@ -88,4 +88,4 @@ class http_connection( object ) :
 		r = requests.get(self.serverURL+'/search/'+query)
 		if r.status_code == 200:
 			return json.loads(r.text)
-		return False
+		return None
