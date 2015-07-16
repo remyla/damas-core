@@ -100,8 +100,8 @@ module.exports = function(app, express){
 			{
 				for(k in keys)
 					keys[k]= decodeURIComponent(keys[k]);
-				if(keys.user===undefined)
-					keys.user=req.connection.remoteAddress;
+				if(keys.author===undefined)
+					keys.author=req.connection.remoteAddress;
 				keys.time=Date.now();
 				mod.create(keys, function(error, doc)
 				{
@@ -166,8 +166,8 @@ module.exports = function(app, express){
 			id = keys.id;
 			delete keys.id;
 		}
-		if(keys.user===undefined)
-			keys.user=req.connection.remoteAddress;
+		if(keys.author===undefined)
+			keys.author=req.connection.remoteAddress;
 		keys.time=Date.now();
 		if( Object.keys( keys ).length === 0 || id === "undefined" )
 		{
@@ -439,7 +439,7 @@ module.exports = function(app, express){
 				});
 			});
 			var keys={};
-			keys.user=req.connection.remoteAddress;
+			keys.author=req.connection.remoteAddress;
 			keys.time=Date.now();
 			keys.file=decodeURIComponent(req.body.path);
 			keys.checksum=checksum;
@@ -475,7 +475,7 @@ module.exports = function(app, express){
 				});
 			});
 			var keys={};
-			keys.user=req.connection.remoteAddress;
+			keys.author=req.connection.remoteAddress;
 			keys.time=Date.now();
 			keys.checksum=checksum;
 			mod.update(req.body.id,keys, function(error, doc)
