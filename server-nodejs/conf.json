@@ -11,7 +11,7 @@
 	},
 	"statics" : [
 		"static",
-		"/home/damas/files/"
+		"/home/damas/bin/"
 	],
-	"fileSystem": "./fileSystem/"
+	"fileSystem": "/PRODUCTIONS/"
 }

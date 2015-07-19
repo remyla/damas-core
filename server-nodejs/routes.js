@@ -278,99 +278,108 @@ module.exports = function(app, express){
 	graph = function(req,res) {
 		var id;
 		id = req.params.id || req.body.id;
-		if( !id || id=="undefined" )
+		if (!id || id=="undefined")
 		{
 			res.status(400);
 			res.send('Bad command');
+			return;
 		}
-		else{
-			id = id.split(',');
-			mod.graph(id, function(error, nodes){
-				if(error){
-					res.status(409).send('graph Error, please change your values');
-				}
-				else if (nodes){
-					res.json(nodes);
-				}
-				else
-					res.status(404).send('Id not found');
-			});
-		}
+		id = id.split(',');
+		mod.graph(id, function(error, nodes){
+			if(error){
+				res.status(409).send('graph Error, please change your values');
+			}
+			else if (nodes){
+				res.json(nodes);
+			}
+			else
+				res.status(404).send('Id not found');
+		});
 	};
 
-	search=function(req, res){
-		var q;
+	search = function(req, res){
 		var q = req.params.query || req.body.query;
-		if(!q || q=="undefined")
+		if (!q || q=="undefined")
 		{
 			res.status(400);
 			res.send('Bad command');
+			return;
 		}
-		else{
-			q= q.replace(/\s+/g,' ').trim();
-			q= q.replace('< ','<');
-			q= q.replace('<= ','<=');
-			q= q.replace('>= ','>=');
-			q= q.replace('> ','>');
-			q= q.replace(': ',':');
-			var arr = q.split(" ");
-			var temp;
-			var result={};
-			var j;
-			var tempField;
-			for(i in arr){
-				if(arr[i].indexOf('<=')>0){
-					temp=arr[i].split('<=');
-					result[temp[0]]={$lte:decodeURIComponent(temp[1])};
-					continue;
-				}
-				if(arr[i].indexOf('<')>0){
-					temp=arr[i].split('<');
-					result[temp[0]]={$lt:decodeURIComponent(temp[1])};
-					continue;
-				}
-				if(arr[i].indexOf('>=')>0){
-					temp=arr[i].split('>=');
-					result[temp[0]]={$gte:decodeURIComponent(temp[1])};
-					continue;
-				}
-				if(arr[i].indexOf('>')>0){
-					temp=arr[i].split('>');
-					result[temp[0]]={$gt:decodeURIComponent(temp[1])};
-					continue;
-				}
-				if(arr[i].indexOf(':')>0){
-					temp=arr[i].split(':');
-					tempField=temp[0];
-					result[tempField]="";
-					for(j=1;j<temp.length-1;j++)
-						result[tempField]+=decodeURIComponent(temp[j])+":";
-					if(temp[j]!='')
-						result[tempField]+=decodeURIComponent(temp[j]);
-					continue;
-				}
-				if(i==0){
-					continue;
-				}
-				if(result[tempField]!='')
-					result[tempField]+= " "+arr[i];
-				else
-					result[tempField]+=arr[i];
-			}
-			mod.search( result, function( error, doc )
+		console.log(q);
+		q = q.replace(/\s+/g,' ').trim();
+		//q = q.replace('< ','<');
+		//q = q.replace('<= ','<=');
+		//q = q.replace('>= ','>=');
+		//q = q.replace('> ','>');
+		//q = q.replace(': ',':');
+		console.log(q);
+		var terms = q.split(" ");
+		var pair;
+		var result={};
+		var j;
+		var tempField;
+		for(var i=0; i< terms.length; i++){
+			if (terms[i].indexOf('<=') > 0)
 			{
-				if( error )
-				{
-					res.status(409);
-					res.send('Read Error, please change your values');
-				}
-				else
-				{
-					res.status(200);
-					res.send(doc);
-				}
-			});
+				pair = terms[i].split('<=');
+				result[pair[0]] = { $lte: decodeURIComponent(pair[1]) };
+				continue;
+			}
+			if (terms[i].indexOf('<') > 0)
+			{
+				pair = terms[i].split('<');
+				result[pair[0]] = { $lt: decodeURIComponent(pair[1]) };
+				continue;
+			}
+			if (terms[i].indexOf('>=') > 0)
+			{
+				pair = terms[i].split('>=');
+				result[pair[0]] = { $gte: decodeURIComponent(pair[1]) };
+				continue;
+			}
+			if (terms[i].indexOf('>') > 0)
+			{
+				pair = terms[i].split('>');
+				result[pair[0]] = { $gt: decodeURIComponent(pair[1]) };
+				continue;
+			}
+			if (terms[i].indexOf(':') > 0)
+			{
+				pair = terms[i].split(':');
+				//tempField = pair[0];
+				//result[tempField]="";
+				result[pair[0]] = decodeURIComponent(pair[1]);
+/*
+				for(j=1;j<pair.length-1;j++)
+					result[tempField]+=decodeURIComponent(pair[j])+":";
+				if(pair[j]!='')
+					result[tempField]+=decodeURIComponent(pair[j]);
+*/
+				continue;
+			}
+/*
+			if(i==0){
+				continue;
+			}
+			if(result[tempField]!='')
+				result[tempField]+= " "+terms[i];
+			else
+				result[tempField]+=terms[i];
+*/
 		}
+		mod.search( result, function( error, doc )
+		{
+			if( error )
+			{
+				res.status(409);
+				res.send('Read Error, please change your values');
+			}
+			else
+			{
+				res.status(200);
+				res.send(doc);
+			}
+		});
 	}
 
 	/**
