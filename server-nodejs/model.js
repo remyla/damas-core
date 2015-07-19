@@ -320,49 +320,55 @@ module.exports = function Model()
 		});
 	};
 
-	this.graph= function(id, callback){
-		var ids=[];
-		var self= this;
-		ids.push(id);
+	/**
+	 * Retrieve the graph for the specified nodes
+	 * @param {Array} ids - Array of node indexes
+	 * @param {Function} callback - function(err, result) to call
+	 */
+	this.graph = function(ids, callback){
 		this.connection( function(err, database )
 		{
-			if( err )
+			if (err)
 			{
 				callback(true);
+				return;
 			}
-			else
-			{
-				self.links_r(ids,null , database, function(error, links){
-					if(error){
-						callback(true);
+			self.links_r(ids, null, database, function(error, links){
+				if (error)
+				{
+					callback(true);
+					return;
+				}
+				if (!links)
+				{
+					callback(true);
+					return;
+				}
+				var graph_indexes = ids;
+				for(l in links){
+					if (links[l].src_id != undefined)
+					{
+						if (graph_indexes.indexOf(links[l].src_id) < 0)
+							graph_indexes.push(links[l].src_id);
 					}
-					else if (links){
-						ids.length=0;
-						ids.push(id);
-						for(l in links){
-							if(links[l].src_id!=undefined){
-								if(ids.indexOf(links[l].src_id)<0)
-									ids.push(links[l].src_id);
-								}
-							}
-						self.read(ids, function(error, nodes){
-							if(error){
-								callback(true);
-							}
-							else if(nodes){
-								for(l in links)
-									nodes.push(links[l]);
-								var result=links.concat(nodes);
-								callback(false,nodes);
-							}
-							else
-								callback(true);
-						});
-					}
-					else
+				}
+				self.read(graph_indexes, function(error, nodes){
+					if (error)
+					{
 						callback(true);
+						return;
+					}
+					if (!nodes)
+					{
+						callback(true);
+						return;
+					}
+					for(l in links)
+						nodes.push(links[l]);
+					var result = links.concat(nodes);
+					callback(false, nodes);
 				});
-			}
+			});
 		});
 	};
 };
