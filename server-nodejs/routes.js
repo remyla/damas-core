@@ -570,7 +570,7 @@ module.exports = function(app, express){
 	//
 	// Alternative Operations ()
 	//
-	app.get('/search',search);
+	app.get('/search/:query(*)', search);
 	app.get('/graph/', graph);
 	app.get('/', read);
 	app.put('/', update);
@@ -583,5 +583,4 @@ module.exports = function(app, express){
 	app.get('/:id', read);
 	app.put('/:id', update);
 	app.delete('/:id', deleteNode);
-	app.get('/search/:query',search);
 }
