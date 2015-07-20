@@ -278,9 +278,10 @@ module.exports = function(app, express){
 			res.send('Bad command');
 		}
 		else{
+			id = id.split(',');
 			mod.graph(id, function(error, nodes){
 				if(error){
-					res.status(404).send('Id not found');
+					res.status(409).send('graph Error, please change your values');
 				}
 				else if (nodes){
 					res.json(nodes);
@@ -554,7 +555,7 @@ module.exports = function(app, express){
 	//
 	// Alternative Operations ()
 	//
-	app.get('/search',search);
+	app.get('/search/:query(*)', search);
 	app.get('/graph/', graph);
 	app.get('/', read);
 	app.put('/', update);
@@ -567,5 +568,4 @@ module.exports = function(app, express){
 	app.get('/:id', read);
 	app.put('/:id', update);
 	app.delete('/:id', deleteNode);
-	app.get('/search/:query',search);
 }
