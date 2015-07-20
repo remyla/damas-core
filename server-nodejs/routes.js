@@ -126,165 +126,103 @@ module.exports = function(app, express){
 	/* CRUD operations */
 	create = function( req, res )
 	{
-		var obj_keys = Object.keys( req.body ),
-		keys = req.body;
-		//Empty keys
-		if( obj_keys === '' || !obj_keys || obj_keys.length === 0)
+		if (Object.keys(req.body).length === 0)
 		{
-			res.status(400);
-			res.send('Bad command');
+			res.status(400).send('create error: the body of the request is empty');
+			return;
 		}
-		else
-		{
-			//Invalid JSON
-			if(!isValidJson( (keys) ))
+		var keys = req.body;
+		keys.author = req.connection.remoteAddress;
+		keys.time = Date.now();
+		mod.create(keys, function(error, doc){
+			if (error)
 			{
-				res.status(409);
-				res.send('create Error, please change your values');
+				res.status(409).send('create error, please change your values');
+				return;
 			}
-
-			//Correct Format - keys
-			else
-			{
-				for(k in keys)
-					keys[k]= decodeURIComponent(keys[k]);
-				if(keys.author===undefined)
-					keys.author=req.connection.remoteAddress;
-				keys.time=Date.now();
-				mod.create(keys, function(error, doc)
-				{
-					if( error )
-					{
-						res.status(409);
-						res.send('create Error, please change your values');
-					}
-					else
-					{
-						res.status(201);
-						res.send(doc[0]);
-					}
-				});
-			}
-		}
+			res.status(201).send(doc);
+		});
 	};
 
 	read = function( req,res )
 	{
-		var id;
-		id = req.params.id || req.body.id;
-		if(id)
-			id=id.split(",");
-		else
+		var id = req.params.id || req.body.id;
+		if (!id)
 		{
-			res.status(400);
-			res.send('Bad command');
+			res.status(400).send('read error: the specified id is not valid');
+			return;
 		}
-		mod.read( id, function( error, doc )
-		{
-			if( error )
+		mod.read( id.split(","), function(error, doc){
+			if (error)
 			{
-				res.status(409);
-				res.send('Read Error, please change your values');
+				res.status(409).send('read error, please change your values');
+				return;
 			}
-			else
+			if (doc.length===0)
 			{
-				if(doc.length===0){
-					res.status(404);
-					res.send('Id not found');
-				}
-				else{
-					res.status(200);
-					res.send(doc);
-				}
+				res.status(404).send('Id not found');
+				return;
 			}
+			res.status(200).send(doc);
 		});
 	};
 
 	update = function( req, res )
 	{
-		var id,
-		keys = req.body;
-
-		if( req.params.id )
+		if (!ObjectId.isValid(req.params.id))
 		{
-			id = req.params.id;
-		}
-		else if( keys.id )
-		{
-			id = keys.id;
-			delete keys.id;
-		}
-		if(keys.author===undefined)
-			keys.author=req.connection.remoteAddress;
-		keys.time=Date.now();
-		if( Object.keys(keys).length === 0 || id === "undefined" )
-		{
-			res.status(400);
-			res.send('Bad command');
+			res.status(400).send('update error: the specified id is not valid');
 			return;
 		}
-		if (!ObjectId.isValid(id))
+		if (Object.keys(req.body).length === 0)
 		{
-			res.status(404);
-			res.send('Id not found');
+			res.status(400).send('update error: the body of the request is empty');
 			return;
 		}
-		mod.update(id, keys, function(error, doc)
-		{
+		var keys = req.body;
+		mod.update(req.params.id, keys, function(error, doc){
 			if (error)
 			{
-				res.status(409);
-				res.send('Update Error, please change your values');
+				res.status(409).send('update error, please change your values');
 				return;
 			}
-			res.status(200);
-			res.json( doc );
+			res.status(200).json(doc);
 		});
 	};
 
 	deleteNode = function(req, res)
 	{
-		var id;
-		id = req.params.id || req.body.id;
-		if(! ObjectId.isValid( id ) || !id)
+		if (!ObjectId.isValid(req.params.id))
 		{
-			res.status(400);
-			res.send("Bad command");
+			res.status(400).send('error: the specified id is not valid');
+			return;
 		}
-		else
-		{
-			mod.deleteNode(id, function( error, doc )
+		mod.deleteNode(req.params.id, function(error, doc){
+			if (error)
 			{
-				if( error )
-				{
-					res.status(409);
-					res.send('delete Error, please change your values');
-				}
-				else
-				{
-					res.status(200);
-					res.send(doc.result.n + " documents deleted.");
-				}
-			});
-		}
+				res.status(409).send('delete error, please change your values');
+				return;
+			}
+			res.status(200).send(doc.result.n + " documents deleted.");
+		});
 	};
 
 	graph = function(req,res) {
-		var id;
-		id = req.params.id || req.body.id;
+		var id = req.params.id || req.body.id;
 		if (!id || id=="undefined")
 		{
-			res.status(400);
-			res.send('Bad command');
+			res.status(400).send('Bad command');
 			return;
 		}
-		id = id.split(',');
-		mod.graph(id, function(error, nodes){
-			if(error){
-				res.status(409).send('graph Error, please change your values');
+		mod.graph( id.split(","), function(error, nodes){
+			if (error)
+			{
+				res.status(409).send('graph error, please change your values');
+				return;
 			}
-			else if (nodes){
-				res.json(nodes);
+			if (nodes)
+			{
+				res.status(200).json(nodes);
 			}
 			else
 				res.status(404).send('Id not found');
@@ -299,19 +237,17 @@ module.exports = function(app, express){
 			res.send('Bad command');
 			return;
 		}
-		console.log(q);
 		q = q.replace(/\s+/g,' ').trim();
 		//q = q.replace('< ','<');
 		//q = q.replace('<= ','<=');
 		//q = q.replace('>= ','>=');
 		//q = q.replace('> ','>');
 		//q = q.replace(': ',':');
-		console.log(q);
 		var terms = q.split(" ");
 		var pair;
 		var result={};
-		var j;
-		var tempField;
+		//var j;
+		//var tempField;
 		for(var i=0; i< terms.length; i++){
 			if (terms[i].indexOf('<=') > 0)
 			{
@@ -361,6 +297,21 @@ module.exports = function(app, express){
 */
 				continue;
 			}
+/* implement full text search
+			result['$where'] = function(){
+				for (var key in this)
+				{
+					if (this[key] )
+				}
+			}
+db.things.find({$where: function() {
+  for (var key in this) {
+    if (this[key] === "bar") {
+      return true;
+    }
+    return false;
+}});
+*/
 /*
 			if(i==0){
 				continue;
@@ -371,18 +322,13 @@ module.exports = function(app, express){
 				result[tempField]+=terms[i];
 */
 		}
-		mod.search( result, function( error, doc )
-		{
-			if( error )
+		mod.search( result, function(error, doc){
+			if (error)
 			{
-				res.status(409);
-				res.send('Read Error, please change your values');
+				res.status(409).send('Read Error, please change your values');
+				return;
 			}
-			else
-			{
-				res.status(200);
-				res.send(doc);
-			}
+			res.status(200).send(doc);
 		});
 	}
 
@@ -577,8 +523,8 @@ module.exports = function(app, express){
 	app.get('/search/:query(*)', search);
 	app.get('/graph/', graph);
 	app.get('/', read);
-	app.put('/', update);
-	app.delete('/', deleteNode);
+	//app.put('/', update);
+	//app.delete('/', deleteNode);
 
 	//
 	// CRUDS operations
