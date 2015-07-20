@@ -14,7 +14,9 @@
     "express": "^4.13.1",
     "method-override": "^2.3.4",
     "mongodb": "^2.1.0-alpha",
-    "morgan": "^1.6.1"
+    "morgan": "^1.6.1",
+    "multer": "^1.0.1",
+    "ncp": "^2.0.0"
   },
   "devDependencies": {}
 }
