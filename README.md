@@ -9,59 +9,14 @@ Digital asset management server and API
 ## Usage
 Choose a server to run (either the Php or the NodeJS server) and use the Python or Javascript libraries to access it.
 
-The NodeJS is currently under development. For stable versions (currently Php only) please have a look at the releases.
-
-### Javascript
-```html
-<script type="text/javascript" src="damas.js"></script>
-```
-or
-```js
-require('damas.js');
-```
-
-### Python
-```python
-import damas
-```
-
-## API
-
-The API below is new from december 2014, and is not supported by the Python client implementation yet. For a Python compatible API, use the 2.2-stable release.
-
-### Node manipulation
-
-- damas.create( keys )
-- damas.read( id )
-- damas.update( id, keys )
-- damas.delete( id )
-- damas.search( query )
-
-### Node graphs 
-
-- damas.graph( id )
-- damas.link( sourceId , targetId )
-- damas.links( id )
-- damas.unlink( linkId )
-
-
-### Trees, based on a #parent key
-
-- damas.ancestors( id )
-- damas.children( id )
-- damas.move( id, target )
-
-### Asset manipulation (version control)
-
-- damas.backup( id )
-- damas.increment( id )
-- damas.upload( files )
-- damas.lock( id )
-- damas.unlock( id )
+The NodeJS server is currently under development. For stable versions (currently Php only) please have a look at the releases. For a full Python compatible API, use the 2.2-stable release.
 
 ## Related Links
 
+https://github.com/PRIMCODE/damas-flow is a flow graph interface based on the NodeJS server implementation which is being created since April 2015.
+
 http://primcode.com PRIMCODE is the company leading the development, the distribution and the maintenance of damas-core
+
 
 ## License
 GPL License(GPLV3)
