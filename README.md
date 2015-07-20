@@ -15,7 +15,7 @@ The NodeJS server is currently under development. For stable versions (currently
 
 https://github.com/PRIMCODE/damas-flow is a flow graph interface based on the NodeJS server implementation which is being created since April 2015.
 
-http://primcode.com PRIMCODE is the company leading the development, the distribution and the maintenance of damas-core
+http://primcode.com PRIMCODE is the company behind the development, the distribution and the maintenance of damas-core
 
 
 ## License
