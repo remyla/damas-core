@@ -136,6 +136,7 @@ module.exports = function Model()
 		hasKeyToAdd = false;
 		var ids=[];
 		ids.push(id);
+		console.log(arguments);
 
 		for( var k in keys )
 		{

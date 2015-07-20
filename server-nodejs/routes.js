@@ -217,35 +217,29 @@ module.exports = function(app, express){
 		if(keys.author===undefined)
 			keys.author=req.connection.remoteAddress;
 		keys.time=Date.now();
-		if( Object.keys( keys ).length === 0 || id === "undefined" )
+		if( Object.keys(keys).length === 0 || id === "undefined" )
 		{
 			res.status(400);
 			res.send('Bad command');
+			return;
 		}
-		else
+		if (!ObjectId.isValid(id))
 		{
-			if(! ObjectId.isValid( id ))
-			{
-				res.status(404);
-				res.send('Id not found');
-			}
-			else
-			{
-				mod.update(id, keys, function(error, doc)
-				{
-					if( error )
-					{
-						res.status(409);
-						res.send('Update Error, please change your values');
-					}
-					else
-					{
-						res.status(200);
-						res.json( doc );
-					}
-				});
-			}
+			res.status(404);
+			res.send('Id not found');
+			return;
 		}
+		mod.update(id, keys, function(error, doc)
+		{
+			if (error)
+			{
+				res.status(409);
+				res.send('Update Error, please change your values');
+				return;
+			}
+			res.status(200);
+			res.json( doc );
+		});
 	};
 
 	deleteNode = function(req, res)
