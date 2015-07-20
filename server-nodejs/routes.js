@@ -346,9 +346,19 @@ module.exports = function(app, express){
 			if (terms[i].indexOf(':') > 0)
 			{
 				pair = terms[i].split(':');
-				//tempField = pair[0];
-				//result[tempField]="";
-				result[pair[0]] = decodeURIComponent(pair[1]);
+				var value = decodeURIComponent(pair[1]);
+			
+				var flags = value.replace(/.*\/([gimy]*)$/, '$1');
+				var pattern = value.replace(new RegExp('^/(.*?)/'+flags+'$'), '$1');
+				if(flags!=value && pattern!=value)
+				{
+					var regex = new RegExp(pattern, flags);
+					result[pair[0]] = regex;
+				}
+				else
+				{
+					result[pair[0]] = value;
+				}
 /*
 				for(j=1;j<pair.length-1;j++)
 					result[tempField]+=decodeURIComponent(pair[j])+":";
