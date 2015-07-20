@@ -40,7 +40,8 @@ class http_connection( object ) :
 		@param {Hash} keys of the new node
 		@returns {Hash} New node on success, false otherwise
 		'''
-		r = requests.post(self.serverURL, keys )
+		headers = {'content-type': 'application/json'}
+		r = requests.post(self.serverURL, data=json.dumps(keys), headers=headers )
 		if r.status_code == 201:
 			return json.loads(r.text)
 		return None
@@ -60,12 +61,13 @@ class http_connection( object ) :
 		'''
 		Modify a node. If an attribute with that name is already present in
 		the element, its value is changed to be that of the value parameter.
-		Specifying a null value for a key will remove the key from the node
+		Specifying a None value for a key will remove the key from the node
 		@param {String} id_ Element index
 		@param {Hash} keys to add and remove
 		@returns {Hash} updated node or false on failure
 		'''
-		r = requests.put(self.serverURL+'/'+id_, keys )
+		headers = {'content-type': 'application/json'}
+		r = requests.put(self.serverURL+'/'+id_, data=json.dumps(keys), headers=headers)
 		if r.status_code == 200:
 			return json.loads(r.text)
 		return None
@@ -76,16 +78,27 @@ class http_connection( object ) :
 		@param {String} id_ the internal node index to delete
 		@returns {Boolean} True on success, False otherwise
 		'''
-		r = requests.delete(self.serverURL, id_ )
+		r = requests.delete(self.serverURL+'/'+id_)
 		return r.status_code == 200
 
 	def search( self, query ) :
 		'''
 		Find elements wearing the specified key(s)
 		@param {String} query string
-		@returns {Array} array of element indexes or null if no element found
+		@returns {Array} array of element indexes or None if no element found
 		'''
 		r = requests.get(self.serverURL+'/search/'+query)
+		if r.status_code == 200:
+			return json.loads(r.text)
+		return None
+
+	def graph( self, id_ ) :
+		'''
+		Retrieve a node graph specifying its index
+		@param {String} id_ the node index(es) to search
+		@returns {Hash} node or false on failure
+		'''
+		r = requests.get(self.serverURL+'/graph/'+id_ )
 		if r.status_code == 200:
 			return json.loads(r.text)
 		return None
