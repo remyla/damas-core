@@ -1,8 +1,8 @@
 <img src="http://damas-software.com/bin/damas_logo.png" alt="damas-core"/>
 
-http://damas-software.org
 
 # damas-core
+http://damas-software.org
 
 Digital asset management server and API
 
