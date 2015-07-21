@@ -52,7 +52,6 @@ module.exports = function Model()
 			}
 			else
 			{
-			//console.log('Add: ' + JSON.stringify(keys));
 			database.collection( dataMongo.collection, function( err, collection )
 			{
 				if( err )
@@ -69,8 +68,8 @@ module.exports = function Model()
 						}
 						else
 						{
-						//console.log('Success: ' + JSON.stringify(records));
-						self.read( (keys._id).toString().split(","), callback );
+							//self.read( (keys._id).toString().split(","), callback );
+							self.readOne( (keys._id).toString(), callback );
 						}
 					});
 				}
@@ -86,7 +85,6 @@ module.exports = function Model()
 	 */
 	this.read = function( id, callback )
 	{
-	//console.log('ok');
 		this.connection( function(err, database )
 		{
 			if( err )
@@ -120,6 +118,38 @@ module.exports = function Model()
 			}
 		});
 	}; //End read
+
+	/**
+	 * Get a node specifying its index
+	 * @param {string} id - index of the node to
+	 * @param {function} callback - Function callback to routes.js
+	 */
+	this.readOne = function( id, callback )
+	{
+		this.connection( function(err, database )
+		{
+			if( err )
+			{
+				callback( true );
+				return;
+			}
+			database.collection( dataMongo.collection, function(err, collection){
+				if(err)
+				{
+					callback( true );
+					return;
+				}
+				collection.findOne({'_id':new ObjectId(id)},function(err, item) {
+					if (err)
+					{
+						callback(true);
+						return;
+					}
+					callback(false,item);
+				});
+			});
+		});
+	};
 
 	/**
 	 * Update the keys of a node. Specified keys overwrite existing keys, others are left untouched.
