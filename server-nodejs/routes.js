@@ -337,6 +337,7 @@ db.things.find({$where: function() {
 	 * @param {JSON Object} JSON Object containing the keys - values
 	 * @return {boolean} true if is valid, false otherwise
 	 */
+/*
 	isValidJson = function( keys )
 	{
 		for( var val in keys )
@@ -353,6 +354,7 @@ db.things.find({$where: function() {
 		}
 		return true;
 	}
+*/
 
 
 	/**

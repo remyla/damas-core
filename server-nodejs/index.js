@@ -3,8 +3,13 @@ https = require('https'),
 express = require('express'),
 app = express(),
 fs = require('fs'),
-conf = require('./conf.json'),
-routes = require('./routes')(app, express);
+conf = require('./conf.json');
+
+var router = express.Router();
+router.use(require('./controllers/dam'));
+app.use(router);
+
+var routes = require('./routes')(app, express);
 
 //Shortcut conf json
 var confConn = conf.connection;

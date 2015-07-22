@@ -185,23 +185,23 @@
 	damas.update = function ( id, keys, callback )
 	{
 		function req_callback( req ) {
-			return JSON.parse( req.responseText );
+			return JSON.parse(req.responseText);
 		}
 		var req = new XMLHttpRequest();
-		req.open('PUT', this.server+id,callback !== undefined);
+		req.open('PUT', this.server+id, callback !== undefined);
 		req.setRequestHeader("Content-type","application/json");
 		req.setRequestHeader("Accept","application/json");
 		req.onreadystatechange = function(e){
-			if(req.readyState == 4)
+			if (req.readyState === 4)
 			{
-				if(callback)
+				if (callback)
 				{
 					callback(req_callback(req));
 				}
 			}
 		}
 		req.send(JSON.stringify(keys));
-		if(callback === undefined)
+		if (callback === undefined)
 		{
 			return req_callback(req);
 		}
@@ -339,6 +339,56 @@
 			}
 		}
 		req.send();
+	}
+
+	damas.lock = function ( id, callback )
+	{
+		function req_callback( req ) {
+			return req.status === 200;
+		}
+		var req = new XMLHttpRequest();
+		req.open('PUT', this.server+'lock/'+id, callback !== undefined);
+		req.setRequestHeader("Content-type","application/json");
+		req.setRequestHeader("Accept","application/json");
+		req.onreadystatechange = function(e){
+			if (req.readyState === 4)
+			{
+				if (callback)
+				{
+					callback(req_callback(req));
+				}
+			}
+		}
+		req.send();
+		if (callback === undefined)
+		{
+			return req_callback(req);
+		}
+	}
+
+	damas.unlock = function ( id, callback )
+	{
+		function req_callback( req ) {
+			return req.status === 200;
+		}
+		var req = new XMLHttpRequest();
+		req.open('PUT', this.server+'unlock/'+id, callback !== undefined);
+		req.setRequestHeader("Content-type","application/json");
+		req.setRequestHeader("Accept","application/json");
+		req.onreadystatechange = function(e){
+			if (req.readyState === 4)
+			{
+				if (callback)
+				{
+					callback(req_callback(req));
+				}
+			}
+		}
+		req.send();
+		if (callback === undefined)
+		{
+			return req_callback(req);
+		}
 	}
 
 	damas.create_rest = damas.create;

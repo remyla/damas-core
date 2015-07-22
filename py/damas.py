@@ -102,3 +102,22 @@ class http_connection( object ) :
 		if r.status_code == 200:
 			return json.loads(r.text)
 		return None
+
+	def lock( self, id_ ) :
+		'''
+		Lock an asset for edition
+		@param {String} id_ the internal node index
+		@returns {Boolean} True on success, False otherwise
+		'''
+		r = requests.put(self.serverURL+'/lock/'+id_)
+		return r.status_code == 200
+
+	def unlock( self, id_ ) :
+		'''
+		Unlock a locked asset
+		@param {String} id_ the internal node index
+		@returns {Boolean} True on success, False otherwise
+		'''
+		r = requests.put(self.serverURL+'/unlock/'+id_)
+		return r.status_code == 200
+
