@@ -11,7 +11,7 @@ Digital asset management server and API
 A PHP server to run in a Apache/MySQL environment. It contains a generic key-value data model supporting simple graph structures. Contains user authentication, file upload, file version control. It supports database replication among multiple sites. Used in production and maintained since 2007.
 
 ### server-nodejs
-A new Javascript implementation of the server for NodeJS which is developped since April 2015. Specifications redesign. enhanced graph structures, integration of long-time requested features, MongoDB backend. Alpha stage of development.
+A new Javascript implementation of the server for NodeJS which is developped since April 2015. Specifications redesign, enhanced graph structures, integration of long-time requested features. MongoDB backend. Alpha stage of development.
 
 ### js
 Client API library for Javascript
