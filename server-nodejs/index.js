@@ -1,9 +1,17 @@
-var http = require('http'),
-https = require('https'),
-express = require('express'),
-app = express(),
-fs = require('fs'),
-conf = require('./conf.json');
+var debug = require('debug')('app:' + process.pid);
+
+debug("Initializing express");
+var express = require('express');
+var app = express();
+
+var fs = require('fs');
+var conf = require('./conf.json');
+
+var http = require('http');
+var https = require('https')
+
+var http_port = process.env.HTTP_PORT || 8090;
+var https_port = process.env.HTTPS_PORT || 8443;
 
 var router = express.Router();
 router.use(require('./controllers/dam'));
@@ -11,26 +19,26 @@ app.use(router);
 
 var routes = require('./routes')(app, express);
 
-//Shortcut conf json
-var confConn = conf.connection;
-
-//Setting for determine if is a test envoronment
+// not in a test environment
 if( !module.parent )
 {
-	//Creation server http
-	var serverhttp  = http.createServer(app).listen(confConn.portHttp);
-	if(confConn.hasOwnProperty('keyFile') && confConn.hasOwnProperty('cerFile'))
+	debug('Creating HTTP server on port %s', http_port);
+	http.createServer(app).listen(http_port, function(){
+		debug('HTTP server listening on port %s in %s mode', http_port, app.get('env'));
+	});
+	if(conf.connection.hasOwnProperty('Key') && conf.connection.hasOwnProperty('Cert'))
 	{
-		//Options for https connection
-		var options = {
-			key : fs.readFileSync(confConn.keyFile),
-			cert : fs.readFileSync(confConn.cerFile)
-		};
-		//Creation server https
-		var serverhttps = https.createServer(options, app).listen(confConn.portHttps); 
+		debug('Creating HTTPS server on port %s', https_port);
+		https.createServer({
+			key : fs.readFileSync(conf.connection.Key),
+			cert : fs.readFileSync(conf.connection.Cert)
+
+		}, app).listen(https_port, function(){
+			debug('HTTPS server listening on port %s in %s mode', https_port, app.get('env'));
+		}); 
 	}
 }
-//test environment
+// test environment
 else
 {
 	module.exports = app;
