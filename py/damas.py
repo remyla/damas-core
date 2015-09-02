@@ -87,7 +87,7 @@ class http_connection( object ) :
 		@param {String} query string
 		@returns {Array} array of element indexes or None if no element found
 		'''
-		r = requests.get(self.serverURL+'/search/'+query)
+		r = requests.get(self.serverURL+'/search/'+query, verify=False)
 		if r.status_code == 200:
 			return json.loads(r.text)
 		return None
