@@ -41,7 +41,7 @@ class http_connection( object ) :
 		@returns {Hash} New node on success, false otherwise
 		'''
 		headers = {'content-type': 'application/json'}
-		r = requests.post(self.serverURL, data=json.dumps(keys), headers=headers )
+		r = requests.post(self.serverURL, data=json.dumps(keys), headers=headers, verify=False)
 		if r.status_code == 201:
 			return json.loads(r.text)
 		return None
@@ -52,7 +52,7 @@ class http_connection( object ) :
 		@param {String} id_ the internal node index to search
 		@returns {Hash} node or false on failure
 		'''
-		r = requests.get(self.serverURL+'/'+id_ )
+		r = requests.get(self.serverURL+'/'+id_, verify=False)
 		if r.status_code == 200:
 			return json.loads(r.text)
 		return None
@@ -67,7 +67,7 @@ class http_connection( object ) :
 		@returns {Hash} updated node or false on failure
 		'''
 		headers = {'content-type': 'application/json'}
-		r = requests.put(self.serverURL+'/'+id_, data=json.dumps(keys), headers=headers)
+		r = requests.put(self.serverURL+'/'+id_, data=json.dumps(keys), headers=headers, verify=False)
 		if r.status_code == 200:
 			return json.loads(r.text)
 		return None
@@ -78,7 +78,7 @@ class http_connection( object ) :
 		@param {String} id_ the internal node index to delete
 		@returns {Boolean} True on success, False otherwise
 		'''
-		r = requests.delete(self.serverURL+'/'+id_)
+		r = requests.delete(self.serverURL+'/'+id_, verify=False)
 		return r.status_code == 200
 
 	def search( self, query ) :
@@ -98,7 +98,7 @@ class http_connection( object ) :
 		@param {String} id_ the node index(es) to search
 		@returns {Hash} node or false on failure
 		'''
-		r = requests.get(self.serverURL+'/graph/'+id_ )
+		r = requests.get(self.serverURL+'/graph/'+id_, verify=False)
 		if r.status_code == 200:
 			return json.loads(r.text)
 		return None
@@ -109,7 +109,7 @@ class http_connection( object ) :
 		@param {String} id_ the internal node index
 		@returns {Boolean} True on success, False otherwise
 		'''
-		r = requests.put(self.serverURL+'/lock/'+id_)
+		r = requests.put(self.serverURL+'/lock/'+id_, verify=False)
 		return r.status_code == 200
 
 	def unlock( self, id_ ) :
@@ -118,6 +118,6 @@ class http_connection( object ) :
 		@param {String} id_ the internal node index
 		@returns {Boolean} True on success, False otherwise
 		'''
-		r = requests.put(self.serverURL+'/unlock/'+id_)
+		r = requests.put(self.serverURL+'/unlock/'+id_, verify=False)
 		return r.status_code == 200
 
