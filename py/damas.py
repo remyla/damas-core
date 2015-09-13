@@ -33,6 +33,8 @@ class http_connection( object ) :
 	def __init__( self, url ) :
 		#self.cj = cookielib.LWPCookieJar()
 		self.serverURL = url
+		self.jsonwebtoken = None
+		self.headers = {}
 
 	def create( self, keys ) :
 		'''
@@ -121,3 +123,32 @@ class http_connection( object ) :
 		r = requests.put(self.serverURL+'/unlock/'+id_)
 		return r.status_code == 200
 
+	# USERS AUTHENTICATION METHODS
+ 
+	def signIn( self, username, password ) :
+		'''
+		@return {Boolean} True on success, False otherwise
+		'''
+		r = requests.post(self.serverURL+'/signIn', data = "username=%s&password=%s" % (username, password) )
+		if r.status_code == 200:
+			self.jsonwebtoken = json.loads(r.text)
+			self.headers['Authentication'] = 'Bearer ' + self.jsonwebtoken['token']
+			return True
+		return False
+		# opener = urllib2.build_opener( urllib2.HTTPCookieProcessor( self.cj ) )
+		# urllib2.install_opener( opener )
+		# try: a = urllib2.urlopen( self.serverURL + '/authentication.php?cmd=login&user=' + username + '&password=' + password )
+		# except: return False
+		# return json.loads( a.read() )
+ 
+	def signOut( self ) :
+		'''
+		@return {Boolean} True on success, False otherwise
+		'''
+		return self.command( { 'cmd': 'logout' }, '/authentication.php' )['status'] == 401
+ 
+	def getUser( self ) :
+		'''
+		@return {dict} a dictionary containing username and userclass on success, None otherwise
+		'''
+		return self.command( { 'cmd': 'getUser' }, '/authentication.php' )['json']
