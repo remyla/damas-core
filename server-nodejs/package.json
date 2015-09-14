@@ -15,6 +15,7 @@
     "express": "^4.13.1",
     "express-jwt": "^3.0.1",
     "express-unless": "^0.3.0",
+    "jsonwebtoken": "^5.0.5",
     "method-override": "^2.3.4",
     "mkdirp": "^0.5.1",
     "mongodb": "^2.1.0-alpha",
