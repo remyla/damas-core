@@ -22,6 +22,14 @@ if (conf.auth === 'jwt')
 {
 	router.use(require('./controllers/auth-node-jwt.js'));
 }
+else {
+
+	router.use(function(req, res, next ){
+		req.user = { }
+		next();
+	});
+}
+
 router.use(require('./controllers/dam'));
 
 app.use(router);
