@@ -17,8 +17,13 @@ var morgan= require('morgan');
 app.use(morgan('dev'));
 
 var router = express.Router();
-router.use(require('./controllers/auth-node-jwt.js'));
+
+if (conf.auth === 'jwt')
+{
+	router.use(require('./controllers/auth-node-jwt.js'));
+}
 router.use(require('./controllers/dam'));
+
 app.use(router);
 
 var routes = require('./routes')(app, express);
