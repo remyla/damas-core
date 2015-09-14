@@ -293,8 +293,6 @@ module.exports = function Model()
 	}; //End deleteNode
 
 	this.search=function(keys, callback){
-		console.log("keys=");
-		console.log(keys);
 		this.connection( function(err, database )
 		{
 			if( err )

@@ -18,7 +18,7 @@ router.put('/lock/:id', function(req, res){
 			return;
 		}
 		var keys = {
-			"lock": req.connection.remoteAddress
+			"lock": req.user.username || req.connection.remoteAddress
 		};
 		mod.update(req.params.id, keys, function(error, doc){
 			if (error)
@@ -39,7 +39,7 @@ router.put('/unlock/:id', function(req, res){
 		return;
 	}
 	var n = mod.readOne(req.params.id, function(err, n){
-		if (n.lock !== req.connection.remoteAddress)
+		if (n.lock !== ( req.user.username || req.connection.remoteAddress) )
 		{
 			res.status(409).send('lock error, the asset is locked by '+ n.lock);
 			return;

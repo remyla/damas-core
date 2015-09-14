@@ -33,7 +33,7 @@ class http_connection( object ) :
 	def __init__( self, url ) :
 		#self.cj = cookielib.LWPCookieJar()
 		self.serverURL = url
-		self.jsonwebtoken = None
+		self.token = None
 		self.headers = {}
 
 	def create( self, keys ) :
@@ -43,6 +43,7 @@ class http_connection( object ) :
 		@returns {Hash} New node on success, false otherwise
 		'''
 		headers = {'content-type': 'application/json'}
+		headers.update(self.headers)
 		r = requests.post(self.serverURL, data=json.dumps(keys), headers=headers, verify=False)
 		if r.status_code == 201:
 			return json.loads(r.text)
@@ -54,7 +55,7 @@ class http_connection( object ) :
 		@param {String} id_ the internal node index to search
 		@returns {Hash} node or false on failure
 		'''
-		r = requests.get(self.serverURL+'/'+id_, verify=False)
+		r = requests.get(self.serverURL+'/'+id_, headers=self.headers, verify=False)
 		if r.status_code == 200:
 			return json.loads(r.text)
 		return None
@@ -80,7 +81,7 @@ class http_connection( object ) :
 		@param {String} id_ the internal node index to delete
 		@returns {Boolean} True on success, False otherwise
 		'''
-		r = requests.delete(self.serverURL+'/'+id_, verify=False)
+		r = requests.delete(self.serverURL+'/'+id_, headers=self.headers, verify=False)
 		return r.status_code == 200
 
 	def search( self, query ) :
@@ -89,7 +90,7 @@ class http_connection( object ) :
 		@param {String} query string
 		@returns {Array} array of element indexes or None if no element found
 		'''
-		r = requests.get(self.serverURL+'/search/'+query, verify=False)
+		r = requests.get(self.serverURL+'/search/'+query, headers=self.headers, verify=False)
 		if r.status_code == 200:
 			return json.loads(r.text)
 		return None
@@ -100,7 +101,7 @@ class http_connection( object ) :
 		@param {String} id_ the node index(es) to search
 		@returns {Hash} node or false on failure
 		'''
-		r = requests.get(self.serverURL+'/graph/'+id_, verify=False)
+		r = requests.get(self.serverURL+'/graph/'+id_, headers=self.headers, verify=False)
 		if r.status_code == 200:
 			return json.loads(r.text)
 		return None
@@ -111,7 +112,7 @@ class http_connection( object ) :
 		@param {String} id_ the internal node index
 		@returns {Boolean} True on success, False otherwise
 		'''
-		r = requests.put(self.serverURL+'/lock/'+id_, verify=False)
+		r = requests.put(self.serverURL+'/lock/'+id_, headers=self.headers, verify=False)
 		return r.status_code == 200
 
 	def unlock( self, id_ ) :
@@ -120,7 +121,7 @@ class http_connection( object ) :
 		@param {String} id_ the internal node index
 		@returns {Boolean} True on success, False otherwise
 		'''
-		r = requests.put(self.serverURL+'/unlock/'+id_, verify=False)
+		r = requests.put(self.serverURL+'/unlock/'+id_, headers=self.headers, verify=False)
 		return r.status_code == 200
 
 	# USERS AUTHENTICATION METHODS
@@ -129,10 +130,10 @@ class http_connection( object ) :
 		'''
 		@return {Boolean} True on success, False otherwise
 		'''
-		r = requests.post(self.serverURL+'/signIn', data = "username=%s&password=%s" % (username, password) )
+		r = requests.post(self.serverURL+'/signIn', data = "username=%s&password=%s" % (username, password), verify=False )
 		if r.status_code == 200:
-			self.jsonwebtoken = json.loads(r.text)
-			self.headers['Authentication'] = 'Bearer ' + self.jsonwebtoken['token']
+			self.token = json.loads(r.text)
+			self.headers['Authorization'] = 'Bearer ' + self.token['token']
 			return True
 		return False
 		# opener = urllib2.build_opener( urllib2.HTTPCookieProcessor( self.cj ) )
@@ -145,10 +146,14 @@ class http_connection( object ) :
 		'''
 		@return {Boolean} True on success, False otherwise
 		'''
-		return self.command( { 'cmd': 'logout' }, '/authentication.php' )['status'] == 401
+		self.token =  None
+		del self.headers['Authorization']
  
-	def getUser( self ) :
+	def verify( self ) :
 		'''
 		@return {dict} a dictionary containing username and userclass on success, None otherwise
 		'''
-		return self.command( { 'cmd': 'getUser' }, '/authentication.php' )['json']
+		r = requests.get(self.serverURL+'/verify', headers=self.headers, verify=False )
+		if r.status_code == 200:
+			return True
+		return False

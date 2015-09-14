@@ -132,7 +132,7 @@ module.exports = function(app, express){
 			return;
 		}
 		var keys = req.body;
-		keys.author = req.connection.remoteAddress;
+		keys.author = req.user.username || req.connection.remoteAddress;
 		keys.time = Date.now();
 		mod.create(keys, function(error, doc){
 			if (error)

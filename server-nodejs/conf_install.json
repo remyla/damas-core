@@ -1,13 +1,18 @@
 {
 	"connection" : {
-		"portHttp" : 8090,
-		"portHttps" : 443
+		"Cert": "cert.pem",
+		"Key": "key.pem"
 	},
 	"mongoDB" : {
 		"host" : "localhost",
 		"collection" : "node",
 		"port" : 27017,
 		"options" : { "auto_reconnect" : true }
+	},
+	"jwt" : {
+		"passwordHashAlgorithm" : "sha1",
+		"secret" : "webtokensecret",
+		"exp" : 1440
 	},
 	"statics" : [
 		"static",

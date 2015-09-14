@@ -13,7 +13,11 @@ var https = require('https')
 var http_port = process.env.HTTP_PORT || 8090;
 var https_port = process.env.HTTPS_PORT || 8443;
 
+var morgan= require('morgan');
+app.use(morgan('dev'));
+
 var router = express.Router();
+router.use(require('./controllers/auth-node-jwt.js'));
 router.use(require('./controllers/dam'));
 app.use(router);
 
