@@ -1,5 +1,6 @@
 var mongo = require('mongodb'),
 conf = require('./conf');
+var debug = require('debug')('app:model:mongo:' + process.pid);
 
 module.exports = function Model()
 {
@@ -29,7 +30,7 @@ module.exports = function Model()
 			{
 				return callback( true );
 			}
-			console.log('connected');
+			debug('connected');
 			conn = databaseConnection;
 			callback( false, databaseConnection );
 		});
@@ -166,7 +167,7 @@ module.exports = function Model()
 		hasKeyToAdd = false;
 		var ids=[];
 		ids.push(id);
-		console.log(arguments);
+		debug(arguments);
 
 		for( var k in keys )
 		{
