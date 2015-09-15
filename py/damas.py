@@ -130,7 +130,7 @@ class http_connection( object ) :
 		'''
 		@return {Boolean} True on success, False otherwise
 		'''
-		r = requests.post(self.serverURL+'/signIn', data = "username=%s&password=%s" % (username, password), verify=False )
+		r = requests.post(self.serverURL+'/signIn', data={"username":username, "password":password}, verify=False)
 		if r.status_code == 200:
 			self.token = json.loads(r.text)
 			self.headers['Authorization'] = 'Bearer ' + self.token['token']
