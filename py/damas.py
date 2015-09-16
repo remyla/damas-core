@@ -70,6 +70,7 @@ class http_connection( object ) :
 		@returns {Hash} updated node or false on failure
 		'''
 		headers = {'content-type': 'application/json'}
+		headers.update(self.headers)
 		r = requests.put(self.serverURL+'/'+id_, data=json.dumps(keys), headers=headers, verify=False)
 		if r.status_code == 200:
 			return json.loads(r.text)
