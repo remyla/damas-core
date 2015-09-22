@@ -47,10 +47,14 @@
 	 * damas.read(res[0])
 	 *
 	 * @property {string} server - damas server URL
+	 * @property {string} token - json web token for authentication
+	 * @property {string} user - authenticated user
 	 *
 	 */
 	var damas = {};
 	damas.server = '';
+	damas.token = null;
+	damas.user = null;
 
 	//
 	//
@@ -95,6 +99,7 @@
 		var req = new XMLHttpRequest();
 		req.open('POST', this.server, callback !== undefined);
 		req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+		req.setRequestHeader("Authorization","Bearer "+damas.token);
 		req.onreadystatechange = function(e){
 			if(req.readyState == 4)
 			{
@@ -153,6 +158,7 @@
 		}
 		var req = new XMLHttpRequest();
 		req.open('GET', this.server + id, callback !== undefined);
+		req.setRequestHeader("Authorization","Bearer "+damas.token);
 		req.onreadystatechange = function(e){
 			if(req.readyState == 4)
 			{
@@ -176,7 +182,7 @@
 	 * @returns {object|undefined} Node or nothing in case of asynchronous call
 	 *
 	 * @example
-	* //Create a set of keys for our node
+	 * //Create a set of keys for our node
 	 * var keys= {name:'test2',newKey:'name'};
 	 *
 	 * //Update the node id with this set of keys
@@ -191,6 +197,7 @@
 		req.open('PUT', this.server+id, callback !== undefined);
 		req.setRequestHeader("Content-type","application/json");
 		req.setRequestHeader("Accept","application/json");
+		req.setRequestHeader("Authorization","Bearer "+damas.token);
 		req.onreadystatechange = function(e){
 			if (req.readyState === 4)
 			{
@@ -224,6 +231,7 @@
 		var req = new XMLHttpRequest();
 		req.open('DELETE', this.server + id, callback !== undefined);
 		req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+		req.setRequestHeader("Authorization","Bearer "+damas.token);
 		req.onreadystatechange = function(e){
 			if(req.readyState == 4)
 			{
@@ -252,6 +260,7 @@
 	{
 		var req = new XMLHttpRequest();
 		req.open('GET', this.server + 'search/' + encodeURIComponent(query), callback !== undefined);
+		req.setRequestHeader("Authorization","Bearer "+damas.token);
 		req.onreadystatechange = function(e){
 			if(req.readyState == 4)
 			{
@@ -305,6 +314,7 @@
 		}
 		var req = new XMLHttpRequest();
 		req.open('GET', this.server + 'graph/' + encodeURIComponent(ids), callback !== undefined);
+		req.setRequestHeader("Authorization","Bearer "+damas.token);
 		req.onreadystatechange = function(e){
 			if(req.readyState == 4)
 			{
@@ -329,6 +339,7 @@
 		var req = new XMLHttpRequest();
 		req.open('GET', this.server + query, callback !== undefined);
 		//req.open('GET', this.server + encodeURIComponent(query), callback !== undefined);
+		req.setRequestHeader("Authorization","Bearer "+damas.token);
 		req.onreadystatechange = function(e){
 			if(req.readyState == 4)
 			{
@@ -350,6 +361,7 @@
 		req.open('PUT', this.server+'lock/'+id, callback !== undefined);
 		req.setRequestHeader("Content-type","application/json");
 		req.setRequestHeader("Accept","application/json");
+		req.setRequestHeader("Authorization","Bearer "+damas.token);
 		req.onreadystatechange = function(e){
 			if (req.readyState === 4)
 			{
@@ -375,6 +387,7 @@
 		req.open('PUT', this.server+'unlock/'+id, callback !== undefined);
 		req.setRequestHeader("Content-type","application/json");
 		req.setRequestHeader("Accept","application/json");
+		req.setRequestHeader("Authorization","Bearer "+damas.token);
 		req.onreadystatechange = function(e){
 			if (req.readyState === 4)
 			{
@@ -390,6 +403,91 @@
 			return req_callback(req);
 		}
 	}
+
+	//
+	//
+	//
+	//
+	// USER AUTHENTICATION METHODS
+	//
+	//
+	//
+	//
+
+	/**
+	 * Sign in using the server embeded authentication system
+	 * @param {String} username the user id
+	 * @param {String} password the user secret password
+	 * @return true on success, false otherwise
+	 */
+	damas.signIn = function ( username, password, callback )
+	{
+		function req_callback( req ) {
+			if(req.status === 200)
+			{
+				damas.user = JSON.parse(req.responseText);
+				damas.token = damas.user.token;
+				return JSON.parse(req.responseText);
+			}
+			return false;
+		}
+		var req = new XMLHttpRequest();
+		req.open('POST', this.server+"signIn", callback !== undefined);
+		req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+		req.onreadystatechange = function(e){
+			if(req.readyState == 4)
+			{
+				if(callback)
+				{
+					callback(req_callback(req));
+				}
+			}
+		}
+		req.send("username="+encodeURIComponent(username) + "&password="+encodeURIComponent(password));
+		if(callback === undefined)
+		{
+			return req_callback(req);
+		}
+	}
+
+	/**
+	 * Sign out using the server embeded authentication system
+	 * @return true on success, false otherwise
+	 */
+	damas.signOut = function ( callback )
+	{
+		damas.token = null;
+		damas.user = null;
+	}
+
+	/**
+	 * Check if the authentication is valid
+	 * @return true on success, false otherwise
+	 */
+	damas.verify = function ( callback )
+	{
+		function req_callback( req ) {
+			if(req.status === 200)
+			{
+				return true;
+			}
+			return false;
+		}
+		var req = new XMLHttpRequest();
+		req.open('GET', this.server+"verify", callback !== undefined);
+		req.setRequestHeader("Authorization","Bearer "+damas.token);
+		req.onreadystatechange = function(e){
+			if(req.readyState == 4)
+			{
+				if(callback)
+				{
+					callback(req_callback(req));
+				}
+			}
+		}
+		req.send();
+	}
+
 
 	damas.create_rest = damas.create;
 	damas.read_rest = damas.read;
