@@ -62,13 +62,15 @@ class http_connection( object ) :
 
 	def update( self, id_, keys ) :
 		'''
-		Modify a node. If an attribute with that name is already present in
+		Modify a node(s). If an attribute with that name is already present in
 		the element, its value is changed to be that of the value parameter.
 		Specifying a None value for a key will remove the key from the node
 		@param {String} id_ Element index
 		@param {Hash} keys to add and remove
 		@returns {Hash} updated node or false on failure
 		'''
+		if type(id_) is list:
+			id_ = ",".join(id_)
 		headers = {'content-type': 'application/json'}
 		headers.update(self.headers)
 		r = requests.put(self.serverURL+'/'+id_, data=json.dumps(keys), headers=headers, verify=False)

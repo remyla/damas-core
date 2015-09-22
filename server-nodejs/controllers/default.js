@@ -13,14 +13,12 @@ module.exports = function(app, express){
 	crypto= require('crypto'),
 
 	mod.connection( function(){});
-	morgan= require('morgan');
 
 	ncp.limit=16;
 	var checksum;
 	var tempFile;
 	var fileSystem=conf.fileSystem;
 	//Middlewares
-	app.use(morgan('dev'));
 	app.use( bodyParser.json({limit: '50mb'}));
 	app.use( bodyParser.urlencoded( { limit: '50mb', extended : true } ) );
 
@@ -169,6 +167,7 @@ module.exports = function(app, express){
 
 	update = function( req, res )
 	{
+/*
 		if (!ObjectId.isValid(req.params.id))
 		{
 			res.status(400).send('update error: the specified id is not valid');
@@ -179,7 +178,8 @@ module.exports = function(app, express){
 			res.status(400).send('update error: the body of the request is empty');
 			return;
 		}
-		mod.update(req.params.id, req.body, function(error, doc){
+*/
+		mod.update(req.params.id.split(","), req.body, function(error, doc){
 			if (error)
 			{
 				res.status(409).send('update error, please change your values');

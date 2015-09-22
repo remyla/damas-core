@@ -153,33 +153,33 @@ module.exports = function Model()
 	};
 
 	/**
-	 * Update the keys of a node. Specified keys overwrite existing keys, others are left untouched.
+	 * Update nodes keys. The specified keys overwrite existing keys, others are left untouched.
 	 * A null key value removes the key.
-	 * @param {Integer} $id node index
-	 * @param {Array} $keys keys Array of key/value pairs to update (usually comming from json_decode)
-	 * @param {function} callback - Function callback to routes.js
+	 * @param {array} id - array of node indexes to update
+	 * @param {object} keys - hash containing key/value pairs
+	 * @param {function} callback - function to call when done
 	 */
-	this.update = function( id, keys, callback )
+	this.update = function( ids, keys, callback )
 	{
-		var keyToRemove = {},
-		keyToAdd = {},
-		hasKeyToRemove = false,
-		hasKeyToAdd = false;
-		var ids=[];
-		ids.push(id);
-		debug(arguments);
-
+		debug('update nodes: ', ids);
+		debug('update keys: ', keys);
+		var keysToUnset = {},
+			keysToSet = {};
+		// prepare ids
+		var ids_o = new Array();
+		for (var i in ids)
+		{
+			ids_o.push(new ObjectId(ids[i]));
+		}
 		for( var k in keys )
 		{
 			if( keys[k] === null )
 			{
-				keyToRemove[k] = '';
-				hasKeyToRemove = true;
+				keysToUnset[k] = '';
 			}
 			else
 			{
-				keyToAdd[k] = decodeURIComponent(keys[k]);
-				hasKeyToAdd = true;
+				keysToSet[k] = decodeURIComponent(keys[k]);
 			}
 		}
 		this.connection( function(err, database )
@@ -198,53 +198,23 @@ module.exports = function Model()
 					}
 					else
 					{
-						if( hasKeyToAdd && hasKeyToRemove )
+
+						collection.update( { '_id': {$in:ids_o} }, { $set:keysToSet, $unset:keysToUnset}, {multi: true}, function( err, result)
 						{
-							collection.updateOne( {'_id':new ObjectId( id )}, {$set:keyToAdd, $unset:keyToRemove}, function( err, result)
+							if( err )
 							{
-								if( err )
-								{
-									callback( true );
-								}
-								else
-								{
-									self.read( ids, callback );
-								}
-							});
-						}
-						else if( hasKeyToAdd )
-						{
-							collection.updateOne( {'_id':new ObjectId(id)}, {$set:keyToAdd}, function( err, result )
+								callback( true );
+							}
+							else
 							{
-								if( err )
-								{
-									callback( true );
-								}
-								else
-								{
-									self.read( ids, callback );
-								}
-							});
-						}
-						else if( hasKeyToRemove )
-						{
-							collection.updateOne({'_id':new ObjectId(id)}, {$unset:keyToRemove}, function(err, result)
-							{
-								if( err )
-								{
-									callback( true );
-								}
-								else
-								{
-									self.read( ids, callback );
-								}
-							});
-						}
+								self.read( ids_o, callback );
+							}
+						});
 					}
 				});
 			}
 		});
-	}; //End update
+	};
 
 	/**
 	 * Recursively delete a node - WARNING: this function doesn't check anything before removal

@@ -190,6 +190,10 @@
 	 */
 	damas.update = function ( id, keys, callback )
 	{
+		if( Array.isArray(id) )
+		{
+			id = id.join(',');
+		}
 		function req_callback( req ) {
 			return JSON.parse(req.responseText);
 		}
