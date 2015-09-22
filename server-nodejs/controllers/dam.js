@@ -5,7 +5,7 @@ var bodyParser = require( 'body-parser' );
 router.use(bodyParser());
 
 // if is already locked returns false
-router.put('/lock/:id', function(req, res){
+router.put('/api/lock/:id', function(req, res){
 	if (!ObjectId.isValid(req.params.id))
 	{
 		res.status(400).send('lock error: the specified id is not valid');
@@ -31,7 +31,7 @@ router.put('/lock/:id', function(req, res){
 	});
 });
 
-router.put('/unlock/:id', function(req, res){
+router.put('/api/unlock/:id', function(req, res){
 	console.log('unlock');
 	if (!ObjectId.isValid(req.params.id))
 	{
@@ -54,5 +54,24 @@ router.put('/unlock/:id', function(req, res){
 		});
 	});
 });
+
+/*
+router.post('/api/versionof/:id', function(req, res){
+
+
+	var keys = req.body;
+	keys.author = req.user.username || req.connection.remoteAddress;
+	key.time = Date.now();
+	mod.create(keys, function(error, doc){
+		if (error)
+		{
+			res.status(409).send('create error, please change your values');
+			return;
+		}
+		res.status(201).send(doc);
+
+	mod.create()
+});
+*/
 
 module.exports = router;

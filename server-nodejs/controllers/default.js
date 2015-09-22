@@ -1,9 +1,9 @@
 module.exports = function(app, express){
 	var mongo = require( 'mongodb' ),
-	mongoModel = require( './model.js' ),
+	mongoModel = require( '../model.js' ),
 	bodyParser = require( 'body-parser' ),
 	methodOverride = require( 'method-override' ),
-	conf = require( './conf.json' ),
+	conf = require( '../conf.json' ),
 	fs  = require('fs'),
 	multer  = require('multer'),
 	ncp= require('ncp').ncp;
@@ -179,8 +179,7 @@ module.exports = function(app, express){
 			res.status(400).send('update error: the body of the request is empty');
 			return;
 		}
-		var keys = req.body;
-		mod.update(req.params.id, keys, function(error, doc){
+		mod.update(req.params.id, req.body, function(error, doc){
 			if (error)
 			{
 				res.status(409).send('update error, please change your values');
@@ -511,28 +510,28 @@ db.things.find({$where: function() {
 	//
 	// Extra operations
 	//
-	app.get('/graph/:id', graph);
-	app.get('/file/:path(*)',getFile);
-	app.post('/import', importJSON);
-	app.post('/upload', upload);
-	app.put('/upload', uploadNewVersion);
+	app.get('/api/graph/:id', graph);
+	app.get('/api/file/:path(*)',getFile);
+	app.post('/api/import', importJSON);
+	app.post('/api/upload', upload);
+	app.put('/api/upload', uploadNewVersion);
 	//app.get('/subdirs/:path',getSubdirs);
 	//app.get('/subdirs',getSubdirs);
 
 	//
 	// Alternative Operations ()
 	//
-	app.get('/search/:query(*)', search);
-	app.get('/graph/', graph);
-	app.get('/', read);
+	app.get('/api/search/:query(*)', search);
+	app.get('/api/graph/', graph);
+	app.get('/api/', read);
 	//app.put('/', update);
 	//app.delete('/', deleteNode);
 
 	//
 	// CRUDS operations
 	//
-	app.post('/', create);
-	app.get('/:id', read);
-	app.put('/:id', update);
-	app.delete('/:id', deleteNode);
+	app.post('/api/', create);
+	app.get('/api/:id', read);
+	app.put('/api/:id', update);
+	app.delete('/api/:id', deleteNode);
 }

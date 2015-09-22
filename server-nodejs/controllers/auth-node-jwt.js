@@ -79,11 +79,11 @@ var middleware = function () {
 	return func;
 };
 
-router.use(middleware().unless({path:'/signIn'}));
+router.use(middleware().unless({path:['/api/signIn',/\/damas-flow.*/]}));
 
 var jwtMiddleware = expressJwt({secret:conf.jwt.secret});
 jwtMiddleware.unless = unless;
-router.use( jwtMiddleware.unless({path: '/signIn'}) );
+router.use( jwtMiddleware.unless({path:['/api/signIn',/\/damas-flow.*/]}) );
 
 // error handler for all the applications
 router.use(function (err, req, res, next) {
@@ -109,7 +109,7 @@ router.use(function (err, req, res, next) {
 	return res.status(code).json(msg);
 });
 
-router.get("/verify", function (req, res) {
+router.get("/api/verify", function (req, res) {
 			var token = fetch(req.headers);
 			jwt.verify(token, conf.jwt.secret, function (err, decode) {
 				if (err) {
@@ -120,7 +120,7 @@ router.get("/verify", function (req, res) {
 			});
 });
 
-router.route("/signIn").post(authenticate, function (req, res, next) {
+router.route("/api/signIn").post(authenticate, function (req, res, next) {
 	return res.status(200).json(req.user);
 });
 

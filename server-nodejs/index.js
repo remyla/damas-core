@@ -34,7 +34,8 @@ router.use(require('./controllers/dam'));
 
 app.use(router);
 
-var routes = require('./routes')(app, express);
+//var routes = require('./routes')(app, express);
+var routes = require('./controllers/default')(app, express);
 
 // not in a test environment
 if( !module.parent )
