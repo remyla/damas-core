@@ -14,12 +14,12 @@ The data can be remotely accessed from Python or Javascript, and using command l
 
 Please visit the wiki's [API Reference](https://github.com/remyla/damas-core/wiki/API).
 
-## Usage
+# Usage
 Choose a server to run (either the Php or the NodeJS server) and use the Python or Javascript libraries to access it.
 
 The NodeJS server is currently under development. For stable versions (currently Php only) please have a look at the releases. For a full Python compatible API, use the 2.2-stable release.
 
-## Related Links
+# Related Links
 
 https://github.com/PRIMCODE/damas-flow is a flow graph interface based on the NodeJS server implementation which is being created since April 2015.
 
@@ -30,7 +30,7 @@ http://damas-software.org is a website which presents the works related to damas
 http://primcode.com PRIMCODE is the company behind the development, the distribution and the maintenance of damas-core
 
 
-## License
+# License
 GPL License(GPLV3)
 
 Copyright(c) 2015 Remy Lalanne remy@primcode.com
