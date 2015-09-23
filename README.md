@@ -1,30 +1,25 @@
 <img src="http://damas-software.com/bin/damas_logo.png" alt="damas-core"/>
 
-
-# damas-core
-http://damas-software.org
-
 Digital asset management server and API
 
-## Overview
-### server-php
+# Overview
+## server-php
 A PHP server to run in a Apache/MySQL environment. It contains a generic key-value data model supporting simple graph structures. Contains user authentication, file upload, file version control. It supports database replication among multiple sites. Used in production and maintained since 2007.
 
-### server-nodejs
+## server-nodejs
 A new Javascript implementation of the server for NodeJS which is developped since April 2015. Specifications redesign, enhanced graph structures, integration of long-time requested features. MongoDB backend. Alpha stage of development.
 
-### js
-Client API library for Javascript
+## API
+The data can be remotely accessed from Python or Javascript, and using command line tools like curl.
 
-### py
-Client API library for Python
+Please visit the wiki's [API Reference](https://github.com/remyla/damas-core/wiki/API).
 
-## Usage
+# Usage
 Choose a server to run (either the Php or the NodeJS server) and use the Python or Javascript libraries to access it.
 
 The NodeJS server is currently under development. For stable versions (currently Php only) please have a look at the releases. For a full Python compatible API, use the 2.2-stable release.
 
-## Related Links
+# Related Links
 
 https://github.com/PRIMCODE/damas-flow is a flow graph interface based on the NodeJS server implementation which is being created since April 2015.
 
@@ -35,7 +30,7 @@ http://damas-software.org is a website which presents the works related to damas
 http://primcode.com PRIMCODE is the company behind the development, the distribution and the maintenance of damas-core
 
 
-## License
+# License
 GPL License(GPLV3)
 
 Copyright(c) 2015 Remy Lalanne remy@primcode.com
