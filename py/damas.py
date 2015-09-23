@@ -18,7 +18,7 @@
 
   Usage:
     import damas
-    project = damas.http_connection( "https://example.com/damas/server" )
+    project = damas.http_connection( "https://localhost/api/" )
     elem = project.search('id:element_id')
     print elem
 """
@@ -55,6 +55,8 @@ class http_connection( object ) :
 		@param {String} id_ the internal node index to search
 		@returns {Hash} node or false on failure
 		'''
+		if type(id_) is list:
+			id_ = ",".join(id_)
 		r = requests.get(self.serverURL+'/'+id_, headers=self.headers, verify=False)
 		if r.status_code == 200:
 			return json.loads(r.text)
@@ -84,6 +86,8 @@ class http_connection( object ) :
 		@param {String} id_ the internal node index to delete
 		@returns {Boolean} True on success, False otherwise
 		'''
+		if type(id_) is list:
+			id_ = ",".join(id_)
 		r = requests.delete(self.serverURL+'/'+id_, headers=self.headers, verify=False)
 		return r.status_code == 200
 
@@ -104,6 +108,8 @@ class http_connection( object ) :
 		@param {String} id_ the node index(es) to search
 		@returns {Hash} node or false on failure
 		'''
+		if type(id_) is list:
+			id_ = ",".join(id_)
 		r = requests.get(self.serverURL+'/graph/'+id_, headers=self.headers, verify=False)
 		if r.status_code == 200:
 			return json.loads(r.text)
