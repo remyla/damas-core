@@ -80,11 +80,11 @@ module.exports = function Model()
 	}; //End Create
 
 	/**
-	 * Get key->values combinations for a given node
-	 * @param {Integer} $id of the node
+	 * Get key->values combinations for the given nodes
+	 * @param {Integer} ids array of indexes
 	 * @param {function} callback - Function callback to routes.js
 	 */
-	this.read = function( id, callback )
+	this.read = function( ids, callback )
 	{
 		this.connection( function(err, database )
 		{
@@ -102,23 +102,24 @@ module.exports = function Model()
 					}
 					else
 					{
-							var array=[];
-							for(i in id){
-								collection.findOne({'_id':new ObjectId(id[i])},function(err, item) {
-									if (err)
-										callback(true);
-									else{
-										array.push(item);
-										if(id.length == array.length)
-											callback(false,array);
-										}
-								});
+						var array=[];
+						function findnext(indexes, cursor){
+							collection.findOne({'_id':new ObjectId(indexes[cursor])}, function(err, item) {
+							if(cursor===indexes.length)
+							{
+								callback(false,array);
+								return;
 							}
+							array.push(item);
+							findnext(indexes, ++cursor);
+							});
+						}
+						findnext(ids, 0);
 					}
 				});
 			}
 		});
-	}; //End read
+	};
 
 	/**
 	 * Get a node specifying its index
@@ -167,7 +168,7 @@ module.exports = function Model()
 			keysToSet = {};
 		// prepare ids
 		var ids_o = new Array();
-		for (var i in ids)
+		for (var i = 0; i < ids.length; i++)
 		{
 			ids_o.push(new ObjectId(ids[i]));
 		}
