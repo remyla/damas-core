@@ -18,13 +18,15 @@
 
   Usage:
     import damas
-    project = damas.http_connection( "https://example.com/damas/server" )
+    project = damas.http_connection( "https://localhost/api/" )
     elem = project.search('id:element_id')
     print elem
 """
 
 import json
 import requests
+
+requests.packages.urllib3.disable_warnings() # remove certificate warning
 
 class http_connection( object ) :
 	'''
@@ -55,6 +57,8 @@ class http_connection( object ) :
 		@param {String} id_ the internal node index to search
 		@returns {Hash} node or false on failure
 		'''
+		if isinstance(id_, (tuple,list,set)):
+			id_ = ",".join(id_)
 		r = requests.get(self.serverURL+'/'+id_, headers=self.headers, verify=False)
 		if r.status_code == 200:
 			return json.loads(r.text)
@@ -69,7 +73,7 @@ class http_connection( object ) :
 		@param {Hash} keys to add and remove
 		@returns {Hash} updated node or false on failure
 		'''
-		if type(id_) is list:
+		if isinstance(id_, (tuple,list,set)):
 			id_ = ",".join(id_)
 		headers = {'content-type': 'application/json'}
 		headers.update(self.headers)
@@ -84,6 +88,8 @@ class http_connection( object ) :
 		@param {String} id_ the internal node index to delete
 		@returns {Boolean} True on success, False otherwise
 		'''
+		if isinstance(id_, (tuple,list,set)):
+			id_ = ",".join(id_)
 		r = requests.delete(self.serverURL+'/'+id_, headers=self.headers, verify=False)
 		return r.status_code == 200
 
@@ -104,6 +110,8 @@ class http_connection( object ) :
 		@param {String} id_ the node index(es) to search
 		@returns {Hash} node or false on failure
 		'''
+		if isinstance(id_, (tuple,list,set)):
+			id_ = ",".join(id_)
 		r = requests.get(self.serverURL+'/graph/'+id_, headers=self.headers, verify=False)
 		if r.status_code == 200:
 			return json.loads(r.text)
