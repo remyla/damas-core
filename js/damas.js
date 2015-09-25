@@ -430,7 +430,7 @@
 			}
 			return false;
 		}
-		keys.path = path;
+		keys.file = path;
 		var req = new XMLHttpRequest();
 		req.open('POST', this.server+'version/'+id, callback !== undefined);
 		req.setRequestHeader("Content-type","application/x-www-form-urlencoded");

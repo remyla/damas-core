@@ -143,7 +143,7 @@ class http_connection( object ) :
 		'''
 		headers = {'content-type': 'application/json'}
 		headers.update(self.headers)
-		keys['path'] = path;
+		keys['file'] = path;
 		r = requests.post('%s/version/%s' % (self.serverURL, id_), data=json.dumps(keys), headers=headers, verify=False)
 		if r.status_code == 201:
 			return json.loads(r.text)
