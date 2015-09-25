@@ -38,7 +38,7 @@
 	 *
 	 * @example
 	 * // set the server URL
-	 * damas.server = "https://server/";
+	 * damas.server = "https://localhost:8443/api";
 	 *
 	 * // retrieve the node unique index of a file using its path in the project
 	 * var res = damas.search({"file":"/project/dir/file.png"});
@@ -403,6 +403,52 @@
 		}
 		req.send();
 		if (callback === undefined)
+		{
+			return req_callback(req);
+		}
+	}
+
+	/**
+	 * Creates a node with the specified keys, asynchronously if a callback function is specified or synchronously otherwise.
+	 * @param {hash} keys - Hash of key:value pairs
+	 * @param {function} [callback] - Function with the XHR object as argument to call
+	 * @returns {object|boolean|undefined} New node on success, false otherwise (or nothing if async)
+	 *
+	 * @example
+	 * //Create a set of keys for our node
+	 * var keys= {name:'test',type:'char'};
+	 *
+	 * //Create a new node using this set of keys
+	 * var newNode= damas.create(keys);
+	 */
+	damas.version = function ( id, path, keys, callback )
+	{
+		function req_callback( req ) {
+			if(req.status === 201)
+			{
+				return JSON.parse(req.responseText);
+			}
+			return false;
+		}
+		keys.path = path;
+		var req = new XMLHttpRequest();
+		req.open('POST', this.server+'version/'+id, callback !== undefined);
+		req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+		req.setRequestHeader("Authorization","Bearer "+damas.token);
+		req.onreadystatechange = function(e){
+			if(req.readyState == 4)
+			{
+				if(callback)
+				{
+					callback(req_callback(req));
+				}
+			}
+		}
+		var qs = Object.keys(keys).map(function(key){
+			return encodeURIComponent(key) + '=' + encodeURIComponent(keys[key]);
+		}).join('&');
+		req.send(qs);
+		if(callback === undefined)
 		{
 			return req_callback(req);
 		}

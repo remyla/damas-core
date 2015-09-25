@@ -32,7 +32,6 @@ router.put('/api/lock/:id', function(req, res){
 });
 
 router.put('/api/unlock/:id', function(req, res){
-	console.log('unlock');
 	if (!ObjectId.isValid(req.params.id))
 	{
 		res.status(400).send('lock error: the specified id is not valid');
@@ -55,13 +54,12 @@ router.put('/api/unlock/:id', function(req, res){
 	});
 });
 
-/*
-router.post('/api/versionof/:id', function(req, res){
-
-
+router.post('/api/version/:id', function(req, res){
 	var keys = req.body;
 	keys.author = req.user.username || req.connection.remoteAddress;
-	key.time = Date.now();
+	keys.time = Date.now();
+	keys.file = req.params.path;
+	keys['#parent'] = req.params.id;
 	mod.create(keys, function(error, doc){
 		if (error)
 		{
@@ -69,9 +67,9 @@ router.post('/api/versionof/:id', function(req, res){
 			return;
 		}
 		res.status(201).send(doc);
+	});
 
-	mod.create()
+	mod.create();
 });
-*/
 
 module.exports = router;
