@@ -56,9 +56,13 @@ router.put('/api/unlock/:id', function(req, res){
 
 router.post('/api/version/:id', function(req, res){
 	var keys = req.body;
+	if (!keys.file)
+	{
+		res.status(400).send('version error: file key must be specified');
+		return;
+	}
 	keys.author = req.user.username || req.connection.remoteAddress;
 	keys.time = Date.now();
-	keys.file = req.params.path;
 	keys['#parent'] = req.params.id;
 	mod.create(keys, function(error, doc){
 		if (error)
@@ -68,8 +72,6 @@ router.post('/api/version/:id', function(req, res){
 		}
 		res.status(201).send(doc);
 	});
-
-	mod.create();
 });
 
 module.exports = router;

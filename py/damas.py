@@ -135,7 +135,7 @@ class http_connection( object ) :
 		r = requests.put(self.serverURL+'/unlock/'+id_, headers=self.headers, verify=False)
 		return r.status_code == 200
 
-	def version( self, id_, path, keys ) :
+	def version( self, id_, keys ) :
 		'''
 		Create a node version
 		@param {Hash} keys of the new node
@@ -143,7 +143,6 @@ class http_connection( object ) :
 		'''
 		headers = {'content-type': 'application/json'}
 		headers.update(self.headers)
-		keys['file'] = path;
 		r = requests.post('%s/version/%s' % (self.serverURL, id_), data=json.dumps(keys), headers=headers, verify=False)
 		if r.status_code == 201:
 			return json.loads(r.text)

@@ -421,7 +421,7 @@
 	 * //Create a new node using this set of keys
 	 * var newNode= damas.create(keys);
 	 */
-	damas.version = function ( id, path, keys, callback )
+	damas.version = function ( id, keys, callback )
 	{
 		function req_callback( req ) {
 			if(req.status === 201)
@@ -430,7 +430,6 @@
 			}
 			return false;
 		}
-		keys.file = path;
 		var req = new XMLHttpRequest();
 		req.open('POST', this.server+'version/'+id, callback !== undefined);
 		req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
