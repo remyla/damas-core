@@ -262,6 +262,9 @@
 	 */
 	damas.search = function ( query, callback )
 	{
+		function req_callback( req ) {
+			return JSON.parse(req.responseText);
+		}
 		var req = new XMLHttpRequest();
 		req.open('GET', this.server + 'search/' + encodeURIComponent(query), callback !== undefined);
 		req.setRequestHeader("Authorization","Bearer "+damas.token);
@@ -270,12 +273,18 @@
 			{
 				if(req.status == 200)
 				{
-					//callback( { 'status': req.status, text: req.responseText } );
-					callback(JSON.parse(req.responseText));
+					if(callback)
+					{
+						callback(req_callback(req));
+					}
 				}
 			}
 		}
 		req.send();
+		if(callback === undefined)
+		{
+			return req_callback(req);
+		}
 	}
 
 /* this is the php version as reference
@@ -421,7 +430,7 @@
 	 * //Create a new node using this set of keys
 	 * var newNode= damas.create(keys);
 	 */
-	damas.version = function ( id, keys, callback )
+	damas.version = function ( id, path, keys, callback )
 	{
 		function req_callback( req ) {
 			if(req.status === 201)
@@ -430,6 +439,7 @@
 			}
 			return false;
 		}
+		keys.file = path;
 		var req = new XMLHttpRequest();
 		req.open('POST', this.server+'version/'+id, callback !== undefined);
 		req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
