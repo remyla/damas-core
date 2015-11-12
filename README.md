@@ -14,7 +14,7 @@ A PHP server to run in a Apache environment. Generic key-value data model, simpl
 The Python and Javascript libraries to access the server remotly, interface its methods and process the JSON results using the language native objects. The [API Reference](https://github.com/remyla/damas-core/wiki/API) wiki page describes these behaviours.
 
 # Usage
-Choose a server to run (either the Php or the NodeJS server). Refer at the README.md files in the servers folders for the installation instructions. Then use the Python or Javascript libraries to access it, of which instructions can be found in the wiki.
+Choose a server to run (either the Php or the NodeJS server). Refer to the README.md files in the servers folders for the installation instructions. Then use the Python or Javascript libraries to access it, of which instructions can be found in the wiki.
 
 # Related Links
 
