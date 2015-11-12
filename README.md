@@ -5,7 +5,7 @@ Nodal digital asset management server and API
 # Overview
 
 ## server-nodejs
-A Javascript implementation of the server for NodeJS which developpement started in April 2015. Specifications redesign, enhanced graph structures, web token user authentication, integration of long-time requested features. MongoDB backend. This version is used in a production and stable. Some functions are still missing though, please see the documentation.
+A Javascript implementation of the server for NodeJS which developpement started in April 2015. Specifications redesign, enhanced graph structures, web token user authentication, integration of long-time requested features. MongoDB backend. This version is used in production and stable. Some functions are still missing though, please see the documentation.
 
 ## server-php
 A PHP server to run in a Apache environment. Generic key-value data model, simple graph structures, user authentication, file version control, using MySQL as database. It supports database replication among multiple sites. Used in production and maintained since 2007. The Php version is still used in production, very stable, and maintained. We intend to make it evolve to the new specifications some days. 
