@@ -1,13 +1,14 @@
-<img src="http://damas-software.com/bin/damas_logo.png" alt="damas-core"/>
+<img src="http://damas-software.org/bin/damas_software_logo.svg" alt="damas software logo"/>
 
-Digital asset management server and API
+Nodal digital asset management server and API
 
 # Overview
-## server-php
-A PHP server to run in a Apache/MySQL environment. It contains a generic key-value data model supporting simple graph structures. Contains user authentication, file upload, file version control. It supports database replication among multiple sites. Used in production and maintained since 2007.
 
 ## server-nodejs
-A new Javascript implementation of the server for NodeJS which is developped since April 2015. Specifications redesign, enhanced graph structures, integration of long-time requested features. MongoDB backend. Alpha stage of development.
+A Javascript implementation of the server for NodeJS which developpement started in April 2015. Specifications redesign, enhanced graph structures, web token user authentication, integration of long-time requested features. MongoDB backend. This version is used in a production and stable. Some functions are still missing though, please see the documentation.
+
+## server-php
+A PHP server to run in a Apache environment. Generic key-value data model, simple graph structures, user authentication, file version control, using MySQL as database. It supports database replication among multiple sites. Used in production and maintained since 2007. The Php version is still used in production, very stable, and maintained. We intend to make it evolve to the new specifications some days. 
 
 ## API
 The data can be remotely accessed from Python or Javascript, and using command line tools like curl.
@@ -15,9 +16,7 @@ The data can be remotely accessed from Python or Javascript, and using command l
 Please visit the wiki's [API Reference](https://github.com/remyla/damas-core/wiki/API).
 
 # Usage
-Choose a server to run (either the Php or the NodeJS server) and use the Python or Javascript libraries to access it.
-
-The NodeJS server is currently under development. For stable versions (currently Php only) please have a look at the releases. For a full Python compatible API, use the 2.2-stable release.
+Choose a server to run (either the Php or the NodeJS server). Refer at the README.md files in the servers folders for the installation instructions. Then use the Python or Javascript libraries to access it, of which instructions can be found in the wiki.
 
 # Related Links
 
