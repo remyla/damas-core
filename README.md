@@ -1,6 +1,6 @@
 <img src="http://damas-software.org/bin/damas_software_logo.svg" alt="damas software logo"/>
 
-Nodal digital asset management server and API
+Servers and client libraries for nodal digital asset management
 
 # Overview
 
@@ -18,11 +18,11 @@ Choose a server to run (either the Php or the NodeJS server). Refer to the READM
 
 # Related Links
 
-https://github.com/PRIMCODE/damas-flow is a flow graph interface based on the NodeJS server implementation which is being created since April 2015.
+http://damas-software.org is a website which presents the projects related to damas-core
 
 http://dabox.io is collaborative platform for architecture using damas-core as backend
 
-http://damas-software.org is a website which presents the works related to damas-core
+https://github.com/PRIMCODE/damas-flow is a flow graph interface based on the NodeJS server implementation which is being created since April 2015.
 
 http://primcode.com PRIMCODE is the company behind the development, the distribution and the maintenance of damas-core
 
