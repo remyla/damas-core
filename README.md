@@ -10,10 +10,8 @@ A Javascript implementation of the server for NodeJS which developpement started
 ## server-php
 A PHP server to run in a Apache environment. Generic key-value data model, simple graph structures, user authentication, file version control, using MySQL as database. It supports database replication among multiple sites. Used in production and maintained since 2007. The Php version is still used in production, very stable, and maintained. We intend to make it evolve to the new specifications some days. 
 
-## API
-The data can be remotely accessed from Python or Javascript, and using command line tools like curl.
-
-Please visit the wiki's [API Reference](https://github.com/remyla/damas-core/wiki/API).
+## py and js
+The Python and Javascript libraries to access the server remotly, interface its methods and process the JSON results using the language native objects. The [API Reference](https://github.com/remyla/damas-core/wiki/API) wiki page describes these behaviours.
 
 # Usage
 Choose a server to run (either the Php or the NodeJS server). Refer at the README.md files in the servers folders for the installation instructions. Then use the Python or Javascript libraries to access it, of which instructions can be found in the wiki.
