@@ -262,6 +262,9 @@
 	 */
 	damas.search = function ( query, callback )
 	{
+		function req_callback( req ) {
+			return JSON.parse(req.responseText);
+		}
 		var req = new XMLHttpRequest();
 		req.open('GET', this.server + 'search/' + encodeURIComponent(query), callback !== undefined);
 		req.setRequestHeader("Authorization","Bearer "+damas.token);
@@ -270,12 +273,18 @@
 			{
 				if(req.status == 200)
 				{
-					//callback( { 'status': req.status, text: req.responseText } );
-					callback(JSON.parse(req.responseText));
+					if(callback)
+					{
+						callback(req_callback(req));
+					}
 				}
 			}
 		}
 		req.send();
+		if(callback === undefined)
+		{
+			return req_callback(req);
+		}
 	}
 
 /* this is the php version as reference
