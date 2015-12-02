@@ -516,6 +516,10 @@
 	{
 		damas.token = null;
 		damas.user = null;
+		if(callback)
+		{
+			callback();
+		}
 	}
 
 	/**
