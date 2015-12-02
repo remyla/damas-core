@@ -79,11 +79,11 @@ var middleware = function () {
 	return func;
 };
 
-router.use(middleware().unless({path:['/api/signIn',/\/damas-flow.*/]}));
+router.use(middleware().unless({path:['/api/signIn',/\/damas-flow.*/, '/console.html', '/damas.js']}));
 
 var jwtMiddleware = expressJwt({secret:conf.jwt.secret});
 jwtMiddleware.unless = unless;
-router.use( jwtMiddleware.unless({path:['/api/signIn',/\/damas-flow.*/]}) );
+router.use( jwtMiddleware.unless({path:['/api/signIn',/\/damas-flow.*/, '/console.html', '/damas.js']}) );
 
 // error handler for all the applications
 router.use(function (err, req, res, next) {
