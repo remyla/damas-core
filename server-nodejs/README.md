@@ -22,6 +22,11 @@ and edit it according to your needs
 # Run
 > DEBUG=app:* node .
 
+On windows
+
+> set DEBUG=*
+> node .
+
 The server will be listening and waiting for commands on ports 8090 and 8443 by default.
 
 ## Run a development server
