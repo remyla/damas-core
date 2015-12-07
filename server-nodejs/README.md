@@ -22,6 +22,7 @@ and edit it according to your needs
 # Run
 On Windows, the environment variable is set using the `set` command.
 > set DEBUG=*
+
 Then, run the program to be debugged as usual.
 
 > DEBUG=app:* node .
