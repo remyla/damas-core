@@ -20,6 +20,10 @@ Copy the default configuration file
 and edit it according to your needs
 
 # Run
+On Windows, the environment variable is set using the `set` command.
+> set DEBUG=*
+Then, run the program to be debugged as usual.
+
 > DEBUG=app:* node .
 
 The server will be listening and waiting for commands on ports 8090 and 8443 by default.
@@ -27,8 +31,3 @@ The server will be listening and waiting for commands on ports 8090 and 8443 by 
 ## Run a development server
 A secondary server which will be used for tests may be useful. You can adapt the command line to specify alternate ports, and to show full debug information:
 > DEBUG=* HTTP_PORT=8091 HTTPS_PORT=8444 nodejs .
-
-### Windows note
-On Windows, the environment variable is set using the `set` command.
-> set DEBUG=*
-Then, run the program to be debugged as usual.
