@@ -1,3 +1,5 @@
+[![Stories in Ready](https://badge.waffle.io/remyla/damas-core.png?label=ready&title=Ready)](https://waffle.io/remyla/damas-core)
+
 <img src="http://damas-software.org/bin/damas_software_logo.svg" alt="damas software logo"/>
 
 Servers and client libraries for nodal digital asset management

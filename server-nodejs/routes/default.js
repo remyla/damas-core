@@ -102,9 +102,9 @@ module.exports = function(app, express){
 	}));
 
 	//Static routes
-	for(var route in conf.statics)
+	for(var route in conf.publiclyServedFolders)
 	{
-		app.use( express.static( conf.statics[route] ) );
+		app.use( express.static( conf.publiclyServedFolders[route] ) );
 	}
 
 	//Handle errors

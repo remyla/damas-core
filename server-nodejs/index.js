@@ -20,9 +20,11 @@ var router = express.Router();
 
 if (conf.auth === 'jwt')
 {
-	router.use(require('./controllers/auth-node-jwt.js'));
+	router.use(require('./routes/auth-node-jwt.js'));
+	debug("Authentification is JWT");
 }
 else {
+	debug("No authentification");
 
 	router.use(function(req, res, next ){
 		req.user = { }
@@ -30,12 +32,12 @@ else {
 	});
 }
 
-router.use(require('./controllers/dam'));
+router.use(require('./routes/dam'));
 
 app.use(router);
 
 //var routes = require('./routes')(app, express);
-var routes = require('./controllers/default')(app, express);
+var routes = require('./routes/default')(app, express);
 
 // not in a test environment
 if( !module.parent )
