@@ -331,6 +331,86 @@ db.things.find({$where: function() {
 		});
 	}
 
+	search_mongo = function(req, res){
+		var query, sort, limit, skip;
+		if (req.body.queryobj)
+		{
+			var queryobj = JSON.parse(req.body.queryobj);
+			query =  queryobj.query;
+			sort =  queryobj.sort;
+			limit =  queryobj.limit;
+			skip =  queryobj.skip;
+		}
+		else
+		{
+			query = JSON.parse(req.body.query);
+			sort = JSON.parse(req.body.sort);
+			limit = JSON.parse(req.body.limit);
+			skip = JSON.parse(req.body.skip);
+		}
+		// replace regexps from json
+		function mongoops (obj)
+		{
+			for( var key in obj)
+			{
+				if(!key) continue;
+				console.log(key);
+				console.log(obj[key]);
+				if(typeof obj[key] === 'object' && obj[key] !== null)
+				{
+					//console.log('is object!');
+					mongoops(obj[key]);
+				}
+/*
+				if ( key[0] === '$' )
+				{
+					console.log('is operator!');
+					obj[key] = obj[key];
+				}
+*/
+				if ( obj[key].indexOf('REGEX_') === 0 )
+				{
+					//console.log('is regexp!');
+					obj[key] = new RegExp(obj[key].replace('REGEX_',''));
+				}
+			}
+		}
+		mongoops(query);
+
+
+		mod.connection( function(err, database )
+		{
+			if( err )
+			{
+				res.status(409).send('mongodb connection error');
+			}
+			else
+			{
+				database.collection("node", function(err, collection) {
+					if (err)
+					{
+						console.log(err);
+						res.status(409).send('mongodb collection retrival error');
+					}
+					else {
+						collection.find(query).sort(sort).skip(skip).limit(limit).toArray(function(err, results) {
+							if (err)
+								res.status(409).send('mongodb find error');
+							else
+							{
+								var ids=[];
+								for(r in results)
+									ids.push((results[r]._id).toString());
+								res.status(200).send(ids);
+								//res.status(200).send(results);
+							}
+						});
+					}
+				});
+			}
+		});
+	}
+
 	/**
 	 * Check if an object is a valid json
 	 * @param {JSON Object} JSON Object containing the keys - values
@@ -522,6 +602,7 @@ db.things.find({$where: function() {
 	// Alternative Operations ()
 	//
 	app.get('/api/search/:query(*)', search);
+	app.post('/api/search_mongo', search_mongo);
 	app.get('/api/graph/', graph);
 	app.get('/api/', read);
 	//app.put('/', update);
