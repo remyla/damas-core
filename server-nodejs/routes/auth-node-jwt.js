@@ -110,14 +110,14 @@ router.use(function (err, req, res, next) {
 });
 
 router.get("/api/verify", function (req, res) {
-			var token = fetch(req.headers);
-			jwt.verify(token, conf.jwt.secret, function (err, decode) {
-				if (err) {
-					req.user = undefined;
-					return res.status(401).json('invalid token');
-				}
-				return res.status(200).json(req.user);
-			});
+	var token = fetch(req.headers);
+	jwt.verify(token, conf.jwt.secret, function (err, decode) {
+		if (err) {
+			req.user = undefined;
+			return res.status(401).json('invalid token');
+		}
+		return res.status(200).json(req.user);
+	});
 });
 
 router.route("/api/signIn").post(authenticate, function (req, res, next) {

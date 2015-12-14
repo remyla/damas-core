@@ -24,12 +24,8 @@ if (conf.auth === 'jwt')
 	debug("Authentification is JWT");
 }
 else {
-	debug("No authentification");
-
-	router.use(function(req, res, next ){
-		req.user = { }
-		next();
-	});
+	router.use(require('./routes/auth-none.js'));
+	debug("Warning: No authentication. Edit conf.json and set auth=jwt to enable json web tokens");
 }
 
 router.use(require('./routes/dam'));

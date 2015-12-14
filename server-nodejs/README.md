@@ -17,6 +17,8 @@ Then copy the generated files `cert.pem` and `key.pem` to the server-nodejs/ dir
 
 ## Configure
 
+
+
 Copy the default configuration file
 > damas-core/server-nodejs > cp conf_install.json conf.json
 
