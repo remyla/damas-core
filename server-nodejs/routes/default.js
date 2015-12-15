@@ -262,15 +262,15 @@ db.things.find({$where: function() {
 			var queryobj = JSON.parse(req.body.queryobj);
 			query =  queryobj.query;
 			sort =  queryobj.sort;
-			limit =  queryobj.limit;
-			skip =  queryobj.skip;
+			limit =  queryobj.limit | 0;
+			skip =  queryobj.skip | 0;
 		}
 		else
 		{
 			query = JSON.parse(req.body.query);
 			sort = JSON.parse(req.body.sort);
-			limit = JSON.parse(req.body.limit);
-			skip = JSON.parse(req.body.skip);
+			limit = JSON.parse(req.body.limit) | 0;
+			skip = JSON.parse(req.body.skip) | 0;
 		}
 		// replace regexps from json
 		function mongoops (obj)
