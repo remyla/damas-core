@@ -20,7 +20,7 @@ var router = express.Router();
 
 if (conf.auth === 'jwt')
 {
-	router.use(require('./routes/auth-node-jwt.js'));
+	router.use(require('./routes/auth-jwt-node.js'));
 	debug("Authentification is JWT");
 }
 else {
@@ -29,6 +29,7 @@ else {
 }
 
 router.use(require('./routes/dam'));
+router.use(require('./routes/upload'));
 
 app.use(router);
 
