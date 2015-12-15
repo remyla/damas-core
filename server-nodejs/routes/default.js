@@ -351,36 +351,38 @@ db.things.find({$where: function() {
 		// replace regexps from json
 		function mongoops (obj)
 		{
-			for( var key in obj)
+			for (var key in obj)
 			{
-				if(!key) continue;
+				if (!key) continue;
 				console.log(key);
 				console.log(obj[key]);
-				if(typeof obj[key] === 'object' && obj[key] !== null)
+				if (typeof obj[key] === 'object' && obj[key] !== null)
 				{
-					//console.log('is object!');
+					// recursive
 					mongoops(obj[key]);
 				}
-/*
-				if ( key[0] === '$' )
+				if (typeof obj[key] === "string")
 				{
-					console.log('is operator!');
-					obj[key] = obj[key];
-				}
-*/
-				if ( obj[key].indexOf('REGEX_') === 0 )
-				{
-					//console.log('is regexp!');
-					obj[key] = new RegExp(obj[key].replace('REGEX_',''));
+					/*
+					if ( key[0] === '$' )
+					{
+						console.log('is operator!');
+						obj[key] = obj[key];
+					}
+					*/
+					if (obj[key].indexOf('REGEX_') === 0 )
+					{
+						//console.log('is regexp!');
+						obj[key] = new RegExp(obj[key].replace('REGEX_',''));
+					}
 				}
 			}
 		}
 		mongoops(query);
 
-
 		mod.connection( function(err, database )
 		{
-			if( err )
+			if (err)
 			{
 				res.status(409).send('mongodb connection error');
 			}
@@ -392,7 +394,8 @@ db.things.find({$where: function() {
 						console.log(err);
 						res.status(409).send('mongodb collection retrival error');
 					}
-					else {
+					else
+					{
 						collection.find(query).sort(sort).skip(skip).limit(limit).toArray(function(err, results) {
 							if (err)
 								res.status(409).send('mongodb find error');
