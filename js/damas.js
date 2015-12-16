@@ -98,7 +98,8 @@
 		}
 		var req = new XMLHttpRequest();
 		req.open('POST', this.server, callback !== undefined);
-		req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+		req.setRequestHeader("Content-type","application/json");
+		//req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 		req.setRequestHeader("Authorization","Bearer "+damas.token);
 		req.onreadystatechange = function(e){
 			if(req.readyState == 4)
@@ -109,10 +110,13 @@
 				}
 			}
 		}
+		req.send(JSON.stringify(keys));
+		/*
 		var qs = Object.keys(keys).map(function(key){
 			return encodeURIComponent(key) + '=' + encodeURIComponent(keys[key]);
 		}).join('&');
 		req.send(qs);
+		*/
 		if(callback === undefined)
 		{
 			return req_callback(req);
@@ -219,7 +223,7 @@
 	}
 
 	/**
-	 * Recursively delete the specified node
+	 * Delete the specified node
 	 * @param {string} id - Node internal index to delete
 	 * @param {function} callback - Function to call, boolean argument
 	 * @returns {boolean} true on success, false otherwise
@@ -234,7 +238,7 @@
 		}
 		var req = new XMLHttpRequest();
 		req.open('DELETE', this.server + id, callback !== undefined);
-		req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+		//req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 		req.setRequestHeader("Authorization","Bearer "+damas.token);
 		req.onreadystatechange = function(e){
 			if(req.readyState == 4)
@@ -309,7 +313,7 @@
 		}
 		var req = new XMLHttpRequest();
 		req.open('POST', this.server+"search_mongo", callback !== undefined);
-		req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+		req.setRequestHeader("Content-type","application/json");
 		req.setRequestHeader("Authorization","Bearer "+damas.token);
 		req.onreadystatechange = function(e){
 			if(req.readyState == 4)
@@ -328,7 +332,7 @@
 		obj.sort = sort;
 		obj.limit = limit;
 		obj.skip = skip;
-		req.send("queryobj="+JSON.stringify(obj));
+		req.send(JSON.stringify(obj));
 		req.send();
 		if(callback === undefined)
 		{
