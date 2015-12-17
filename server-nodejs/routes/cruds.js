@@ -1,19 +1,16 @@
 module.exports = function(app, express){
 	var mongo = require( 'mongodb' ),
 	mongoModel = require( '../model.js' ),
-	bodyParser = require( 'body-parser' ),
-	methodOverride = require( 'method-override' ),
+	//methodOverride = require( 'method-override' ),
 	conf = require( '../conf.json' ),
 	fs  = require('fs'),
 	multer  = require('multer'),
-	ncp= require('ncp').ncp;
 	ObjectId = mongo.ObjectID;
 	mod = new mongoModel(),
-	mkdirp= require('mkdirp'),
-	crypto= require('crypto'),
 
 	mod.connection( function(){});
 
+/*
 	app.use(methodOverride( function(req, res)
 	{
 		if ( req.body && typeof req.body === 'object' && '_method' in req.body )
@@ -24,12 +21,6 @@ module.exports = function(app, express){
 			return method;
 		}
 	}));
-
-	//Static routes
-	for(var route in conf.publiclyServedFolders)
-	{
-		app.use( express.static( conf.publiclyServedFolders[route] ) );
-	}
 
 	//Handle errors
 	app.use( function(err, req, res, next)
@@ -43,7 +34,7 @@ module.exports = function(app, express){
 			next();
 		}
 	});
-
+*/
 
 	/* CRUD operations */
 	create = function( req, res )
@@ -259,27 +250,24 @@ db.things.find({$where: function() {
 		var query, sort, limit, skip;
 		if (req.body.queryobj)
 		{
-			var queryobj = JSON.parse(req.body.queryobj);
-			query =  queryobj.query;
-			sort =  queryobj.sort;
-			limit =  queryobj.limit | 0;
-			skip =  queryobj.skip | 0;
+			var data = JSON.parse(req.body.queryobj);
+			query =  data.query;
+			sort =  data.sort;
+			limit =  data.limit | 0;
+			skip =  data.skip | 0;
 		}
 		else
 		{
-			query = JSON.parse(req.body.query);
-			sort = JSON.parse(req.body.sort);
-			limit = JSON.parse(req.body.limit) | 0;
-			skip = JSON.parse(req.body.skip) | 0;
+			query = req.body.query;
+			sort = req.body.sort;
+			limit = req.body.limit | 0;
+			skip = req.body.skip | 0;
 		}
-		// replace regexps from json
 		function mongoops (obj)
 		{
 			for (var key in obj)
 			{
 				if (!key) continue;
-				console.log(key);
-				console.log(obj[key]);
 				if (typeof obj[key] === 'object' && obj[key] !== null)
 				{
 					// recursive
@@ -287,23 +275,15 @@ db.things.find({$where: function() {
 				}
 				if (typeof obj[key] === "string")
 				{
-					/*
-					if ( key[0] === '$' )
-					{
-						console.log('is operator!');
-						obj[key] = obj[key];
-					}
-					*/
+					// replace regexps from json
 					if (obj[key].indexOf('REGEX_') === 0 )
 					{
-						//console.log('is regexp!');
 						obj[key] = new RegExp(obj[key].replace('REGEX_',''));
 					}
 				}
 			}
 		}
 		mongoops(query);
-
 		mod.connection( function(err, database )
 		{
 			if (err)
@@ -328,8 +308,7 @@ db.things.find({$where: function() {
 								var ids=[];
 								for(r in results)
 									ids.push((results[r]._id).toString());
-								res.status(200).send(ids);
-								//res.status(200).send(results);
+								res.status(200).json(ids);
 							}
 						});
 					}
@@ -337,31 +316,6 @@ db.things.find({$where: function() {
 			}
 		});
 	}
-
-	/**
-	 * Check if an object is a valid json
-	 * @param {JSON Object} JSON Object containing the keys - values
-	 * @return {boolean} true if is valid, false otherwise
-	 */
-/*
-	isValidJson = function( keys )
-	{
-		for( var val in keys )
-		{
-			var y;
-			if( Object.prototype.hasOwnProperty.call( keys,  val ) )
-			{
-				y = keys[val];
-				if(y = '' || y=== null || y==='')
-				{
-					return false;
-				}
-			}
-		}
-		return true;
-	}
-*/
-
 
 	/**
 	 * Import a JSON graph commit from our current Php Server
@@ -419,9 +373,7 @@ db.things.find({$where: function() {
 		res.send();
 	};
 
-
 	getFile= function(req,res){
-		//console.log(req.params.path );
 		var path = fileSystem+decodeURIComponent(req.params.path).replace(/:/g,"").replace(/\/+/g,"/");
 		fs.exists(path, function(exists){
 			if(exists)
