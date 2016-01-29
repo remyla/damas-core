@@ -8,6 +8,25 @@ module.exports = function(app){
 	//var bodyParser = require( 'body-parser' );
 	//app.use( bodyParser.urlencoded() );
 
+	var middleware = function () {
+		var func = function (req, res, next) {
+			var token = fetch(req.headers);
+			jwt.verify(token, conf.jwt.secret, function (err, decode) {
+				if (err) {
+					req.user = undefined;
+					return res.status(401).json('invalid token');
+				}
+				mod.readOne(decode._id, function(err, user){
+					// we could add decode properties to the user object here
+					req.user = user;
+					next();
+				});
+			});
+		};
+		func.unless = require("express-unless");
+		return func;
+	};
+
 	app.use('/api', middleware().unless({path:['/api/signIn']}));
 
 	var jwtMiddleware = expressJwt({secret:conf.jwt.secret});
@@ -62,25 +81,6 @@ module.exports = function(app){
 		{
 			return null;
 		}
-	};
-
-	var middleware = function () {
-		var func = function (req, res, next) {
-			var token = fetch(req.headers);
-			jwt.verify(token, conf.jwt.secret, function (err, decode) {
-				if (err) {
-					req.user = undefined;
-					return res.status(401).json('invalid token');
-				}
-				mod.readOne(decode._id, function(err, user){
-					// we could add decode properties to the user object here
-					req.user = user;
-					next();
-				});
-			});
-		};
-		func.unless = require("express-unless");
-		return func;
 	};
 
 	// error handler for all the applications
