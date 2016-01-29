@@ -3,6 +3,7 @@ var debug = require('debug')('app:' + process.pid);
 debug("Initializing express");
 var express = require('express');
 var app = express();
+var fs = require('fs');
 
 var conf = require('./conf.json');
 
