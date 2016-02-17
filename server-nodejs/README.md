@@ -32,6 +32,11 @@ and edit it according to your needs.
 * publiclyServerFolders: you can specify a list of paths where the files will be served by the server. It can be relative of absolute pathes. By default, the `server-nodejs/public/` folder is served.
 
 # Run
+On Windows, the environment variable is set using the `set` command.
+> set DEBUG=*
+
+Then, run the program to be debugged as usual.
+
 > DEBUG=app:* node .
 
 The server will be listening and waiting for commands on ports 8090 and 8443 by default.
