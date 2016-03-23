@@ -1,4 +1,4 @@
-A Javascript DAMAS RESTful server implementation based on NodeJS and MongoDB. Some of its features are:
+A Javascript RESTful implementation of DAMAS server based on NodeJS and MongoDB. Some of its features are:
 
 * JSON Web Token authentication (http://jwt.io)
 * MongoDB database (https://www.mongodb.com/)
@@ -37,14 +37,14 @@ Copy the default configuration file `conf_install.json` to `conf.json` and edit 
         "fileSystem": "/PRODUCTIONS/"
 }
 ```
-Copy it to conf.json in the same directory and edit it according to your needs:
+Edit it according to your needs:
 * `auth`: `jwt` to use JSON Web Token authentication (see jwt options below) or `none` for no authentication (public access)
 * `connection`: paths to the SSL certificate to use for https (see below to generate a self signed certificate)
 * `jwt`: JSON Web Token authentication options
     * `passwordHashAlgorithm`: `sha1` or `md5`
     * `secret`:  encryption salt string
     * `exp`: token expiration time in seconds
-* `mongoDB`: options to connect to the database. the default values to use a mongodb located on the same machine
+* `mongoDB`: options to connect to the database. Keep the default values to use a mongodb located on the same machine
 * `statics`: a list of relative or absolute pathes to be served by the server. It contains server ressources and possible interfaces
 * `fileSystem`: the path to the indexed files root directory to serve assets from
 
