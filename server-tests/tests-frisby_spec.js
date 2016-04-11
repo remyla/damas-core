@@ -13,7 +13,7 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 //START: --------------SETTINGS---------------
 	//var url = "http://damas-server.com/crud";
-	var url = "http://localhost:8090";
+	var url = "http://localhost:8090/api";
 //END: ----------------SETTINGS---------------
 
 //START: --------------VARIABLES--------------
@@ -33,15 +33,22 @@ tjson = conf.expects.contentType.json;
 //END: ----------------VARIABLES--------------
 
 
+	frisby.create('/api/signin')
+		.post(url+"/signIn", {"username": "demo", "password": "demo"} )
+		.expectStatus(200)
+		.after(function (error, response, body) {
+			token = body.token;
+		}).toss();
+
 
 	/**
 	 * Tests for method Create
 	 */
 	frisby.create('CREATE - should create an object in the database')
-	.post(url, {"key" : "value"})
-	.expectStatus(200)
-	.expectHeaderContains('Content-Type', tjson)
-	.after(function (error, response, body) {
+		.post(url, {"key" : "value"})
+		.expectStatus(200)
+		.expectHeaderContains('Content-Type', tjson)
+		.after(function (error, response, body) {
 		
 		var res = JSON.parse(response.body)
 		idFoundInDb = res._id || res.id;
@@ -147,5 +154,4 @@ tjson = conf.expects.contentType.json;
 			.delete(url, {"id" : idFoundInDb })
 			.expectStatus(200)
 		.toss();*/
-	})
-.toss();
+	}).toss();
