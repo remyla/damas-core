@@ -1,5 +1,5 @@
 {
-	"auth" : "jwt",
+	"auth" : "no",
 	"connection" : {
 		"Cert": "cert.pem",
 		"Key": "key.pem"
