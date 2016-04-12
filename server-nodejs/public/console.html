@@ -1,0 +1,184 @@
+<html>
+	<head>
+		<script src="damas.js"></script>
+		<script type="text/javascript">
+			document.addEventListener('DOMContentLoaded', function() {
+
+				/* UI */
+				var signOut = document.getElementById('signOut');
+				signOut.addEventListener('click', function( e ){
+					damas.signOut( function(e){
+						localStorage.removeItem("token");
+						localStorage.removeItem("user");
+						document.location.reload();
+					});
+				});
+				var form = document.getElementById('signInForm');
+				form.addEventListener('submit', function( e ){
+					//e.stopPropagation();
+					e.preventDefault();
+					var res = damas.signIn(form.elements['username'].value, form.elements['password'].value, function( res ){
+						if (!res)
+						{
+							alert('signIn failed');
+							return;
+						}
+						if (localStorage)
+						{
+							localStorage.setItem("token", damas.token);
+							damas.user.token = undefined;
+							localStorage.setItem("user", JSON.stringify(damas.user));
+						}
+						document.location.reload();
+					});
+					return false;
+				});
+
+				var button = document.getElementById('but_locks');
+				button.addEventListener('click', function(e){
+					show_locks();
+				});
+				var button = document.getElementById('but_users');
+				button.addEventListener('click', function(e){
+					show_users();
+				});
+				var button = document.getElementById('but_log');
+				button.addEventListener('click', function(e){
+					show_log();
+				});
+
+				/* START */
+				damas.server = '/api/';
+				if (localStorage)
+				{
+					damas.token = localStorage.getItem("token");
+					damas.user = JSON.parse(localStorage.getItem("user"));
+				}
+				damas.verify( function( res ){
+					if (res){
+						if (damas.user)
+						{
+							document.querySelector('.username').innerHTML = damas.user.username;
+							document.querySelector('#signOut').style.display = 'inline';
+							document.querySelector('#menubar1').style.display = 'block';
+						}
+						document.querySelector('#menubar2').style.display = 'block';
+						show_log();
+					}
+					else
+					{
+						document.querySelector('#connection').style.display = 'block';
+					}
+				});
+			});
+
+		/**
+		 * Methods
+		 */
+		function show_users(){
+			//damas.search('username:/.*/', function(res){
+			damas.search_mongo({'username':'REGEX_.*'}, {"username":1},0,0, function(res){
+				damas.read(res, function(users){
+					console.log(users);
+					window.users = users;
+					var out = document.querySelector('#contents');
+					out.innerHTML = '';
+					for(var i=0; i<users.length; i++)
+					{
+						out.innerHTML +=  '<li>'+users[i].username+'</li>';
+					}
+				});
+			});
+		}
+
+		function show_locks(){
+			//damas.search('lock:/.*/', function(res){
+			damas.search_mongo({'lock':'REGEX_.*'}, {"lock":1},0,0, function(res){
+				damas.read(res, function(assets){
+					var out = document.querySelector('#contents');
+					var str = '<table><tr><th>lock &xdtri;</th><th>file</th></tr>'
+					for(var i=0; i<assets.length; i++)
+					{
+						str +=  '<tr><td>'+assets[i].lock+'</td><td>'+assets[i].file+'</td></tr>';
+					}
+					str += '</table>';
+					out.innerHTML = str;
+				});
+			});
+		}
+		function show_log(){
+				damas.search_mongo({'time': {$exists:true}}, {"time":-1},200,0, function(res){
+				//damas.search_mongo({'time': 'REGEX_.*'}, {"time":-1},200,0, function(res){
+				damas.read(res, function(assets){
+					var out = document.querySelector('#contents');
+					var str = '<table><tr><th>author</th><th>file</th><th>time &xutri;</th><th>comment</th></tr>'
+					for(var i=0; i<assets.length; i++)
+					{
+						str +=  '<tr>';
+						str +=  '<td>'+assets[i].author+'</td>';
+						str +=  '<td>'+assets[i].file+'</td>';
+						str +=  '<td>'+new Date(parseInt(assets[i].time))+'</td>';
+						str +=  '<td style="white-space:normal">'+assets[i].comment+'</td>';
+						str +=  '</tr>';
+					}
+					str += '</table>';
+					out.innerHTML = str;
+				});
+			});
+		}
+
+		</script>
+		<style>
+			body {
+				text-align: center;
+				font-family: monospace;
+			}
+			#connection {
+				display: none;
+			}
+			#menubar1 {
+				display: none;
+			}
+			#signOut {
+				display: none;
+			}
+			#menubar2 {
+				display: none;
+			}
+			.menubar {
+				text-align: right;
+			}
+			#contents {
+				text-align: left;
+			}
+			th {
+				text-align: left;
+			}
+			td {
+				white-space: nowrap;
+				vertical-align: top;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="menubar1" class="menubar">
+			Connecté.e en tant que <span class="username"></span>
+		</div>
+		<div id="menubar2" class="menubar">
+			<button id="but_log">log</button><button id="but_locks">locks</button><button id="but_users">users</button>
+			<button id="signOut">sign out</button>
+		</div>
+		<div id="connection">
+			<h1>Connexion</h1>
+			<form id="signInForm">
+				<input type="" placeholder="login" required="required" name="username"/>
+				<br/>
+				<input type="password" placeholder="password" required="required" name="password"/>
+				<br/>
+				<input type="submit" value="SignIn"/>
+			</form>
+		</div>
+		<div id="contents">
+		</div>
+	</body>
+</html>

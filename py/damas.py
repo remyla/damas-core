@@ -104,6 +104,15 @@ class http_connection( object ) :
 			return json.loads(r.text)
 		return None
 
+	def search_mongo( self, query, sort, limit, skip ) :
+		data = {"query":query, "sort":sort, "limit":limit, "skip":skip}
+		headers = {'content-type': 'application/json'}
+		headers.update(self.headers)
+		r = requests.post(self.serverURL+'/search_mongo', data=json.dumps(data), headers=headers, verify=False)
+		if r.status_code == 200:
+			return json.loads(r.text)
+		return None
+
 	def graph( self, id_ ) :
 		'''
 		Retrieve a node graph specifying its index
