@@ -28,6 +28,7 @@ module.exports = function Model()
 		{
 			if(err)
 			{
+				console.log('error: could not connect to the specified MongoDB database');
 				return callback( true );
 			}
 			debug('connected');
