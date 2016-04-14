@@ -1,11 +1,9 @@
 module.exports = function(app, express){
-	var mongoModel = require( '../model.js' );
+	var mod  = app.locals.mod;
+	var conf = app.locals.conf;
 	//methodOverride = require( 'method-override' ),
-	var conf = require( '../conf.json' );
 	var fs  = require('fs');
 	var multer  = require('multer');
-	mod = new mongoModel();
-	mod.connection( function(){});
 
 /*
 	app.use(methodOverride( function(req, res)
