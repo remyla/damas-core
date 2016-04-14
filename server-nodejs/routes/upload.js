@@ -1,17 +1,18 @@
 module.exports = function(app){
-	var mongoModel = require( '../model.js' );
-	var conf = require( '../conf.json' );
+	var mod  = app.locals.mod;
+	var conf = app.locals.conf;
+
 	var fs = require('fs');
 	var multer = require('multer');
 	var ncp = require('ncp').ncp;
-	var mod = new mongoModel();
 	var mkdirp = require('mkdirp');
 	var crypto = require('crypto');
-	mod.connection( function(){});
+
 	ncp.limit=16;
 	var checksum;
 	var tempFile;
 	var fileSystem=conf.fileSystem;
+
 	app.use( multer({
 		onError: function (error, next) {
 			console.log(error);

@@ -1,10 +1,12 @@
 module.exports = function(app){
+	var mod  = app.locals.mod;
+	var conf = app.locals.conf;
+
 	var expressJwt = require('express-jwt');
 	var jwt = require("jsonwebtoken");
 	var unless = require('express-unless');
 	var crypto = require('crypto');
 	var debug = require('debug')('app:routes:auth:' + process.pid);
-	var conf = require('../conf.json');
 	//var bodyParser = require( 'body-parser' );
 	//app.use( bodyParser.urlencoded() );
 
