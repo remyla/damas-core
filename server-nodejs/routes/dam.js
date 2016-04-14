@@ -1,11 +1,13 @@
 module.exports = function(app){
 	// if is already locked returns false
 	app.put('/api/lock/:id', function(req, res){
+		/* this check should not be based on mongo ObjectId, we disable it
 		if (!ObjectId.isValid(req.params.id))
 		{
 			res.status(400).send('lock error: the specified id is not valid');
 			return;
 		}
+		*/
 		var n = mod.readOne(req.params.id, function(err, n){
 			if (n.lock !== undefined)
 			{
@@ -15,7 +17,7 @@ module.exports = function(app){
 			var keys = {
 				"lock": req.user.username || req.connection.remoteAddress
 			};
-			mod.update(req.params.id, keys, function(error, doc){
+			mod.update([req.params.id], keys, function(error, doc){
 				if (error)
 				{
 					res.status(409).send('lock error, please change your values');
@@ -26,18 +28,20 @@ module.exports = function(app){
 		});
 	});
 	app.put('/api/unlock/:id', function(req, res){
+		/*
 		if (!ObjectId.isValid(req.params.id))
 		{
 			res.status(400).send('lock error: the specified id is not valid');
 			return;
 		}
+		*/
 		var n = mod.readOne(req.params.id, function(err, n){
 			if (n.lock !== ( req.user.username || req.connection.remoteAddress) )
 			{
 				res.status(409).send('lock error, the asset is locked by '+ n.lock);
 				return;
 			}
-			mod.update(req.params.id, { "lock": null }, function(error, doc){
+			mod.update([req.params.id], { "lock": null }, function(error, doc){
 				if (error)
 				{
 					res.status(409).send('lock error, please change your values');
