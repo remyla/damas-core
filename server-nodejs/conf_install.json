@@ -16,7 +16,7 @@
 		"exp" : 1440
 	},
 	"publiclyServedFolders" : [
-		"public"
+		"public", "../js"
 	],
 	"fileSystem": "/PRODUCTIONS/"
 }
