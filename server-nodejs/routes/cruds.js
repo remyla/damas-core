@@ -1,95 +1,11 @@
 module.exports = function(app, express){
-	var mongo = require( 'mongodb' ),
-	mongoModel = require( '../model.js' ),
-	bodyParser = require( 'body-parser' ),
-	methodOverride = require( 'method-override' ),
-	conf = require( '../conf.json' ),
-	fs  = require('fs'),
-	multer  = require('multer'),
-	ncp= require('ncp').ncp;
-	ObjectId = mongo.ObjectID;
-	mod = new mongoModel(),
-	mkdirp= require('mkdirp'),
-	crypto= require('crypto'),
+	var mod  = app.locals.mod;
+	var conf = app.locals.conf;
+	//methodOverride = require( 'method-override' ),
+	var fs  = require('fs');
+	var multer  = require('multer');
 
-	mod.connection( function(){});
-
-	ncp.limit=16;
-	var checksum;
-	var tempFile;
-	var fileSystem=conf.fileSystem;
-	//Middlewares
-	app.use( bodyParser.json({limit: '50mb'}));
-	app.use( bodyParser.urlencoded( { limit: '50mb', extended : true } ) );
-
-	app.use( multer({
-		onError: function (error, next) {
-			console.log(error);
-			next(error);
-		},
-		onFileUploadStart: function (file) {
-			checksum = crypto.createHash('sha1');
-		},
-		onFileUploadData: function (file, data, req, res) {
-			checksum.update(data);
-		},
-		onFileUploadComplete: function (file, req, res) {
-			//var dest=decodeURIComponent(req.body.path);
-			var dest=fileSystem+decodeURIComponent(req.body.path).replace(/:/g,"");
-			dest=dest.replace(/\/+/,"/");
-			mkdirp(dest.replace(/\/[^\/]*$/,""),function(err){
-				ncp(file.path, dest, function (err) {
-					if (err) {
-						return console.error(err);
-					}
-					else {
-						fs.unlinkSync(file.path);
-					}
-				});
-			});
-			var keys={};
-			keys.user=req.connection.remoteAddress;
-			keys.time=Date.now();
-			keys.file=decodeURIComponent(req.body.path);
-			keys.checksum = checksum.digest('hex');
-			keys.size = file.size;
-			console.log(req.body.id);
-			console.log(typeof(req.body.id));
-			if (req.body.id === 'null')
-			{
-				mod.create(keys, function(error, doc)
-				{
-					if (error)
-					{
-						res.status(409);
-						res.send('create Error, please change your values');
-					}
-					else
-					{
-						res.status(201);
-						res.send(doc);
-					}
-				});
-			}
-			else
-			{
-				mod.update(req.body.id, keys, function(error, doc)
-				{
-					if (error)
-					{
-						res.status(409);
-						res.send('update Error, please change your values');
-					}
-					else
-					{
-						res.status(201);
-						res.send(doc);
-					}
-				});
-			}
-		}
-	}));
-
+/*
 	app.use(methodOverride( function(req, res)
 	{
 		if ( req.body && typeof req.body === 'object' && '_method' in req.body )
@@ -100,12 +16,6 @@ module.exports = function(app, express){
 			return method;
 		}
 	}));
-
-	//Static routes
-	for(var route in conf.statics)
-	{
-		app.use( express.static( conf.statics[route] ) );
-	}
 
 	//Handle errors
 	app.use( function(err, req, res, next)
@@ -119,7 +29,7 @@ module.exports = function(app, express){
 			next();
 		}
 	});
-
+*/
 
 	/* CRUD operations */
 	create = function( req, res )
@@ -191,11 +101,13 @@ module.exports = function(app, express){
 
 	deleteNode = function(req, res)
 	{
+		/* this check should not be based on ObjectId - disabled
 		if (!ObjectId.isValid(req.params.id))
 		{
 			res.status(400).send('error: the specified id is not valid');
 			return;
 		}
+		*/
 		mod.deleteNode(req.params.id, function(error, doc){
 			if (error)
 			{
@@ -331,30 +243,76 @@ db.things.find({$where: function() {
 		});
 	}
 
-	/**
-	 * Check if an object is a valid json
-	 * @param {JSON Object} JSON Object containing the keys - values
-	 * @return {boolean} true if is valid, false otherwise
-	 */
-/*
-	isValidJson = function( keys )
-	{
-		for( var val in keys )
+	search_mongo = function(req, res){
+		var query, sort, limit, skip;
+		if (req.body.queryobj)
 		{
-			var y;
-			if( Object.prototype.hasOwnProperty.call( keys,  val ) )
+			var data = JSON.parse(req.body.queryobj);
+			query =  data.query;
+			sort =  data.sort;
+			limit =  data.limit | 0;
+			skip =  data.skip | 0;
+		}
+		else
+		{
+			query = req.body.query;
+			sort = req.body.sort;
+			limit = req.body.limit | 0;
+			skip = req.body.skip | 0;
+		}
+		function mongoops (obj)
+		{
+			for (var key in obj)
 			{
-				y = keys[val];
-				if(y = '' || y=== null || y==='')
+				if (!key) continue;
+				if (typeof obj[key] === 'object' && obj[key] !== null)
 				{
-					return false;
+					// recursive
+					mongoops(obj[key]);
+				}
+				if (typeof obj[key] === "string")
+				{
+					// replace regexps from json
+					if (obj[key].indexOf('REGEX_') === 0 )
+					{
+						obj[key] = new RegExp(obj[key].replace('REGEX_',''));
+					}
 				}
 			}
 		}
-		return true;
+		mongoops(query);
+		mod.connection( function(err, database )
+		{
+			if (err)
+			{
+				res.status(409).send('mongodb connection error');
+			}
+			else
+			{
+				database.collection("node", function(err, collection) {
+					if (err)
+					{
+						console.log(err);
+						res.status(409).send('mongodb collection retrival error');
+					}
+					else
+					{
+						collection.find(query).sort(sort).skip(skip).limit(limit).toArray(function(err, results) {
+							if (err)
+								res.status(409).send('mongodb find error');
+							else
+							{
+								var ids=[];
+								for(r in results)
+									ids.push((results[r]._id).toString());
+								res.status(200).json(ids);
+							}
+						});
+					}
+				});
+			}
+		});
 	}
-*/
-
 
 	/**
 	 * Import a JSON graph commit from our current Php Server
@@ -412,9 +370,7 @@ db.things.find({$where: function() {
 		res.send();
 	};
 
-
 	getFile= function(req,res){
-		//console.log(req.params.path );
 		var path = fileSystem+decodeURIComponent(req.params.path).replace(/:/g,"").replace(/\/+/g,"/");
 		fs.exists(path, function(exists){
 			if(exists)
@@ -431,90 +387,12 @@ db.things.find({$where: function() {
 		});
 	};
 
-	//Upload Management
-	upload=function (req, res){
-/*
-		if(done){
-			var dest=decodeURIComponent(req.body.path);
-			dest=fileSystem+dest.replace(/:/g,"");
-			dest=dest.replace(/\/+/,"/");
-			mkdirp(dest.replace(/\/[^\/]*$/,""),function(err){
-				ncp(tempFile.path,dest, function (err) {
-					if (err) {
-						return console.error(err);
-					}
-					else {
-						fs.unlinkSync(tempFile.path);
-					}
-				});
-			});
-			var keys={};
-			keys.author=req.connection.remoteAddress;
-			keys.time=Date.now();
-			keys.file=decodeURIComponent(req.body.path);
-			keys.checksum=checksum;
-			mod.create(keys, function(error, doc)
-			{
-				if( error )
-				{
-					res.status(409);
-					res.send('create Error, please change your values');
-				}
-				else
-				{
-					res.status(201);
-					res.send(doc[0]);
-				}
-			});
-		}
-*/
-	};
-
-	uploadNewVersion=function (req, res){
-/*
-		if(done){
-			var dest=decodeURIComponent(req.body.path);
-			dest=fileSystem+dest.replace(/:/g,"");
-			dest=dest.replace(/\/+/g,"/");
-			mkdirp(dest.replace(/\/[^\/]*$/,""),function(err){
-				ncp(tempFile.path,dest, function (err) {
-					if (err) {
-						return console.error(err);
-					}
-					else {
-						fs.unlinkSync(tempFile.path);
-					}
-				});
-			});
-			var keys={};
-			keys.author=req.connection.remoteAddress;
-			keys.time=Date.now();
-			keys.checksum=checksum;
-			mod.update(req.body.id,keys, function(error, doc)
-			{
-				if( error )
-				{
-					res.status(409);
-					res.send('Update Error, please change your values');
-				}
-				else
-				{
-					res.status(201);
-					res.send(doc);
-				}
-			});
-		}
-*/
-	};
-
 	//
 	// Extra operations
 	//
 	app.get('/api/graph/:id', graph);
 	app.get('/api/file/:path(*)',getFile);
 	app.post('/api/import', importJSON);
-	app.post('/api/upload', upload);
-	app.put('/api/upload', uploadNewVersion);
 	//app.get('/subdirs/:path',getSubdirs);
 	//app.get('/subdirs',getSubdirs);
 
@@ -522,6 +400,7 @@ db.things.find({$where: function() {
 	// Alternative Operations ()
 	//
 	app.get('/api/search/:query(*)', search);
+	app.post('/api/search_mongo', search_mongo);
 	app.get('/api/graph/', graph);
 	app.get('/api/', read);
 	//app.put('/', update);

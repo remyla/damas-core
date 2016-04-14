@@ -1,31 +1,32 @@
-<img src="http://damas-software.com/bin/damas_logo.png" alt="damas-core"/>
+[![Stories in Ready](https://badge.waffle.io/remyla/damas-core.png?label=ready&title=Ready)](https://waffle.io/remyla/damas-core)
 
-Digital asset management server and API
+<img src="http://damas-software.org/bin/damas_software_logo.svg" alt="damas software logo"/>
+
+Servers and client libraries for nodal digital asset management
 
 # Overview
-## server-php
-A PHP server to run in a Apache/MySQL environment. It contains a generic key-value data model supporting simple graph structures. Contains user authentication, file upload, file version control. It supports database replication among multiple sites. Used in production and maintained since 2007.
 
 ## server-nodejs
-A new Javascript implementation of the server for NodeJS which is developped since April 2015. Specifications redesign, enhanced graph structures, integration of long-time requested features. MongoDB backend. Alpha stage of development.
+A Javascript implementation of the server for NodeJS which development started in April 2015. Specifications redesign, enhanced graph structures, web token authentication, integration of long-time requested features. MongoDB backend. This version is used in production and stable. Some functions are still missing though, please see the documentation.
 
-## API
-The data can be remotely accessed from Python or Javascript, and using command line tools like curl.
+## server-php
+A PHP server to run in a Apache environment. Generic key-value data model, simple graph structures, user authentication, file version control, using MySQL as database. It supports database replication among multiple sites. Used in production and maintained since 2007. The Php version is still used in production, very stable, and maintained. We intend to make it evolve to the new specifications some days. 
 
-Please visit the wiki's [API Reference](https://github.com/remyla/damas-core/wiki/API).
+## py and js
+The Python and Javascript libraries to access the server remotely, interface its methods and process the JSON results using the language native objects.
+* Setup a scripting environment using this [guide](https://github.com/remyla/damas-core/wiki/Scripting)
+* The documentation of the methods is available in the [API Reference](https://github.com/remyla/damas-core/wiki/API)
 
 # Usage
-Choose a server to run (either the Php or the NodeJS server) and use the Python or Javascript libraries to access it.
-
-The NodeJS server is currently under development. For stable versions (currently Php only) please have a look at the releases. For a full Python compatible API, use the 2.2-stable release.
+Choose a server to run (either the Php or the NodeJS server). Refer to the README.md files in the servers folders for the installation instructions. Then use the Python or Javascript libraries to access it, of which instructions can be found in the wiki.
 
 # Related Links
 
-https://github.com/PRIMCODE/damas-flow is a flow graph interface based on the NodeJS server implementation which is being created since April 2015.
+http://damas-software.org is a website which presents the projects related to damas-core
 
 http://dabox.io is collaborative platform for architecture using damas-core as backend
 
-http://damas-software.org is a website which presents the works related to damas-core
+https://github.com/PRIMCODE/damas-flow is a flow graph interface based on the NodeJS server implementation which is being created since April 2015.
 
 http://primcode.com PRIMCODE is the company behind the development, the distribution and the maintenance of damas-core
 

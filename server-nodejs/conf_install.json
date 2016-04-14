@@ -1,5 +1,5 @@
 {
-	"auth" : "jwt",
+	"auth" : "no",
 	"connection" : {
 		"Cert": "cert.pem",
 		"Key": "key.pem"
@@ -15,9 +15,8 @@
 		"secret" : "webtokensecret",
 		"exp" : 1440
 	},
-	"statics" : [
-		"static",
-		"/home/damas/bin/"
+	"publiclyServedFolders" : [
+		"public", "../js"
 	],
 	"fileSystem": "/PRODUCTIONS/"
 }

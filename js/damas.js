@@ -98,7 +98,8 @@
 		}
 		var req = new XMLHttpRequest();
 		req.open('POST', this.server, callback !== undefined);
-		req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+		req.setRequestHeader("Content-type","application/json");
+		//req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 		req.setRequestHeader("Authorization","Bearer "+damas.token);
 		req.onreadystatechange = function(e){
 			if(req.readyState == 4)
@@ -109,10 +110,13 @@
 				}
 			}
 		}
+		req.send(JSON.stringify(keys));
+		/*
 		var qs = Object.keys(keys).map(function(key){
 			return encodeURIComponent(key) + '=' + encodeURIComponent(keys[key]);
 		}).join('&');
 		req.send(qs);
+		*/
 		if(callback === undefined)
 		{
 			return req_callback(req);
@@ -219,7 +223,7 @@
 	}
 
 	/**
-	 * Recursively delete the specified node
+	 * Delete the specified node
 	 * @param {string} id - Node internal index to delete
 	 * @param {function} callback - Function to call, boolean argument
 	 * @returns {boolean} true on success, false otherwise
@@ -234,7 +238,7 @@
 		}
 		var req = new XMLHttpRequest();
 		req.open('DELETE', this.server + id, callback !== undefined);
-		req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+		//req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 		req.setRequestHeader("Authorization","Bearer "+damas.token);
 		req.onreadystatechange = function(e){
 			if(req.readyState == 4)
@@ -262,6 +266,9 @@
 	 */
 	damas.search = function ( query, callback )
 	{
+		function req_callback( req ) {
+			return JSON.parse(req.responseText);
+		}
 		var req = new XMLHttpRequest();
 		req.open('GET', this.server + 'search/' + encodeURIComponent(query), callback !== undefined);
 		req.setRequestHeader("Authorization","Bearer "+damas.token);
@@ -270,13 +277,68 @@
 			{
 				if(req.status == 200)
 				{
-					//callback( { 'status': req.status, text: req.responseText } );
-					callback(JSON.parse(req.responseText));
+					if(callback)
+					{
+						callback(req_callback(req));
+					}
 				}
 			}
 		}
 		req.send();
+		if(callback === undefined)
+		{
+			return req_callback(req);
+		}
 	}
+
+	/**
+	 * BETA - Expose the find method from mongodb
+	 * @param {Object} query
+	 * @param {Object} sort
+	 * @param {Integer} limit
+	 * @param {Integer} skip
+	 * @returns {Array} array of element indexes or null if no element found
+	 *
+	 * query, sort, limit, skip arguments are respectively passed to mongodb methods of the same names.
+	 * https://docs.mongodb.org/manual/reference/method/db.collection.find/
+	 * because the query object is converted to JSON, we use strings with "REGEX_" as suffix to define regular expressions. for example, /.*x$/ will be defined as "REGEX_.*x$" 
+	 *
+	 * @example
+	 * damas.search_mongo({"lock": /.*$/}, {"lock":1}, 2,0)
+	 */
+	damas.search_mongo = function ( query, sort, limit, skip, callback )
+	{
+		function req_callback( req ) {
+			return JSON.parse(req.responseText);
+		}
+		var req = new XMLHttpRequest();
+		req.open('POST', this.server+"search_mongo", callback !== undefined);
+		req.setRequestHeader("Content-type","application/json");
+		req.setRequestHeader("Authorization","Bearer "+damas.token);
+		req.onreadystatechange = function(e){
+			if(req.readyState == 4)
+			{
+				if(req.status == 200)
+				{
+					if(callback)
+					{
+						callback(req_callback(req));
+					}
+				}
+			}
+		}
+		var obj = {};
+		obj.query = query;
+		obj.sort = sort;
+		obj.limit = limit;
+		obj.skip = skip;
+		req.send(JSON.stringify(obj));
+		if(callback === undefined)
+		{
+			return req_callback(req);
+		}
+	}
+
 
 /* this is the php version as reference
 	damas.search = function ( keys, sortby, order, limit, callback )
@@ -507,6 +569,10 @@
 	{
 		damas.token = null;
 		damas.user = null;
+		if(callback)
+		{
+			callback();
+		}
 	}
 
 	/**
