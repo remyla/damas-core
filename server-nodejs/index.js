@@ -1,16 +1,33 @@
-var debug = require('debug')('app:' + process.pid);
+/*
+ * index.js - from Damas-Core
+ * Licensed under the GNU GPL v3
+ */
 
+/*
+ * Initialize required modules
+ */
+var debug = require('debug')('app:' + process.pid);
 debug("Initializing express");
 var express = require('express');
-var app = express();
-var fs = require('fs');
+var app     = express();
+var fs      = require('fs');
+var http    = require('http');
+var https   = require('https')
 
-var conf = require('./conf.json');
+/*
+ * Mongo model
+ */
+var mongoModel = require('../model.js');
+app.locals.mod = new mongoModel();
+app.locals.mod.connection(function () { });
+var mod = app.locals.mod;
 
-var http = require('http');
-var https = require('https')
-
-var http_port = process.env.HTTP_PORT || 8090;
+/*
+ * Configuration
+ */
+app.locals.conf = require('./conf.json');
+var conf = app.locals.conf;
+var http_port = process.env.HTTP_PORT   || 8090;
 var https_port = process.env.HTTPS_PORT || 8443;
 
 require('./routes/index')(app, express);

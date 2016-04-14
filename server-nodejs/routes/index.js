@@ -1,10 +1,10 @@
 module.exports = function (app, express){
+	var conf = app.locals.conf;
 	var debug = require('debug')('app:init');
-	var conf = require('../conf.json');
 
 	var bodyParser = require( 'body-parser' );
 	app.use( bodyParser.urlencoded( { limit: '50mb', extended : true } ) );
-	app.use( bodyParser.json({limit: '50mb'}));                                                                                                                                                          
+	app.use( bodyParser.json({limit: '50mb'}));
 
 	var morgan = require('morgan');
 	app.use(morgan('dev'));
