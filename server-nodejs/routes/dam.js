@@ -1,4 +1,5 @@
 module.exports = function(app){
+	var mod  = app.locals.mod;
 	// if is already locked returns false
 	app.put('/api/lock/:id', function(req, res){
 		/* this check should not be based on mongo ObjectId, we disable it
