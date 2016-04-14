@@ -1,13 +1,10 @@
 module.exports = function(app, express){
-	var mongo = require( 'mongodb' ),
-	mongoModel = require( '../model.js' ),
+	var mongoModel = require( '../model.js' );
 	//methodOverride = require( 'method-override' ),
-	conf = require( '../conf.json' ),
-	fs  = require('fs'),
-	multer  = require('multer'),
-	ObjectId = mongo.ObjectID;
-	mod = new mongoModel(),
-
+	var conf = require( '../conf.json' );
+	var fs  = require('fs');
+	var multer  = require('multer');
+	mod = new mongoModel();
 	mod.connection( function(){});
 
 /*
@@ -106,11 +103,13 @@ module.exports = function(app, express){
 
 	deleteNode = function(req, res)
 	{
+		/* this check should not be based on ObjectId - disabled
 		if (!ObjectId.isValid(req.params.id))
 		{
 			res.status(400).send('error: the specified id is not valid');
 			return;
 		}
+		*/
 		mod.deleteNode(req.params.id, function(error, doc){
 			if (error)
 			{

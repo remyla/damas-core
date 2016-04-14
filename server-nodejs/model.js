@@ -1,16 +1,16 @@
-var mongo = require('mongodb'),
-conf = require('./conf');
 var debug = require('debug')('app:model:mongo:' + process.pid);
+var conf = require('./conf');
+var mongo = require('mongodb');
+var ObjectId = mongo.ObjectID;
 
 module.exports = function Model()
 {
 	// Data about connection is in the file conf.json
-	var dataMongo = conf.mongoDB,
-	self = this,
-	Server = mongo.Server,
-	Db = mongo.Db,
-	ObjectId = mongo.ObjectID,
-	conn;
+	var dataMongo = conf.mongoDB;
+	var self = this;
+	var Server = mongo.Server;
+	var Db = mongo.Db;
+	var conn;
 
 	//START: --------------MONGODB--------------
 	this.connection = function(callback)
