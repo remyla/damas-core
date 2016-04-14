@@ -114,7 +114,7 @@ module.exports = function(app){
 		jwt.verify(token, conf.jwt.secret, function (err, decode) {
 			if (err) {
 				req.user = undefined;
-				return res.status(401).json('invalid token');
+				return res.status(401).send('invalid token');
 			}
 			return res.status(200).json(req.user);
 		});

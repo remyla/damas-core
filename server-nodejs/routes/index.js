@@ -4,7 +4,7 @@ module.exports = function (app, express){
 
 	var bodyParser = require( 'body-parser' );
 	app.use( bodyParser.urlencoded( { limit: '50mb', extended : true } ) );
-	app.use( bodyParser.json({limit: '50mb'}));                                                                                                                                                          
+	app.use( bodyParser.json({limit: '50mb'}));
 
 	var morgan = require('morgan');
 	app.use(morgan('dev'));
@@ -13,6 +13,8 @@ module.exports = function (app, express){
 	{
 		if (req.body)
 			console.log(req.body);
+		else
+			console.log('undefined req.body');
 		next();
 	});
 	//Static routes

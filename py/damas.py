@@ -157,6 +157,20 @@ class http_connection( object ) :
 			return json.loads(r.text)
 		return None
 
+	def link( self, target, sources, keys ) :
+		'''
+		Create a node edge from sources to target wearing the specified keys
+		@param {Hash} keys of the new node
+		@returns {Hash} Array of created edges ids on success, None otherwise
+		'''
+		data = {"target":target, "sources":sources, "keys":keys}
+		headers = {'content-type': 'application/json'}
+		headers.update(self.headers)
+		r = requests.post('%s/link' % (self.serverURL), data=json.dumps(data), headers=headers, verify=False)
+		if r.status_code == 200:
+			return json.loads(r.text)
+		return None
+
 
 	# USERS AUTHENTICATION METHODS
  
