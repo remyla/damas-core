@@ -68,7 +68,7 @@ module.exports = function () {
         if (!self.conn) {
             return callback(true);
         }
-        if (!Array.isArray(ids) {
+        if (!Array.isArray(ids)) {
             ids = [ids];
         }
         self.conn.collection(self.collection, function (err, coll) {
@@ -78,7 +78,7 @@ module.exports = function () {
             coll.find({'_id':{$in:ids}}, function (err, results) {
                 callback(err, err ? null : results.toArray());
             });
-        }
+        });
     };
 
     /**
@@ -91,7 +91,7 @@ module.exports = function () {
         if (!self.conn) {
             return callback(true);
         }
-        if (!Array.isArray(ids) {
+        if (!Array.isArray(ids)) {
             ids = [ids];
         }
         self.conn.collection(self.collection, function (err, coll) {
@@ -123,14 +123,14 @@ module.exports = function () {
         if (!self.conn) {
             return callback(true);
         }
-        if (!Array.isArray(ids) {
+        if (!Array.isArray(ids)) {
             ids = [ids];
         }
         self.conn.collection(self.collection, function (err, coll) {
             if (err) {
                 return callback(true);
             }
-            collection.remove({'_id':{$in:ids}}, function (err, result) {
+            coll.remove({'_id':{$in:ids}}, function (err, result) {
                 if (err || result.result.n === 0) {
                     return callback(true);
                 }
@@ -152,7 +152,7 @@ module.exports = function () {
             if (err) {
                 return callback(true);
             }
-            collection.find(keys,{"_id":true}, function (err, results) {
+            coll.find(keys,{"_id":true}, function (err, results) {
                 callback(err, err ? null : results.toArray());
             });
         });
