@@ -3,14 +3,11 @@
  * Licensed under the GNU GPL v3
  */
 
-/*
- * Explicitly an object
- */
 module.exports = function () {
     var self   = this;
     var mongo = require('mongodb');
     self.conn  = false;
-    self.debug = require('debug')('app:db:mongo:' = process.pid);
+    self.debug = require('debug')('app:db:mongo:' + process.pid);
     // TODO: recursion algorithms at a higher level
     // TODO: normalize the output to the callbacks
     // TODO: run tests...
@@ -122,7 +119,7 @@ module.exports = function () {
      * @param {array} ids - List of node ids to delete
      * @param {function} callback - Function callback to routes.js
      */
-    self.deleteNode = function (ids, callback) {
+    self.remove = function (ids, callback) {
         if (!self.conn) {
             return callback(true);
         }
@@ -160,6 +157,7 @@ module.exports = function () {
             });
         });
     };
+    return self;
 };
 
 

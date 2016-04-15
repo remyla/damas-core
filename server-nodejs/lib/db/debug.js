@@ -1,13 +1,13 @@
-var debug = require('debug')('app:db:mongo:' + process.pid);
-var conf = require('./conf');
-var mongo = require('mongodb');
-var ObjectId = mongo.ObjectID;
-
 /*
- * Explicitly an object
+ * lib/db/debug.js - from Damas-Core
+ * Licensed under the GNU GPL v3
  */
+
 module.exports = function () {
     var self = this;
+    self.test = "testself";
+    var test = "testvar";
+    self.debug = require('debug')('app:db:debug:' + process.pid);
 
     self.connect = function (conf, callback) {
         debug('Call to db.connect() with the following configuration:');
@@ -30,7 +30,7 @@ module.exports = function () {
         debug('Update keys: ', keys);
     };
 
-    self.delete = function (ids, callback) {
+    self.remove = function (ids, callback) {
         debug('Call to db.delete() with the following ids:');
         debug(ids);
     };
@@ -39,6 +39,7 @@ module.exports = function () {
         debug('Call to db.search() with the following keys:');
         debug(keys);
     };
+    return self;
 };
 
 
