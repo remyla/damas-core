@@ -18,7 +18,7 @@ module.exports = function(app){
 					req.user = undefined;
 					return res.status(401).json('invalid token');
 				}
-				db.readNodes(decode._id, function(err, user){
+				db.read(decode._id, function(err, user){
 					// we could add decode properties to the user object here
 					req.user = user[0];
 					next();
@@ -42,12 +42,12 @@ module.exports = function(app){
 			debug('no username or password');
 			return res.status(401).json('Invalid username or password');
 		}
-		db.searchNodes({"username": req.body.username }, function( err, doc ){
+		db.search({"username": req.body.username }, function( err, doc ){
 			if (err || doc.length === 0)
 			{
 				return res.status(401).json('Invalid username or password');
 			}
-			db.readNodes(doc[0], function(err, user){
+			db.read(doc[0], function(err, user){
 				user = user[0];
 				if (crypto.createHash(conf.jwt.passwordHashAlgorithm).update(req.body.password).digest('hex') !== user.password)
 				{
