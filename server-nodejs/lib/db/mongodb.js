@@ -44,7 +44,7 @@ module.exports = function () {
      * @param {array} nodes - Objects to create in the database
      * @param {function} callback - Callback function to routes.js
      */
-    self.create = function(nodes, callback) {
+    self.createNodes = function(nodes, callback) {
         if (!self.conn) {
             self.debug('Error: not connected to the database');
             return callback(true);
@@ -68,7 +68,7 @@ module.exports = function () {
      * @param {array} ids - Identifiers of the nodes to retrieve.
      * @param {function} callback - Callback function to routes.js
      */
-    self.read = function (ids, callback) {
+    self.readNodes = function (ids, callback) {
         if (!self.conn) {
             return callback(true);
         }
@@ -94,7 +94,7 @@ module.exports = function () {
      * @param {object} keys - New keys to define on the nodes
      * @param {function} callback - Callback function to routes.js
      */
-    self.update = function (ids, keys, callback) {
+    self.updateNodes = function (ids, keys, callback) {
         if (!self.conn) {
             return callback(true);
         }
@@ -130,7 +130,7 @@ module.exports = function () {
      * @param {array} ids - List of node ids to delete
      * @param {function} callback - Function callback to routes.js
      */
-    self.remove = function (ids, callback) {
+    self.removeNodes = function (ids, callback) {
         if (!self.conn) {
             return callback(true);
         }
@@ -158,7 +158,7 @@ module.exports = function () {
      * @param {object} keys - Keys to find
      * @param {function} callback - Callback function to routes.js
      */
-    self.search = function (keys, callback) {
+    self.searchNodes = function (keys, callback) {
         if (!self.conn) {
             return callback(true);
         }
@@ -192,7 +192,7 @@ module.exports = function () {
      * @param {integer} limit - Pagination: max number of results to return
      * @param {function} callback - Callback function to routes.js
      */
-    self.mongo_search = function (query, sort, skip, limit, callback) {
+    self.mongo_searchNodes = function (query, sort, skip, limit, callback) {
         if (!self.conn) {
             return callback(true);
         }

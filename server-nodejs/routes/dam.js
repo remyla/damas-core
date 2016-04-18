@@ -1,5 +1,5 @@
 module.exports = function(app){
-	var mod  = app.locals.mod;
+	var db  = app.locals.db;
 	// if is already locked returns false
 	app.put('/api/lock/:id', function(req, res){
 		/* this check should not be based on mongo ObjectId, we disable it
@@ -9,8 +9,8 @@ module.exports = function(app){
 			return;
 		}
 		*/
-		var n = mod.readOne(req.params.id, function(err, n){
-			if (n.lock !== undefined)
+		var n = db.readNodes(req.params.id, function(err, n){
+			if (n[0].lock !== undefined)
 			{
 				res.status(409).send('lock error, the asset is already locked');
 				return;
@@ -18,7 +18,7 @@ module.exports = function(app){
 			var keys = {
 				"lock": req.user.username || req.connection.remoteAddress
 			};
-			mod.update([req.params.id], keys, function(error, doc){
+			db.updateNodes([req.params.id], keys, function(error, doc){
 				if (error)
 				{
 					res.status(409).send('lock error, please change your values');
@@ -36,13 +36,13 @@ module.exports = function(app){
 			return;
 		}
 		*/
-		var n = mod.readOne(req.params.id, function(err, n){
-			if (n.lock !== ( req.user.username || req.connection.remoteAddress) )
+		var n = db.readNodes(req.params.id, function(err, n){
+			if (n[0].lock !== ( req.user.username || req.connection.remoteAddress) )
 			{
-				res.status(409).send('lock error, the asset is locked by '+ n.lock);
+				res.status(409).send('lock error, the asset is locked by '+ n[0].lock);
 				return;
 			}
-			mod.update([req.params.id], { "lock": null }, function(error, doc){
+			db.updateNodes([req.params.id], { "lock": null }, function(error, doc){
 				if (error)
 				{
 					res.status(409).send('lock error, please change your values');
@@ -62,7 +62,7 @@ module.exports = function(app){
 		keys.author = req.user.username || req.connection.remoteAddress;
 		keys.time = Date.now();
 		keys['#parent'] = req.params.id;
-		mod.create(keys, function(error, doc){
+		db.createNodes(keys, function(error, doc){
 			if (error)
 			{
 				res.status(409).send('create error, please change your values');

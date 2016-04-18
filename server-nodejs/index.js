@@ -24,7 +24,7 @@ var conf = app.locals.conf = require('./conf.json');
 var Database = require('./lib/database.js');
 app.locals.db = Database(conf.db, conf[conf.db]);
 
-var http_port  = process.env.HTTP_PORT  || 8090;
+var http_port = process.env.HTTP_PORT || 8090;
 var https_port = process.env.HTTPS_PORT || 8443;
 
 require('./routes/index')(app, express);
@@ -38,7 +38,7 @@ if (!module.parent) {
      */
     debug('Working in %s mode', app.get('env'));
     debug('Creating HTTP server on port %s', http_port);
-    http.createServer(app).listen(http_port, function () {
+    http.createServer(app).listen(http_port, function() {
         debug('HTTP server listening on port %s', http_port);
     });
 
@@ -46,12 +46,12 @@ if (!module.parent) {
      * Create an HTTP server if there are certificates
      */
     if (conf.connection.hasOwnProperty('Key') &&
-            conf.connection.hasOwnProperty('Cert')) {
+        conf.connection.hasOwnProperty('Cert')) {
         debug('Creating HTTPS server on port %s', https_port);
         https.createServer({
-            key:  fs.readFileSync(conf.connection.Key),
-            cert: fs.readFileSync(conf.connection.Cert)
-        }, app).listen(https_port, function () {
+            key : fs.readFileSync(conf.connection.Key),
+            cert : fs.readFileSync(conf.connection.Cert)
+        }, app).listen(https_port, function() {
             debug('HTTPS server listening on port %s', https_port);
         });
     }
