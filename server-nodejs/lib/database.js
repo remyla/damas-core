@@ -12,7 +12,7 @@ module.exports = function (type, settings) {
      * Choose the database to instantiate
      */
     switch (type) {
-        case 'mongodb':
+        case 'MongoDB':
             db = require('./db/mongodb')();
             break;
         default:
