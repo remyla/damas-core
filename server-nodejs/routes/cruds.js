@@ -89,7 +89,7 @@ module.exports = function(app, express) {
             return;
         }
         */
-        db.remove(req.params.id, function(error, doc) {
+        db.removeNodes(req.params.id, function(error, doc) {
             if (error) {
                 res.status(409).send('delete error, please change your values');
                 return;
@@ -213,6 +213,10 @@ db.things.find({$where: function() {
     }
 
     search_mongo = function(req, res) {
+        if(typeof db.mongo_searchNodes !== "function") {
+            res.status(409).send('MongoDB not in use');
+            return;
+        }
         var query, sort, limit, skip;
         if (req.body.queryobj) {
             var data = JSON.parse(req.body.queryobj);
@@ -255,7 +259,7 @@ db.things.find({$where: function() {
                         res.status(409).send('mongodb collection retrival error');
                     }
                     else {*/
-                        db.searchNodes_Mongo(query, sort, skip, limit).toArray(function(err, results) {
+                        db.mongo_searchNodes(query, sort, skip, limit).toArray(function(err, results) {
                             if (err)
                                 res.status(409).send('mongodb find error');
                             else {
