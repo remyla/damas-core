@@ -12,11 +12,13 @@ module.exports = function (type, settings) {
      * Choose the database to instantiate
      */
     switch (type) {
-        case 'MongoDB':
-            db = require('./db/mongodb')();
+        case 'mongodb':
+            var dbClass = require('./db/mongodb');
+            db = new dbClass();
             break;
         default:
-            db = require('./db/debug')();
+            var dbClass = require('./db/debug');
+            db = new dbClass();
     }
 
     /*
