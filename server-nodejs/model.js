@@ -165,9 +165,9 @@ module.exports = function Model()
 	{
 		debug('update nodes: ', ids);
 		debug('update keys: ', keys);
-		var keysToUnset = {},
-			keysToSet = {},
-			toUpdate = {};
+		var keysToUnset = {};
+		var keysToSet = {};
+		var toUpdate = {};
 		// prepare ids
 		var ids_o = new Array();
 		for (var i = 0; i < ids.length; i++)
@@ -186,7 +186,7 @@ module.exports = function Model()
 			}
 		}
 
-		//Mongo cannot set or unset empty keys
+		//Mongo >= 2.6 Update operators must specify a non-empty operand expression
 		if (Object.keys(keysToSet).length > 0) {
 			toUpdate.$set = keysToSet;
 		}
