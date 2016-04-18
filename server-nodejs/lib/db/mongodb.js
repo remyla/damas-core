@@ -6,13 +6,15 @@
 module.exports = function () {
     var self   = this;
     var mongo = require('mongodb');
+    var ObjectID = mongo.ObjectID;
     self.conn  = false;
+    self.collection = false;
     self.debug = require('debug')('app:db:mongo:' + process.pid);
-    // TODO: recursion algorithms at a higher level
     // TODO: normalize the output to the callbacks
     // TODO: run tests...
-    // On large collections, toArray() might be risky - everything is in memory
-    // The DB managers don't have to know the structure of stored data
+    // TODO: make sure we get an id array when searching
+    // TODO: verify input and output types of every function
+    // TODO: make sure every function supports arrays (eg, search)
 
     /*
      * Initialize the connection.
@@ -25,16 +27,17 @@ module.exports = function () {
         }
         var server = new mongo.Server(conf.host, conf.port, conf.options);
         var db     = new mongo.Db(conf.collection, server);
-        db.open(function (err, conn) {
+        db.open(function (err, connection) {
             if (err) {
+                self.debug('Unable to connect to the MongoDB database');
                 return callback(true);
             }
-            self.debug('connected');
-            self.conn = conn;
+            self.debug('Connected to the database');
+            self.conn = connection;
             self.collection = conf.collection;
             callback(false, conn);
         });
-    };
+    }; // connect()
 
     /**
      * Create nodes, without parent verification.
@@ -43,6 +46,7 @@ module.exports = function () {
      */
     self.create = function(nodes, callback) {
         if (!self.conn) {
+            self.debug('Error: not connected to the database');
             return callback(true);
         }
         self.conn.collection(self.collection, function (err, coll) {
@@ -57,7 +61,7 @@ module.exports = function () {
                 callback(err, err ? null : result);
             });
         });
-    };
+    }; // create()
 
     /**
      * Retrieve nodes as key->value objects.
@@ -71,6 +75,9 @@ module.exports = function () {
         if (!Array.isArray(ids)) {
             ids = [ids];
         }
+        for (var i in ids) {
+            ids[i] = new ObjectID(ids[i]);
+        }
         self.conn.collection(self.collection, function (err, coll) {
             if (err) {
                 return callback(true);
@@ -79,7 +86,7 @@ module.exports = function () {
                 callback(err, err ? null : results.toArray());
             });
         });
-    };
+    }; // read()
 
     /**
      * Update nodes. Existing values are overwritten, null removes the key.
@@ -94,11 +101,15 @@ module.exports = function () {
         if (!Array.isArray(ids)) {
             ids = [ids];
         }
+        for (var i in ids) {
+            ids[i] = new ObjectID(ids[i]);
+        }
         self.conn.collection(self.collection, function (err, coll) {
             if (err) {
                 return callback(true);
             }
-            var set = [], unset = [];
+            var set = [];
+            var unset = [];
             for (var k in keys) {
                 if (keys[k] === null) {
                     unset[k] = '';
@@ -109,10 +120,10 @@ module.exports = function () {
             coll.update({'_id':{$in:ids}}, {$set: set, $unset: unset},
                         {'multi': true}, function (err, count, status) {
                 callback(err, err ? null : status);
-                self.debug(count + '/' + nodes.length + ' nodes updated');
+                self.debug(count + '/' + ids.length + ' nodes updated');
             });
         });
-    };
+    }; // update()
 
     /**
      * Delete specified nodes.
@@ -126,6 +137,9 @@ module.exports = function () {
         if (!Array.isArray(ids)) {
             ids = [ids];
         }
+        for (var i in ids) {
+            ids[i] = new ObjectID(ids[i]);
+        }
         self.conn.collection(self.collection, function (err, coll) {
             if (err) {
                 return callback(true);
@@ -137,10 +151,10 @@ module.exports = function () {
                 callback(false, result);
             });
         });
-    };
+    }; // remove()
 
     /**
-     * Search for nodes in the database.
+     * Search for nodes ids in the database.
      * @param {object} keys - Keys to find
      * @param {function} callback - Callback function to routes.js
      */
@@ -152,11 +166,72 @@ module.exports = function () {
             if (err) {
                 return callback(true);
             }
-            coll.find(keys,{"_id":true}, function (err, results) {
-                callback(err, err ? null : results.toArray());
+            coll.find(keys,{'_id':true}, function (err, results) {
+                if (err) {
+                    return callback(true);
+                }
+                results = results.toArray();
+                var ids = [];
+                for (r in results) {
+                    ids.push((results[r]._id).toString());
+                }
+                callback(false, ids);
             });
         });
-    };
+    }; // search()
+
+    /*
+     * MongoDB-specific functions
+     */
+
+    /**
+     * Search for nodes ids in the database.
+     * @param {object} query - Keys to find (with optional regexes)
+     * @param {string} sort - Key used to sort the results
+     * @param {integer} skip - Pagination: number of results to skip
+     * @param {integer} limit - Pagination: max number of results to return
+     * @param {function} callback - Callback function to routes.js
+     */
+    self.mongo_search = function (query, sort, skip, limit, callback) {
+        if (!self.conn) {
+            return callback(true);
+        }
+        function prepare_regexes(obj) {
+            for (var key in obj) {
+            if (!key) {
+                continue;
+            }
+            if ('object' === typeof obj[key] && null !== obj[key]) {
+                prepare_regexes(obj[key]);
+                continue;
+            }
+            if ('string' === typeof obj[key]) {
+                if (obj[key].indexOf('REGEX_') === 0) {
+                    obj[key] = new RegExp(obj[key].replace('REGEX_',''));
+                }
+            }
+        }
+        prepare_regexes(query);
+        self.conn.collection(self.collection, function (err, coll) {
+            if (err) {
+                return callback(true);
+            }
+            var find = coll.find(query).sort(sort).skip(skip).limit(limit);
+            find.toArray(function (err, results) {
+                if (err) {
+                    return callback(true);
+                }
+                results = results.toArray();
+                var ids = [];
+                for (r in results) {
+                    ids.push((results[r]._id).toString());
+                }
+                callback(false, ids);
+            });
+        });
+    } // mongo_search()
+
+
     return self;
 };
 
