@@ -8,7 +8,7 @@
  */
 var debug = require('debug')('app:' + process.pid);
 
-debug("Initializing express");
+debug('Initializing express');
 var express = require('express');
 var app     = express();
 var fs      = require('fs');
@@ -24,29 +24,40 @@ var conf = app.locals.conf = require('./conf.json');
 var Database = require('./lib/database.js');
 app.locals.db = Database(conf.db, conf[conf.db]);
 
-var http_port = process.env.HTTP_PORT   || 8090;
+var http_port = process.env.HTTP_PORT || 8090;
 var https_port = process.env.HTTPS_PORT || 8443;
 
 require('./routes/index')(app, express);
 
-// not in a test environment
+/*
+ * We are not in a test environment, start a server
+ */
 if (!module.parent) {
+    /*
+     * Create an HTTP server
+     */
+    debug('Working in %s mode', app.get('env'));
     debug('Creating HTTP server on port %s', http_port);
     http.createServer(app).listen(http_port, function() {
-        debug('HTTP server listening on port %s in %s mode', http_port, app.get('env'));
+        debug('HTTP server listening on port %s', http_port);
     });
-    if (conf.connection.hasOwnProperty('Key') && conf.connection.hasOwnProperty('Cert')) {
+
+    /*
+     * Create an HTTP server if there are certificates
+     */
+    if (conf.connection.hasOwnProperty('Key') &&
+        conf.connection.hasOwnProperty('Cert')) {
         debug('Creating HTTPS server on port %s', https_port);
         https.createServer({
             key : fs.readFileSync(conf.connection.Key),
             cert : fs.readFileSync(conf.connection.Cert)
-
         }, app).listen(https_port, function() {
-            debug('HTTPS server listening on port %s in %s mode', https_port, app.get('env'));
+            debug('HTTPS server listening on port %s', https_port);
         });
     }
-}
-// test environment
-else {
+} else {
+    /*
+     * We are in a test environment, export the app
+     */
     module.exports = app;
 }
