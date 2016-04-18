@@ -9,7 +9,7 @@ module.exports = function(app){
 			return;
 		}
 		*/
-		var n = db.readNodes(req.params.id, function(err, n){
+		var n = db.read(req.params.id, function(err, n){
 			if (n[0].lock !== undefined)
 			{
 				res.status(409).send('lock error, the asset is already locked');
@@ -18,7 +18,7 @@ module.exports = function(app){
 			var keys = {
 				"lock": req.user.username || req.connection.remoteAddress
 			};
-			db.updateNodes([req.params.id], keys, function(error, doc){
+			db.update([req.params.id], keys, function(error, doc){
 				if (error)
 				{
 					res.status(409).send('lock error, please change your values');
@@ -36,13 +36,13 @@ module.exports = function(app){
 			return;
 		}
 		*/
-		var n = db.readNodes(req.params.id, function(err, n){
+		var n = db.read(req.params.id, function(err, n){
 			if (n[0].lock !== ( req.user.username || req.connection.remoteAddress) )
 			{
 				res.status(409).send('lock error, the asset is locked by '+ n[0].lock);
 				return;
 			}
-			db.updateNodes([req.params.id], { "lock": null }, function(error, doc){
+			db.update([req.params.id], { "lock": null }, function(error, doc){
 				if (error)
 				{
 					res.status(409).send('lock error, please change your values');
@@ -62,7 +62,7 @@ module.exports = function(app){
 		keys.author = req.user.username || req.connection.remoteAddress;
 		keys.time = Date.now();
 		keys['#parent'] = req.params.id;
-		db.createNodes(keys, function(error, doc){
+		db.create(keys, function(error, doc){
 			if (error)
 			{
 				res.status(409).send('create error, please change your values');

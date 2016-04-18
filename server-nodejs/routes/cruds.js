@@ -26,7 +26,7 @@ module.exports = function(app, express) {
 */
 
     /* CRUD operations */
-    create = function(req, res ) {
+    create = function (req, res) {
         if (Object.keys(req.body).length === 0) {
             res.status(400).send('create error: the body of the request is empty');
             return;
@@ -34,7 +34,7 @@ module.exports = function(app, express) {
         var keys = req.body;
         keys.author = req.user.username || req.connection.remoteAddress;
         keys.time = Date.now();
-        db.createNodes(keys, function(error, doc) {
+        db.create(keys, function(error, doc) {
             if (error) {
                 res.status(409).send('create error, please change your values');
                 return;
@@ -49,7 +49,7 @@ module.exports = function(app, express) {
             res.status(400).send('read error: the specified id is not valid');
             return;
         }
-        db.readNodes(id.split(","), function(error, doc) {
+        db.read(id.split(","), function(error, doc) {
             if (error) {
                 res.status(409).send('read error, please change your values');
                 return;
@@ -73,7 +73,7 @@ module.exports = function(app, express) {
             return;
         }
 */
-        db.updateNodes(req.params.id.split(","), req.body, function(error, doc) {
+        db.update(req.params.id.split(","), req.body, function(error, doc) {
             if (error) {
                 res.status(409).send('update error, please change your values');
                 return;
@@ -89,7 +89,7 @@ module.exports = function(app, express) {
             return;
         }
         */
-        db.removeNodes(req.params.id, function(error, doc) {
+        db.remove(req.params.id, function(error, doc) {
             if (error) {
                 res.status(409).send('delete error, please change your values');
                 return;
@@ -105,7 +105,7 @@ module.exports = function(app, express) {
             return;
         }
         //obsolete
-        db.getGraph(id.split(","), function(error, nodes) {
+        db.graph(id.split(","), function(error, nodes) {
             if (error) {
                 res.status(409).send('graph error, please change your values');
                 return;
@@ -203,7 +203,7 @@ db.things.find({$where: function() {
                 result[tempField]+=terms[i];
 */
         }
-        db.searchNodes(result, function(error, doc) {
+        db.search(result, function(error, doc) {
             if (error) {
                 res.status(409).send('Read Error, please change your values');
                 return;
@@ -213,7 +213,7 @@ db.things.find({$where: function() {
     }
 
     search_mongo = function(req, res) {
-        if(typeof db.mongo_searchNodes !== "function") {
+        if(typeof db.mongo_search !== "function") {
             res.status(409).send('MongoDB not in use');
             return;
         }
@@ -259,7 +259,7 @@ db.things.find({$where: function() {
                         res.status(409).send('mongodb collection retrival error');
                     }
                     else {*/
-                        db.mongo_searchNodes(query, sort, skip, limit).toArray(function(err, results) {
+                        db.mongo_search(query, sort, skip, limit).toArray(function(err, results) {
                             if (err)
                                 res.status(409).send('mongodb find error');
                             else {
@@ -284,13 +284,13 @@ db.things.find({$where: function() {
         json.nodes.forEach(function(node, i, nodes) {
             var keys = node.keys;
             keys.mysqlid = node.id;
-            db.searchNodes({mysqlid:keys.mysqlid}, function(err, res) {
+            db.search({mysqlid:keys.mysqlid}, function(err, res) {
                 if (err) {
                     console.log('ERROR');
                     return;
                 }
                 if (res.length === 0) {
-                    db.createNodes(keys, function(err, n) {
+                    db.create(keys, function(err, n) {
                         if (err) console.log('ERROR create')
                     });
                 }
@@ -300,11 +300,11 @@ db.things.find({$where: function() {
                 if (i===nodes.length -1) {  // we finished inserting nodes
                     json.links.forEach(function(link) {
                         console.log(link );
-                        db.searchNodes({mysqlid:link.src_id.toString()}, function(err, res1) {
+                        db.search({mysqlid:link.src_id.toString()}, function(err, res1) {
                             if (!err) {
-                                db.searchNodes({mysqlid:link.tgt_id.toString()}, function(err, res2) {
+                                db.search({mysqlid:link.tgt_id.toString()}, function(err, res2) {
                                     if (!err) {
-                                        db.createNodes({src_id: res1[0], tgt_id: res2[0]}, function() {});
+                                        db.create({src_id: res1[0], tgt_id: res2[0]}, function() {});
                                     }
                                     else {
                                         console.log('LINK ERR');
