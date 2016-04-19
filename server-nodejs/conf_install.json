@@ -4,7 +4,8 @@
 		"Cert": "cert.pem",
 		"Key": "key.pem"
 	},
-	"mongoDB" : {
+    "db" : "mongodb",
+	"mongodb" : {
 		"host" : "localhost",
 		"collection" : "node",
 		"port" : 27017,
