@@ -24,14 +24,16 @@ module.exports = function () {
      */
     self.connect = function (conf, callback) {
         if (self.conn) {
-            return callback(false, self.conn);
+            callback(false, self.conn);
+            return;
         }
         var server = new mongo.Server(conf.host, conf.port, conf.options);
         var db     = new mongo.Db(conf.collection, server);
         db.open(function (err, connection) {
             if (err) {
                 self.debug('Unable to connect to the MongoDB database');
-                return callback(true);
+                callback(true);
+                return;
             }
             self.debug('Connected to the database');
             self.conn = connection;
@@ -74,12 +76,22 @@ module.exports = function () {
      */
     self.create = function(nodes, callback) {
         self.getCollection(callback, function (coll) {
-            /*
-             * MongoDB actually supports inserting one document
-             * or multiple documents at the same time.
-             */
-            coll.insert(nodes, {safe: true}, function (err, result) {
-                callback(err, err ? null : result.ops);
+            coll.insert(nodes, {'safe': true}, function (err, result) {
+                if (err) {
+                    callback(true);
+                    return;
+                }
+                // result.ops = array containing all nodes
+                if (result.ops.length === 1) {
+                    // One element inserted, return one element
+                    callback(false, result.ops[0]);
+                } else if (result.ops.length > 1) {
+                    // An array was inserted, return an array
+                    callback(false, result.ops);
+                } else {
+                    // Nothing was inserted
+                    callback(true);
+                }
             });
         });
     }; // create()
@@ -97,9 +109,20 @@ module.exports = function () {
             for (var i in ids) {
                 ids[i] = new ObjectID(ids[i]);
             }
-            coll.find({'_id':{$in:ids}}).toArray(function (err, results) {
-                callback(err, err ? null : results);
-            });
+            var array = [];
+            function findNext(pos) {
+                if (pos === ids.length) {
+                    callback(false, array);
+                    return;
+                }
+                coll.findOne({'_id': ids[pos]}, function (err, node) {
+                    if (!err) {
+                        array.push(node);
+                        findNext(++pos);
+                    }
+                });
+            }
+            findNext(0);
         });
     }; // read()
 
@@ -159,7 +182,8 @@ module.exports = function () {
             }
             coll.remove({'_id':{$in:ids}}, function (err, result) {
                 if (err || result.result.n === 0) {
-                    return callback(true);
+                    callback(true);
+                    return;
                 }
                 callback(false, result);
             });
@@ -175,7 +199,8 @@ module.exports = function () {
         self.getCollection(callback, function (coll) {
             coll.find(keys, {'_id':true}).toArray(function (err, results) {
                 if (err) {
-                    return callback(true);
+                    callback(true);
+                    return;
                 }
                 var ids = [];
                 for (r in results) {
@@ -191,45 +216,62 @@ module.exports = function () {
      * Higher-level functions
      */
 
-    self.links_r = function(ids, nIds, callback) {
+    self.links_r = function (ids, links, callback) {
+        var newIds = [];
+        var self = this;
+        if (links==null) {
+            links=[];
+        }
         self.getCollection(callback, function (coll) {
             coll.find({'tgt_id':{$in:ids}}).toArray(function (err, results) {
-                nIds = [];
                 if (err) {
-                    return callback(true);
+                    callback(true);
+                    return;
                 }
                 for (var r in results) {
-                    if (undefined !== results[r].src_id) {
-                        if (0 > ids.indexOf(results[r].src_id)) {
-                            ids.push(results[r].src_id);
-                            nIds.push(results[r].src_id);
+                    if (undefined == links[results[r]._id]) {
+                        if (results[r].src_id != undefined) {
+                            if (0 > ids.indexOf(results[r].src_id)) {
+                                newIds.push(results[r].src_id);
+                            }
                         }
-                    }
-                    if (0 > ids.indexOf(results[r]._id)) {
-                        ids.push(results[r]._id);
+                        links[results[r]._id] = results[r];
                     }
                 }
-                if (nIds.length > 0) {
-                    self.links_r(ids, nIds, callback);
+                if (newIds.length < 1) {
+                    callback(false, links);
                 } else {
-                    callback(false, ids);
+                    self.links_r(newIds, links, callback);
                 }
             });
         });
-    };
+    }; // links_r()
 
-    self.graph = function(ids, callback) {
-        if (!Array.isArray(ids)) {
-            ids = [ids];
-        }
-        var newIds = ids;
-        self.links_r(ids, newIds, function (err, lids) {
-            if (err) {
-                return callback(true);
+    /**
+     * Retrieve the graph of the specified target nodes
+     * @param {Array} ids - Array of node indexes
+     * @param {Function} callback - function(err, result) to call
+     */
+    this.graph = function(ids, callback){
+        self.links_r(ids, null, function (err, links) {
+            if (err || !links) {
+                callback(true);
+                return;
             }
-            self.read(lids, function (error, nodes) {
+            for (l in links) {
+                if (undefined != links[l].src_id) {
+                    if (0 > ids.indexOf(links[l].src_id)) {
+                        ids.push(links[l].src_id);
+                    }
+                }
+            }
+            self.read(ids, function(error, nodes) {
                 if (error || !nodes) {
-                    return callback(true);
+                    callback(true);
+                    return;
+                }
+                for (var l in links) {
+                    nodes.push(links[l]);
                 }
                 callback(false, nodes);
             });
@@ -272,7 +314,8 @@ module.exports = function () {
             var find = coll.find(query).sort(sort).skip(skip).limit(limit);
             find.toArray(function (err, results) {
                 if (err) {
-                    return callback(true);
+                    callback(true);
+                    return;
                 }
                 var ids = [];
                 for (r in results) {
@@ -284,8 +327,9 @@ module.exports = function () {
     }; // mongo_search()
 
     // Compatibility
+    // As deleteNode() can actually delete multiple nodes
     self.deleteNode = function (ids, callback) {
-        return self.remove(ids, callback);
+        self.remove(ids, callback);
     }; // deleteNode()
 };
 
