@@ -157,6 +157,7 @@ class http_connection( object ) :
 			return json.loads(r.text)
 		return None
 
+	""" commented until proper implementation
 	def link( self, target, sources, keys ) :
 		'''
 		Create a node edge from sources to target wearing the specified keys
@@ -170,6 +171,7 @@ class http_connection( object ) :
 		if r.status_code == 200:
 			return json.loads(r.text)
 		return None
+	"""
 
 
 	# USERS AUTHENTICATION METHODS

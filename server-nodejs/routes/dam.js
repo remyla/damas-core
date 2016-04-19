@@ -71,6 +71,9 @@ module.exports = function(app){
 			res.status(201).send(doc);
 		});
 	});
+
+	/* this is added as comment because we will implement this route
+
 	app.post('/api/link', function(req, res){
 		if (!req.body.target)
 		{
@@ -118,4 +121,5 @@ module.exports = function(app){
 		})
 		res.status(200).json(result);
 	});
+	*/
 }
