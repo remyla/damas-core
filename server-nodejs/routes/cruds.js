@@ -231,48 +231,13 @@ db.things.find({$where: function() {
             limit = req.body.limit | 0;
             skip = req.body.skip | 0;
         }
-        function mongoops (obj) {
-            for (var key in obj) {
-                if (!key) continue;
-                if (typeof obj[key] === 'object' && obj[key] !== null) {
-                    // recursive
-                    mongoops(obj[key]);
-                }
-                if (typeof obj[key] === "string") {
-                    // replace regexps from json
-                    if (obj[key].indexOf('REGEX_') === 0 ) {
-                        obj[key] = new RegExp(obj[key].replace('REGEX_',''));
-                    }
-                }
-            }
-        }
-        mongoops(query);
-        //this is done in every dbms object
-        /*db.connection(function(err, database ) {
+        db.mongo_search(query, sort, skip, limit, function (err, ids) {
             if (err) {
-                res.status(409).send('mongodb connection error');
+                res.status(409).send('mongodb find error');
+            } else {
+                res.status(200).json(ids);
             }
-            else {
-                database.collection("node", function(err, collection) {
-                    if (err) {
-                        console.log(err);
-                        res.status(409).send('mongodb collection retrival error');
-                    }
-                    else {*/
-                        db.mongo_search(query, sort, skip, limit).toArray(function(err, results) {
-                            if (err)
-                                res.status(409).send('mongodb find error');
-                            else {
-                                var ids=[];
-                                for(r in results)
-                                    ids.push((results[r]._id).toString());
-                                res.status(200).json(ids);
-                            }
-                        });
-                    /*}
-                });
-            }
-        });*/
+        });
     }
 
     /**
@@ -342,7 +307,7 @@ db.things.find({$where: function() {
     //
     // Extra operations
     //
-    app.get('/api/graph/:id', graph);
+    //\app.get('/api/graph/:id', graph);
     app.get('/api/file/:path(*)',getFile);
     app.post('/api/import', importJSON);
     //app.get('/subdirs/:path',getSubdirs);
@@ -351,10 +316,10 @@ db.things.find({$where: function() {
     //
     // Alternative Operations ()
     //
-    app.get('/api/search/:query(*)', search);
+    //\app.get('/api/search/:query(*)', search);
     app.post('/api/search_mongo', search_mongo);
-    app.get('/api/graph/', graph);
-    app.get('/api/', read);
+    //\app.get('/api/graph/', graph);
+    //\app.get('/api/', read);
     //app.put('/', update);
     //app.delete('/', deleteNode);
 
@@ -362,7 +327,7 @@ db.things.find({$where: function() {
     // CRUDS operations
     //
     app.post('/api/', create);
-    app.get('/api/:id', read);
+    //\app.get('/api/:id', read);
     app.put('/api/:id', update);
     app.delete('/api/:id', deleteNode);
 }

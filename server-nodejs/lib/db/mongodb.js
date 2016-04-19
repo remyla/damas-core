@@ -191,6 +191,32 @@ module.exports = function () {
      * Higher-level functions
      */
 
+    self.links_r = function(ids, nIds, callback) {
+        self.conn.collection(self.collection, function (err, coll) {
+            coll.find({'tgt_id':{$in:ids}}).toArray(function (err, results) {
+                nIds = [];
+                if (err) {
+                    return callback(true);
+                }
+                for (var r in results) {
+                    if (undefined !== results[r].src_id) {
+                        if (0 > ids.indexOf(results[r].src_id)) {
+                            ids.push(results[r].src_id);
+                            nIds.push(results[r].src_id);
+                        }
+                    }
+                    if (0 > ids.indexOf(results[r]._id)) {
+                        ids.push(results[r]._id);
+                    }
+                }
+                if (nIds.length > 0) {
+                    self.links_r(ids, nIds, callback);
+                } else {
+                    callback(false, ids);
+                }
+            });
+        });
+    };
 
     self.graph = function(ids, callback) {
         if (!self.conn) {
@@ -199,32 +225,12 @@ module.exports = function () {
         if (!Array.isArray(ids)) {
             ids = [ids];
         }
-        for (var i in ids) {
-            ids[i] = new ObjectID(ids[i]);
-        }
-        self.conn.collection(self.collection, function (err, coll) {
-            var newIds = ids;
-            do {
-                var find = collection.find({'tgt_id': {$in: newIds}});
-                find.toArray(function (err, results) {
-                    newIds = [];
-                    if (err) {
-                        return callback(true);
-                    }
-                    for (var r in results) {
-                        if (undefined !== results[r].src_id) {
-                            if (0 > ids.indexOf(results[r].src_id)) {
-                                ids.push(results[r].src_id);
-                                newIds.push(results[r].src_id);
-                            }
-                        }
-                        if (0 > ids.indexOf(results[r]._id)) {
-                            ids.push(results[r]._id);
-                        }
-                    }
-                });
-            } while (newIds.length > 0);
-            self.read(ids, function (error, nodes) {
+        var newIds = ids;
+        self.links_r(ids, newIds, function (err, lids) {
+            if (err) {
+                return callback(true);
+            }
+            self.read(lids, function (error, nodes) {
                 if (error || !nodes) {
                     return callback(true);
                 }
