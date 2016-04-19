@@ -31,12 +31,18 @@ module.exports = function(app, express) {
             res.status(400).send('create error: the body of the request is empty');
             return;
         }
-        var keys = req.body;
-        keys.author = req.user.username || req.connection.remoteAddress;
-        keys.time = Date.now();
-        db.create(keys, function(error, doc) {
+        var nodes = req.body;
+        if (!Array.isArray(nodes)) {
+            nodes = [nodes];
+        }
+        for (var n in nodes) {
+            nodes[n].author = req.user.username||req.connection.remoteAddress;
+            nodes[n].time = Date.now();
+        }
+        db.create(nodes, function(error, doc) {
             if (error) {
-                res.status(409).send('create error, please change your values');
+                res.status(409).send('Create error, ' +
+                    'please change your values');
                 return;
             }
             res.status(201).send(doc);
