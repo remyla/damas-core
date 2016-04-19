@@ -40,6 +40,27 @@ module.exports = function () {
         });
     }; // connect()
 
+    /*
+     * Load the collection
+     * @param {function} route - Callback function in case of failure
+     * @param {function} callback - Function needing the collection
+     */
+    self.getCollection = function (route, callback) {
+        if (!self.conn) {
+            self.debug('Error: not connected to the database');
+            route(true);
+            return;
+        }
+        self.conn.collection(self.collection, function (err, coll) {
+            if (err) {
+                self.debug('Error: unable to load the collection');
+                route(true);
+                return;
+            }
+            callback(coll);
+        });
+    };
+
 
     /*
      * Minimal CRUDS operations
@@ -52,14 +73,7 @@ module.exports = function () {
      * @param {function} callback - Callback function to routes.js
      */
     self.create = function(nodes, callback) {
-        if (!self.conn) {
-            self.debug('Error: not connected to the database');
-            return callback(true);
-        }
-        self.conn.collection(self.collection, function (err, coll) {
-            if (err) {
-                return callback(true);
-            }
+        self.getCollection(callback, function (coll) {
             /*
              * MongoDB actually supports inserting one document
              * or multiple documents at the same time.
@@ -76,18 +90,12 @@ module.exports = function () {
      * @param {function} callback - Callback function to routes.js
      */
     self.read = function (ids, callback) {
-        if (!self.conn) {
-            return callback(true);
-        }
-        if (!Array.isArray(ids)) {
-            ids = [ids];
-        }
-        for (var i in ids) {
-            ids[i] = new ObjectID(ids[i]);
-        }
-        self.conn.collection(self.collection, function (err, coll) {
-            if (err) {
-                return callback(true);
+        self.getCollection(callback, function (coll) {
+            if (!Array.isArray(ids)) {
+                ids = [ids];
+            }
+            for (var i in ids) {
+                ids[i] = new ObjectID(ids[i]);
             }
             coll.find({'_id':{$in:ids}}).toArray(function (err, results) {
                 callback(err, err ? null : results);
@@ -102,18 +110,12 @@ module.exports = function () {
      * @param {function} callback - Callback function to routes.js
      */
     self.update = function (ids, keys, callback) {
-        if (!self.conn) {
-            return callback(true);
-        }
-        if (!Array.isArray(ids)) {
-            ids = [ids];
-        }
-        for (var i in ids) {
-            ids[i] = new ObjectID(ids[i]);
-        }
-        self.conn.collection(self.collection, function (err, coll) {
-            if (err) {
-                return callback(true);
+        self.getCollection(callback, function (coll) {
+            if (!Array.isArray(ids)) {
+                ids = [ids];
+            }
+            for (var i in ids) {
+                ids[i] = new ObjectID(ids[i]);
             }
             var params = {};
             for (var k in keys) {
@@ -148,18 +150,12 @@ module.exports = function () {
      * @param {function} callback - Function callback to routes.js
      */
     self.remove = function (ids, callback) {
-        if (!self.conn) {
-            return callback(true);
-        }
-        if (!Array.isArray(ids)) {
-            ids = [ids];
-        }
-        for (var i in ids) {
-            ids[i] = new ObjectID(ids[i]);
-        }
-        self.conn.collection(self.collection, function (err, coll) {
-            if (err) {
-                return callback(true);
+        self.getCollection(callback, function (coll) {
+            if (!Array.isArray(ids)) {
+                ids = [ids];
+            }
+            for (var i in ids) {
+                ids[i] = new ObjectID(ids[i]);
             }
             coll.remove({'_id':{$in:ids}}, function (err, result) {
                 if (err || result.result.n === 0) {
@@ -176,13 +172,7 @@ module.exports = function () {
      * @param {function} callback - Callback function to routes.js
      */
     self.search = function (keys, callback) {
-        if (!self.conn) {
-            return callback(true);
-        }
-        self.conn.collection(self.collection, function (err, coll) {
-            if (err) {
-                return callback(true);
-            }
+        self.getCollection(callback, function (coll) {
             coll.find(keys, {'_id':true}).toArray(function (err, results) {
                 if (err) {
                     return callback(true);
@@ -202,7 +192,7 @@ module.exports = function () {
      */
 
     self.links_r = function(ids, nIds, callback) {
-        self.conn.collection(self.collection, function (err, coll) {
+        self.getCollection(callback, function (coll) {
             coll.find({'tgt_id':{$in:ids}}).toArray(function (err, results) {
                 nIds = [];
                 if (err) {
@@ -229,9 +219,6 @@ module.exports = function () {
     };
 
     self.graph = function(ids, callback) {
-        if (!self.conn) {
-            return callback(true);
-        }
         if (!Array.isArray(ids)) {
             ids = [ids];
         }
@@ -264,9 +251,6 @@ module.exports = function () {
      * @param {function} callback - Callback function to routes.js
      */
     self.mongo_search = function (query, sort, skip, limit, callback) {
-        if (!self.conn) {
-            return callback(true);
-        }
         function prepare_regexes(obj) {
             for (var key in obj) {
                 if (!key) {
@@ -284,10 +268,7 @@ module.exports = function () {
             }
         }
         prepare_regexes(query);
-        self.conn.collection(self.collection, function (err, coll) {
-            if (err) {
-                return callback(true);
-            }
+        self.getCollection(callback, function (coll) {
             var find = coll.find(query).sort(sort).skip(skip).limit(limit);
             find.toArray(function (err, results) {
                 if (err) {
