@@ -17,7 +17,7 @@ var https   = require('https')
 /*
  * Mongo model
  */
-var mongoModel = require('../model.js');
+var mongoModel = require('./model.js');
 app.locals.mod = new mongoModel();
 app.locals.mod.connection(function () { });
 var mod = app.locals.mod;
