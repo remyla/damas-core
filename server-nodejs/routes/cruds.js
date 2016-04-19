@@ -307,19 +307,19 @@ db.things.find({$where: function() {
     //
     // Extra operations
     //
-    //\app.get('/api/graph/:id', graph);
-    app.get('/api/file/:path(*)',getFile);
-    app.post('/api/import', importJSON);
+    app.get('/api/graph/:id', graph);
+    app.get('/api/file/:path(*)',getFile); // untested
+    app.post('/api/import', importJSON); // untested
     //app.get('/subdirs/:path',getSubdirs);
     //app.get('/subdirs',getSubdirs);
 
     //
     // Alternative Operations ()
     //
-    //\app.get('/api/search/:query(*)', search);
+    app.get('/api/search/:query(*)', search);
     app.post('/api/search_mongo', search_mongo);
-    //\app.get('/api/graph/', graph);
-    //\app.get('/api/', read);
+    app.get('/api/graph/', graph);
+    app.get('/api/', read);
     //app.put('/', update);
     //app.delete('/', deleteNode);
 
@@ -327,7 +327,9 @@ db.things.find({$where: function() {
     // CRUDS operations
     //
     app.post('/api/', create);
-    //\app.get('/api/:id', read);
+    app.get('/api/:id', read);
     app.put('/api/:id', update);
     app.delete('/api/:id', deleteNode);
 }
+
+
