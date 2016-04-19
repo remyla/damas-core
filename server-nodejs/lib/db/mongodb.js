@@ -65,7 +65,7 @@ module.exports = function () {
              * or multiple documents at the same time.
              */
             coll.insert(nodes, {safe: true}, function (err, result) {
-                callback(err, err ? null : result);
+                callback(err, err ? null : result.ops);
             });
         });
     }; // create()
@@ -115,19 +115,29 @@ module.exports = function () {
             if (err) {
                 return callback(true);
             }
-            var set = [];
-            var unset = [];
+            var params = {};
             for (var k in keys) {
                 if (keys[k] === null) {
-                    unset[k] = '';
+                    if (undefined === params.$unset) {
+                        params.$unset = {};
+                    }
+                    params.$unset[k] = '';
                 } else {
-                    set[k] = keys[k];
+                    if (undefined === params.$set) {
+                        params.$set = {};
+                    }
+                    params.$set[k] = keys[k];
                 }
             }
-            coll.update({'_id':{$in:ids}}, {$set: set, $unset: unset},
-                        {'multi': true}, function (err, count, status) {
-                callback(err, err ? null : status);
-                self.debug(count + '/' + ids.length + ' nodes updated');
+            coll.update({'_id':{$in:ids}}, params, {multi: true},
+                        function (err, status) {
+                if (err) {
+                    callback(true);
+                }
+                self.debug('Update status: ' + status);
+                self.read(ids, function (err, nodes) {
+                    callback(err, err ? null : nodes);
+                });
             });
         });
     }; // update()
