@@ -144,21 +144,24 @@ module.exports = function (conf) {
             for (var i in ids) {
                 ids[i] = new ObjectID(ids[i]);
             }
-            var params = {};
+            var keysToUnset = {};
+            var keysToSet = {};
+            var toUpdate = {};
+
             for (var k in keys) {
                 if (keys[k] === null) {
-                    if (undefined === params.$unset) {
-                        params.$unset = {};
-                    }
-                    params.$unset[k] = '';
+                    keysToUnset[k] = '';
                 } else {
-                    if (undefined === params.$set) {
-                        params.$set = {};
-                    }
-                    params.$set[k] = keys[k];
+                    keysToSet[k] = decodeURIComponent(keys[k]);
                 }
             }
-            coll.update({'_id':{$in:ids}}, params, {multi: true},
+            if (Object.keys(keysToSet).length > 0) {
+                toUpdate.$set = keysToSet;
+            }
+            if (Object.keys(keysToUnset).length > 0) {
+                toUpdate.$unset = keysToUnset;
+            }
+            coll.update({'_id':{$in:ids}}, toUpdate, {multi: true},
                         function (err, status) {
                 if (err) {
                     callback(true);
