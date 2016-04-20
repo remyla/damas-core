@@ -297,23 +297,6 @@ module.exports = function (conf) {
      * @param {function} callback - Callback function to routes.js
      */
     self.mongo_search = function (query, sort, skip, limit, callback) {
-        function prepare_regexes(obj) {
-            for (var key in obj) {
-                if (!key) {
-                    continue;
-                }
-                if ('object' === typeof obj[key] && null !== obj[key]) {
-                    prepare_regexes(obj[key]);
-                    continue;
-                }
-                if ('string' === typeof obj[key]) {
-                    if (obj[key].indexOf('REGEX_') === 0) {
-                        obj[key] = new RegExp(obj[key].replace('REGEX_',''));
-                    }
-                }
-            }
-        }
-        prepare_regexes(query);
         self.getCollection(callback, function (coll) {
             var find = coll.find(query).sort(sort).skip(skip).limit(limit);
             find.toArray(function (err, results) {
