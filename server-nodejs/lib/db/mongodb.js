@@ -1,378 +1,336 @@
-var debug = require('debug')('app:model:mongo:' + process.pid);
-var conf = require('./conf');
-var mongo = require('mongodb');
-var ObjectId = mongo.ObjectID;
+/*
+ * lib/db/mongodb.js - from Damas-Core
+ * Licensed under the GNU GPL v3
+ */
 
-module.exports = function Model()
-{
-	// Data about connection is in the file conf.json
-	var dataMongo = conf.mongoDB;
-	var self = this;
-	var Server = mongo.Server;
-	var Db = mongo.Db;
-	var conn;
+module.exports = function () {
+    var self   = this;
+    var mongo = require('mongodb');
+    var ObjectID = mongo.ObjectID;
+    self.conn  = false;
+    self.collection = false;
+    self.debug = require('debug')('app:db:mongo:' + process.pid);
+    // TODO: normalize the output to the callbacks (error code?)
+    // TODO: run tests...
+    // TODO: make sure we get an id array when searching
+    // TODO: verify input and output types of every function
+    // TODO: make sure every function supports arrays (eg, search with $in)
+    // TODO: check ObjectID compatibility everywhere...
 
-	//START: --------------MONGODB--------------
-	this.connection = function(callback)
-	{
-		//console.log(this);
-		//Check if there is an active connection to db
-		if(conn)
-		{
-			callback( false, conn );
-			return;
-		}
-		server = new Server( dataMongo.host, dataMongo.port, dataMongo.options ),
-		db = new Db( dataMongo.collection, server );
-		db.open(function(err, databaseConnection)
-		{
-			if(err)
-			{
-				console.log('error: could not connect to the specified MongoDB database');
-				return callback( true );
-			}
-			debug('connected');
-			conn = databaseConnection;
-			callback( false, databaseConnection );
-		});
-	}
-	//END: ----------------MONGODB--------------
+    /*
+     * Initialize the connection.
+     * @param {object} conf - Database settings
+     * @param {function} callback - Callback function to routes.js
+     */
+    self.connect = function (conf, callback) {
+        if (self.conn) {
+            callback(false, self.conn);
+            return;
+        }
+        var server = new mongo.Server(conf.host, conf.port, conf.options);
+        var db     = new mongo.Db(conf.collection, server);
+        db.open(function (err, connection) {
+            if (err) {
+                self.debug('Unable to connect to the MongoDB database');
+                callback(true);
+                return;
+            }
+            self.debug('Connected to the database');
+            self.conn = connection;
+            self.collection = conf.collection;
+            callback(false, self.conn);
+        });
+    }; // connect()
 
-	/**
-	 * Creates a node providing its internal type value. Doesn't check parent node existence.
-	 * @param {JSON Object} JSON Object containing the values of the fields to create for this node
-	 * @param {function} callback - Function callback to routes.js
-	 */
+    /*
+     * Load the collection
+     * @param {function} route - Callback function in case of failure
+     * @param {function} callback - Function needing the collection
+     */
+    self.getCollection = function (route, callback) {
+        if (!self.conn) {
+            self.debug('Error: not connected to the database');
+            route(true);
+            return;
+        }
+        self.conn.collection(self.collection, function (err, coll) {
+            if (err) {
+                self.debug('Error: unable to load the collection');
+                route(true);
+                return;
+            }
+            callback(coll);
+        });
+    };
 
-	this.create = function( keys, callback )
-	{
-		this.connection( function( err, database )
-		{
-			if( err )
-			{
-				callback( true );
-			}
-			else
-			{
-			database.collection( dataMongo.collection, function( err, collection )
-			{
-				if( err )
-				{
-					callback( true );
-				}
-				else
-				{
-					collection.insert( keys, {safe:true}, function( err, records )
-					{
-						if( err )
-						{
-							callback( true );
-						}
-						else
-						{
-							//self.read( (keys._id).toString().split(","), callback );
-							self.readOne( (keys._id).toString(), callback );
-						}
-					});
-				}
-			});
-		}
-	});
-	}; //End Create
 
-	/**
-	 * Get key->values combinations for the given nodes
-	 * @param {Integer} ids array of indexes
-	 * @param {function} callback - Function callback to routes.js
-	 */
-	this.read = function( ids, callback )
-	{
-		this.connection( function(err, database )
-		{
-			if( err )
-			{
-				callback( true );
-			}
-			else
-			{
-				database.collection(dataMongo.collection, function(err, collection)
-				{
-					if(err)
-					{
-						callback( true );
-					}
-					else
-					{
-						var array=[];
-						function findnext(indexes, cursor){
-							collection.findOne({'_id':new ObjectId(indexes[cursor])}, function(err, item) {
-							if(cursor===indexes.length)
-							{
-								callback(false,array);
-								return;
-							}
-							array.push(item);
-							findnext(indexes, ++cursor);
-							});
-						}
-						findnext(ids, 0);
-					}
-				});
-			}
-		});
-	};
+    /*
+     * Minimal CRUDS operations
+     */
 
-	/**
-	 * Get a node specifying its index
-	 * @param {string} id - index of the node to
-	 * @param {function} callback - Function callback to routes.js
-	 */
-	this.readOne = function( id, callback )
-	{
-		this.connection( function(err, database )
-		{
-			if( err )
-			{
-				callback( true );
-				return;
-			}
-			database.collection( dataMongo.collection, function(err, collection){
-				if(err)
-				{
-					callback( true );
-					return;
-				}
-				collection.findOne({'_id':new ObjectId(id)},function(err, item) {
-					if (err)
-					{
-						callback(true);
-						return;
-					}
-					callback(false,item);
-				});
-			});
-		});
-	};
 
-	/**
-	 * Update nodes keys. The specified keys overwrite existing keys, others are left untouched.
-	 * A null key value removes the key.
-	 * @param {array} id - array of node indexes to update
-	 * @param {object} keys - hash containing key/value pairs
-	 * @param {function} callback - function to call when done
-	 */
-	this.update = function( ids, keys, callback )
-	{
-		debug('update nodes: ', ids);
-		debug('update keys: ', keys);
-		var keysToUnset = {},
-			keysToSet = {};
-		// prepare ids
-		var ids_o = new Array();
-		for (var i = 0; i < ids.length; i++)
-		{
-			ids_o.push(new ObjectId(ids[i]));
-		}
-		for( var k in keys )
-		{
-			if( keys[k] === null )
-			{
-				keysToUnset[k] = '';
-			}
-			else
-			{
-				keysToSet[k] = decodeURIComponent(keys[k]);
-			}
-		}
-		this.connection( function(err, database )
-		{
-			if( err )
-			{
-				callback(true);
-			}
-			else
-			{
-				database.collection( dataMongo.collection, function( err, collection )
-				{
-					if( err )
-					{
-						callback( true );
-					}
-					else
-					{
+    /**
+     * Create nodes, without parent verification.
+     * @param {array} nodes - Objects to create in the database
+     * @param {function} callback - Callback function to routes.js
+     */
+    self.create = function(nodes, callback) {
+        self.getCollection(callback, function (coll) {
+            coll.insert(nodes, {'safe': true}, function (err, result) {
+                if (err) {
+                    callback(true);
+                    return;
+                }
+                // result.ops = array containing all nodes
+                if (result.ops.length === 1) {
+                    // One element inserted, return one element
+                    callback(false, result.ops[0]);
+                } else if (result.ops.length > 1) {
+                    // An array was inserted, return an array
+                    callback(false, result.ops);
+                } else {
+                    // Nothing was inserted
+                    callback(true);
+                }
+            });
+        });
+    }; // create()
 
-						collection.update( { '_id': {$in:ids_o} }, { $set:keysToSet, $unset:keysToUnset}, {multi: true}, function( err, result)
-						{
-							if( err )
-							{
-								callback( true );
-							}
-							else
-							{
-								self.read( ids_o, callback );
-							}
-						});
-					}
-				});
-			}
-		});
-	};
+    /**
+     * Retrieve nodes as key->value objects.
+     * @param {array} ids - Identifiers of the nodes to retrieve.
+     * @param {function} callback - Callback function to routes.js
+     */
+    self.read = function (ids, callback) {
+        self.getCollection(callback, function (coll) {
+            if (!Array.isArray(ids)) {
+                ids = [ids];
+            }
+            for (var i in ids) {
+                ids[i] = new ObjectID(ids[i]);
+            }
+            var array = [];
+            function findNext(pos) {
+                if (pos === ids.length) {
+                    callback(false, array);
+                    return;
+                }
+                coll.findOne({'_id': ids[pos]}, function (err, node) {
+                    if (!err) {
+                        array.push(node);
+                        findNext(++pos);
+                    }
+                });
+            }
+            findNext(0);
+        });
+    }; // read()
 
-	/**
-	 * Recursively delete a node - WARNING: this function doesn't check anything before removal
-	 * @param {Integer} $id node index
-	 * @param {function} callback - Function callback to routes.js
-	 */
-	this.deleteNode = function( id, callback )
-	{
-		this.connection( function(err, database )
-		{
-			if( err )
-			{
-				callback(true);
-			}
-			else
-			{
-				database.collection( dataMongo.collection, function( err, collection)
-				{
-					if( err )
-					{
-						callback( true );
-					}
-					else {
-						collection.remove( {$or:[ {'_id':new ObjectId(id)}, {'tgt_id':id},{'src_id':id}] }, function( err, result )
-						{
-							if( err )
-							{
-								callback( true );
-							}
-							else
-							{
-								var res = result.result.n;
-								if(res === 0)
-								{
-									return callback( true );
-								}
-								else
-								{
-									callback( false, result );
-								}
-							}
-						});
-					}
-				});
-			}
-		});
-	}; //End deleteNode
+    /**
+     * Update nodes. Existing values are overwritten, null removes the key.
+     * @param {array} ids - Identifiers of the nodes to update
+     * @param {object} keys - New keys to define on the nodes
+     * @param {function} callback - Callback function to routes.js
+     */
+    self.update = function (ids, keys, callback) {
+        self.getCollection(callback, function (coll) {
+            if (!Array.isArray(ids)) {
+                ids = [ids];
+            }
+            for (var i in ids) {
+                ids[i] = new ObjectID(ids[i]);
+            }
+            var params = {};
+            for (var k in keys) {
+                if (keys[k] === null) {
+                    if (undefined === params.$unset) {
+                        params.$unset = {};
+                    }
+                    params.$unset[k] = '';
+                } else {
+                    if (undefined === params.$set) {
+                        params.$set = {};
+                    }
+                    params.$set[k] = keys[k];
+                }
+            }
+            coll.update({'_id':{$in:ids}}, params, {multi: true},
+                        function (err, status) {
+                if (err) {
+                    callback(true);
+                }
+                self.debug('Update status: ' + status);
+                self.read(ids, function (err, nodes) {
+                    callback(err, err ? null : nodes);
+                });
+            });
+        });
+    }; // update()
 
-	this.search=function(keys, callback){
-		this.connection( function(err, database )
-		{
-			if( err )
-			{
-				callback(true);
-			}
-			else
-			{
-				database.collection(dataMongo.collection, function(err, collection) {
-					if (err)
-						callback(true);
-					else {
-						collection.find(keys,{"_id":1}).toArray(function(err, results) {
-							if (err)
-								callback(true);
-							else{
-								var ids=[];
-								for(r in results)
-									ids.push((results[r]._id).toString());
-								callback(false, ids);
-							}
-						});
-					}
-				});
-			}
-		});
-	};
+    /**
+     * Delete specified nodes.
+     * @param {array} ids - List of node ids to delete
+     * @param {function} callback - Function callback to routes.js
+     */
+    self.remove = function (ids, callback) {
+        self.getCollection(callback, function (coll) {
+            if (!Array.isArray(ids)) {
+                ids = [ids];
+            }
+            for (var i in ids) {
+                ids[i] = new ObjectID(ids[i]);
+            }
+            coll.remove({'_id':{$in:ids}}, function (err, result) {
+                if (err || result.result.n === 0) {
+                    callback(true);
+                    return;
+                }
+                callback(false, result);
+            });
+        });
+    }; // remove()
 
-	this.links_r=function(ids, links, database, callback){
-		var newIds=[];
-		var self= this;
-		if(links==null)
-			links=[];
-		database.collection(dataMongo.collection, function(err, collection) {
-			if (err)
-				callback(true);
-			else {
-				collection.find({'tgt_id':{$in:ids}}).toArray(function(err, results) {
-					if (err)
-						callback(true);
-					else{
-						for(r in results){
-							if(links[results[r]._id]==undefined){
-								if(ids.indexOf(results[r].src_id)<0 && (results[r].src_id)!=undefined)
-									newIds.push(results[r].src_id);
-								links[results[r]._id]=results[r];
-							}
-						}
-						if(newIds.length<1)
-							callback(false, links);
-						else
-							self.links_r(newIds, links, database, callback);
-					}
-				});
-			}
-		});
-	};
+    /**
+     * Search for nodes ids in the database.
+     * @param {object} keys - Keys to find
+     * @param {function} callback - Callback function to routes.js
+     */
+    self.search = function (keys, callback) {
+        self.getCollection(callback, function (coll) {
+            coll.find(keys, {'_id':true}).toArray(function (err, results) {
+                if (err) {
+                    callback(true);
+                    return;
+                }
+                var ids = [];
+                for (r in results) {
+                    ids.push(results[r]._id).toString();
+                }
+                callback(false, ids);
+            });
+        });
+    }; // search()
 
-	/**
-	 * Retrieve the graph for the specified nodes
-	 * @param {Array} ids - Array of node indexes
-	 * @param {Function} callback - function(err, result) to call
-	 */
-	this.graph = function(ids, callback){
-		this.connection( function(err, database )
-		{
-			if (err)
-			{
-				callback(true);
-				return;
-			}
-			self.links_r(ids, null, database, function(error, links){
-				if (error)
-				{
-					callback(true);
-					return;
-				}
-				if (!links)
-				{
-					callback(true);
-					return;
-				}
-				var graph_indexes = ids;
-				for(l in links){
-					if (links[l].src_id != undefined)
-					{
-						if (graph_indexes.indexOf(links[l].src_id) < 0)
-							graph_indexes.push(links[l].src_id);
-					}
-				}
-				self.read(graph_indexes, function(error, nodes){
-					if (error)
-					{
-						callback(true);
-						return;
-					}
-					if (!nodes)
-					{
-						callback(true);
-						return;
-					}
-					for(l in links)
-						nodes.push(links[l]);
-					var result = links.concat(nodes);
-					callback(false, nodes);
-				});
-			});
-		});
-	};
+
+    /*
+     * Higher-level functions
+     */
+
+    self.links_r = function (ids, links, callback) {
+        var newIds = [];
+        var self = this;
+        if (links==null) {
+            links=[];
+        }
+        self.getCollection(callback, function (coll) {
+            coll.find({'tgt_id':{$in:ids}}).toArray(function (err, results) {
+                if (err) {
+                    callback(true);
+                    return;
+                }
+                for (var r in results) {
+                    if (undefined == links[results[r]._id]) {
+                        if (results[r].src_id != undefined) {
+                            if (0 > ids.indexOf(results[r].src_id)) {
+                                newIds.push(results[r].src_id);
+                            }
+                        }
+                        links[results[r]._id] = results[r];
+                    }
+                }
+                if (newIds.length < 1) {
+                    callback(false, links);
+                } else {
+                    self.links_r(newIds, links, callback);
+                }
+            });
+        });
+    }; // links_r()
+
+    /**
+     * Retrieve the graph of the specified target nodes
+     * @param {Array} ids - Array of node indexes
+     * @param {Function} callback - function(err, result) to call
+     */
+    this.graph = function(ids, callback){
+        self.links_r(ids, null, function (err, links) {
+            if (err || !links) {
+                callback(true);
+                return;
+            }
+            for (l in links) {
+                if (undefined != links[l].src_id) {
+                    if (0 > ids.indexOf(links[l].src_id)) {
+                        ids.push(links[l].src_id);
+                    }
+                }
+            }
+            self.read(ids, function(error, nodes) {
+                if (error || !nodes) {
+                    callback(true);
+                    return;
+                }
+                for (var l in links) {
+                    nodes.push(links[l]);
+                }
+                callback(false, nodes);
+            });
+        });
+    }; // graph()
+
+
+    /*
+     * MongoDB-specific functions
+     */
+
+
+    /**
+     * Search for nodes ids in the database.
+     * @param {object} query - Keys to find (with optional regexes)
+     * @param {string} sort - Key used to sort the results
+     * @param {integer} skip - Pagination: number of results to skip
+     * @param {integer} limit - Pagination: max number of results to return
+     * @param {function} callback - Callback function to routes.js
+     */
+    self.mongo_search = function (query, sort, skip, limit, callback) {
+        function prepare_regexes(obj) {
+            for (var key in obj) {
+                if (!key) {
+                    continue;
+                }
+                if ('object' === typeof obj[key] && null !== obj[key]) {
+                    prepare_regexes(obj[key]);
+                    continue;
+                }
+                if ('string' === typeof obj[key]) {
+                    if (obj[key].indexOf('REGEX_') === 0) {
+                        obj[key] = new RegExp(obj[key].replace('REGEX_',''));
+                    }
+                }
+            }
+        }
+        prepare_regexes(query);
+        self.getCollection(callback, function (coll) {
+            var find = coll.find(query).sort(sort).skip(skip).limit(limit);
+            find.toArray(function (err, results) {
+                if (err) {
+                    callback(true);
+                    return;
+                }
+                var ids = [];
+                for (r in results) {
+                    ids.push(results[r]._id.toString());
+                }
+                callback(false, ids);
+            });
+        });
+    }; // mongo_search()
+
+    // Compatibility
+    // As deleteNode() can actually delete multiple nodes
+    self.deleteNode = function (ids, callback) {
+        self.remove(ids, callback);
+    }; // deleteNode()
 };
+
+

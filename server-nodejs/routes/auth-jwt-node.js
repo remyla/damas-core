@@ -1,5 +1,5 @@
 module.exports = function(app){
-	var mod  = app.locals.mod;
+	var db  = app.locals.db;
 	var conf = app.locals.conf;
 
 	var expressJwt = require('express-jwt');
@@ -18,9 +18,9 @@ module.exports = function(app){
 					req.user = undefined;
 					return res.status(401).json('invalid token');
 				}
-				mod.readOne(decode._id, function(err, user){
+				db.read(decode._id, function(err, user){
 					// we could add decode properties to the user object here
-					req.user = user;
+					req.user = user[0];
 					next();
 				});
 			});
@@ -42,12 +42,13 @@ module.exports = function(app){
 			debug('no username or password');
 			return res.status(401).json('Invalid username or password');
 		}
-		mod.search({"username": req.body.username }, function( err, doc ){
+		db.search({"username": req.body.username }, function( err, doc ){
 			if (err || doc.length === 0)
 			{
 				return res.status(401).json('Invalid username or password');
 			}
-			mod.readOne(doc[0], function(err, user){
+			db.read(doc[0], function(err, user){
+				user = user[0];
 				if (crypto.createHash(conf.jwt.passwordHashAlgorithm).update(req.body.password).digest('hex') !== user.password)
 				{
 					return res.status(401).json('Invalid username or password');
