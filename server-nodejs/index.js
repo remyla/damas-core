@@ -21,8 +21,8 @@ var https   = require('https')
 debug('Loading configuration');
 var conf = app.locals.conf = require('./conf.json');
 
-var Database = require('./lib/database.js');
-app.locals.db = Database(conf.db, conf[conf.db]);
+var database = require('./db/index.js');
+app.locals.db = database(conf.db, conf[conf.db]);
 
 var http_port = process.env.HTTP_PORT || 8090;
 var https_port = process.env.HTTPS_PORT || 8443;
