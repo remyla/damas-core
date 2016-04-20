@@ -237,6 +237,20 @@ db.things.find({$where: function() {
             limit = req.body.limit | 0;
             skip = req.body.skip | 0;
         }
+        function prepare_regexes(obj) {
+            for (var key in obj) {
+                if ('object' === typeof obj[key] && null !== obj[key]) {
+                    prepare_regexes(obj[key]);
+                    continue;
+                }
+                if ('string' === typeof obj[key]) {
+                    if (obj[key].indexOf('REGEX_') === 0) {
+                        obj[key] = new RegExp(obj[key].replace('REGEX_',''));
+                    }
+                }
+            }
+        }
+        prepare_regexes(query);
         db.mongo_search(query, sort, skip, limit, function (err, ids) {
             if (err) {
                 res.status(409).send('mongodb find error');
