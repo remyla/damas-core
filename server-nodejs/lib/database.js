@@ -4,40 +4,33 @@
  */
 
 module.exports = function (type, settings) {
-    this.debug = require('debug')('app:db:' + type + ':' + process.pid);
-    this.debug('Specified database : ' + type);
+    var debug = require('debug')('app:db:' + process.pid);
+    debug('Specified database : ' + type);
+    var db = null;
 
     /*
-     * Fill the current object using the prototype of the wanted database
+     * Choose the database to instantiate
      */
     switch (type) {
         case 'mongodb':
-            this.prototype = require('./db/mongodb');
+            var dbClass = require('./db/mongodb');
+            db = new dbClass();
             break;
-/*
-        case 'mysql':
-            this.prototype = require('./db/mysql');
-            break;
-        case 'redis':
-            this.prototype = require('./db/redis');
-            break;
-        case 'gun':
-            this.prototype = require('./db/gun');
-            break;
-*/
-        case 'none':
-        case 'debug':
         default:
-            this.prototype = require('./db/debug');
+            var dbClass = require('./db/debug');
+            db = new dbClass();
     }
 
-    this.connect(settings, function (err, conn) {
+    /*
+     * Initialize the database object
+     */
+    db.connect(settings, function (err, conn) {
         if (err) {
-            this.debug('Error: could not connect to the database.');
-            this.connected = false;
+            debug('Error: could not connect to the database.');
         }
     });
-    return this;
+
+    return db;
 }
 
 
