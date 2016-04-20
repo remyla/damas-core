@@ -3,30 +3,33 @@
  * Licensed under the GNU GPL v3
  */
 
-module.exports = function () {
+module.exports = function (conf) {
     var self   = this;
-    var mongo = require('mongodb');
-    var ObjectID = mongo.ObjectID;
+    self.conf  = conf;
     self.conn  = false;
     self.collection = false;
     self.debug = require('debug')('app:db:mongo:' + process.pid);
+
+    var mongo = require('mongodb');
+    var ObjectID = mongo.ObjectID;
+
     // TODO: normalize the output to the callbacks (error code?)
     // TODO: run tests...
     // TODO: make sure we get an id array when searching
     // TODO: verify input and output types of every function
     // TODO: make sure every function supports arrays (eg, search with $in)
-    // TODO: check ObjectID compatibility everywhere...
 
     /*
      * Initialize the connection.
      * @param {object} conf - Database settings
      * @param {function} callback - Callback function to routes.js
      */
-    self.connect = function (conf, callback) {
+    self.connect = function (callback) {
         if (self.conn) {
             callback(false, self.conn);
             return;
         }
+        var conf   = self.conf;
         var server = new mongo.Server(conf.host, conf.port, conf.options);
         var db     = new mongo.Db(conf.collection, server);
         db.open(function (err, connection) {
@@ -48,18 +51,19 @@ module.exports = function () {
      * @param {function} callback - Function needing the collection
      */
     self.getCollection = function (route, callback) {
-        if (!self.conn) {
-            self.debug('Error: not connected to the database');
-            route(true);
-            return;
-        }
-        self.conn.collection(self.collection, function (err, coll) {
-            if (err) {
-                self.debug('Error: unable to load the collection');
+        self.connect(function (err, conn) {
+            if (err || !conn) {
                 route(true);
                 return;
             }
-            callback(coll);
+            self.conn.collection(self.collection, function (err, coll) {
+                if (err || !coll) {
+                    self.debug('Error: unable to load the collection');
+                    route(true);
+                    return;
+                }
+                callback(coll);
+            });
         });
     };
 
