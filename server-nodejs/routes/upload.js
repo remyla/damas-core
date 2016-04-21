@@ -1,5 +1,5 @@
 module.exports = function(app){
-	var mod  = app.locals.mod;
+	var db = app.locals.db;
 	var conf = app.locals.conf;
 
 	var fs = require('fs');
@@ -47,7 +47,7 @@ module.exports = function(app){
 			console.log(typeof(req.body.id));
 			if (req.body.id === 'null')
 			{
-				mod.create(keys, function(error, doc)
+				db.create(keys, function(error, doc)
 				{
 					if (error)
 					{
@@ -63,7 +63,7 @@ module.exports = function(app){
 			}
 			else
 			{
-				mod.update([req.body.id], keys, function(error, doc)
+				db.update([req.body.id], keys, function(error, doc)
 				{
 					if (error)
 					{
@@ -102,7 +102,7 @@ module.exports = function(app){
 			keys.time=Date.now();
 			keys.file=decodeURIComponent(req.body.path);
 			keys.checksum=checksum;
-			mod.create(keys, function(error, doc)
+			db.create(keys, function(error, doc)
 			{
 				if( error )
 				{
@@ -139,7 +139,7 @@ module.exports = function(app){
 			keys.author=req.connection.remoteAddress;
 			keys.time=Date.now();
 			keys.checksum=checksum;
-			mod.update(req.body.id,keys, function(error, doc)
+			db.update(req.body.id,keys, function(error, doc)
 			{
 				if( error )
 				{
