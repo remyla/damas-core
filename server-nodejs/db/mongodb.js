@@ -13,12 +13,6 @@ module.exports = function (conf) {
     var mongo = require('mongodb');
     var ObjectID = mongo.ObjectID;
 
-    // TODO: normalize the output to the callbacks (error code?)
-    // TODO: run tests...
-    // TODO: make sure we get an id array when searching
-    // TODO: verify input and output types of every function
-    // TODO: make sure every function supports arrays (eg, search with $in)
-
     /*
      * Initialize the connection.
      * @param {object} conf - Database settings
@@ -85,6 +79,7 @@ module.exports = function (conf) {
                     callback(true);
                     return;
                 }
+                // Compatibility checks
                 // result.ops = array containing all nodes
                 if (result.ops.length === 1) {
                     // One element inserted, return one element
@@ -107,22 +102,20 @@ module.exports = function (conf) {
      */
     self.read = function (ids, callback) {
         self.getCollection(callback, function (coll) {
-            if (!Array.isArray(ids)) {
-                ids = [ids];
-            }
+            var ids_o = [];
             for (var i in ids) {
-                ids[i] = new ObjectID(ids[i]);
+                ids_o[i] = new ObjectID(ids[i]);
             }
             var array = [];
-            function findNext(pos) {
-                if (pos === ids.length) {
+            function findNext(cursor) {
+                if (cursor === ids_o.length) {
                     callback(false, array);
                     return;
                 }
-                coll.findOne({'_id': ids[pos]}, function (err, node) {
+                coll.findOne({'_id': ids_o[cursor]}, function (err, node) {
                     if (!err) {
                         array.push(node);
-                        findNext(++pos);
+                        findNext(++cursor);
                     }
                 });
             }
@@ -138,11 +131,9 @@ module.exports = function (conf) {
      */
     self.update = function (ids, keys, callback) {
         self.getCollection(callback, function (coll) {
-            if (!Array.isArray(ids)) {
-                ids = [ids];
-            }
+            var ids_o = [];
             for (var i in ids) {
-                ids[i] = new ObjectID(ids[i]);
+                ids_o[i] = new ObjectID(ids[i]);
             }
             var keysToUnset = {};
             var keysToSet = {};
@@ -161,13 +152,13 @@ module.exports = function (conf) {
             if (Object.keys(keysToUnset).length > 0) {
                 toUpdate.$unset = keysToUnset;
             }
-            coll.update({'_id':{$in:ids}}, toUpdate, {multi: true},
+            coll.update({'_id': {$in: ids_o}}, toUpdate, {multi: true},
                         function (err, status) {
                 if (err) {
                     callback(true);
                 }
                 self.debug('Update status: ' + status);
-                self.read(ids, function (err, nodes) {
+                self.read(ids_o, function (err, nodes) {
                     callback(err, err ? null : nodes);
                 });
             });
@@ -181,13 +172,11 @@ module.exports = function (conf) {
      */
     self.remove = function (ids, callback) {
         self.getCollection(callback, function (coll) {
-            if (!Array.isArray(ids)) {
-                ids = [ids];
-            }
+            var ids_o = [];
             for (var i in ids) {
-                ids[i] = new ObjectID(ids[i]);
+                ids_o[i] = new ObjectID(ids[i]);
             }
-            coll.remove({'_id':{$in:ids}}, function (err, result) {
+            coll.remove({'_id': {$in: ids_o}}, function (err, result) {
                 if (err || result.result.n === 0) {
                     callback(true);
                     return;
@@ -211,7 +200,7 @@ module.exports = function (conf) {
                 }
                 var ids = [];
                 for (r in results) {
-                    ids.push(results[r]._id).toString();
+                    ids.push(results[r]._id.toString());
                 }
                 callback(false, ids);
             });
@@ -230,7 +219,7 @@ module.exports = function (conf) {
             links=[];
         }
         self.getCollection(callback, function (coll) {
-            coll.find({'tgt_id':{$in:ids}}).toArray(function (err, results) {
+            coll.find({'tgt_id': {$in: ids}}).toArray(function (err, results) {
                 if (err) {
                     callback(true);
                     return;
@@ -265,14 +254,15 @@ module.exports = function (conf) {
                 callback(true);
                 return;
             }
+            var n_ids = ids;
             for (l in links) {
                 if (undefined != links[l].src_id) {
-                    if (0 > ids.indexOf(links[l].src_id)) {
-                        ids.push(links[l].src_id);
+                    if (0 > n_ids.indexOf(links[l].src_id)) {
+                        n_ids.push(links[l].src_id);
                     }
                 }
             }
-            self.read(ids, function(error, nodes) {
+            self.read(n_ids, function(error, nodes) {
                 if (error || !nodes) {
                     callback(true);
                     return;
