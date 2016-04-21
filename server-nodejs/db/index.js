@@ -12,19 +12,19 @@ module.exports = function (type, settings) {
      * Choose the database to instantiate
      */
     switch (type) {
-        case 'mongodb':
-            var dbClass = require('./db/mongodb');
-            db = new dbClass(settings);
-            break;
-        default:
-            var dbClass = require('./db/debug');
-            db = new dbClass(settings);
+    case 'mongodb':
+        var dbClass = require('./mongodb');
+        db = new dbClass(settings);
+        break;
+    default:
+        var dbClass = require('./debug');
+        db = new dbClass(settings);
     }
 
     /*
      * Initialize the database object
      */
-    db.connect(function (err, conn) {
+    db.connect(function (err) {
         if (err) {
             debug('Error: could not connect to the database.');
         }
