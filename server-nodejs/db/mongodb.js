@@ -4,9 +4,9 @@
  */
 
 module.exports = function (conf) {
-    var self   = this;
-    self.conf  = conf;
-    self.conn  = false;
+    var self = this;
+    self.conf = conf;
+    self.conn = false;
     self.collection = false;
     self.debug = require('debug')('app:db:mongo:' + process.pid);
 
@@ -23,9 +23,9 @@ module.exports = function (conf) {
             callback(false, self.conn);
             return;
         }
-        var conf   = self.conf;
+        var conf = self.conf;
         var server = new mongo.Server(conf.host, conf.port, conf.options);
-        var db     = new mongo.Db(conf.collection, server);
+        var db = new mongo.Db(conf.collection, server);
         db.open(function (err, connection) {
             if (err) {
                 self.debug('Unable to connect to the MongoDB database');
@@ -69,7 +69,7 @@ module.exports = function (conf) {
 
     /**
      * Create nodes, without parent verification.
-     * @param {array} nodes - Objects to create in the database
+     * @param {array} nodes - Objects to insert into the database
      * @param {function} callback - Callback function to routes.js
      */
     self.create = function(nodes, callback) {
@@ -79,18 +79,7 @@ module.exports = function (conf) {
                     callback(true);
                     return;
                 }
-                // Compatibility checks
-                // result.ops = array containing all nodes
-                if (result.ops.length === 1) {
-                    // One element inserted, return one element
-                    callback(false, result.ops[0]);
-                } else if (result.ops.length > 1) {
-                    // An array was inserted, return an array
-                    callback(false, result.ops);
-                } else {
-                    // Nothing was inserted
-                    callback(true);
-                }
+                callback(false, result.ops);
             });
         });
     }; // create()
