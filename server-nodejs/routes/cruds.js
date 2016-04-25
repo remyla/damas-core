@@ -50,7 +50,7 @@ module.exports = function(app, express) {
     };
 
     read = function(req,res ) {
-        var id = req.params.id || req.body.id;
+        var id = req.params.id || req.body._id;
         if (!id) {
             res.status(400).send('read error: the specified id is not valid');
             return;
@@ -339,14 +339,14 @@ db.things.find({$where: function() {
     app.get('/api/search/:query(*)', search);
     app.post('/api/search_mongo', search_mongo);
     app.get('/api/graph/', graph);
-    app.get('/api/', read);
+    app.post('/api/', read);
     //app.put('/', update);
     //app.delete('/', deleteNode);
 
     //
     // CRUDS operations
     //
-    app.post('/api/', create);
+    app.post('/api/create/', create);
     app.get('/api/:id', read);
     app.put('/api/:id', update);
     app.delete('/api/:id', deleteNode);
