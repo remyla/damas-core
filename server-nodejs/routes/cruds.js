@@ -50,7 +50,7 @@ module.exports = function(app, express) {
     };
 
     read = function(req,res ) {
-        var id = req.params.id || req.body._id;
+        var id = req.params.id || req.body.id;
         if (!id) {
             res.status(400).send('read error: the specified id is not valid');
             return;
@@ -60,10 +60,11 @@ module.exports = function(app, express) {
                 res.status(409).send('read error, please change your values');
                 return;
             }
-            if (doc.length===0) {
+            /* Always return a non empty array
+            if (0 === doc.length) {
                 res.status(404).send('Id not found');
                 return;
-            }
+            }*/
             res.status(200).send(doc);
         });
     };

@@ -161,7 +161,7 @@
                 }
             }
         }
-        req.send(JSON.stringify({_id:id}));
+        req.send(JSON.stringify({id:id}));
         if (callback === undefined) {
             return req_callback(req);
         }
