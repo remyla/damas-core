@@ -333,7 +333,6 @@
 		obj.limit = limit;
 		obj.skip = skip;
 		req.send(JSON.stringify(obj));
-		req.send();
 		if(callback === undefined)
 		{
 			return req_callback(req);

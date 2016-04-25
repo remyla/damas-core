@@ -1,22 +1,23 @@
 {
-	"auth" : "no",
-	"connection" : {
-		"Cert": "cert.pem",
-		"Key": "key.pem"
-	},
-	"mongoDB" : {
-		"host" : "localhost",
-		"collection" : "node",
-		"port" : 27017,
-		"options" : { "auto_reconnect" : true }
-	},
-	"jwt" : {
-		"passwordHashAlgorithm" : "sha1",
-		"secret" : "webtokensecret",
-		"exp" : 1440
-	},
-	"publiclyServedFolders" : [
-		"public"
-	],
-	"fileSystem": "/PRODUCTIONS/"
+    "auth" : "no",
+    "connection" : {
+        "Cert": "cert.pem",
+        "Key": "key.pem"
+    },
+    "db" : "mongodb",
+    "mongodb" : {
+        "host" : "localhost",
+        "collection" : "node",
+        "port" : 27017,
+        "options" : { "auto_reconnect" : true }
+    },
+    "jwt" : {
+        "passwordHashAlgorithm" : "sha1",
+        "secret" : "webtokensecret",
+        "exp" : 1440
+    },
+    "publiclyServedFolders" : [
+        "public", "../js"
+    ],
+    "fileSystem": "/PRODUCTIONS/"
 }
