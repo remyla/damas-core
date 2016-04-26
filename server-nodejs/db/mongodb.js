@@ -102,10 +102,7 @@ module.exports = function (conf) {
      */
     self.read = function (ids, callback) {
         self.getCollection(callback, function (coll) {
-            var ids_o = [];
-            for (var i in ids) {
-                ids_o[i] = new ObjectID(ids[i]);
-            }
+            var ids_o = exportIds(ids);
             var array = [];
             function findNext(cursor) {
                 if (cursor === ids_o.length) {
@@ -131,10 +128,7 @@ module.exports = function (conf) {
      */
     self.update = function (ids, keys, callback) {
         self.getCollection(callback, function (coll) {
-            var ids_o = [];
-            for (var i in ids) {
-                ids_o[i] = new ObjectID(ids[i]);
-            }
+            var ids_o = exportIds(ids);
             var keysToUnset = {};
             var keysToSet = {};
             var toUpdate = {};
@@ -172,10 +166,7 @@ module.exports = function (conf) {
      */
     self.remove = function (ids, callback) {
         self.getCollection(callback, function (coll) {
-            var ids_o = [];
-            for (var i in ids) {
-                ids_o[i] = new ObjectID(ids[i]);
-            }
+            var ids_o = exportIds(ids);
             coll.remove({'_id': {$in: ids_o}}, function (err, result) {
                 if (err || result.result.n === 0) {
                     callback(true);
@@ -311,6 +302,23 @@ module.exports = function (conf) {
     self.deleteNode = function (ids, callback) {
         self.remove(ids, callback);
     }; // deleteNode()
+
+    /**
+     * Put all ids into a new array, handling ObjectID
+     * @param {array} ids - ids to put
+     * @return {array} - the new array
+     */
+    function exportIds(ids) {
+        var ids_o = [];
+        for (var i in ids) {
+            if(24 == ids[i].length && -1 == ids[i].indexOf('/')) {
+                ids_o.push(new ObjectID(ids[i]));
+            } else {
+                ids_o.push(ids[i]);
+            }
+        }
+        return ids_o;
+    }
 };
 
 
