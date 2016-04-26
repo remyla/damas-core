@@ -95,7 +95,7 @@
             return false;
         }
         var req = new XMLHttpRequest();
-        req.open('POST', this.server + "create", callback !== undefined);
+        req.open('POST', this.server, callback !== undefined);
         req.setRequestHeader("Content-type","application/json");
         //req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
         req.setRequestHeader("Authorization","Bearer "+damas.token);
@@ -151,7 +151,7 @@
             return JSON.parse(req.responseText);
         }
         var req = new XMLHttpRequest();
-        req.open('POST', this.server, callback !== undefined);
+        req.open('POST', this.server + "read", callback !== undefined);
         req.setRequestHeader("Content-type","application/json");
         req.setRequestHeader("Authorization","Bearer " + damas.token);
         req.onreadystatechange = function(e) {
