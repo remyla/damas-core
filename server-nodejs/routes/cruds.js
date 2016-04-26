@@ -60,10 +60,11 @@ module.exports = function(app, express) {
                 res.status(409).send('read error, please change your values');
                 return;
             }
-            if (doc.length===0) {
+            /* Always return a non empty array
+            if (0 === doc.length) {
                 res.status(404).send('Id not found');
                 return;
-            }
+            }*/
             res.status(200).send(doc);
         });
     };
@@ -339,7 +340,8 @@ db.things.find({$where: function() {
     app.get('/api/search/:query(*)', search);
     app.post('/api/search_mongo', search_mongo);
     app.get('/api/graph/', graph);
-    app.get('/api/', read);
+    app.post('/api/read', read);
+    app.get('/api/read/:id', read);
     //app.put('/', update);
     //app.delete('/', deleteNode);
 

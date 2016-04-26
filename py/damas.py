@@ -59,7 +59,7 @@ class http_connection( object ) :
 		'''
 		if isinstance(id_, (tuple,list,set)):
 			id_ = ",".join(id_)
-		r = requests.get(self.serverURL+'/'+id_, headers=self.headers, verify=False)
+		r = requests.post(self.serverURL+"/read", data=id_, headers=self.headers, verify=False)
 		if r.status_code == 200:
 			return json.loads(r.text)
 		return None
