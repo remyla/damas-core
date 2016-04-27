@@ -43,7 +43,7 @@ describe('Damas-core - Server NodeJs [API]', function() {
 
         it('should throw an error (JSON Empty)', function(done) {
             request
-                .post('/api/create')
+                .post('/api/')
                 .set('Accept', 'application/json')
                 .send(nullData)
                 .expect(400)
@@ -60,7 +60,7 @@ describe('Damas-core - Server NodeJs [API]', function() {
         });
 */        it('should throw an error (JSON expected, null found )', function(done) {
             request
-                .post('/api/create')
+                .post('/api/')
                 .set('Accept', 'application/json')
                 .send(nullData)
                 .expect(400)
@@ -68,7 +68,7 @@ describe('Damas-core - Server NodeJs [API]', function() {
         });
         it('should create an object in the database', function(done) {
             request
-                .post('/api/create')
+                .post('/api')
                 .set('Accept', 'application/json')
                 .send(dataOk)
                 .expect('Content-Type', /application\/json/)
@@ -77,7 +77,7 @@ describe('Damas-core - Server NodeJs [API]', function() {
         });
         it('should create an object in the database with custom id', function(done) {
             request
-                .post('/api/create')
+                .post('/api')
                 .set('Accept', 'application/json')
                 .send(dataCustomId)
                 .expect('Content-Type', /application\/json/)
@@ -86,7 +86,7 @@ describe('Damas-core - Server NodeJs [API]', function() {
         });
         it('should throw an error (id already exists)', function(done) {
             request
-                .post('/api/create')
+                .post('/api')
                 .set('Accept', 'application/json')
                 .send(dataCustomId)
                 .expect(409)
@@ -111,7 +111,7 @@ describe('Damas-core - Server NodeJs [API]', function() {
         });
         it('should not throw an error 409 (id valid but not found in db) - ID through body', function(done) {
             request
-                .post('/api/')
+                .post('/api/read')
                 .set('Accept', 'application/json')
                 .send(notExistIdJSON)
                 .expect(200)
@@ -127,7 +127,7 @@ describe('Damas-core - Server NodeJs [API]', function() {
         });
         it('should get a document from db (id exists) - ID  through body', function(done) {
             request
-                .post('/api/')
+                .post('/api/read')
                 .set('Accept', 'application/json')
                 .send(validIdJSON)
                 .expect('Content-Type', /application\/json/)
@@ -151,7 +151,7 @@ describe('Damas-core - Server NodeJs [API]', function() {
         });
         it('should get a document from db (custom id exists) - ID  through body', function(done) {
             request
-                .post('/api/')
+                .post('/api/read')
                 .set('Accept', 'application/json')
                 .send(customIdJSON)
                 .expect('Content-Type', /application\/json/)
@@ -160,7 +160,7 @@ describe('Damas-core - Server NodeJs [API]', function() {
         });
         it('should throw an error 400 (id empty - without params) - Bad request', function(done) {
             request
-                .post('/api/')
+                .post('/api/read')
                 .set('Accept', 'application/json')
                 .expect(400)
                 .end(done)
