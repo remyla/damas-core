@@ -340,14 +340,15 @@ db.things.find({$where: function() {
     app.get('/api/search/:query(*)', search);
     app.post('/api/search_mongo', search_mongo);
     app.get('/api/graph/', graph);
-    app.post('/api/', read);
+    app.post('/api/read', read);
+    app.get('/api/read/:id', read);
     //app.put('/', update);
     //app.delete('/', deleteNode);
 
     //
     // CRUDS operations
     //
-    app.post('/api/create/', create);
+    app.post('/api/', create);
     app.get('/api/:id', read);
     app.put('/api/:id', update);
     app.delete('/api/:id', deleteNode);
