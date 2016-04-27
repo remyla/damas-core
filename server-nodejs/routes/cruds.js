@@ -75,11 +75,11 @@ module.exports = function(app, express) {
             res.status(400).send('update error: the specified id is not valid');
             return;
         }
-        if (Object.keys(req.body).length === 0) {
+*/        if (Object.keys(req.body).length === 0) {
             res.status(400).send('update error: the body of the request is empty');
             return;
         }
-*/
+
         db.update(req.params.id.split(","), req.body, function(error, doc) {
             if (error) {
                 res.status(409).send('update error, please change your values');
@@ -96,7 +96,7 @@ module.exports = function(app, express) {
             return;
         }
         */
-        db.remove(req.params.id, function(error, doc) {
+        db.remove(req.params.id.split(","), function(error, doc) {
             if (error) {
                 res.status(409).send('delete error, please change your values');
                 return;
