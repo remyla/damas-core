@@ -50,24 +50,32 @@ module.exports = function (app, express) {
      */
     create = function (req, res) {
         if (Object.keys(req.body).length === 0) {
-            res.status(400).send('create error: the body of the request is empty');
+            res.status(400);
+            res.send('create error: the body of the request is empty');
             return;
         }
+
         var nodes = req.body;
         if (!Array.isArray(nodes)) {
             nodes = [nodes];
         }
+
+        // Control properties
+        var author = req.user.username || req.connection.remoteAddress;
+        var time = Date.now();
         for (var n in nodes) {
-            nodes[n].author = req.user.username||req.connection.remoteAddress;
-            nodes[n].time = Date.now();
+            nodes[n].author = author;
+            nodes[n].time = time;
         }
+
         db.create(nodes, function (error, doc) {
             if (error) {
-                res.status(409).send('Create error, ' +
-                    'please change your values');
+                res.status(409);
+                res.send('Create error, please change your values');
                 return;
             }
-            res.status(201).send(doc);
+            res.status(201);
+            res.send(doc);
         });
     }; // create()
 
@@ -88,20 +96,24 @@ module.exports = function (app, express) {
     read = function (req, res) {
         var id = req.params.id || req.body.id;
         if (!id) {
-            res.status(400).send('read error: the specified id is not valid');
+            res.status(400);
+            res.send('read error: the specified id is not valid');
             return;
         }
         db.read(id.split(","), function (error, doc) {
             if (error) {
-                res.status(409).send('read error, please change your values');
+                res.status(409);
+                res.send('read error, please change your values');
                 return;
             }
             /* Always return a non empty array
             if (0 === doc.length) {
-                res.status(404).send('Id not found');
+                res.status(404);
+                res.send('Id not found');
                 return;
             }*/
-            res.status(200).send(doc);
+            res.status(200);
+            res.send(doc);
         });
     }; // read()
 
@@ -123,20 +135,24 @@ module.exports = function (app, express) {
     update = function (req, res) {
 /*
         if (!ObjectId.isValid(req.params.id)) {
-            res.status(400).send('update error: the specified id is not valid');
+            res.status(400);
+            res.send('update error: the specified id is not valid');
             return;
         }
 */        if (Object.keys(req.body).length === 0) {
-            res.status(400).send('update error: the body of the request is empty');
+            res.status(400);
+            res.send('update error: the body of the request is empty');
             return;
         }
 
         db.update(req.params.id.split(","), req.body, function (error, doc) {
             if (error) {
-                res.status(409).send('update error, please change your values');
+                res.status(409);
+                res.send('update error, please change your values');
                 return;
             }
-            res.status(200).json(doc);
+            res.status(200);
+            res.json(doc);
         });
     }; // update()
 
@@ -157,16 +173,19 @@ module.exports = function (app, express) {
     deleteNode = function (req, res) {
         /* this check should not be based on ObjectId - disabled
         if (!ObjectId.isValid(req.params.id)) {
-            res.status(400).send('error: the specified id is not valid');
+            res.status(400);
+            res.send('error: the specified id is not valid');
             return;
         }
         */
         db.remove(req.params.id.split(","), function (error, doc) {
             if (error) {
-                res.status(409).send('delete error, please change your values');
+                res.status(409);
+                res.send('delete error, please change your values');
                 return;
             }
-            res.status(200).send(doc.result.n + " documents deleted.");
+            res.status(200);
+            res.send(doc.result.n + " documents deleted.");
         });
     }; // deleteNode()
 
@@ -187,19 +206,23 @@ module.exports = function (app, express) {
     graph = function (req, res) {
         var id = req.params.id || req.body.id;
         if (!id || id == "undefined") {
-            res.status(400).send('Bad command');
+            res.status(400);
+            res.send('Bad command');
             return;
         }
         //obsolete
         db.graph(id.split(","), function (error, nodes) {
             if (error) {
-                res.status(409).send('graph error, please change your values');
+                res.status(409);
+                res.send('graph error, please change your values');
                 return;
             }
             if (nodes) {
-                res.status(200).json(nodes);
+                res.status(200);
+                res.json(nodes);
             } else {
-                res.status(404).send('Id not found');
+                res.status(404);
+                res.send('Id not found');
             }
         });
     }; // graph()
@@ -261,7 +284,7 @@ module.exports = function (app, express) {
                 var value = decodeURIComponent(pair[1]);
 
                 var flags = value.replace(/.*\/([gimy]*)$/, '$1');
-                var pattern = value.replace(new RegExp('^/(.*?)/'+flags+'$'), '$1');
+                var pattern = value.replace(new RegExp('^/(.*?)/' + flags + '$'), '$1');
                 if (flags != value && pattern != value) {
                     var regex = new RegExp(pattern, flags);
                     result[pair[0]] = regex;
@@ -270,7 +293,7 @@ module.exports = function (app, express) {
                 }
 /*
                 for (j = 1;j<pair.length-1;j++)
-                    result[tempField] += decodeURIComponent(pair[j])+":";
+                    result[tempField] += decodeURIComponent(pair[j]) + ":";
                 if (pair[j] != '')
                     result[tempField] += decodeURIComponent(pair[j]);
 */
@@ -296,7 +319,7 @@ db.things.find({$where: function () {
                 continue;
             }
             if (result[tempField] != '') {
-                result[tempField] += " "+terms[i];
+                result[tempField] += " " + terms[i];
             } else {
                 result[tempField] += terms[i];
             }
@@ -304,10 +327,12 @@ db.things.find({$where: function () {
         }
         db.search(result, function (error, doc) {
             if (error) {
-                res.status(409).send('Read Error, please change your values');
+                res.status(409);
+                res.send('Read Error, please change your values');
                 return;
             }
-            res.status(200).send(doc);
+            res.status(200);
+            res.send(doc);
         });
     }; // search()
 
@@ -327,7 +352,8 @@ db.things.find({$where: function () {
      */
     search_mongo = function (req, res) {
         if (typeof db.mongo_search !== "function") {
-            res.status(409).send('MongoDB not in use');
+            res.status(409);
+            res.send('MongoDB not in use');
             return;
         }
         var query, sort, limit, skip;
@@ -359,12 +385,14 @@ db.things.find({$where: function () {
         prepare_regexes(query);
         db.mongo_search(query, sort, skip, limit, function (err, ids) {
             if (err) {
-                res.status(409).send('mongodb find error');
+                res.status(409);
+                res.send('mongodb find error');
             } else {
-                res.status(200).json(ids);
+                res.status(200);
+                res.json(ids);
             }
         });
-    }; //search_mongo()
+    }; // search_mongo()
 
 
     /**
@@ -386,23 +414,26 @@ db.things.find({$where: function () {
                         if (err) console.log('ERROR create')
                     });
                 } else {
-                    console.log('found mysqlid:'+keys.mysqlid);
+                    console.log('found mysqlid:' + keys.mysqlid);
                 }
-                if (i === nodes.length -1) {  // we finished inserting nodes
+                if (i === nodes.length - 1) { // we finished inserting nodes
                     json.links.forEach(function (link) {
                         console.log(link);
-                        db.search({mysqlid:link.src_id.toString()}, function (err, res1) {
-                            if (!err) {
-                                db.search({mysqlid:link.tgt_id.toString()}, function (err, res2) {
-                                    if (!err) {
-                                        db.create({src_id: res1[0], tgt_id: res2[0]}, function () {});
-                                    } else {
-                                        console.log('LINK ERR');
-                                    }
-                                });
-                            } else {
+                        db.search({mysqlid:link.src_id.toString()},
+                                function (err, res1) {
+                            if (err) {
                                 console.log('LINK ERR');
+                                return;
                             }
+                            db.search({mysqlid:link.tgt_id.toString()},
+                                    function (err, res2) {
+                                if (err) {
+                                    console.log('LINK ERR');
+                                    return;
+                                }
+                                db.create({src_id: res1[0], tgt_id: res2[0]},
+                                        function () {});
+                            });
                         });
                     });
 
@@ -427,17 +458,18 @@ db.things.find({$where: function () {
      * - 400: Bad request (not formatted correctly)
      * - 404: Not Found (the file does not exist)
      */
-    getFile= function (req, res) {
-        var path = fileSystem+decodeURIComponent(req.params.path).replace(/:/g, "").replace(/\/+/g, "/");
+    getFile = function (req, res) {
+        var path = fileSystem + decodeURIComponent(req.params.path);
+        path = path.replace(/:/g, "").replace(/\/+/g, "/");
         fs.exists(path, function (exists) {
-            if (exists) {
-                var stream = fs.createReadStream(path, {bufferSize: 64 * 1024});
-                res.writeHead(200);
-                stream.pipe(res);
-            } else {
+            if (!exists) {
                 res.status(404);
                 res.send('File not found');
+                return;
             }
+            var stream = fs.createReadStream(path, {bufferSize: 64 * 1024});
+            res.writeHead(200);
+            stream.pipe(res);
         });
     }; // getFile()
 
