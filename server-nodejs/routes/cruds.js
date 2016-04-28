@@ -74,8 +74,15 @@ module.exports = function (app, express) {
                 res.send('Create error, please change your values');
                 return;
             }
-            res.status(201);
-            res.send(doc);
+            // FIXME compatibility hack
+            // Output in the same data type as the input
+            if (Array.isArray(req.body)) {
+                res.status(201);
+                res.send(doc);
+            } else {
+                res.status(201);
+                res.send(doc[0]);
+            }
         });
     }; // create()
 
