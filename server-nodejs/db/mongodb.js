@@ -4,9 +4,9 @@
  */
 
 module.exports = function (conf) {
-    var self   = this;
-    self.conf  = conf;
-    self.conn  = false;
+    var self = this;
+    self.conf = conf;
+    self.conn = false;
     self.collection = false;
     self.debug = require('debug')('app:db:mongo:' + process.pid);
 
@@ -23,9 +23,9 @@ module.exports = function (conf) {
             callback(false, self.conn);
             return;
         }
-        var conf   = self.conf;
+        var conf = self.conf;
         var server = new mongo.Server(conf.host, conf.port, conf.options);
-        var db     = new mongo.Db(conf.collection, server);
+        var db = new mongo.Db(conf.collection, server);
         db.open(function (err, connection) {
             if (err) {
                 self.debug('Unable to connect to the MongoDB database');
@@ -72,25 +72,14 @@ module.exports = function (conf) {
      * @param {array} nodes - Objects to create in the database
      * @param {function} callback - Callback function to routes.js
      */
-    self.create = function(nodes, callback) {
+    self.create = function (nodes, callback) {
         self.getCollection(callback, function (coll) {
             coll.insert(nodes, {'safe': true}, function (err, result) {
                 if (err) {
                     callback(true);
                     return;
                 }
-                // Compatibility checks
-                // result.ops = array containing all nodes
-                if (result.ops.length === 1) {
-                    // One element inserted, return one element
-                    callback(false, result.ops[0]);
-                } else if (result.ops.length > 1) {
-                    // An array was inserted, return an array
-                    callback(false, result.ops);
-                } else {
-                    // Nothing was inserted
-                    callback(true);
-                }
+                callback(false, result.ops);
             });
         });
     }; // create()
@@ -162,7 +151,7 @@ module.exports = function (conf) {
     /**
      * Delete specified nodes.
      * @param {array} ids - List of node ids to delete
-     * @param {function} callback - Function callback to routes.js
+     * @param {function} callback - Callback function to routes.js
      */
     self.remove = function (ids, callback) {
         self.getCollection(callback, function (coll) {
@@ -234,12 +223,13 @@ module.exports = function (conf) {
         });
     }; // links_r()
 
+
     /**
      * Retrieve the graph of the specified target nodes
      * @param {Array} ids - Array of node indexes
-     * @param {Function} callback - function(err, result) to call
+     * @param {Function} callback - function (err, result) to call
      */
-    this.graph = function(ids, callback){
+    this.graph = function (ids, callback){
         self.links_r(ids, null, function (err, links) {
             if (err || !links) {
                 callback(true);
@@ -253,7 +243,7 @@ module.exports = function (conf) {
                     }
                 }
             }
-            self.read(n_ids, function(error, nodes) {
+            self.read(n_ids, function (error, nodes) {
                 if (error || !nodes) {
                     callback(true);
                     return;
