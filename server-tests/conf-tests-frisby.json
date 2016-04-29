@@ -1,31 +1,7 @@
 {
+    "protocol": "http",
     "http": {"port": 8090},
     "https": {"port": 8443},
     "host": "localhost",
-    "path": "crud",
-    "args":
-    {
-        "idNotFoundinDb": 100000001,
-        "idFoundInDb": 15,
-        "idInvalid":  "5535b3a",
-        "idInvalidBadFormat":  {"id": "5535b3" },
-        "idOkDataIncorrect": { "id": 10, "keys": "{}" },
-        "idEmpty": {"id": "" },
-        "string": "Foo",
-        "jsonEmpty": {},
-        "validKeys": "{'type_link': 'typeTestUpdated Okkkk'}",
-        "dataUpdated":
-        {
-            "type_linkkk": "typeTestUpdated",
-            "src_iddd": 12345,
-            "tgt_iddd": 45678
-        }
-    },
-    "expects":
-    {
-        "contentType":
-        {
-            "json": "application/json"
-        }
-    }
+    "path": "api/"
 }

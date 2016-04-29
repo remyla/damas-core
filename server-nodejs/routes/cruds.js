@@ -113,7 +113,7 @@ module.exports = function (app, express) {
                 res.send('read error, please change your values');
                 return;
             }
-            /* Always return a non empty array
+            /*FIXME always return a non empty array
             if (0 === doc.length) {
                 res.status(404);
                 res.send('Id not found');
