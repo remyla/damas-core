@@ -5,12 +5,16 @@
 
 var listeners = {};
 
-module.exports = {
+module.exports = new EventLayer();
+
+function EventLayer() {
+    var self = this;
+
     /*
      * fire()
      * Fire an event: call all of its listeners
      */
-    fire: function (hook) {
+    this.fire = function (hook) {
         var args = [];
         for (var i = 1; i < arguments.length; ++i) {
             args.push(arguments[i]);
@@ -21,43 +25,43 @@ module.exports = {
                 listeners[hook][id].apply(listeners[hook][id], args);
             }
         }
-    }, // fire()
+    }; // fire()
 
 
     /*
      * afire()
      * Asynchronously fire events
      */
-    afire: function () {
+    this.afire = function () {
         var args = arguments;
         setTimeout(function () {
             self.fire.apply(self.fire, args);
         }, 0);
-    }, // afire()
+    }; // afire()
 
 
     /*
      * attach()
      * Attach an event listener to an event
      */
-    attach: function (hook, id, callback) {
+    this.attach = function (hook, id, callback) {
         if (!(hook in listeners)) {
             listeners[hook] = {};
         }
         // Note that we allow the override of existing listeners
         listeners[hook][id] = callback;
-    }, // attach()
+    }; // attach()
 
 
     /*
      * detach()
      * Detach an event listener
      */
-    detach: function (hook, id) {
+    this.detach = function (hook, id) {
         if (hook in listeners && id in listeners[hook]) {
             delete listeners[hook][id];
         }
-    }, // detach()
-};
+    }; // detach()
+}
 
 
