@@ -38,7 +38,7 @@ module.exports = function (app, express) {
      * create()
      *
      * Method: PUT
-     * URI: /api/lock/
+     * URI: /api/
      *
      * Insert new nodes
      *
@@ -78,10 +78,10 @@ module.exports = function (app, express) {
             // Output in the same data type as the input
             if (Array.isArray(req.body)) {
                 res.status(201);
-                res.send(doc);
+                res.json(doc);
             } else {
                 res.status(201);
-                res.send(doc[0]);
+                res.json(doc[0]);
             }
         });
     }; // create()
@@ -120,7 +120,7 @@ module.exports = function (app, express) {
                 return;
             }*/
             res.status(200);
-            res.send(doc);
+            res.json(doc);
         });
     }; // read()
 
@@ -339,7 +339,7 @@ db.things.find({$where: function () {
                 return;
             }
             res.status(200);
-            res.send(doc);
+            res.json(doc);
         });
     }; // search()
 
@@ -502,7 +502,7 @@ db.things.find({$where: function () {
     app.get('/api/search/:query(*)', search);
     app.post('/api/search_mongo', search_mongo);
     app.get('/api/graph/', graph);
-    app.post('/api/read', read);
+    app.post('/api/read/', read);
     app.get('/api/read/:id', read);
     //app.put('/', update);
     //app.delete('/', deleteNode);
