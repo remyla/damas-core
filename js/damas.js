@@ -95,7 +95,7 @@
             return false;
         }
         var req = new XMLHttpRequest();
-        req.open('POST', this.server, callback !== undefined);
+        req.open('POST', this.server + "create/", callback !== undefined);
         req.setRequestHeader("Content-type","application/json");
         //req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
         req.setRequestHeader("Authorization","Bearer "+damas.token);
@@ -151,7 +151,7 @@
             return JSON.parse(req.responseText);
         }
         var req = new XMLHttpRequest();
-        req.open('POST', this.server + "read", callback !== undefined);
+        req.open('POST', this.server + "read/", callback !== undefined);
         req.setRequestHeader("Content-type","application/json");
         req.setRequestHeader("Authorization","Bearer " + damas.token);
         req.onreadystatechange = function(e) {
@@ -161,7 +161,7 @@
                 }
             }
         }
-        req.send(JSON.stringify({id}));
+        req.send(JSON.stringify({id: id}));
         if (callback === undefined) {
             return req_callback(req);
         }
@@ -188,7 +188,7 @@
             return JSON.parse(req.responseText);
         }
         var req = new XMLHttpRequest();
-        req.open('PUT', this.server+id, callback !== undefined);
+        req.open('PUT', this.server + "update/" + id, callback !== undefined);
         req.setRequestHeader("Content-type","application/json");
         req.setRequestHeader("Accept","application/json");
         req.setRequestHeader("Authorization","Bearer "+damas.token);
@@ -219,7 +219,7 @@
             return req.status === 200;
         }
         var req = new XMLHttpRequest();
-        req.open('DELETE', this.server + id, callback !== undefined);
+        req.open('DELETE', this.server + "delete/" + id, callback !== undefined);
         //req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
         req.setRequestHeader("Authorization","Bearer "+damas.token);
         req.onreadystatechange = function(e) {
