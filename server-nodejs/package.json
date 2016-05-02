@@ -9,8 +9,8 @@
     "url": "git://github.com/remyla/damas-core.git"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "test": "mocha -w tests",
+    "start": "nodejs index.js"
   },
   "author": "Remy Lalanne <remy@primcode.com> http://primcode.com",
   "license": "GPL v3",
@@ -28,5 +28,7 @@
     "multer": "^0.1.8",
     "ncp": "^2.0.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "frisby": "^0.8.5"
+  }
 }
