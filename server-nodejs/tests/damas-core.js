@@ -18,6 +18,7 @@ describe('Damas-core - Server NodeJs [API]', function() {
     var validId = '5537a27077d0099b2f886a79';
     var customId = '/file/;.*?<>#%';
     var customIdEncoded = '%2ffile%2f;.*%3f<>%23%25'
+    var invalidId = '111111111111111111111111';
 
     /*
      * Tests for method create
@@ -41,28 +42,21 @@ describe('Damas-core - Server NodeJs [API]', function() {
         };
         var stringTest = 'Foo';
 
-        it('should throw an error (JSON Empty)', function(done) {
+        it('should create an object with JSON empty', function(done) {
             request
                 .post('/api/')
                 .set('Accept', 'application/json')
                 .send(nullData)
-                .expect(400)
+                .expect(201)
                 .end(done)
         });
-        // 'Foo' is changed into {Foo:''} for no reason...
-/*        it('should throw an error (JSON expected, string found )', function(done) {
+
+        it('should throw an error (JSON expected, string found )', function(done) {
             request
                 .post('/api/create')
                 .set('Accept', 'application/json')
+                .set('Content-Type', 'application/json')
                 .send(stringTest)
-                .expect(409)
-                .end(done)
-        });
-*/        it('should throw an error (JSON expected, null found )', function(done) {
-            request
-                .post('/api/')
-                .set('Accept', 'application/json')
-                .send(nullData)
                 .expect(400)
                 .end(done)
         });
@@ -170,7 +164,6 @@ describe('Damas-core - Server NodeJs [API]', function() {
      * Tests for method update
      */
     describe('CRUD - Update', function() {
-        var invalidId = '111111111111111111111111';
         var validData = {
             'nodeUpdated' : {
                 'type' : 'node Test updated', 
@@ -253,7 +246,7 @@ describe('Damas-core - Server NodeJs [API]', function() {
      * Tests for method delete
      */
     describe('CRUD - Delete', function() {
-        /*it('should throw an error 400 (id - not valid)', function(done) {
+        it('should throw an error 400 (id - not valid)', function(done) {
             request
                 .delete('/api/' + invalidId)
                 .set('Accept', 'application/json')
@@ -266,7 +259,7 @@ describe('Damas-core - Server NodeJs [API]', function() {
                 .set('Accept', 'application/json')
                 .expect(400)
                 .end(done)
-        });*/
+        });
         it('should throw an error 409 (id valid but not found in the DB)', function(done) {
             request
                 .delete('/api/' + notExistId)
