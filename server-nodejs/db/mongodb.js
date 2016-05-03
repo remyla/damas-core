@@ -123,10 +123,11 @@ module.exports = function (conf) {
             var toUpdate = {};
 
             for (var k in keys) {
+                console.log(keys[k] + ' is type : ' + typeof keys[k]);
                 if (keys[k] === null) {
                     keysToUnset[k] = '';
                 } else {
-                    keysToSet[k] = decodeURIComponent(keys[k]);
+                    keysToSet[k] = keys[k];
                 }
             }
             if (Object.keys(keysToSet).length > 0) {
