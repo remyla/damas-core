@@ -49,12 +49,6 @@ module.exports = function (app, express) {
      * - 409: Conflict (some nodes already exist with these identifiers)
      */
     create = function (req, res) {
-        if (Object.keys(req.body).length === 0) {
-            res.status(400);
-            res.send('create error: the body of the request is empty');
-            return;
-        }
-
         var nodes = req.body;
         if (!Array.isArray(nodes)) {
             nodes = [nodes];
@@ -64,6 +58,11 @@ module.exports = function (app, express) {
         var author = req.user.username || req.connection.remoteAddress;
         var time = Date.now();
         for (var n in nodes) {
+            if ('object' !== typeof nodes[n]) {
+                res.status(400);
+                res.send('create error: the body of the request is empty');
+                return;
+            }
             nodes[n].author = author;
             nodes[n].time = time;
         }
