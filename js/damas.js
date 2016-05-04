@@ -134,18 +134,8 @@
      * var nodes= damas.read(ids);
      */
     damas.read = function (id, callback) {
-        var multi = false;
-        if (Array.isArray(id)) {
-            if (id.length === 0) {
-                return callback([]);
-            }
-            else {
-                id = id.join(',');
-                multi = true;
-            }
-        }
-        if (typeof(id) === 'string' && id.indexOf(',') != -1) {
-            multi = true;
+        if (Array.isArray(id) && id.length === 0) {
+            return callback([]);
         }
         function req_callback(req) {
             return JSON.parse(req.responseText);
@@ -161,7 +151,7 @@
                 }
             }
         }
-        req.send(JSON.stringify({id: id}));
+        req.send(JSON.stringify(id));
         if (callback === undefined) {
             return req_callback(req);
         }
