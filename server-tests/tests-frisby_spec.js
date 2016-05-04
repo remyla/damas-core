@@ -34,7 +34,7 @@ var tjson = 'application/json';
  * Tests for method Create
  */
 frisby.create('CREATE - should create an object in the database')
-    .addHeader('content-type', tjson)
+    .addHeader('Content-Type', tjson)
     .post(url + 'create/', {'key': 'value', 'num': 3}, asJSON)
     .expectStatus(201)
     .expectHeaderContains('Content-Type', tjson)
@@ -48,28 +48,28 @@ frisby.create('CREATE - should create an object in the database')
     idFoundInDb = res._id || res.id;
 
     frisby.create('CREATE - should create an object with JSON Empty)')
-        .addHeader('content-type', tjson)
+        .addHeader('Content-Type', tjson)
         .post(url + 'create/', {}, asJSON)
         .expectHeaderContains('Content-Type', tjson)
         .expectStatus(201)
     .toss();
 
-    //should be a single string
+    //we can only post objects and arrays...
     frisby.create('CREATE - should throw an error (JSON expected, string found)')
-        .addHeader('content-type', tjson)
+        .addHeader('Content-Type', tjson)
         .post(url + 'create/', ['Foo'], asJSON)
         .expectStatus(400)
     .toss();
 
     frisby.create('CREATE - should create an object in database with custom id')
-        .addHeader('content-type', tjson)
+        .addHeader('Content-Type', tjson)
         .post(url + 'create/', {'_id': idCustom}, asJSON)
         .expectHeaderContains('Content-Type', tjson)
         .expectStatus(201)
     .toss();
 
     frisby.create('CREATE - should throw an error (node already exist)')
-        .addHeader('content-type', tjson)
+        .addHeader('Content-Type', tjson)
         .post(url + 'create/', {'_id': idCustom}, asJSON)
         .expectStatus(409)
     .toss();
@@ -105,10 +105,9 @@ frisby.create('CREATE - should create an object in the database')
         .expectHeaderContains('Content-Type', tjson)
     .toss();
 
-    //could be upgraded
     frisby.create('READ - should a record valid with custom id - POST')
-        .addHeader('content-type', tjson)
-        .post(url + 'read', {id: idCustom}, asJSON)
+        .addHeader('Content-Type', tjson)
+        .post(url + 'read', [idCustom], asJSON)
         .expectStatus(200)
         .expectHeaderContains('Content-Type', tjson)
     .toss();
@@ -117,25 +116,25 @@ frisby.create('CREATE - should create an object in the database')
      * Tests for method Update
      */
     frisby.create('UPDATE - should throw an error (id empty, no data send)')
-        .addHeader('content-type', tjson)
+        .addHeader('Content-Type', tjson)
         .put(url + 'update/', {}, asJSON)
         .expectStatus(400)
     .toss();
 
     frisby.create('UPDATE - should throw an error (invald custom id)')
-        .addHeader('content-type', tjson)
+        .addHeader('Content-Type', tjson)
         .put(url + 'update/' + idCustom, {'key' : ''}, asJSON)
         .expectStatus(404)
     .toss();
 
     frisby.create('UPDATE - should throw an error (format data invalid) with valid id')
-        .addHeader('content-type', tjson)
+        .addHeader('Content-Type', tjson)
         .put(url + 'update/' + idFoundInDb, {}, asJSON)
         .expectStatus(400)
     .toss();
 
     frisby.create('UPDATE - should throw an error (format data invalid) with invalid id')
-        .addHeader('content-type', tjson)
+        .addHeader('Content-Type', tjson)
         .put(url + 'update/' + idNotFoundinDb, {}, asJSON)
         .expectStatus(400)
     .toss();
@@ -146,14 +145,14 @@ frisby.create('CREATE - should create an object in the database')
     .toss();
 
     frisby.create('UPDATE - should update a document - data valid, id valid')
-        .addHeader('content-type', tjson)
+        .addHeader('Content-Type', tjson)
         .put(url + 'update/' + idFoundInDb, {'a':'c'}, asJSON)
         .expectHeaderContains('Content-Type', tjson)
         .expectStatus(200)
     .toss();
 
     frisby.create('UPDATE - should update a document with an integer')
-        .addHeader('content-type', tjson)
+        .addHeader('Content-Type', tjson)
         .put(url + 'update/' + idFoundInDb, {'b': 2}, asJSON)
         .expectHeaderContains('Content-Type', tjson)
         .expectJSONTypes({
@@ -163,7 +162,7 @@ frisby.create('CREATE - should create an object in the database')
     .toss();
 
     frisby.create('UPDATE - should update a document - data valid, custom id valid')
-        .addHeader('content-type', tjson)
+        .addHeader('Content-Type', tjson)
         .put(url + 'update/' + idCustomEncoded, {'a':'c'}, asJSON)
         .expectHeaderContains('Content-Type', tjson)
         .expectStatus(200)
