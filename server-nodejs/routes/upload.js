@@ -57,7 +57,7 @@ module.exports = function(app){
 					else
 					{
 						res.status(201);
-						res.send(doc);
+						res.send(doc[0]);
 					}
 				});
 			}
