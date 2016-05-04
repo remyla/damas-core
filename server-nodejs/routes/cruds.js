@@ -49,12 +49,6 @@ module.exports = function (app, express) {
      * - 409: Conflict (some nodes already exist with these identifiers)
      */
     create = function (req, res) {
-        if (Object.keys(req.body).length === 0) {
-            res.status(400);
-            res.send('create error: the body of the request is empty');
-            return;
-        }
-
         var nodes = req.body;
         if (!Array.isArray(nodes)) {
             nodes = [nodes];
@@ -64,6 +58,11 @@ module.exports = function (app, express) {
         var author = req.user.username || req.connection.remoteAddress;
         var time = Date.now();
         for (var n in nodes) {
+            if ('object' !== typeof nodes[n]) {
+                res.status(400);
+                res.send('create error: the body of the request is empty');
+                return;
+            }
             nodes[n].author = author;
             nodes[n].time = time;
         }
@@ -101,13 +100,16 @@ module.exports = function (app, express) {
      * - 404: Not Found (the nodes do not exist)
      */
     read = function (req, res) {
-        var id = req.params.id || req.body.id;
+        var id = req.params.id || req.body;
         if (!id) {
             res.status(400);
             res.send('read error: the specified id is not valid');
             return;
         }
-        db.read(id.split(","), function (error, doc) {
+        if (!Array.isArray(id)) {
+            id = id.split(',');
+        }
+        db.read(id, function (error, doc) {
             if (error) {
                 res.status(409);
                 res.send('read error, please change your values');
@@ -486,6 +488,12 @@ db.things.find({$where: function () {
      */
 
     // CRUDS operations
+    app.post('/api/create/', create);
+    app.post('/api/read/', read);
+    app.put('/api/update/:id', update);
+    app.delete('/api/delete/:id', deleteNode);
+
+    // Old CRUDS operations
     app.post('/api/', create);
     app.get('/api/:id', read);
     app.put('/api/:id', update);
@@ -502,7 +510,6 @@ db.things.find({$where: function () {
     app.get('/api/search/:query(*)', search);
     app.post('/api/search_mongo', search_mongo);
     app.get('/api/graph/', graph);
-    app.post('/api/read/', read);
     app.get('/api/read/:id', read);
     //app.put('/', update);
     //app.delete('/', deleteNode);
