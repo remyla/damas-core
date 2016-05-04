@@ -70,7 +70,7 @@ module.exports = function (conf) {
     /**
      * Create nodes, without parent verification.
      * @param {array} nodes - Objects to create in the database
-     * @param {function} callback - Callback function to routes.js
+     * @param {function} callback - function({boolean} err, {array} nodes)
      */
     self.create = function (nodes, callback) {
         self.getCollection(callback, function (coll) {
