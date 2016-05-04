@@ -57,9 +57,7 @@ class http_connection( object ) :
 		@param {String} id_ the internal node index to search
 		@returns {Hash} node or false on failure
 		'''
-		if isinstance(id_, (tuple,list,set)):
-			id_ = ",".join(id_)
-		r = requests.post(self.serverURL+"/read/", data=id_, headers=self.headers, verify=False)
+		r = requests.post(self.serverURL+"/read/", data=json.dumps(id_), headers=self.headers, verify=False)
 		if r.status_code == 200:
 			return json.loads(r.text)
 		return None
@@ -90,7 +88,7 @@ class http_connection( object ) :
 		'''
 		if isinstance(id_, (tuple,list,set)):
 			id_ = ",".join(id_)
-		r = requests.delete(self.serverURL+'delete/'+id_, headers=self.headers, verify=False)
+		r = requests.delete(self.serverURL+'/delete/'+id_, headers=self.headers, verify=False)
 		return r.status_code == 200
 
 	def search( self, query ) :

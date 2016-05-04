@@ -100,13 +100,16 @@ module.exports = function (app, express) {
      * - 404: Not Found (the nodes do not exist)
      */
     read = function (req, res) {
-        var id = req.params.id || req.body.id;
+        var id = req.params.id || req.body;
         if (!id) {
             res.status(400);
             res.send('read error: the specified id is not valid');
             return;
         }
-        db.read(id.split(","), function (error, doc) {
+        if (!Array.isArray(id)) {
+            id = id.split(',');
+        }
+        db.read(id, function (error, doc) {
             if (error) {
                 res.status(409);
                 res.send('read error, please change your values');
