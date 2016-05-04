@@ -60,7 +60,7 @@ module.exports = function (app, express) {
         for (var n in nodes) {
             if ('object' !== typeof nodes[n]) {
                 res.status(400);
-                res.send('create error: the body of the request is empty');
+                res.send('create error: the specified elements must be objects');
                 return;
             }
             nodes[n].author = author;
