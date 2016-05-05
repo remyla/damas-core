@@ -37,14 +37,14 @@ module.exports = function (app, express) {
     /*
      * create()
      *
-     * Method: PUT
-     * URI: /api/
+     * Method: POST
+     * URI: /api/create/
      *
      * Insert new nodes
      *
      * HTTP status codes:
-     * - 200: OK (nodes created)
-     * - 400: Bad request (not formatted correctly)
+     * - 201: OK (nodes created)
+     * - 400: Bad Request (not formatted correctly)
      * ? 403: Forbidden (the user does not have the right permissions)
      * - 409: Conflict (some nodes already exist with these identifiers)
      */
@@ -90,13 +90,13 @@ module.exports = function (app, express) {
      * read()
      *
      * Method: GET
-     * URI: /api/
+     * URI: /api/read/
      *
      * Retrieve the specified nodes
      *
      * HTTP status codes:
      * - 200: OK (nodes retrieved)
-     * - 400: Bad request (not formatted correctly)
+     * - 400: Bad Request (not formatted correctly)
      * - 404: Not Found (the nodes do not exist)
      */
     read = function (req, res) {
@@ -131,13 +131,13 @@ module.exports = function (app, express) {
      * update()
      *
      * Method: PUT
-     * URI: /api/
+     * URI: /api/update/
      *
      * Update existing nodes
      *
      * HTTP status codes:
      * - 200: OK (nodes updated)
-     * - 400: Bad request (not formatted correctly)
+     * - 400: Bad Request (not formatted correctly)
      * ? 403: Forbidden (the user does not have the right permissions)
      * - 404: Not Found (the nodes do not exist)
      */
@@ -176,7 +176,7 @@ module.exports = function (app, express) {
      *
      * HTTP status codes:
      * - 200: OK (nodes deleted (or not found))
-     * - 400: Bad request (not formatted correctly)
+     * - 400: Bad Request (not formatted correctly)
      * ? 403: Forbidden (the user does not have the right permissions)
      */
     deleteNode = function (req, res) {
@@ -209,7 +209,7 @@ module.exports = function (app, express) {
      *
      * HTTP status codes:
      * - 200: OK (graph retrieved)
-     * - 400: Bad request (not formatted correctly)
+     * - 400: Bad Request (not formatted correctly)
      * - 404: Not Found (the nodes do not exist)
      */
     graph = function (req, res) {
@@ -247,7 +247,7 @@ module.exports = function (app, express) {
      *
      * HTTP status codes:
      * - 200: OK (search successful, even without results)
-     * - 400: Bad request (not formatted correctly)
+     * - 400: Bad Request (not formatted correctly)
      */
     search = function (req, res) {
         var q = req.params.query || req.body.query;
@@ -256,94 +256,64 @@ module.exports = function (app, express) {
             res.send('Bad command');
             return;
         }
+        q = decodeURIComponent(q);
         q = q.replace(/\s+/g, ' ').trim();
-        //q = q.replace('< ', '<');
-        //q = q.replace('<= ', '<=');
-        //q = q.replace('>= ', '>=');
-        //q = q.replace('> ', '>');
-        //q = q.replace(': ', ':');
-        var terms = q.split(" ");
-        var pair;
-        var result = {};
-        //var j;
-        //var tempField;
-        for (var i = 0; i< terms.length; i++) {
-            if (terms[i].indexOf('<=') > 0) {
-                pair = terms[i].split('<=');
-                result[pair[0]] = {$lte: decodeURIComponent(pair[1])};
-                continue;
-            }
-            if (terms[i].indexOf('<') > 0) {
-                pair = terms[i].split('<');
-                result[pair[0]] = {$lt: decodeURIComponent(pair[1])};
-                continue;
-            }
-            if (terms[i].indexOf('>=') > 0) {
-                pair = terms[i].split('>=');
-                result[pair[0]] = {$gte: decodeURIComponent(pair[1])};
-                continue;
-            }
-            if (terms[i].indexOf('>') > 0) {
-                pair = terms[i].split('>');
-                result[pair[0]] = {$gt: decodeURIComponent(pair[1])};
-                continue;
-            }
-            if (terms[i].indexOf(':') > 0) {
-                pair = terms[i].split(':');
-                var value = decodeURIComponent(pair[1]);
-
-                var flags = value.replace(/.*\/([gimy]*)$/, '$1');
-                var pattern = value.replace(new RegExp('^/(.*?)/' + flags + '$'), '$1');
-                if (flags != value && pattern != value) {
-                    var regex = new RegExp(pattern, flags);
-                    result[pair[0]] = regex;
-                } else {
-                    result[pair[0]] = value;
-                }
-/*
-                for (j = 1;j<pair.length-1;j++)
-                    result[tempField] += decodeURIComponent(pair[j]) + ":";
-                if (pair[j] != '')
-                    result[tempField] += decodeURIComponent(pair[j]);
-*/
-                continue;
-            }
-/* implement full text search
-            result['$where'] = function () {
-                for (var key in this) {
-                    if (this[key])
-                }
-            }
-db.things.find({$where: function () {
-  for (var key in this) {
-    if (this[key] === "bar") {
-      return true;
-    }
-    return false;
-    }
-}});
-*/
-/*
-            if (i == 0) {
-                continue;
-            }
-            if (result[tempField] != '') {
-                result[tempField] += " " + terms[i];
-            } else {
-                result[tempField] += terms[i];
-            }
-*/
-        }
-        db.search(result, function (error, doc) {
+        db.searchFromText(q, function (error, doc) {
             if (error) {
                 res.status(409);
-                res.send('Read Error, please change your values');
+                res.send('search error, please change your values');
                 return;
             }
             res.status(200);
             res.json(doc);
         });
     }; // search()
+
+
+    /*
+     * search_one()
+     *
+     * Method: GET
+     * URI: /api/search_one/
+     *
+     * Search for nodes in the database, returning the first matching occurrence
+     * as a node object.
+     *
+     * HTTP status codes:
+     * - 200: OK (search successful, even without results)
+     * - 400: Bad Request (not formatted correctly)
+     */
+    search_one = function (req, res) {
+        var q = req.params.query || req.body.query;
+        if (!q || q == "undefined") {
+            res.status(400);
+            res.send('Bad command');
+            return;
+        }
+        q = decodeURIComponent(q);
+        q = q.replace(/\s+/g, ' ').trim();
+        db.searchFromText(q, function (error, doc) {
+            if (error) {
+                res.status(409);
+                res.send('search_one error, please change your values');
+                return;
+            }
+            res.status(200);
+            if (doc.length === 0) {
+                res.json(null);
+            } else {
+                db.read([doc[0]], function(error, node) {
+                    if (error) {
+                        res.status(409);
+                        res.send('read error, please change your values');
+                        return;
+                    }
+                    res.status(200);
+                    res.json(node[0]);
+                });
+            }
+        });
+    }; // search_one()
 
 
     /*
@@ -356,7 +326,7 @@ db.things.find({$where: function () {
      *
      * HTTP status codes:
      * - 200: OK (search successful, even without results)
-     * - 400: Bad request (not formatted correctly)
+     * - 400: Bad Request (not formatted correctly)
      * - 501: Not Implemented (MongoDB not in use)
      */
     search_mongo = function (req, res) {
@@ -464,7 +434,7 @@ db.things.find({$where: function () {
      *
      * HTTP status codes:
      * - 200: OK (file retrieved)
-     * - 400: Bad request (not formatted correctly)
+     * - 400: Bad Request (not formatted correctly)
      * - 404: Not Found (the file does not exist)
      */
     getFile = function (req, res) {
@@ -487,13 +457,20 @@ db.things.find({$where: function () {
      * Register the operations
      */
 
-    // CRUDS operations
+    // CRUD operations
     app.post('/api/create/', create);
+    app.get('/api/read/:id', read);
     app.post('/api/read/', read);
     app.put('/api/update/:id', update);
     app.delete('/api/delete/:id', deleteNode);
 
-    // Old CRUDS operations
+    // Search operations
+    app.get('/api/search/:query(*)', search);
+    app.get('/api/search_one/:query(*)', search_one);
+    app.post('/api/search_mongo', search_mongo);
+    app.get('/api/graph/', graph);
+
+    // CRUD operations (deprecated)
     app.post('/api/', create);
     app.get('/api/:id', read);
     app.put('/api/:id', update);
@@ -505,14 +482,6 @@ db.things.find({$where: function () {
     app.post('/api/import', importJSON); // untested
     //app.get('/subdirs/:path', getSubdirs);
     //app.get('/subdirs', getSubdirs);
-
-    // Alternative Operations
-    app.get('/api/search/:query(*)', search);
-    app.post('/api/search_mongo', search_mongo);
-    app.get('/api/graph/', graph);
-    app.get('/api/read/:id', read);
-    //app.put('/', update);
-    //app.delete('/', deleteNode);
 }
 
 

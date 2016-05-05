@@ -102,6 +102,18 @@ class http_connection( object ) :
 			return json.loads(r.text)
 		return None
 
+	def search_one( self, query ) :
+		'''
+		Find nodes wearing the specified key(s) and return the first
+                occurence found
+		@param {String} query string
+		@returns {Array} array of element indexes or None if no element found
+		'''
+		r = requests.get(self.serverURL+'/search_one/'+query, headers=self.headers, verify=False)
+		if r.status_code == 200:
+			return json.loads(r.text)
+		return None
+
 	def search_mongo( self, query, sort, limit, skip ) :
 		data = {"query":query, "sort":sort, "limit":limit, "skip":skip}
 		headers = {'content-type': 'application/json'}

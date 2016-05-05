@@ -188,6 +188,9 @@ module.exports = function (conf) {
         });
     }; // search()
 
+    self.searchFromText = function (str, callback) {
+        self.search(textSearch2MongoQuery(str), callback);
+    };
 
     /*
      * Higher-level functions
@@ -310,6 +313,65 @@ module.exports = function (conf) {
         }
         return ids_o;
     }
+
+    function textSearch2MongoQuery( str ) {
+        var terms = str.split(" ");
+        var pair;
+        var result = {};
+        for (var i = 0; i < terms.length; i++) {
+            if (terms[i].indexOf('<=') > 0) {
+                pair = terms[i].split('<=');
+                result[pair[0]] = {$lte: pair[1]};
+                continue;
+            }
+            if (terms[i].indexOf('<') > 0) {
+                pair = terms[i].split('<');
+                result[pair[0]] = {$lt: pair[1]};
+                continue;
+            }
+            if (terms[i].indexOf('>=') > 0) {
+                pair = terms[i].split('>=');
+                result[pair[0]] = {$gte: pair[1]};
+                continue;
+            }
+            if (terms[i].indexOf('>') > 0) {
+                pair = terms[i].split('>');
+                result[pair[0]] = {$gt: pair[1]};
+                continue;
+            }
+            if (terms[i].indexOf(':') > 0) {
+                pair = terms[i].split(':');
+                var value = pair[1];
+
+                var flags = value.replace(/.*\/([gimy]*)$/, '$1');
+                var pattern = value.replace(new RegExp('^/(.*?)/' + flags + '$'), '$1');
+                if (flags != value && pattern != value) {
+                    var regex = new RegExp(pattern, flags);
+                    result[pair[0]] = regex;
+                } else {
+                    result[pair[0]] = value;
+                }
+                continue;
+            }
+        }
+        return result;
+    }
+/* implement full text search
+            result['$where'] = function () {
+                for (var key in this) {
+                    if (this[key])
+                }
+            }
+db.things.find({$where: function () {
+  for (var key in this) {
+    if (this[key] === "bar") {
+      return true;
+    }
+    return false;
+    }
+}});
+*/
+
 };
 
 
