@@ -14,6 +14,7 @@ var manager = module.exports = new EventManager();
 function EventContext(name, id, data) {
     this.next = id + 1;
     this.data = data;
+    this.name = name;
     this.listener = listeners[name][id];
 
     /*
