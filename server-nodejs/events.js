@@ -4,45 +4,7 @@
  */
 
 var listeners = {};
-var manager = module.exports = new EventManager();
-
-
-/*
- * EventContext()
- * Constructor for a context object for event listeners
- */
-function EventContext(name) {
-    this.next = 1;
-    this.data = {};
-    this.name = name;
-    this.listener = listeners[name][this.next - 1];
-
-    /*
-     * detach()
-     * Detach the current event listener
-     */
-    this.detach = function () {
-        manager.detach(name, listeners[name][--this.next]);
-    };
-
-
-    /*
-     * attach()
-     * Attach another listener to the current event
-     */
-    this.attach = function (callback) {
-        manager.attach(name, callback);
-    };
-
-
-    /*
-     * interrupt()
-     * Interrupt the event (don't call other listeners)
-     */
-    this.interrupt = function () {
-        this.next = listeners[name].length;
-    };
-}
+module.exports = new EventManager();
 
 
 /*
@@ -57,18 +19,40 @@ function EventManager() {
      * Fire an event: call all of its listeners
      */
     this.fire = function (hook) {
-        var ctx = new EventContext(hook);
         if (hook in listeners) {
             var args = [];
             for (var i = 1; i < arguments.length; ++i) {
                 args.push(arguments[i]);
             }
-            while (ctx.next <= listeners[hook].length) {
-                listeners[hook][ctx.next - 1].apply(ctx, args);
-                ++ctx.next;
+            var next = 0;
+            var ctx = {
+                data: {},
+                name: hook,
+                listener: null,
+
+                // Detach the current event listener
+                detach: function () {
+                    self.detach(hook, listeners[hook][--next]);
+                },
+
+                // Attach another listener to the current event
+                attach: function (callback) {
+                    self.attach(hook, callback);
+                },
+
+                // Interrupt the event (don't call other listeners)
+                interrupt: function () {
+                    next = listeners[hook].length;
+                }
+            };
+
+            while (next < listeners[hook].length) {
+                ctx.listener = listeners[hook][next++];
+                ctx.listener.apply(ctx, args);
             }
+            return ctx.data;
         }
-        return ctx.data;
+        return {};
     }; // fire()
 
 
@@ -77,7 +61,7 @@ function EventManager() {
      * Asynchronously fire events
      */
     this.afire = function () {
-        var args = arguments;
+        var args = arguments; // Doesn't work without this hack
         setTimeout(function () {
             self.fire.apply(self.fire, args);
         }, 0);
