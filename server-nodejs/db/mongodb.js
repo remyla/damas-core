@@ -73,6 +73,11 @@ module.exports = function (conf) {
      * @param {function} callback - Callback function to routes.js
      */
     self.create = function (nodes, callback) {
+        for(i in nodes) {
+            if(ObjectID.isValid(nodes[i]._id)) {
+                nodes[i]._id = new ObjectID(nodes[i]._id);
+            }
+        }
         self.getCollection(callback, function (coll) {
             coll.insert(nodes, {'safe': true}, function (err, result) {
                 if (err) {
@@ -302,7 +307,7 @@ module.exports = function (conf) {
     function exportIds(ids) {
         var ids_o = [];
         for (var i in ids) {
-            if(24 == ids[i].length && -1 == ids[i].indexOf('/')) {
+            if(ObjectID.isValid(ids[i])) {
                 ids_o.push(new ObjectID(ids[i]));
             } else {
                 ids_o.push(ids[i]);
