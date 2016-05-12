@@ -491,6 +491,23 @@ db.things.find({$where: function () {
     function getMultipleResponse(isArray, doc) {
         var result = {};
         if (isArray) {
+            var errorCount = 0;
+            for (i in doc) {
+                if (!doc[i]) {
+                    ++errorCount;
+                }
+            }
+            if (doc.length === errorCount) {
+                result.status = 404;
+                result.content = 'No id found';
+                return result;
+            }
+            if (0 < errorCount) {
+                //some ids found but not all
+                result.status = 207;
+                result.content = doc;
+                return result;
+            }
             result.status = 200;
             result.content = doc;
             return result;
