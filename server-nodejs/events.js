@@ -35,13 +35,13 @@ function EventManager() {
                 listener: null
             };
 
-            function call() {
-                if (next === listeners[hook].length) {
+            function call(number) {
+                if (number === listeners[hook].length) {
                     then(ctx.data);
-                    return;
+                } else if (number < listeners[hook].length) {
+                    ctx.listener = listeners[hook][number];
+                    ctx.listener.apply(ctx, args);
                 }
-                ctx.listener = listeners[hook][next++];
-                ctx.listener.apply(ctx, args);
             }
 
             /*
@@ -58,9 +58,15 @@ function EventManager() {
                 self.attach(hook, callback);
             };
 
+            // Stop the event
+            ctx.end = function () {
+                next = listeners[hook].length;
+                ctx.next();
+            };
+
             // Run asynchronously the next listener
             ctx.next = function () {
-                process.nextTick(call);
+                process.nextTick(function () { call (next++); });
             };
             ctx.next();
         }
