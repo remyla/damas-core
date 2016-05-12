@@ -142,9 +142,9 @@ frisby.create('CREATE - should create an object in the database')
         .expectStatus(400)
     .toss();
 
-    frisby.create('UPDATE - should throw an error (invald custom id)')
+    frisby.create('UPDATE - should throw an error (invalid custom id)')
         .addHeader('Content-Type', tjson)
-        .put(url + 'update/' + idCustom, {'key' : ''}, asJSON)
+        .put(url + 'update/' + idCustom, {'key' : 'val'}, asJSON)
         .expectStatus(404)
     .toss();
 
@@ -154,10 +154,10 @@ frisby.create('CREATE - should create an object in the database')
         .expectStatus(400)
     .toss();
 
-    frisby.create('UPDATE - should throw an error (format data invalid) with invalid id')
+    frisby.create('UPDATE - should throw an error (id not found)')
         .addHeader('Content-Type', tjson)
-        .put(url + 'update/' + idNotFoundinDb, {}, asJSON)
-        .expectStatus(400)
+        .put(url + 'update/' + idNotFoundinDb, {'key': 'val'}, asJSON)
+        .expectStatus(404)
     .toss();
 
     frisby.create('UPDATE - should throw an error (null data) with valid id')
@@ -169,7 +169,7 @@ frisby.create('CREATE - should create an object in the database')
         .addHeader('Content-Type', tjson)
         .put(url + 'update/' + idFoundInDb, {'a':'c'}, asJSON)
         .expectHeaderContains('Content-Type', tjson)
-        .expectJSON('*', {'a': 'c'})
+        .expectJSON({'a': 'c'})
         .expectStatus(200)
     .toss();
 
@@ -177,7 +177,7 @@ frisby.create('CREATE - should create an object in the database')
         .addHeader('Content-Type', tjson)
         .put(url + 'update/' + idFoundInDb, {'b': 2}, asJSON)
         .expectHeaderContains('Content-Type', tjson)
-        .expectJSON('*', {'b': 2})
+        .expectJSON({'b': 2})
         .expectStatus(200)
     .toss();
 

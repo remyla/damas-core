@@ -73,8 +73,6 @@ module.exports = function (app, express) {
                 res.send('Create error, please change your values');
                 return;
             }
-            // FIXME compatibility hack
-            // Output in the same data type as the input
             if (Array.isArray(req.body)) {
                 res.status(201);
                 res.json(doc);
@@ -106,7 +104,8 @@ module.exports = function (app, express) {
             res.send('read error: the specified id is not valid');
             return;
         }
-        if (!Array.isArray(id)) {
+        var idIsArray = Array.isArray(id);
+        if (!idIsArray) {
             id = id.split(',');
         }
         db.read(id, function (error, doc) {
@@ -115,14 +114,13 @@ module.exports = function (app, express) {
                 res.send('read error, please change your values');
                 return;
             }
-            /*FIXME always return a non empty array
-            if (0 === doc.length) {
-                res.status(404);
-                res.send('Id not found');
-                return;
-            }*/
-            res.status(200);
-            res.json(doc);
+            var response = getMultipleResponse(idIsArray, doc);
+            res.status(response.status);
+            if (typeof response.content === "object") {
+                res.json(response.content);
+            } else {
+                res.send(response.content);
+            }
         });
     }; // read()
 
@@ -142,13 +140,7 @@ module.exports = function (app, express) {
      * - 404: Not Found (the nodes do not exist)
      */
     update = function (req, res) {
-/*
-        if (!ObjectId.isValid(req.params.id)) {
-            res.status(400);
-            res.send('update error: the specified id is not valid');
-            return;
-        }
-*/        if (Object.keys(req.body).length === 0) {
+        if (Object.keys(req.body).length === 0) {
             res.status(400);
             res.send('update error: the body of the request is empty');
             return;
@@ -160,8 +152,14 @@ module.exports = function (app, express) {
                 res.send('update error, please change your values');
                 return;
             }
-            res.status(200);
-            res.json(doc);
+            var response = getMultipleResponse(
+                (1 < req.params.id.split(',').length), doc);
+            res.status(response.status);
+            if (typeof response.content === "object") {
+                res.json(response.content);
+            } else {
+                res.send(response.content);
+            }
         });
     }; // update()
 
@@ -226,12 +224,12 @@ module.exports = function (app, express) {
                 res.send('graph error, please change your values');
                 return;
             }
-            if (nodes) {
-                res.status(200);
-                res.json(nodes);
+            var response = getMultipleResponse(Array.isArray(id), nodes);
+            res.status(response.status);
+            if (typeof response.content === "object") {
+                res.json(response.content);
             } else {
-                res.status(404);
-                res.send('Id not found');
+                res.send(response.content);
             }
         });
     }; // graph()
@@ -481,6 +479,30 @@ db.things.find({$where: function () {
             stream.pipe(res);
         });
     }; // getFile()
+
+
+    /**
+     * Sets the appropriate response and status code for multiple params or not
+     * @param {boolean} isArray - did client sent an array or not
+     * @param {array} doc - the database response
+     * @param {} result - the returned object or string
+     * @return {number} - the HTTP status code
+     */
+    function getMultipleResponse(isArray, doc) {
+        var result = {};
+        if (isArray) {
+            result.status = 200;
+            result.content = doc;
+            return result;
+        } else if (!doc[0]) {
+            result.status = 404;
+            result.content = 'Id not found';
+            return result;
+        }
+        result.status = 200
+        result.content = doc[0];
+        return result;
+    }
 
 
     /*
