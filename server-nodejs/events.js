@@ -19,53 +19,57 @@ function EventManager() {
      * Fire an event: call all of its listeners
      */
     this.fire = function (hook) {
+        var then = function () {};
         if (hook in listeners) {
+            // Translate arguments
             var args = [];
             for (var i = 1; i < arguments.length; ++i) {
                 args.push(arguments[i]);
             }
+
+            // Required objects for running listeners
             var next = 0;
             var ctx = {
                 data: {},
                 name: hook,
-                listener: null,
-
-                // Detach the current event listener
-                detach: function () {
-                    self.detach(hook, listeners[hook][--next]);
-                },
-
-                // Attach another listener to the current event
-                attach: function (callback) {
-                    self.attach(hook, callback);
-                },
-
-                // Interrupt the event (don't call other listeners)
-                interrupt: function () {
-                    next = listeners[hook].length;
-                }
+                listener: null
             };
 
-            while (next < listeners[hook].length) {
+            function call() {
+                if (next === listeners[hook].length) {
+                    then(ctx.data);
+                    return;
+                }
                 ctx.listener = listeners[hook][next++];
                 ctx.listener.apply(ctx, args);
             }
-            return ctx.data;
+
+            /*
+             * Add utility functions to the context
+             */
+
+            // Detach the current listener
+            ctx.detach = function () {
+                self.detach(hook, --next);
+            };
+
+            // Attach another listener to the current event
+            ctx.attach = function (callback) {
+                self.attach(hook, callback);
+            };
+
+            // Run asynchronously the next listener
+            ctx.next = function () {
+                process.nextTick(call);
+            };
+            ctx.next();
         }
-        return {};
+        return {
+            then: function (callback) {
+                then = callback;
+            }
+        };
     }; // fire()
-
-
-    /*
-     * afire()
-     * Asynchronously fire events
-     */
-    this.afire = function () {
-        var args = arguments; // Doesn't work without this hack
-        setTimeout(function () {
-            self.fire.apply(self.fire, args);
-        }, 0);
-    }; // afire()
 
 
     /*
@@ -84,10 +88,14 @@ function EventManager() {
      * detach()
      * Detach an event listener
      */
-    this.detach = function (hook, callback) {
+    this.detach = function (hook, listener) {
         if (hook in listeners) {
-            var i = listeners[hook].indexOf(callback);
-            if (-1 !== i) {
+            if (typeof listener === 'number') {
+                var i = listener;
+            } else {
+                var i = listeners[hook].indexOf(listener);
+            }
+            if (-1 < i && i < listeners[hook].length) {
                 listeners[hook].splice(i, 1);
             }
         }
