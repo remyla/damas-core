@@ -43,7 +43,7 @@ module.exports = function (app, express) {
      * Insert new nodes
      *
      * HTTP status codes:
-     * - 200: OK (nodes created)
+     * - 201: Created (nodes created)
      * - 207: Multi-Status (some nodes already exist with these identifiers)
      * - 400: Bad request (not formatted correctly)
      * - 409: Conflict (all nodes already exist with these identifiers)
@@ -98,14 +98,9 @@ module.exports = function (app, express) {
      *
      * HTTP status codes:
      * - 200: OK (nodes retrieved)
-<<<<<<< HEAD
      * - 207: Multi-Status (some nodes do not exist)
      * - 400: Bad request (not formatted correctly)
      * - 404: Not Found (all the nodes do not exist)
-=======
-     * - 400: Bad Request (not formatted correctly)
-     * - 404: Not Found (the nodes do not exist)
->>>>>>> upstream/experimental
      */
     read = function (req, res) {
         var id = req.params.id || req.body;
@@ -114,12 +109,8 @@ module.exports = function (app, express) {
             res.send('read error: the specified id is not valid');
             return;
         }
-<<<<<<< HEAD
         var idIsArray = Array.isArray(id);
         if (!idIsArray) {
-=======
-        if (!Array.isArray(id)) {
->>>>>>> upstream/experimental
             id = id.split(',');
         }
         db.read(id, function (error, doc) {
@@ -149,15 +140,9 @@ module.exports = function (app, express) {
      *
      * HTTP status codes:
      * - 200: OK (nodes updated)
-<<<<<<< HEAD
      * - 207: Multi-Status (some nodes do not exist)
      * - 400: Bad request (not formatted correctly)
      * - 404: Not Found (all the nodes do not exist)
-=======
-     * - 400: Bad Request (not formatted correctly)
-     * ? 403: Forbidden (the user does not have the right permissions)
-     * - 404: Not Found (the nodes do not exist)
->>>>>>> upstream/experimental
      */
     update = function (req, res) {
         if (Object.keys(req.body).length === 0) {
@@ -194,14 +179,9 @@ module.exports = function (app, express) {
      *
      * HTTP status codes:
      * - 200: OK (nodes deleted (or not found))
-<<<<<<< HEAD
      * - 207: Multi-Status (some nodes do not exist)
      * - 400: Bad request (not formatted correctly)
      * - 404: Not Found (all the nodes do not exist)
-=======
-     * - 400: Bad Request (not formatted correctly)
-     * ? 403: Forbidden (the user does not have the right permissions)
->>>>>>> upstream/experimental
      */
     deleteNode = function (req, res) {
         /* this check should not be based on ObjectId - disabled
@@ -238,14 +218,9 @@ module.exports = function (app, express) {
      *
      * HTTP status codes:
      * - 200: OK (graph retrieved)
-<<<<<<< HEAD
      * - 207: Multi-Status (some nodes do not exist)
      * - 400: Bad request (not formatted correctly)
      * - 404: Not Found (all the nodes do not exist)
-=======
-     * - 400: Bad Request (not formatted correctly)
-     * - 404: Not Found (the nodes do not exist)
->>>>>>> upstream/experimental
      */
     graph = function (req, res) {
         var id = req.params.id || req.body.id;
@@ -533,21 +508,13 @@ module.exports = function (app, express) {
      * Register the operations
      */
 
-<<<<<<< HEAD
-    // CRUDS operations
-    app.post('/api/create/', create);
-=======
     // CRUD operations
     app.post('/api/create/', create);
     app.get('/api/read/:id', read);
->>>>>>> upstream/experimental
     app.post('/api/read/', read);
     app.put('/api/update/:id', update);
     app.delete('/api/delete/:id', deleteNode);
 
-<<<<<<< HEAD
-    // Old CRUDS operations
-=======
     // Search operations
     app.get('/api/search/:query(*)', search);
     app.get('/api/search_one/:query(*)', search_one);
@@ -555,7 +522,6 @@ module.exports = function (app, express) {
     app.get('/api/graph/', graph);
 
     // CRUD operations (deprecated)
->>>>>>> upstream/experimental
     app.post('/api/', create);
     app.get('/api/:id', read);
     app.put('/api/:id', update);
@@ -567,17 +533,6 @@ module.exports = function (app, express) {
     app.post('/api/import', importJSON); // untested
     //app.get('/subdirs/:path', getSubdirs);
     //app.get('/subdirs', getSubdirs);
-<<<<<<< HEAD
-
-    // Alternative Operations
-    app.get('/api/search/:query(*)', search);
-    app.post('/api/search_mongo', search_mongo);
-    app.get('/api/graph/', graph);
-    app.get('/api/read/:id', read);
-    //app.put('/', update);
-    //app.delete('/', deleteNode);
-=======
->>>>>>> upstream/experimental
 }
 
 

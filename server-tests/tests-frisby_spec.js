@@ -181,16 +181,6 @@ frisby.create('CREATE - should create an object in the database')
         .expectStatus(200)
     .toss();
 
-    frisby.create('UPDATE - should update a document with an integer')
-        .addHeader('Content-Type', tjson)
-        .put(url + 'update/' + idFoundInDb, {'b': 2}, asJSON)
-        .expectHeaderContains('Content-Type', tjson)
-        .expectJSONTypes({
-            0: {'b': Number}
-        })
-        .expectStatus(200)
-    .toss();
-
     frisby.create('UPDATE - should update a document - data valid, custom id valid')
         .addHeader('Content-Type', tjson)
         .put(url + 'update/' + idCustomEncoded, {'a':'c'}, asJSON)
@@ -213,7 +203,7 @@ frisby.create('CREATE - should create an object in the database')
     //it always return a non empty array
     frisby.create('GRAPH - should throw an error (id empty) - Not found')
         .get(url + 'graph/')
-        .expectStatus(404)
+        .expectStatus(400)
     .toss();
 
     frisby.create('GRAPH - should throw an error (id not found) - Not found')
