@@ -68,22 +68,25 @@ module.exports = function (app, express) {
         }
 
         db.create(nodes, function (error, doc) {
-            if (error && 1 === doc.length) {
+            if(Array.isArray(req.body)) {
+                //in the case Create's doc is unified
+                var response = getMultipleResponse(doc);
+                if (response.err && response.partial) {
+                    res.status(207);
+                    res.json(doc);
+                    return;
+                }
+                res.status(201);
+                res.json(doc);
+                return;
+            }
+            if (error) {
                 res.status(409);
                 res.send('Create error, please change your values');
                 return;
-            } else if (error) {
-                res.status(207);
-                res.json(doc);
-                return;
             }
-            if (Array.isArray(req.body)) {
-                res.status(201);
-                res.json(doc);
-            } else {
-                res.status(201);
-                res.json(doc[0]);
-            }
+            res.status(201);
+            res.json(doc[0]);
         });
     }; // create()
 
@@ -119,13 +122,29 @@ module.exports = function (app, express) {
                 res.send('read error, please change your values');
                 return;
             }
-            var response = getMultipleResponse(idIsArray, doc);
-            res.status(response.status);
-            if (typeof response.content === "object") {
-                res.json(response.content);
-            } else {
-                res.send(response.content);
+
+            if(idIsArray) {
+                var response = getMultipleResponse(doc);
+                if (response.err) {
+                    if(response.partial) {
+                        res.status(207);
+                        res.json(doc);
+                        return;
+                    }
+                    res.status(404);
+                    res.send('No id found');
+                    return;
+                }
+                res.status(200);
+                res.json(doc);
+                return;
+            } else if (null === doc[0]) {
+                res.status(404);
+                res.send('Id not found');
+                return;
             }
+            res.status(200);
+            res.json(doc[0]);
         });
     }; // read()
 
@@ -157,14 +176,29 @@ module.exports = function (app, express) {
                 res.send('update error, please change your values');
                 return;
             }
-            var response = getMultipleResponse(
-                (1 < req.params.id.split(',').length), doc);
-            res.status(response.status);
-            if (typeof response.content === "object") {
-                res.json(response.content);
-            } else {
-                res.send(response.content);
+
+            if(1 < req.params.id.split(',').length) {
+                var response = getMultipleResponse(doc);
+                if (response.err) {
+                    if(response.partial) {
+                        res.status(207);
+                        res.json(doc);
+                        return;
+                    }
+                    res.status(404);
+                    res.send('No id found');
+                    return;
+                }
+                res.status(200);
+                res.json(doc);
+                return;
+            } else if (null === doc[0]) {
+                res.status(404);
+                res.send('Id not found');
+                return;
             }
+            res.status(200);
+            res.json(doc[0]);
         });
     }; // update()
 
@@ -236,13 +270,28 @@ module.exports = function (app, express) {
                 res.send('graph error, please change your values');
                 return;
             }
-            var response = getMultipleResponse(Array.isArray(id), nodes);
-            res.status(response.status);
-            if (typeof response.content === "object") {
-                res.json(response.content);
-            } else {
-                res.send(response.content);
+            if(Array.isArray(id)) {
+                var response = getMultipleResponse(nodes);
+                if (response.err) {
+                    if(response.partial) {
+                        res.status(207);
+                        res.json(nodes);
+                        return;
+                    }
+                    res.status(404);
+                    res.send('No id found');
+                    return;
+                }
+                res.status(200);
+                res.json(nodes);
+                return;
+            } else if (null === nodes[0]) {
+                res.status(404);
+                res.send('Id not found');
+                return;
             }
+            res.status(200);
+            res.json(nodes[0]);
         });
     }; // graph()
 
@@ -468,38 +517,25 @@ module.exports = function (app, express) {
      * @param {boolean} isArray - did client sent an array or not
      * @param {array} doc - the database response
      * @param {} result - the returned object or string
-     * @return {number} - the HTTP status code
+     * @return {{status: number, content: result}} - the results to send
      */
-    function getMultipleResponse(isArray, doc) {
+    function getMultipleResponse(doc) {
         var result = {};
-        if (isArray) {
-            var errorCount = 0;
-            for (i in doc) {
-                if (!doc[i]) {
-                    ++errorCount;
-                }
+        var errorCount = 0;
+        for (i in doc) {
+            if (null === doc[i]) {
+                ++errorCount;
             }
+        }
+        if (0 < errorCount) {
+            result.err = true;
+            result.partial = true;
             if (doc.length === errorCount) {
-                result.status = 404;
-                result.content = 'No id found';
-                return result;
+                result.partial = false;
             }
-            if (0 < errorCount) {
-                //some ids found but not all
-                result.status = 207;
-                result.content = doc;
-                return result;
-            }
-            result.status = 200;
-            result.content = doc;
-            return result;
-        } else if (!doc[0]) {
-            result.status = 404;
-            result.content = 'Id not found';
             return result;
         }
-        result.status = 200
-        result.content = doc[0];
+        result.err = false;
         return result;
     }
 
