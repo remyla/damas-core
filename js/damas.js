@@ -255,6 +255,28 @@
         }
     }
 
+    damas.search_one = function (query, callback) {
+         function req_callback(req) {
+            return JSON.parse(req.responseText);
+        }
+        var req = new XMLHttpRequest();
+        req.open('GET', this.server + 'search_one/' + encodeURIComponent(query), callback !== undefined);
+        req.setRequestHeader("Authorization","Bearer "+damas.token);
+        req.onreadystatechange = function(e) {
+            if (req.readyState == 4) {
+                if (req.status == 200) {
+                    if (callback) {
+                        callback(req_callback(req));
+                    }
+                }
+            }
+        }
+        req.send();
+        if (callback === undefined) {
+            return req_callback(req);
+        }
+   }
+
     /**
      * BETA - Expose the find method from mongodb
      * @param {Object} query

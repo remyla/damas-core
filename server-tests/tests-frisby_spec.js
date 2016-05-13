@@ -181,6 +181,16 @@ frisby.create('CREATE - should create an object in the database')
         .expectStatus(200)
     .toss();
 
+    frisby.create('UPDATE - should update a document with an integer')
+        .addHeader('Content-Type', tjson)
+        .put(url + 'update/' + idFoundInDb, {'b': 2}, asJSON)
+        .expectHeaderContains('Content-Type', tjson)
+        .expectJSONTypes({
+            0: {'b': Number}
+        })
+        .expectStatus(200)
+    .toss();
+
     frisby.create('UPDATE - should update a document - data valid, custom id valid')
         .addHeader('Content-Type', tjson)
         .put(url + 'update/' + idCustomEncoded, {'a':'c'}, asJSON)

@@ -120,7 +120,7 @@ module.exports = function (app) {
                 return;
             }
             res.status(201);
-            res.send(doc);
+            res.send(doc[0]);
         });
     });
 
