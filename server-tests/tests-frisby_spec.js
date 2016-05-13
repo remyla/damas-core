@@ -337,7 +337,7 @@ frisby.create('CREATE - should create an object in the database')
         .addHeader('Content-Type', tjson)
         .post(url + 'create/', [
             {'key': 'value', num: 3},
-            {'_id':idCustom, 'key': 'value', num: 3}
+            {'_id': idCustom, 'key': 'value', num: 3}
          ], asJSON)
         .expectStatus(201)
         .expectHeaderContains('Content-Type', tjson)
@@ -354,7 +354,21 @@ frisby.create('CREATE - should create an object in the database')
             .delete(url + 'delete/' + idFoundInDb + ',' + idCustomEncoded)
             .expectStatus(200)
         .toss();
+
+        frisby.create('CREATE - should throw an error (duplicate id)')
+            .addHeader('Content-Type', tjson)
+            .post(url + 'create/',
+                [{'_id': idCustom, 'key': 'value'}, {'_id': idCustom}], asJSON)
+            .expectStatus(207)
+            .expectHeaderContains('Content-Type', tjson)
+            .after(function (error, response, body) {
+
+            frisby.create('DELETE - should throw an error (not all document deleted)')
+                .delete(url + 'delete/' + idCustomEncoded + ',' + idNotFoundinDb)
+                .expectStatus(207)
+            .toss();
+
+        }).toss();
+
     }).toss();
-
 }).toss();
-

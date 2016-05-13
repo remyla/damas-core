@@ -81,7 +81,7 @@ module.exports = function (conf) {
         self.getCollection(callback, function (coll) {
             coll.insert(nodes, {'safe': true}, function (err, result) {
                 if (err) {
-                    callback(true);
+                    callback(true, result.getInsertedIds());
                     return;
                 }
                 callback(false, result.ops);
@@ -128,7 +128,6 @@ module.exports = function (conf) {
             var toUpdate = {};
 
             for (var k in keys) {
-                console.log(keys[k] + ' is type : ' + typeof keys[k]);
                 if (keys[k] === null) {
                     keysToUnset[k] = '';
                 } else {

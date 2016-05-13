@@ -68,9 +68,13 @@ module.exports = function (app, express) {
         }
 
         db.create(nodes, function (error, doc) {
-            if (error) {
+            if (error && 1 === doc.length) {
                 res.status(409);
                 res.send('Create error, please change your values');
+                return;
+            } else if (error) {
+                res.status(207);
+                res.json(doc);
                 return;
             }
             if (Array.isArray(req.body)) {
@@ -185,13 +189,18 @@ module.exports = function (app, express) {
             return;
         }
         */
-        db.remove(req.params.id.split(","), function (error, doc) {
+        var ids = req.params.id.split(',');
+        db.remove(ids, function (error, doc) {
             if (error) {
                 res.status(409);
                 res.send('delete error, please change your values');
                 return;
             }
-            res.status(200);
+            if (ids.length === doc.result.n) {
+                res.status(200);
+            } else {
+                res.status(207);
+            }
             res.send(doc.result.n + " documents deleted.");
         });
     }; // deleteNode()
