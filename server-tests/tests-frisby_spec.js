@@ -308,16 +308,14 @@ frisby.create('CREATE - should create an object in the database')
     /**
      * Tests for method Delete
      */
-    //404 could be better
     frisby.create('DELETE - should throw an error (id empty)')
         .delete(url + 'delete/')
-        .expectStatus(409)
+        .expectStatus(404)
     .toss();
 
-    //404 could be better
     frisby.create('DELETE - should throw an error (id valid but not found in the DB)')
         .delete(url + 'delete/' + idNotFoundinDb)
-        .expectStatus(409)
+        .expectStatus(404)
     .toss();
 
     frisby.create('DELETE - should delete a document with an id valid')

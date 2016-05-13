@@ -44,9 +44,9 @@ module.exports = function (app, express) {
      *
      * HTTP status codes:
      * - 200: OK (nodes created)
+     * - 207: Multi-Status (some nodes already exist with these identifiers)
      * - 400: Bad request (not formatted correctly)
-     * ? 403: Forbidden (the user does not have the right permissions)
-     * - 409: Conflict (some nodes already exist with these identifiers)
+     * - 409: Conflict (all nodes already exist with these identifiers)
      */
     create = function (req, res) {
         var nodes = req.body;
@@ -98,8 +98,9 @@ module.exports = function (app, express) {
      *
      * HTTP status codes:
      * - 200: OK (nodes retrieved)
+     * - 207: Multi-Status (some nodes do not exist)
      * - 400: Bad request (not formatted correctly)
-     * - 404: Not Found (the nodes do not exist)
+     * - 404: Not Found (all the nodes do not exist)
      */
     read = function (req, res) {
         var id = req.params.id || req.body;
@@ -139,9 +140,9 @@ module.exports = function (app, express) {
      *
      * HTTP status codes:
      * - 200: OK (nodes updated)
+     * - 207: Multi-Status (some nodes do not exist)
      * - 400: Bad request (not formatted correctly)
-     * ? 403: Forbidden (the user does not have the right permissions)
-     * - 404: Not Found (the nodes do not exist)
+     * - 404: Not Found (all the nodes do not exist)
      */
     update = function (req, res) {
         if (Object.keys(req.body).length === 0) {
@@ -178,8 +179,9 @@ module.exports = function (app, express) {
      *
      * HTTP status codes:
      * - 200: OK (nodes deleted (or not found))
+     * - 207: Multi-Status (some nodes do not exist)
      * - 400: Bad request (not formatted correctly)
-     * ? 403: Forbidden (the user does not have the right permissions)
+     * - 404: Not Found (all the nodes do not exist)
      */
     deleteNode = function (req, res) {
         /* this check should not be based on ObjectId - disabled
@@ -192,7 +194,7 @@ module.exports = function (app, express) {
         var ids = req.params.id.split(',');
         db.remove(ids, function (error, doc) {
             if (error) {
-                res.status(409);
+                res.status(404);
                 res.send('delete error, please change your values');
                 return;
             }
@@ -216,8 +218,9 @@ module.exports = function (app, express) {
      *
      * HTTP status codes:
      * - 200: OK (graph retrieved)
+     * - 207: Multi-Status (some nodes do not exist)
      * - 400: Bad request (not formatted correctly)
-     * - 404: Not Found (the nodes do not exist)
+     * - 404: Not Found (all the nodes do not exist)
      */
     graph = function (req, res) {
         var id = req.params.id || req.body.id;
