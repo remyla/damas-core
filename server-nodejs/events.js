@@ -20,56 +20,53 @@ function EventManager() {
      */
     this.fire = function (hook) {
         var then = function () {};
-        if (hook in listeners) {
-            // Translate arguments
-            var args = [];
-            for (var i = 1; i < arguments.length; ++i) {
-                args.push(arguments[i]);
-            }
+        var toRun = (hook in listeners) ? listeners[hook] : [];
 
-            // Required objects for running listeners
-            var next = 0;
-            var ctx = {
-                data: {},
-                name: hook,
-                listener: null
-            };
+        // Translate arguments
+        var args = [];
+        for (var i = 1; i < arguments.length; ++i) {
+            args.push(arguments[i]);
+        }
 
-            function call(number) {
-                if (number === listeners[hook].length) {
-                    then(ctx.data);
-                } else if (number < listeners[hook].length) {
-                    ctx.listener = listeners[hook][number];
-                    ctx.listener.apply(ctx, args);
-                }
-            }
-
-            /*
-             * Add utility functions to the context
-             */
+        // Required for running listeners
+        var next = 0;
+        var ctx = {
+            data: {},
+            name: hook,
+            listener: null,
 
             // Detach the current listener
-            ctx.detach = function () {
+            detach: function () {
                 self.detach(hook, --next);
-            };
+            },
 
             // Attach another listener to the current event
-            ctx.attach = function (callback) {
+            attach: function (callback) {
                 self.attach(hook, callback);
-            };
+            },
 
             // Stop the event
-            ctx.end = function () {
-                next = listeners[hook].length;
+            end: function () {
+                next = toRun.length;
                 ctx.next();
-            };
+            },
 
             // Run asynchronously the next listener
-            ctx.next = function () {
-                process.nextTick(function () { call (next++); });
-            };
-            ctx.next();
-        }
+            next: function () {
+                process.nextTick(function () {
+                    if (next === toRun.length) {
+                        then(ctx.data);
+                        ++next;
+                    } else if (next < toRun.length) {
+                        ctx.listener = toRun[next++];
+                        ctx.listener.apply(ctx, args);
+                    }
+                });
+            }
+        };
+
+        ctx.next();
+
         return {
             then: function (callback) {
                 then = callback;
