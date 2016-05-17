@@ -1,6 +1,7 @@
 <html>
 	<head>
 		<script src="damas.js"></script>
+		<script src="utils.js"></script>
 		<script type="text/javascript">
 			document.addEventListener('DOMContentLoaded', function() {
 
@@ -85,7 +86,7 @@
 					out.innerHTML = '';
 					for(var i=0; i<users.length; i++)
 					{
-						out.innerHTML +=  '<li>'+users[i].username+'</li>';
+						out.innerHTML +=  '<li title="'+JSON_tooltip(users[i])+'">'+users[i].username+'</li>';
 					}
 				});
 			});
@@ -99,7 +100,7 @@
 					var str = '<table><tr><th>lock &xdtri;</th><th>file</th></tr>'
 					for(var i=0; i<assets.length; i++)
 					{
-						str +=  '<tr><td>'+assets[i].lock+'</td><td>'+assets[i].file+'</td></tr>';
+						str +=  '<tr title="'+JSON_tooltip(assets[i])+'"><td>'+assets[i].lock+'</td><td>'+assets[i].file+'</td></tr>';
 					}
 					str += '</table>';
 					out.innerHTML = str;
@@ -111,15 +112,18 @@
 				//damas.search_mongo({'time': 'REGEX_.*'}, {"time":-1},200,0, function(res){
 				damas.read(res, function(assets){
 					var out = document.querySelector('#contents');
-					var str = '<table><tr><th>time &xutri;</th><th>file</th><th>author</th><th>comment</th></tr>';
+					var str = '<table><tr><th>time &xutri;</th><th>file</th><th>collected</th><th>origin</th><th>&lt;author&gt; comment</th></tr>';
 					for(var i=0; i<assets.length; i++)
 					{
 						var time = new Date(parseInt(assets[i].time));
+						var ino_write = new Date(parseInt(assets[i].ino_write));
 						str +=  '<tr>';
-						str +=  '<td title="'+time+'">'+ ('00'+time.getHours()).slice(-2)+':'+('00'+time.getMinutes()).slice(-2)+'</td>';
-						str +=  '<td>'+assets[i].file+'</td>';
-						str +=  '<td>'+assets[i].author+'</td>';
-						str +=  '<td style="white-space:normal">'+assets[i].comment+'</td>';
+						str +=  '<td title="'+time+'">'+ ('00'+time.getHours()).slice(-2)+':'+('00'+time.getMinutes()).slice(-2)+':'+('00'+time.getSeconds()).slice(-2)+'</td>';
+						str +=  '<td title="'+JSON_tooltip(assets[i])+'">'+assets[i].file+'</td>';
+						//str +=  '<td>'+assets[i].author+'</td>';
+						str +=  '<td title="'+ino_write+'">'+((parseInt(assets[i].ino_write) >= parseInt(assets[i].time))? 'yes':'no')+'</td>';
+						str +=  '<td>'+assets[i].origin+'</td>';
+						str +=  '<td style="white-space:normal">&lt;'+assets[i].author+'&gt; '+assets[i].comment+'</td>';
 						str +=  '</tr>';
 					}
 					str += '</table>';
