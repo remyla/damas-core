@@ -89,7 +89,7 @@
      */
     damas.create = function (keys, callback) {
         function req_callback(req) {
-            if (req.status === 201) {
+            if (201 === req.status || 207 === req.status) {
                 return JSON.parse(req.responseText);
             }
             return false;
@@ -206,7 +206,7 @@
      */
     damas.delete = function (id, callback) {
         function req_callback(req) {
-            return req.status === 200;
+            return JSON.parse(req.responseText);
         }
         var req = new XMLHttpRequest();
         req.open('DELETE', this.server + "delete/" + id, callback !== undefined);
