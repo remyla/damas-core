@@ -37,16 +37,16 @@ module.exports = function (app, express) {
     /*
      * create()
      *
-     * Method: PUT
-     * URI: /api/
+     * Method: POST
+     * URI: /api/create/
      *
      * Insert new nodes
      *
      * HTTP status codes:
-     * - 200: OK (nodes created)
+     * - 201: Created (nodes created)
+     * - 207: Multi-Status (some nodes already exist with these identifiers)
      * - 400: Bad request (not formatted correctly)
-     * ? 403: Forbidden (the user does not have the right permissions)
-     * - 409: Conflict (some nodes already exist with these identifiers)
+     * - 409: Conflict (all nodes already exist with these identifiers)
      */
     create = function (req, res) {
         var nodes = req.body;
@@ -68,20 +68,24 @@ module.exports = function (app, express) {
         }
 
         db.create(nodes, function (error, doc) {
-            if (error) {
+            if(Array.isArray(req.body)) {
+                var response = getMultipleResponse(doc);
+                if (response.err && response.partial) {
+                    res.status(207);
+                    res.json(doc);
+                    return;
+                }
+                res.status(201);
+                res.json(doc);
+                return;
+            }
+            if (null === doc[0]) {
                 res.status(409);
                 res.send('Create error, please change your values');
                 return;
             }
-            // FIXME compatibility hack
-            // Output in the same data type as the input
-            if (Array.isArray(req.body)) {
-                res.status(201);
-                res.json(doc);
-            } else {
-                res.status(201);
-                res.json(doc[0]);
-            }
+            res.status(201);
+            res.json(doc[0]);
         });
     }; // create()
 
@@ -90,14 +94,15 @@ module.exports = function (app, express) {
      * read()
      *
      * Method: GET
-     * URI: /api/
+     * URI: /api/read/
      *
      * Retrieve the specified nodes
      *
      * HTTP status codes:
      * - 200: OK (nodes retrieved)
+     * - 207: Multi-Status (some nodes do not exist)
      * - 400: Bad request (not formatted correctly)
-     * - 404: Not Found (the nodes do not exist)
+     * - 404: Not Found (all the nodes do not exist)
      */
     read = function (req, res) {
         var id = req.params.id || req.body;
@@ -106,7 +111,8 @@ module.exports = function (app, express) {
             res.send('read error: the specified id is not valid');
             return;
         }
-        if (!Array.isArray(id)) {
+        var idIsArray = Array.isArray(id);
+        if (!idIsArray) {
             id = id.split(',');
         }
         db.read(id, function (error, doc) {
@@ -115,14 +121,29 @@ module.exports = function (app, express) {
                 res.send('read error, please change your values');
                 return;
             }
-            /*FIXME always return a non empty array
-            if (0 === doc.length) {
+
+            if(idIsArray) {
+                var response = getMultipleResponse(doc);
+                if (response.err) {
+                    if(response.partial) {
+                        res.status(207);
+                        res.json(doc);
+                        return;
+                    }
+                    res.status(404);
+                    res.send('No id found');
+                    return;
+                }
+                res.status(200);
+                res.json(doc);
+                return;
+            } else if (null === doc[0]) {
                 res.status(404);
                 res.send('Id not found');
                 return;
-            }*/
+            }
             res.status(200);
-            res.json(doc);
+            res.json(doc[0]);
         });
     }; // read()
 
@@ -131,24 +152,18 @@ module.exports = function (app, express) {
      * update()
      *
      * Method: PUT
-     * URI: /api/
+     * URI: /api/update/
      *
      * Update existing nodes
      *
      * HTTP status codes:
      * - 200: OK (nodes updated)
+     * - 207: Multi-Status (some nodes do not exist)
      * - 400: Bad request (not formatted correctly)
-     * ? 403: Forbidden (the user does not have the right permissions)
-     * - 404: Not Found (the nodes do not exist)
+     * - 404: Not Found (all the nodes do not exist)
      */
     update = function (req, res) {
-/*
-        if (!ObjectId.isValid(req.params.id)) {
-            res.status(400);
-            res.send('update error: the specified id is not valid');
-            return;
-        }
-*/        if (Object.keys(req.body).length === 0) {
+        if (Object.keys(req.body).length === 0) {
             res.status(400);
             res.send('update error: the body of the request is empty');
             return;
@@ -160,8 +175,29 @@ module.exports = function (app, express) {
                 res.send('update error, please change your values');
                 return;
             }
+
+            if(1 < req.params.id.split(',').length) {
+                var response = getMultipleResponse(doc);
+                if (response.err) {
+                    if(response.partial) {
+                        res.status(207);
+                        res.json(doc);
+                        return;
+                    }
+                    res.status(404);
+                    res.send('No id found');
+                    return;
+                }
+                res.status(200);
+                res.json(doc);
+                return;
+            } else if (null === doc[0]) {
+                res.status(404);
+                res.send('Id not found');
+                return;
+            }
             res.status(200);
-            res.json(doc);
+            res.json(doc[0]);
         });
     }; // update()
 
@@ -176,8 +212,9 @@ module.exports = function (app, express) {
      *
      * HTTP status codes:
      * - 200: OK (nodes deleted (or not found))
+     * - 207: Multi-Status (some nodes do not exist)
      * - 400: Bad request (not formatted correctly)
-     * ? 403: Forbidden (the user does not have the right permissions)
+     * - 404: Not Found (all the nodes do not exist)
      */
     deleteNode = function (req, res) {
         /* this check should not be based on ObjectId - disabled
@@ -187,14 +224,31 @@ module.exports = function (app, express) {
             return;
         }
         */
-        db.remove(req.params.id.split(","), function (error, doc) {
-            if (error) {
-                res.status(409);
+        var ids = req.params.id.split(',');
+        db.remove(ids, function (error, doc) {
+            if(1 < ids.length) {
+                var response = getMultipleResponse(doc);
+                if (response.err) {
+                    if (response.partial) {
+                        res.status(207);
+                        res.json(doc);
+                        return;
+                    }
+                    res.status(404);
+                    res.send('No id found');
+                    return;
+                }
+                res.status(200);
+                res.json(doc);
+                return;
+            }
+            if (null === doc[0]) {
+                res.status(404);
                 res.send('delete error, please change your values');
                 return;
             }
             res.status(200);
-            res.send(doc.result.n + " documents deleted.");
+            res.json(doc[0]);
         });
     }; // deleteNode()
 
@@ -209,8 +263,9 @@ module.exports = function (app, express) {
      *
      * HTTP status codes:
      * - 200: OK (graph retrieved)
+     * - 207: Multi-Status (some nodes do not exist)
      * - 400: Bad request (not formatted correctly)
-     * - 404: Not Found (the nodes do not exist)
+     * - 404: Not Found (all the nodes do not exist)
      */
     graph = function (req, res) {
         var id = req.params.id || req.body.id;
@@ -226,13 +281,28 @@ module.exports = function (app, express) {
                 res.send('graph error, please change your values');
                 return;
             }
-            if (nodes) {
+            if(Array.isArray(id)) {
+                var response = getMultipleResponse(nodes);
+                if (response.err) {
+                    if(response.partial) {
+                        res.status(207);
+                        res.json(nodes);
+                        return;
+                    }
+                    res.status(404);
+                    res.send('No id found');
+                    return;
+                }
                 res.status(200);
                 res.json(nodes);
-            } else {
+                return;
+            } else if (null === nodes[0]) {
                 res.status(404);
                 res.send('Id not found');
+                return;
             }
+            res.status(200);
+            res.json(nodes[0]);
         });
     }; // graph()
 
@@ -247,7 +317,7 @@ module.exports = function (app, express) {
      *
      * HTTP status codes:
      * - 200: OK (search successful, even without results)
-     * - 400: Bad request (not formatted correctly)
+     * - 400: Bad Request (not formatted correctly)
      */
     search = function (req, res) {
         var q = req.params.query || req.body.query;
@@ -256,94 +326,64 @@ module.exports = function (app, express) {
             res.send('Bad command');
             return;
         }
+        q = decodeURIComponent(q);
         q = q.replace(/\s+/g, ' ').trim();
-        //q = q.replace('< ', '<');
-        //q = q.replace('<= ', '<=');
-        //q = q.replace('>= ', '>=');
-        //q = q.replace('> ', '>');
-        //q = q.replace(': ', ':');
-        var terms = q.split(" ");
-        var pair;
-        var result = {};
-        //var j;
-        //var tempField;
-        for (var i = 0; i< terms.length; i++) {
-            if (terms[i].indexOf('<=') > 0) {
-                pair = terms[i].split('<=');
-                result[pair[0]] = {$lte: decodeURIComponent(pair[1])};
-                continue;
-            }
-            if (terms[i].indexOf('<') > 0) {
-                pair = terms[i].split('<');
-                result[pair[0]] = {$lt: decodeURIComponent(pair[1])};
-                continue;
-            }
-            if (terms[i].indexOf('>=') > 0) {
-                pair = terms[i].split('>=');
-                result[pair[0]] = {$gte: decodeURIComponent(pair[1])};
-                continue;
-            }
-            if (terms[i].indexOf('>') > 0) {
-                pair = terms[i].split('>');
-                result[pair[0]] = {$gt: decodeURIComponent(pair[1])};
-                continue;
-            }
-            if (terms[i].indexOf(':') > 0) {
-                pair = terms[i].split(':');
-                var value = decodeURIComponent(pair[1]);
-
-                var flags = value.replace(/.*\/([gimy]*)$/, '$1');
-                var pattern = value.replace(new RegExp('^/(.*?)/' + flags + '$'), '$1');
-                if (flags != value && pattern != value) {
-                    var regex = new RegExp(pattern, flags);
-                    result[pair[0]] = regex;
-                } else {
-                    result[pair[0]] = value;
-                }
-/*
-                for (j = 1;j<pair.length-1;j++)
-                    result[tempField] += decodeURIComponent(pair[j]) + ":";
-                if (pair[j] != '')
-                    result[tempField] += decodeURIComponent(pair[j]);
-*/
-                continue;
-            }
-/* implement full text search
-            result['$where'] = function () {
-                for (var key in this) {
-                    if (this[key])
-                }
-            }
-db.things.find({$where: function () {
-  for (var key in this) {
-    if (this[key] === "bar") {
-      return true;
-    }
-    return false;
-    }
-}});
-*/
-/*
-            if (i == 0) {
-                continue;
-            }
-            if (result[tempField] != '') {
-                result[tempField] += " " + terms[i];
-            } else {
-                result[tempField] += terms[i];
-            }
-*/
-        }
-        db.search(result, function (error, doc) {
+        db.searchFromText(q, function (error, doc) {
             if (error) {
                 res.status(409);
-                res.send('Read Error, please change your values');
+                res.send('search error, please change your values');
                 return;
             }
             res.status(200);
             res.json(doc);
         });
     }; // search()
+
+
+    /*
+     * search_one()
+     *
+     * Method: GET
+     * URI: /api/search_one/
+     *
+     * Search for nodes in the database, returning the first matching occurrence
+     * as a node object.
+     *
+     * HTTP status codes:
+     * - 200: OK (search successful, even without results)
+     * - 400: Bad Request (not formatted correctly)
+     */
+    search_one = function (req, res) {
+        var q = req.params.query || req.body.query;
+        if (!q || q == "undefined") {
+            res.status(400);
+            res.send('Bad command');
+            return;
+        }
+        q = decodeURIComponent(q);
+        q = q.replace(/\s+/g, ' ').trim();
+        db.searchFromText(q, function (error, doc) {
+            if (error) {
+                res.status(409);
+                res.send('search_one error, please change your values');
+                return;
+            }
+            res.status(200);
+            if (doc.length === 0) {
+                res.json(null);
+            } else {
+                db.read([doc[0]], function(error, node) {
+                    if (error) {
+                        res.status(409);
+                        res.send('read error, please change your values');
+                        return;
+                    }
+                    res.status(200);
+                    res.json(node[0]);
+                });
+            }
+        });
+    }; // search_one()
 
 
     /*
@@ -356,7 +396,7 @@ db.things.find({$where: function () {
      *
      * HTTP status codes:
      * - 200: OK (search successful, even without results)
-     * - 400: Bad request (not formatted correctly)
+     * - 400: Bad Request (not formatted correctly)
      * - 501: Not Implemented (MongoDB not in use)
      */
     search_mongo = function (req, res) {
@@ -464,7 +504,7 @@ db.things.find({$where: function () {
      *
      * HTTP status codes:
      * - 200: OK (file retrieved)
-     * - 400: Bad request (not formatted correctly)
+     * - 400: Bad Request (not formatted correctly)
      * - 404: Not Found (the file does not exist)
      */
     getFile = function (req, res) {
@@ -483,17 +523,52 @@ db.things.find({$where: function () {
     }; // getFile()
 
 
+    /**
+     * Sets the appropriate response and status code for multiple params or not
+     * @param {boolean} isArray - did client sent an array or not
+     * @param {array} doc - the database response
+     * @param {} result - the returned object or string
+     * @return {{status: number, content: result}} - the results to send
+     */
+    function getMultipleResponse(doc) {
+        var result = {};
+        var errorCount = 0;
+        for (i in doc) {
+            if (null === doc[i]) {
+                ++errorCount;
+            }
+        }
+        if (0 < errorCount) {
+            result.err = true;
+            result.partial = true;
+            if (doc.length === errorCount) {
+                result.partial = false;
+            }
+            return result;
+        }
+        result.err = false;
+        return result;
+    }
+
+
     /*
      * Register the operations
      */
 
-    // CRUDS operations
+    // CRUD operations
     app.post('/api/create/', create);
+    app.get('/api/read/:id', read);
     app.post('/api/read/', read);
     app.put('/api/update/:id', update);
     app.delete('/api/delete/:id', deleteNode);
 
-    // Old CRUDS operations
+    // Search operations
+    app.get('/api/search/:query(*)', search);
+    app.get('/api/search_one/:query(*)', search_one);
+    app.post('/api/search_mongo', search_mongo);
+    app.get('/api/graph/', graph);
+
+    // CRUD operations (deprecated)
     app.post('/api/', create);
     app.get('/api/:id', read);
     app.put('/api/:id', update);
@@ -505,14 +580,6 @@ db.things.find({$where: function () {
     app.post('/api/import', importJSON); // untested
     //app.get('/subdirs/:path', getSubdirs);
     //app.get('/subdirs', getSubdirs);
-
-    // Alternative Operations
-    app.get('/api/search/:query(*)', search);
-    app.post('/api/search_mongo', search_mongo);
-    app.get('/api/graph/', graph);
-    app.get('/api/read/:id', read);
-    //app.put('/', update);
-    //app.delete('/', deleteNode);
 }
 
 

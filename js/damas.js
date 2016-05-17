@@ -89,7 +89,7 @@
      */
     damas.create = function (keys, callback) {
         function req_callback(req) {
-            if (req.status === 201) {
+            if (201 === req.status || 207 === req.status) {
                 return JSON.parse(req.responseText);
             }
             return false;
@@ -206,7 +206,7 @@
      */
     damas.delete = function (id, callback) {
         function req_callback(req) {
-            return req.status === 200;
+            return JSON.parse(req.responseText);
         }
         var req = new XMLHttpRequest();
         req.open('DELETE', this.server + "delete/" + id, callback !== undefined);
@@ -254,6 +254,28 @@
             return req_callback(req);
         }
     }
+
+    damas.search_one = function (query, callback) {
+         function req_callback(req) {
+            return JSON.parse(req.responseText);
+        }
+        var req = new XMLHttpRequest();
+        req.open('GET', this.server + 'search_one/' + encodeURIComponent(query), callback !== undefined);
+        req.setRequestHeader("Authorization","Bearer "+damas.token);
+        req.onreadystatechange = function(e) {
+            if (req.readyState == 4) {
+                if (req.status == 200) {
+                    if (callback) {
+                        callback(req_callback(req));
+                    }
+                }
+            }
+        }
+        req.send();
+        if (callback === undefined) {
+            return req_callback(req);
+        }
+   }
 
     /**
      * BETA - Expose the find method from mongodb

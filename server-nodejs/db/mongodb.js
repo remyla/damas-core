@@ -73,14 +73,24 @@ module.exports = function (conf) {
      * @param {function} callback - function({boolean} err, {array} nodes)
      */
     self.create = function (nodes, callback) {
+        for(i in nodes) {
+            if(ObjectID.isValid(nodes[i]._id)) {
+                nodes[i]._id = new ObjectID(nodes[i]._id);
+            }
+        }
         self.getCollection(callback, function (coll) {
-            coll.insert(nodes, {'safe': true}, function (err, result) {
-                if (err) {
-                    callback(true);
+            var array = []
+            function createNext(cursor) {
+                if (cursor === nodes.length) {
+                    callback(false, array);
                     return;
                 }
-                callback(false, result.ops);
-            });
+                coll.insert(nodes[cursor], {'safe': true}, function (err, result) {
+                    array.push(err ? null : result.ops[0]);
+                    createNext(++cursor);
+                });
+            }
+            createNext(0);
         });
     }; // create()
 
@@ -123,7 +133,6 @@ module.exports = function (conf) {
             var toUpdate = {};
 
             for (var k in keys) {
-                console.log(keys[k] + ' is type : ' + typeof keys[k]);
                 if (keys[k] === null) {
                     keysToUnset[k] = '';
                 } else {
@@ -157,13 +166,19 @@ module.exports = function (conf) {
     self.remove = function (ids, callback) {
         self.getCollection(callback, function (coll) {
             var ids_o = exportIds(ids);
-            coll.remove({'_id': {$in: ids_o}}, function (err, result) {
-                if (err || result.result.n === 0) {
-                    callback(true);
+            var array = [];
+            function deleteNext(cursor) {
+                if (cursor === ids_o.length) {
+                    callback(false, array);
                     return;
                 }
-                callback(false, result);
-            });
+                coll.remove({'_id': ids_o[cursor]}, function (err, result) {
+                    array.push((err || 0 === result.result.n) ?
+                        null : ids_o[cursor]);
+                    deleteNext(++cursor);
+                });
+            }
+            deleteNext(0);
         });
     }; // remove()
 
@@ -188,6 +203,9 @@ module.exports = function (conf) {
         });
     }; // search()
 
+    self.searchFromText = function (str, callback) {
+        self.search(textSearch2MongoQuery(str), callback);
+    };
 
     /*
      * Higher-level functions
@@ -302,7 +320,7 @@ module.exports = function (conf) {
     function exportIds(ids) {
         var ids_o = [];
         for (var i in ids) {
-            if(24 == ids[i].length && -1 == ids[i].indexOf('/')) {
+            if(ObjectID.isValid(ids[i])) {
                 ids_o.push(new ObjectID(ids[i]));
             } else {
                 ids_o.push(ids[i]);
@@ -310,6 +328,65 @@ module.exports = function (conf) {
         }
         return ids_o;
     }
+
+    function textSearch2MongoQuery( str ) {
+        var terms = str.split(" ");
+        var pair;
+        var result = {};
+        for (var i = 0; i < terms.length; i++) {
+            if (terms[i].indexOf('<=') > 0) {
+                pair = terms[i].split('<=');
+                result[pair[0]] = {$lte: pair[1]};
+                continue;
+            }
+            if (terms[i].indexOf('<') > 0) {
+                pair = terms[i].split('<');
+                result[pair[0]] = {$lt: pair[1]};
+                continue;
+            }
+            if (terms[i].indexOf('>=') > 0) {
+                pair = terms[i].split('>=');
+                result[pair[0]] = {$gte: pair[1]};
+                continue;
+            }
+            if (terms[i].indexOf('>') > 0) {
+                pair = terms[i].split('>');
+                result[pair[0]] = {$gt: pair[1]};
+                continue;
+            }
+            if (terms[i].indexOf(':') > 0) {
+                pair = terms[i].split(':');
+                var value = pair[1];
+
+                var flags = value.replace(/.*\/([gimy]*)$/, '$1');
+                var pattern = value.replace(new RegExp('^/(.*?)/' + flags + '$'), '$1');
+                if (flags != value && pattern != value) {
+                    var regex = new RegExp(pattern, flags);
+                    result[pair[0]] = regex;
+                } else {
+                    result[pair[0]] = value;
+                }
+                continue;
+            }
+        }
+        return result;
+    }
+/* implement full text search
+            result['$where'] = function () {
+                for (var key in this) {
+                    if (this[key])
+                }
+            }
+db.things.find({$where: function () {
+  for (var key in this) {
+    if (this[key] === "bar") {
+      return true;
+    }
+    return false;
+    }
+}});
+*/
+
 };
 
 
