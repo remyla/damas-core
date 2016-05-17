@@ -43,10 +43,10 @@ module.exports = function (app, express) {
      * Insert new nodes
      *
      * HTTP status codes:
-     * - 201: OK (nodes created)
-     * - 400: Bad Request (not formatted correctly)
-     * ? 403: Forbidden (the user does not have the right permissions)
-     * - 409: Conflict (some nodes already exist with these identifiers)
+     * - 201: Created (nodes created)
+     * - 207: Multi-Status (some nodes already exist with these identifiers)
+     * - 400: Bad request (not formatted correctly)
+     * - 409: Conflict (all nodes already exist with these identifiers)
      */
     create = function (req, res) {
         var nodes = req.body;
@@ -68,20 +68,24 @@ module.exports = function (app, express) {
         }
 
         db.create(nodes, function (error, doc) {
-            if (error) {
+            if(Array.isArray(req.body)) {
+                var response = getMultipleResponse(doc);
+                if (response.err && response.partial) {
+                    res.status(207);
+                    res.json(doc);
+                    return;
+                }
+                res.status(201);
+                res.json(doc);
+                return;
+            }
+            if (null === doc[0]) {
                 res.status(409);
                 res.send('Create error, please change your values');
                 return;
             }
-            // FIXME compatibility hack
-            // Output in the same data type as the input
-            if (Array.isArray(req.body)) {
-                res.status(201);
-                res.json(doc);
-            } else {
-                res.status(201);
-                res.json(doc[0]);
-            }
+            res.status(201);
+            res.json(doc[0]);
         });
     }; // create()
 
@@ -96,8 +100,9 @@ module.exports = function (app, express) {
      *
      * HTTP status codes:
      * - 200: OK (nodes retrieved)
-     * - 400: Bad Request (not formatted correctly)
-     * - 404: Not Found (the nodes do not exist)
+     * - 207: Multi-Status (some nodes do not exist)
+     * - 400: Bad request (not formatted correctly)
+     * - 404: Not Found (all the nodes do not exist)
      */
     read = function (req, res) {
         var id = req.params.id || req.body;
@@ -106,7 +111,8 @@ module.exports = function (app, express) {
             res.send('read error: the specified id is not valid');
             return;
         }
-        if (!Array.isArray(id)) {
+        var idIsArray = Array.isArray(id);
+        if (!idIsArray) {
             id = id.split(',');
         }
         db.read(id, function (error, doc) {
@@ -115,14 +121,29 @@ module.exports = function (app, express) {
                 res.send('read error, please change your values');
                 return;
             }
-            /*FIXME always return a non empty array
-            if (0 === doc.length) {
+
+            if(idIsArray) {
+                var response = getMultipleResponse(doc);
+                if (response.err) {
+                    if(response.partial) {
+                        res.status(207);
+                        res.json(doc);
+                        return;
+                    }
+                    res.status(404);
+                    res.send('No id found');
+                    return;
+                }
+                res.status(200);
+                res.json(doc);
+                return;
+            } else if (null === doc[0]) {
                 res.status(404);
                 res.send('Id not found');
                 return;
-            }*/
+            }
             res.status(200);
-            res.json(doc);
+            res.json(doc[0]);
         });
     }; // read()
 
@@ -137,18 +158,12 @@ module.exports = function (app, express) {
      *
      * HTTP status codes:
      * - 200: OK (nodes updated)
-     * - 400: Bad Request (not formatted correctly)
-     * ? 403: Forbidden (the user does not have the right permissions)
-     * - 404: Not Found (the nodes do not exist)
+     * - 207: Multi-Status (some nodes do not exist)
+     * - 400: Bad request (not formatted correctly)
+     * - 404: Not Found (all the nodes do not exist)
      */
     update = function (req, res) {
-/*
-        if (!ObjectId.isValid(req.params.id)) {
-            res.status(400);
-            res.send('update error: the specified id is not valid');
-            return;
-        }
-*/        if (Object.keys(req.body).length === 0) {
+        if (Object.keys(req.body).length === 0) {
             res.status(400);
             res.send('update error: the body of the request is empty');
             return;
@@ -160,8 +175,29 @@ module.exports = function (app, express) {
                 res.send('update error, please change your values');
                 return;
             }
+
+            if(1 < req.params.id.split(',').length) {
+                var response = getMultipleResponse(doc);
+                if (response.err) {
+                    if(response.partial) {
+                        res.status(207);
+                        res.json(doc);
+                        return;
+                    }
+                    res.status(404);
+                    res.send('No id found');
+                    return;
+                }
+                res.status(200);
+                res.json(doc);
+                return;
+            } else if (null === doc[0]) {
+                res.status(404);
+                res.send('Id not found');
+                return;
+            }
             res.status(200);
-            res.json(doc);
+            res.json(doc[0]);
         });
     }; // update()
 
@@ -176,8 +212,9 @@ module.exports = function (app, express) {
      *
      * HTTP status codes:
      * - 200: OK (nodes deleted (or not found))
-     * - 400: Bad Request (not formatted correctly)
-     * ? 403: Forbidden (the user does not have the right permissions)
+     * - 207: Multi-Status (some nodes do not exist)
+     * - 400: Bad request (not formatted correctly)
+     * - 404: Not Found (all the nodes do not exist)
      */
     deleteNode = function (req, res) {
         /* this check should not be based on ObjectId - disabled
@@ -187,14 +224,31 @@ module.exports = function (app, express) {
             return;
         }
         */
-        db.remove(req.params.id.split(","), function (error, doc) {
-            if (error) {
-                res.status(409);
+        var ids = req.params.id.split(',');
+        db.remove(ids, function (error, doc) {
+            if(1 < ids.length) {
+                var response = getMultipleResponse(doc);
+                if (response.err) {
+                    if (response.partial) {
+                        res.status(207);
+                        res.json(doc);
+                        return;
+                    }
+                    res.status(404);
+                    res.send('No id found');
+                    return;
+                }
+                res.status(200);
+                res.json(doc);
+                return;
+            }
+            if (null === doc[0]) {
+                res.status(404);
                 res.send('delete error, please change your values');
                 return;
             }
             res.status(200);
-            res.send(doc.result.n + " documents deleted.");
+            res.json(doc[0]);
         });
     }; // deleteNode()
 
@@ -209,8 +263,9 @@ module.exports = function (app, express) {
      *
      * HTTP status codes:
      * - 200: OK (graph retrieved)
-     * - 400: Bad Request (not formatted correctly)
-     * - 404: Not Found (the nodes do not exist)
+     * - 207: Multi-Status (some nodes do not exist)
+     * - 400: Bad request (not formatted correctly)
+     * - 404: Not Found (all the nodes do not exist)
      */
     graph = function (req, res) {
         var id = req.params.id || req.body.id;
@@ -226,13 +281,28 @@ module.exports = function (app, express) {
                 res.send('graph error, please change your values');
                 return;
             }
-            if (nodes) {
+            if(Array.isArray(id)) {
+                var response = getMultipleResponse(nodes);
+                if (response.err) {
+                    if(response.partial) {
+                        res.status(207);
+                        res.json(nodes);
+                        return;
+                    }
+                    res.status(404);
+                    res.send('No id found');
+                    return;
+                }
                 res.status(200);
                 res.json(nodes);
-            } else {
+                return;
+            } else if (null === nodes[0]) {
                 res.status(404);
                 res.send('Id not found');
+                return;
             }
+            res.status(200);
+            res.json(nodes[0]);
         });
     }; // graph()
 
@@ -451,6 +521,34 @@ module.exports = function (app, express) {
             stream.pipe(res);
         });
     }; // getFile()
+
+
+    /**
+     * Sets the appropriate response and status code for multiple params or not
+     * @param {boolean} isArray - did client sent an array or not
+     * @param {array} doc - the database response
+     * @param {} result - the returned object or string
+     * @return {{status: number, content: result}} - the results to send
+     */
+    function getMultipleResponse(doc) {
+        var result = {};
+        var errorCount = 0;
+        for (i in doc) {
+            if (null === doc[i]) {
+                ++errorCount;
+            }
+        }
+        if (0 < errorCount) {
+            result.err = true;
+            result.partial = true;
+            if (doc.length === errorCount) {
+                result.partial = false;
+            }
+            return result;
+        }
+        result.err = false;
+        return result;
+    }
 
 
     /*
