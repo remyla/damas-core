@@ -79,13 +79,18 @@ module.exports = function (conf) {
             }
         }
         self.getCollection(callback, function (coll) {
-            coll.insert(nodes, {'safe': true}, function (err, result) {
-                if (err) {
-                    callback(true, result.getInsertedIds());
+            var array = []
+            function createNext(cursor) {
+                if (cursor === nodes.length) {
+                    callback(false, array);
                     return;
                 }
-                callback(false, result.ops);
-            });
+                coll.insert(nodes[cursor], {'safe': true}, function (err, result) {
+                    array.push(err ? null : result.ops[0]);
+                    createNext(++cursor);
+                });
+            }
+            createNext(0);
         });
     }; // create()
 
@@ -128,7 +133,6 @@ module.exports = function (conf) {
             var toUpdate = {};
 
             for (var k in keys) {
-                console.log(keys[k] + ' is type : ' + typeof keys[k]);
                 if (keys[k] === null) {
                     keysToUnset[k] = '';
                 } else {
@@ -162,13 +166,22 @@ module.exports = function (conf) {
     self.remove = function (ids, callback) {
         self.getCollection(callback, function (coll) {
             var ids_o = exportIds(ids);
-            coll.remove({'_id': {$in: ids_o}}, function (err, result) {
-                if (err || result.result.n === 0) {
-                    callback(true);
+            var array = [];
+            function deleteNext(cursor) {
+                if (cursor === ids_o.length) {
+                    callback(false, array);
                     return;
                 }
-                callback(false, result);
-            });
+                coll.remove({'_id': ids_o[cursor]}, function (err, result) {
+                    if(err) {
+                        array.push(false);
+                    } else {
+                        array.push(result.result.n !== 0);
+                    }
+                    deleteNext(++cursor);
+                });
+            }
+            deleteNext(0);
         });
     }; // remove()
 
