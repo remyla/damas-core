@@ -44,7 +44,7 @@ debug('Working in %s mode', app.get('env'));
 debug('Creating HTTP server on port %s', http_port);
 var http = require('http').createServer(app).listen(http_port, function () {
     debug('HTTP server listening on port %s', http_port);
-    require('./socket')(http);
+    require('./events/socket')(http);
 });
 
 /*
@@ -58,7 +58,7 @@ if (conf.connection.hasOwnProperty('Key') &&
         cert : fs.readFileSync(conf.connection.Cert).toString()
     }, app).listen(https_port, function () {
         debug('HTTPS server listening on port %s', https_port);
-        require('./socket')(https, {secure: true});
+        require('./events/socket')(https, {secure: true});
     });
 }
 
