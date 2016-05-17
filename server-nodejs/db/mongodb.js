@@ -173,11 +173,8 @@ module.exports = function (conf) {
                     return;
                 }
                 coll.remove({'_id': ids_o[cursor]}, function (err, result) {
-                    if(err) {
-                        array.push(false);
-                    } else {
-                        array.push(result.result.n !== 0);
-                    }
+                    array.push((err || 0 === result.result.n) ?
+                        null : ids_o[cursor]);
                     deleteNext(++cursor);
                 });
             }

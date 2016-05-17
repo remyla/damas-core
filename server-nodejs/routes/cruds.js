@@ -228,16 +228,21 @@ module.exports = function (app, express) {
         db.remove(ids, function (error, doc) {
             if(1 < ids.length) {
                 var response = getMultipleResponse(doc);
-                if (response.err && response.partial) {
-                    res.status(207);
-                    res.json(doc);
+                if (response.err) {
+                    if (response.partial) {
+                        res.status(207);
+                        res.json(doc);
+                        return;
+                    }
+                    res.status(404);
+                    res.send('No id found');
                     return;
                 }
                 res.status(200);
                 res.json(doc);
                 return;
             }
-            if (false === doc[0]) {
+            if (null === doc[0]) {
                 res.status(404);
                 res.send('delete error, please change your values');
                 return;
@@ -529,8 +534,7 @@ module.exports = function (app, express) {
         var result = {};
         var errorCount = 0;
         for (i in doc) {
-            //not 'null === doc[i]' because it can be 'false' with delete
-            if (!doc[i]) {
+            if (null === doc[i]) {
                 ++errorCount;
             }
         }
