@@ -3,6 +3,22 @@
  * Licensed under the GNU GPL v3
  */
 
+function array_sync(array, walker, callback) {
+    var next = 0;
+    var results = [];
+    (function walk() {
+        if (next === array.length) {
+            callback(results);
+            ++next;
+        } else if (next < array.length) {
+            walker(array[next++], function (result) {
+                results.push(result);
+                process.nextTick(walk);
+            });
+        }
+    })();
+}
+
 module.exports = function (conf) {
     var self = this;
     self.conf = conf;
@@ -73,24 +89,17 @@ module.exports = function (conf) {
      * @param {function} callback - function({boolean} err, {array} nodes)
      */
     self.create = function (nodes, callback) {
-        for(i in nodes) {
-            if(ObjectID.isValid(nodes[i]._id)) {
-                nodes[i]._id = new ObjectID(nodes[i]._id);
-            }
-        }
         self.getCollection(callback, function (coll) {
-            var array = []
-            function createNext(cursor) {
-                if (cursor === nodes.length) {
-                    callback(false, array);
-                    return;
+            array_sync(nodes, function (node, cb) {
+                if (node._id && ObjectID.isValid(node._id)) {
+                    node._id = new ObjectID(node._id);
                 }
-                coll.insert(nodes[cursor], {'safe': true}, function (err, result) {
-                    array.push(err ? null : result.ops[0]);
-                    createNext(++cursor);
+                coll.insert(node, {safe: true}, function (err, result) {
+                    cb(err ? null : result.ops[0]);
                 });
-            }
-            createNext(0);
+            }, function (array) {
+                callback(false, array);
+            });
         });
     }; // create()
 
@@ -101,21 +110,13 @@ module.exports = function (conf) {
      */
     self.read = function (ids, callback) {
         self.getCollection(callback, function (coll) {
-            var ids_o = exportIds(ids);
-            var array = [];
-            function findNext(cursor) {
-                if (cursor === ids_o.length) {
-                    callback(false, array);
-                    return;
-                }
-                coll.findOne({'_id': ids_o[cursor]}, function (err, node) {
-                    if (!err) {
-                        array.push(node);
-                        findNext(++cursor);
-                    }
+            array_sync(exportIds(ids), function (id, cb) {
+                coll.findOne({'_id': id}, function (err, node) {
+                    cb(err ? null : node);
                 });
-            }
-            findNext(0);
+            }, function (array) {
+                callback(false, array);
+            });
         });
     }; // read()
 
@@ -165,20 +166,13 @@ module.exports = function (conf) {
      */
     self.remove = function (ids, callback) {
         self.getCollection(callback, function (coll) {
-            var ids_o = exportIds(ids);
-            var array = [];
-            function deleteNext(cursor) {
-                if (cursor === ids_o.length) {
-                    callback(false, array);
-                    return;
-                }
-                coll.remove({'_id': ids_o[cursor]}, function (err, result) {
-                    array.push((err || 0 === result.result.n) ?
-                        null : ids_o[cursor]);
-                    deleteNext(++cursor);
+            array_sync(exportIds(ids), function (id, cb) {
+                coll.remove({'_id': id}, function (err, result) {
+                    cb((err || 0 === result.result.n) ? null : id);
                 });
-            }
-            deleteNext(0);
+            }, function (array) {
+                callback(false, array);
+            });
         });
     }; // remove()
 
