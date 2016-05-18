@@ -7,6 +7,7 @@ module.exports = function (app, express) {
     var db = app.locals.db;
     //methodOverride = require('method-override'),
     var fs = require('fs');
+    var events = require('../events');
 
 /*
     app.use(methodOverride(function (req, res) {
@@ -66,15 +67,24 @@ module.exports = function (app, express) {
             nodes[n].time = time;
         }
 
-        db.create(nodes, function (error, doc) {
-            var response = getMultipleResponse(doc);
-            if (response.fail) {
-                httpStatus(res, 409, 'create');
-            } else if (response.partial) {
-                httpStatus(res, 207, doc);
-            } else {
-                httpStatus(res, 201, isArray ? doc : doc[0]);
+        events.fire('pre-create', nodes).then(function (data) {
+            if (data.status) {
+                httpStatus(res, data.status, 'create');
+                return;
             }
+            nodes = data.nodes || nodes;
+            db.create(nodes, function (error, doc) {
+                var response = getMultipleResponse(doc);
+                if (response.fail) {
+                    httpStatus(res, 409, 'create');
+                } else if (response.partial) {
+                    httpStatus(res, 207, doc);
+                    events.fire('create', doc);
+                } else {
+                    httpStatus(res, 201, isArray ? doc : doc[0]);
+                    events.fire('create', doc);
+                }
+            });
         });
     }; // create()
 
@@ -146,19 +156,29 @@ module.exports = function (app, express) {
 
         var ids = req.params.id.split(',');
         var body = req.body;
-        db.update(ids, body, function (error, doc) {
-            if (error) {
-                httpStatus(res, 409, 'update');
+        events.fire('pre-update', ids, body).then(function (data) {
+            if (data.status) {
+                httpStatus(res, data.status, 'create');
                 return;
             }
-            var response = getMultipleResponse(doc);
-            if (response.fail) {
-                httpStatus(res, 404, 'update');
-            } else if (response.partial) {
-                httpStatus(res, 207, doc);
-            } else {
-                httpStatus(res, 200, 1 < ids.length ? doc : doc[0]);
-            }
+            ids = data.ids || ids;
+            body = data.body || body;
+            db.update(ids, body, function (error, doc) {
+                if (error) {
+                    httpStatus(res, 409, 'update');
+                    return;
+                }
+                var response = getMultipleResponse(doc);
+                if (response.fail) {
+                    httpStatus(res, 404, 'update');
+                } else if (response.partial) {
+                    httpStatus(res, 207, doc);
+                    events.fire('update', doc);
+                } else {
+                    httpStatus(res, 200, 1 < ids.length ? doc : doc[0]);
+                    events.fire('update', doc);
+                }
+            });
         });
     }; // update()
 
@@ -179,16 +199,24 @@ module.exports = function (app, express) {
      */
     deleteNode = function (req, res) {
         var ids = req.params.id.split(',');
-        db.remove(ids, function (error, doc) {
-            console.log(doc);
-            var response = getMultipleResponse(doc);
-            if (response.fail) {
-                httpStatus(res, 404, 'remove');
-            } else if (response.partial) {
-                httpStatus(res, 207, doc);
-            } else {
-                httpStatus(res, 200, 1 < ids.length ? doc : doc[0]);
+        events.fire('pre-remove', ids).then(function (data) {
+            if (data.status) {
+                httpStatus(res, data.status, 'remove');
             }
+            ids = data.ids || ids;
+            db.remove(ids, function (error, doc) {
+                console.log(doc);
+                var response = getMultipleResponse(doc);
+                if (response.fail) {
+                    httpStatus(res, 404, 'remove');
+                } else if (response.partial) {
+                    httpStatus(res, 207, doc);
+                    events.fire('remove', doc);
+                } else {
+                    httpStatus(res, 200, 1 < ids.length ? doc : doc[0]);
+                    events.fire('remove', doc);
+                }
+            });
         });
     }; // deleteNode()
 
