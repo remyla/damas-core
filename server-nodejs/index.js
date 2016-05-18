@@ -12,6 +12,7 @@ debug('Initializing express');
 var express = require('express');
 var app = express();
 var fs = require('fs');
+var socket = require('./events/socket');
 
 
 /*
@@ -19,13 +20,13 @@ var fs = require('fs');
  */
 debug('Loading configuration');
 
-var conf = app.locals.conf = require('./conf.json');
-app.locals.db = require('./db/index.js')(conf.db, conf[conf.db]);
+var conf = app.locals.conf = require('./conf');
+app.locals.db = require('./db')(conf.db, conf[conf.db]);
 
 var http_port = process.env.HTTP_PORT || 8090;
 var https_port = process.env.HTTPS_PORT || 8443;
 
-require('./routes/index')(app, express);
+require('./routes')(app, express);
 
 
 /*
@@ -44,7 +45,7 @@ debug('Working in %s mode', app.get('env'));
 debug('Creating HTTP server on port %s', http_port);
 var http = require('http').createServer(app).listen(http_port, function () {
     debug('HTTP server listening on port %s', http_port);
-    require('./events/socket')(http);
+    socket.attach(http);
 });
 
 /*
@@ -58,7 +59,7 @@ if (conf.connection.hasOwnProperty('Key') &&
         cert : fs.readFileSync(conf.connection.Cert).toString()
     }, app).listen(https_port, function () {
         debug('HTTPS server listening on port %s', https_port);
-        require('./events/socket')(https, {secure: true});
+        socket.attach(https);
     });
 }
 
