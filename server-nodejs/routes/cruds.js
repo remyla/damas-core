@@ -22,7 +22,7 @@ module.exports = function (app, express) {
     //Handle errors
     app.use(function (err, req, res, next) {
         if (err) {
-            console.log("An error has occurred: "+ err);
+            console.log('An error has occurred: '+ err);
         } else {
             next();
         }
@@ -59,8 +59,7 @@ module.exports = function (app, express) {
         var time = Date.now();
         for (var n in nodes) {
             if ('object' !== typeof nodes[n]) {
-                res.status(400);
-                res.send('create error: the specified elements must be objects');
+                httpStatus(res, 400, 'create');
                 return;
             }
             nodes[n].author = author;
@@ -71,21 +70,17 @@ module.exports = function (app, express) {
             if(Array.isArray(req.body)) {
                 var response = getMultipleResponse(doc);
                 if (response.err && response.partial) {
-                    res.status(207);
-                    res.json(doc);
+                    httpStatus(res, 207, doc);
                     return;
                 }
-                res.status(201);
-                res.json(doc);
+                httpStatus(res, 201, doc);
                 return;
             }
             if (null === doc[0]) {
-                res.status(409);
-                res.send('Create error, please change your values');
+                httpStatus(res, 409, 'create');
                 return;
             }
-            res.status(201);
-            res.json(doc[0]);
+            httpStatus(res, 201, doc[0]);
         });
     }; // create()
 
@@ -107,8 +102,7 @@ module.exports = function (app, express) {
     read = function (req, res) {
         var id = req.params.id || req.body;
         if (!id) {
-            res.status(400);
-            res.send('read error: the specified id is not valid');
+            httpStatus(res, 400, 'read');
             return;
         }
         var idIsArray = Array.isArray(id);
@@ -117,8 +111,7 @@ module.exports = function (app, express) {
         }
         db.read(id, function (error, doc) {
             if (error) {
-                res.status(409);
-                res.send('read error, please change your values');
+                httpStatus(res, 409, 'read');
                 return;
             }
 
@@ -126,24 +119,19 @@ module.exports = function (app, express) {
                 var response = getMultipleResponse(doc);
                 if (response.err) {
                     if(response.partial) {
-                        res.status(207);
-                        res.json(doc);
+                        httpStatus(res, 207, doc);
                         return;
                     }
-                    res.status(404);
-                    res.send('No id found');
+                    httpStatus(res, 404, 'read');
                     return;
                 }
-                res.status(200);
-                res.json(doc);
+                httpStatus(res, 200, doc);
                 return;
             } else if (null === doc[0]) {
-                res.status(404);
-                res.send('Id not found');
+                httpStatus(res, 404, 'read');
                 return;
             }
-            res.status(200);
-            res.json(doc[0]);
+            httpStatus(res, 200, doc[0]);
         });
     }; // read()
 
@@ -164,15 +152,13 @@ module.exports = function (app, express) {
      */
     update = function (req, res) {
         if (Object.keys(req.body).length === 0) {
-            res.status(400);
-            res.send('update error: the body of the request is empty');
+            httpStatus(res, 400, 'update');
             return;
         }
 
-        db.update(req.params.id.split(","), req.body, function (error, doc) {
+        db.update(req.params.id.split(','), req.body, function (error, doc) {
             if (error) {
-                res.status(409);
-                res.send('update error, please change your values');
+                httpStatus(res, 409, 'update');
                 return;
             }
 
@@ -180,24 +166,19 @@ module.exports = function (app, express) {
                 var response = getMultipleResponse(doc);
                 if (response.err) {
                     if(response.partial) {
-                        res.status(207);
-                        res.json(doc);
+                        httpStatus(res, 207, doc);
                         return;
                     }
-                    res.status(404);
-                    res.send('No id found');
+                    httpStatus(res, 404, 'update');
                     return;
                 }
-                res.status(200);
-                res.json(doc);
+                httpStatus(res, 200, doc);
                 return;
             } else if (null === doc[0]) {
-                res.status(404);
-                res.send('Id not found');
+                httpStatus(res, 404, 'update');
                 return;
             }
-            res.status(200);
-            res.json(doc[0]);
+            httpStatus(res, 200, doc[0]);
         });
     }; // update()
 
@@ -217,38 +198,26 @@ module.exports = function (app, express) {
      * - 404: Not Found (all the nodes do not exist)
      */
     deleteNode = function (req, res) {
-        /* this check should not be based on ObjectId - disabled
-        if (!ObjectId.isValid(req.params.id)) {
-            res.status(400);
-            res.send('error: the specified id is not valid');
-            return;
-        }
-        */
         var ids = req.params.id.split(',');
         db.remove(ids, function (error, doc) {
             if(1 < ids.length) {
                 var response = getMultipleResponse(doc);
                 if (response.err) {
                     if (response.partial) {
-                        res.status(207);
-                        res.json(doc);
+                        httpStatus(res, 207, doc);
                         return;
                     }
-                    res.status(404);
-                    res.send('No id found');
+                    httpStatus(res, 404, 'remove');
                     return;
                 }
-                res.status(200);
-                res.json(doc);
+                httpStatus(res, 200, doc);
                 return;
             }
             if (null === doc[0]) {
-                res.status(404);
-                res.send('delete error, please change your values');
+                httpStatus(res, 404, 'remove');
                 return;
             }
-            res.status(200);
-            res.json(doc[0]);
+            httpStatus(res, 200, doc[0]);
         });
     }; // deleteNode()
 
@@ -269,40 +238,33 @@ module.exports = function (app, express) {
      */
     graph = function (req, res) {
         var id = req.params.id || req.body.id;
-        if (!id || id == "undefined") {
-            res.status(400);
-            res.send('Bad command');
+        if (!id || id == 'undefined') {
+            httpStatus(res, 400, 'graph');
             return;
         }
         //obsolete
-        db.graph(id.split(","), function (error, nodes) {
+        db.graph(id.split(','), function (error, nodes) {
             if (error) {
-                res.status(409);
-                res.send('graph error, please change your values');
+                httpStatus(res, 409, 'graph');
                 return;
             }
             if(Array.isArray(id)) {
                 var response = getMultipleResponse(nodes);
                 if (response.err) {
                     if(response.partial) {
-                        res.status(207);
-                        res.json(nodes);
+                        httpStatus(res, 207, nodes);
                         return;
                     }
-                    res.status(404);
-                    res.send('No id found');
+                    httpStatus(res, 404, 'graph');
                     return;
                 }
-                res.status(200);
-                res.json(nodes);
+                httpStatus(res, 200, nodes);
                 return;
             } else if (null === nodes[0]) {
-                res.status(404);
-                res.send('Id not found');
+                httpStatus(res, 404, 'graph');
                 return;
             }
-            res.status(200);
-            res.json(nodes[0]);
+            httpStatus(res, 200, nodes[0]);
         });
     }; // graph()
 
@@ -321,21 +283,18 @@ module.exports = function (app, express) {
      */
     search = function (req, res) {
         var q = req.params.query || req.body.query;
-        if (!q || q == "undefined") {
-            res.status(400);
-            res.send('Bad command');
+        if (!q || q == 'undefined') {
+            httpStatus(res, 400, 'search');
             return;
         }
         q = decodeURIComponent(q);
         q = q.replace(/\s+/g, ' ').trim();
         db.searchFromText(q, function (error, doc) {
             if (error) {
-                res.status(409);
-                res.send('search error, please change your values');
-                return;
+                httpStatus(res, 409, 'search');
+            } else {
+                httpStatus(res, 200, doc);
             }
-            res.status(200);
-            res.json(doc);
         });
     }; // search()
 
@@ -346,8 +305,7 @@ module.exports = function (app, express) {
      * Method: GET
      * URI: /api/search_one/
      *
-     * Search for nodes in the database, returning the first matching occurrence
-     * as a node object.
+     * Search for nodes in the database, returning the first matching object.
      *
      * HTTP status codes:
      * - 200: OK (search successful, even without results)
@@ -355,31 +313,24 @@ module.exports = function (app, express) {
      */
     search_one = function (req, res) {
         var q = req.params.query || req.body.query;
-        if (!q || q == "undefined") {
-            res.status(400);
-            res.send('Bad command');
+        if (!q || q == 'undefined') {
+            httpStatus(res, 400, 'search_one');
             return;
         }
         q = decodeURIComponent(q);
         q = q.replace(/\s+/g, ' ').trim();
         db.searchFromText(q, function (error, doc) {
             if (error) {
-                res.status(409);
-                res.send('search_one error, please change your values');
-                return;
-            }
-            res.status(200);
-            if (doc.length === 0) {
-                res.json(null);
+                httpStatus(res, 409, 'search_one');
+            } else if (doc.length === 0) {
+                httpStatus(res, 200, null);
             } else {
                 db.read([doc[0]], function(error, node) {
                     if (error) {
-                        res.status(409);
-                        res.send('read error, please change your values');
-                        return;
+                        httpStatus(res, 409, 'search_one');
+                    } else {
+                        httpStatus(res, 200, node[0]);
                     }
-                    res.status(200);
-                    res.json(node[0]);
                 });
             }
         });
@@ -400,9 +351,8 @@ module.exports = function (app, express) {
      * - 501: Not Implemented (MongoDB not in use)
      */
     search_mongo = function (req, res) {
-        if (typeof db.mongo_search !== "function") {
-            res.status(409);
-            res.send('MongoDB not in use');
+        if (typeof db.mongo_search !== 'function') {
+            httpStatus(res, 501, 'mongo');
             return;
         }
         var query, sort, limit, skip;
@@ -434,11 +384,9 @@ module.exports = function (app, express) {
         prepare_regexes(query);
         db.mongo_search(query, sort, skip, limit, function (err, ids) {
             if (err) {
-                res.status(409);
-                res.send('mongodb find error');
+                httpStatus(res, 409, 'search_mongo');
             } else {
-                res.status(200);
-                res.json(ids);
+                httpStatus(res, 200, ids);
             }
         });
     }; // search_mongo()
@@ -509,11 +457,10 @@ module.exports = function (app, express) {
      */
     getFile = function (req, res) {
         var path = fileSystem + decodeURIComponent(req.params.path);
-        path = path.replace(/:/g, "").replace(/\/+/g, "/");
+        path = path.replace(/:/g, '').replace(/\/+/g, '/');
         fs.exists(path, function (exists) {
             if (!exists) {
-                res.status(404);
-                res.send('File not found');
+                httpStatus(res, 404, 'file');
                 return;
             }
             var stream = fs.createReadStream(path, {bufferSize: 64 * 1024});
@@ -550,6 +497,31 @@ module.exports = function (app, express) {
         return result;
     }
 
+    /**
+     * Send the requested status code to the client, along with the
+     * JSON-encoded data or an error message if needed.
+     * @param {object} res - Express object receiving the response
+     * @param {number} code - HTTP status code
+     * @param {} data - Data to send, or method name for errors
+     */
+    function httpStatus(res, code, data) {
+        res.status(code);
+        if (code < 300) {
+            res.json(data);
+            return;
+        }
+        var e = data + ' error: ';
+        switch (code) {
+            case 400: e += 'Bad request (empty or not well-formed)'; break;
+            case 401: e += 'Unauthorized (authentication required)'; break;
+            case 403: e += 'Forbidden (permission required)'; break;
+            case 404: e += 'Not found'; break;
+            case 409: e += 'Conflict ()'; break;
+            case 501: e += 'Not implemented (contact an administrator)'; break;
+            default:  e += 'Unknown error code';
+        }
+        res.send(e);
+    }
 
     /*
      * Register the operations
