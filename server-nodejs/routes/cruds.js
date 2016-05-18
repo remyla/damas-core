@@ -7,7 +7,6 @@ module.exports = function (app, express) {
     var db = app.locals.db;
     //methodOverride = require('method-override'),
     var fs = require('fs');
-    var multer = require('multer');
 
 /*
     app.use(methodOverride(function (req, res) {
@@ -50,7 +49,8 @@ module.exports = function (app, express) {
      */
     create = function (req, res) {
         var nodes = req.body;
-        if (!Array.isArray(nodes)) {
+        var isArray = Array.isArray(nodes);
+        if (!isArray) {
             nodes = [nodes];
         }
 
@@ -67,20 +67,14 @@ module.exports = function (app, express) {
         }
 
         db.create(nodes, function (error, doc) {
-            if(Array.isArray(req.body)) {
-                var response = getMultipleResponse(doc);
-                if (response.err && response.partial) {
-                    httpStatus(res, 207, doc);
-                    return;
-                }
-                httpStatus(res, 201, doc);
-                return;
-            }
-            if (null === doc[0]) {
+            var response = getMultipleResponse(doc);
+            if (response.fail) {
                 httpStatus(res, 409, 'create');
-                return;
+            } else if (response.partial) {
+                httpStatus(res, 207, doc);
+            } else {
+                httpStatus(res, 201, isArray ? doc : doc[0]);
             }
-            httpStatus(res, 201, doc[0]);
         });
     }; // create()
 
@@ -100,38 +94,32 @@ module.exports = function (app, express) {
      * - 404: Not Found (all the nodes do not exist)
      */
     read = function (req, res) {
-        var id = req.params.id || req.body;
-        if (!id) {
+        if (req.params.id) {
+            var ids = req.params.id.split(',');
+            var isArray = ids.length > 1;
+        } else if (req.body) {
+            var ids = req.body;
+            var isArray = Array.isArray(ids);
+            if (!isArray) {
+                ids = [ids];
+            }
+        } else {
             httpStatus(res, 400, 'read');
             return;
         }
-        var idIsArray = Array.isArray(id);
-        if (!idIsArray) {
-            id = id.split(',');
-        }
-        db.read(id, function (error, doc) {
+        db.read(ids, function (error, doc) {
             if (error) {
                 httpStatus(res, 409, 'read');
                 return;
             }
-
-            if(idIsArray) {
-                var response = getMultipleResponse(doc);
-                if (response.err) {
-                    if(response.partial) {
-                        httpStatus(res, 207, doc);
-                        return;
-                    }
-                    httpStatus(res, 404, 'read');
-                    return;
-                }
-                httpStatus(res, 200, doc);
-                return;
-            } else if (null === doc[0]) {
+            var response = getMultipleResponse(doc);
+            if (response.fail) {
                 httpStatus(res, 404, 'read');
-                return;
+            } else if (response.partial) {
+                httpStatus(res, 207, doc);
+            } else {
+                httpStatus(res, 200, isArray ? doc : doc[0]);
             }
-            httpStatus(res, 200, doc[0]);
         });
     }; // read()
 
@@ -156,29 +144,21 @@ module.exports = function (app, express) {
             return;
         }
 
-        db.update(req.params.id.split(','), req.body, function (error, doc) {
+        var ids = req.params.id.split(',');
+        var body = req.body;
+        db.update(ids, body, function (error, doc) {
             if (error) {
                 httpStatus(res, 409, 'update');
                 return;
             }
-
-            if(1 < req.params.id.split(',').length) {
-                var response = getMultipleResponse(doc);
-                if (response.err) {
-                    if(response.partial) {
-                        httpStatus(res, 207, doc);
-                        return;
-                    }
-                    httpStatus(res, 404, 'update');
-                    return;
-                }
-                httpStatus(res, 200, doc);
-                return;
-            } else if (null === doc[0]) {
+            var response = getMultipleResponse(doc);
+            if (response.fail) {
                 httpStatus(res, 404, 'update');
-                return;
+            } else if (response.partial) {
+                httpStatus(res, 207, doc);
+            } else {
+                httpStatus(res, 200, 1 < ids.length ? doc : doc[0]);
             }
-            httpStatus(res, 200, doc[0]);
         });
     }; // update()
 
@@ -200,24 +180,15 @@ module.exports = function (app, express) {
     deleteNode = function (req, res) {
         var ids = req.params.id.split(',');
         db.remove(ids, function (error, doc) {
-            if(1 < ids.length) {
-                var response = getMultipleResponse(doc);
-                if (response.err) {
-                    if (response.partial) {
-                        httpStatus(res, 207, doc);
-                        return;
-                    }
-                    httpStatus(res, 404, 'remove');
-                    return;
-                }
-                httpStatus(res, 200, doc);
-                return;
-            }
-            if (null === doc[0]) {
+            console.log(doc);
+            var response = getMultipleResponse(doc);
+            if (response.fail) {
                 httpStatus(res, 404, 'remove');
-                return;
+            } else if (response.partial) {
+                httpStatus(res, 207, doc);
+            } else {
+                httpStatus(res, 200, 1 < ids.length ? doc : doc[0]);
             }
-            httpStatus(res, 200, doc[0]);
         });
     }; // deleteNode()
 
@@ -242,29 +213,19 @@ module.exports = function (app, express) {
             httpStatus(res, 400, 'graph');
             return;
         }
-        //obsolete
         db.graph(id.split(','), function (error, nodes) {
             if (error) {
                 httpStatus(res, 409, 'graph');
                 return;
             }
-            if(Array.isArray(id)) {
-                var response = getMultipleResponse(nodes);
-                if (response.err) {
-                    if(response.partial) {
-                        httpStatus(res, 207, nodes);
-                        return;
-                    }
-                    httpStatus(res, 404, 'graph');
-                    return;
-                }
-                httpStatus(res, 200, nodes);
-                return;
-            } else if (null === nodes[0]) {
+            var response = getMultipleResponse(nodes);
+            if (response.fail) {
                 httpStatus(res, 404, 'graph');
-                return;
+            } else if (response.partial) {
+                httpStatus(res, 207, nodes);
+            } else {
+                httpStatus(res, 200, true ? nodes : nodes[0]); // FIXME
             }
-            httpStatus(res, 200, nodes[0]);
         });
     }; // graph()
 
@@ -322,14 +283,12 @@ module.exports = function (app, express) {
         db.searchFromText(q, function (error, doc) {
             if (error) {
                 httpStatus(res, 409, 'search_one');
-            } else if (doc.length === 0) {
-                httpStatus(res, 200, null);
             } else {
-                db.read([doc[0]], function(error, node) {
+                db.read([doc[0]], function (error, nodes) {
                     if (error) {
                         httpStatus(res, 409, 'search_one');
                     } else {
-                        httpStatus(res, 200, node[0]);
+                        httpStatus(res, 200, nodes[0]);
                     }
                 });
             }
@@ -478,32 +437,17 @@ module.exports = function (app, express) {
      * @return {{status: number, content: result}} - the results to send
      */
     function getMultipleResponse(doc) {
-        var result = {};
-        var errorCount = 0;
-        for (i in doc) {
+        var result = { fail: true, partial: false };
+        for (var i in doc) {
             if (null === doc[i]) {
-                ++errorCount;
+                result.partial = true;
+            } else {
+                result.fail = false;
             }
         }
-        if (0 < errorCount) {
-            result.err = true;
-            result.partial = true;
-            if (doc.length === errorCount) {
-                result.partial = false;
-            }
-            return result;
-        }
-        result.err = false;
         return result;
     }
 
-    /**
-     * Send the requested status code to the client, along with the
-     * JSON-encoded data or an error message if needed.
-     * @param {object} res - Express object receiving the response
-     * @param {number} code - HTTP status code
-     * @param {} data - Data to send, or method name for errors
-     */
     function httpStatus(res, code, data) {
         res.status(code);
         if (code < 300) {
