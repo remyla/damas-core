@@ -24,14 +24,17 @@ module.exports = function (server, options) {
 
     events.attach('create', function (nodes) {
         io.sockets.emit('create', nodes);
+        this.next();
     });
 
     events.attach('update', function (nodes) {
         io.sockets.emit('update', nodes);
+        this.next();
     });
 
     events.attach('delete', function (nodes) {
         io.sockets.emit('delete', nodes);
+        this.next();
     });
 
     debug('Socket server listening');
