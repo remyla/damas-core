@@ -47,7 +47,7 @@ class http_connection( object ) :
 		headers = {'content-type': 'application/json'}
 		headers.update(self.headers)
 		r = requests.post(self.serverURL+"/create/", data=json.dumps(keys), headers=headers, verify=False)
-		if r.status_code == 201:
+		if r.status_code == 201 or r.status_code == 207:
 			return json.loads(r.text)
 		return None
 
@@ -57,8 +57,10 @@ class http_connection( object ) :
 		@param {String} id_ the internal node index to search
 		@returns {Hash} node or false on failure
 		'''
-		r = requests.post(self.serverURL+"/read/", data=json.dumps(id_), headers=self.headers, verify=False)
-		if r.status_code == 200:
+		headers = {'content-type': 'application/json'}
+		headers.update(self.headers)
+		r = requests.post(self.serverURL+"/read/", data=json.dumps(id_), headers=headers, verify=False)
+		if r.status_code == 200 or r.status_code == 207:
 			return json.loads(r.text)
 		return None
 
@@ -76,7 +78,7 @@ class http_connection( object ) :
 		headers = {'content-type': 'application/json'}
 		headers.update(self.headers)
 		r = requests.put(self.serverURL+'/update/'+id_, data=json.dumps(keys), headers=headers, verify=False)
-		if r.status_code == 200:
+		if r.status_code == 200 or r.status_code == 207:
 			return json.loads(r.text)
 		return None
 
@@ -89,7 +91,9 @@ class http_connection( object ) :
 		if isinstance(id_, (tuple,list,set)):
 			id_ = ",".join(id_)
 		r = requests.delete(self.serverURL+'/delete/'+id_, headers=self.headers, verify=False)
-		return r.status_code == 200
+		if r.status_code == 200 or r.status_code == 207:
+			return json.loads(r.text)
+		return None
 
 	def search( self, query ) :
 		'''
@@ -132,7 +136,7 @@ class http_connection( object ) :
 		if isinstance(id_, (tuple,list,set)):
 			id_ = ",".join(id_)
 		r = requests.get(self.serverURL+'/graph/'+id_, headers=self.headers, verify=False)
-		if r.status_code == 200:
+		if r.status_code == 200 or r.status_code == 207:
 			return json.loads(r.text)
 		return None
 
