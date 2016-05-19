@@ -19,10 +19,15 @@ function array_sync(array, walker, callback) {
     })();
 }
 
-function cleanNull(array) {
-    return array.filter(function (item) {
-        return item !== null;
-    });
+var events = require('../events');
+/*
+ * Attempt to fire an event, if the given array is valid
+ */
+function fireEvent(name, array) {
+    var clean = array.filter(function (item) { return item !== null; });
+    if (0 < clean.length) {
+        events.fire(name, clean);
+    }
 }
 
 module.exports = function (conf) {
@@ -33,7 +38,6 @@ module.exports = function (conf) {
     self.debug = require('debug')('app:db:mongo:' + process.pid);
 
     var mongo = require('mongodb');
-    var events = require('../events');
     var ObjectID = mongo.ObjectID;
 
     /*
@@ -106,7 +110,7 @@ module.exports = function (conf) {
                 });
             }, function (array) {
                 callback(false, array);
-                events.fire('create', cleanNull(array));
+                fireEvent('create', array);
             });
         });
     }; // create()
@@ -165,7 +169,7 @@ module.exports = function (conf) {
                         callback(true);
                     } else {
                         callback(false, nodes);
-                        events.fire('update', cleanNull(nodes));
+                        fireEvent('update', nodes);
                     }
                 });
             });
@@ -185,7 +189,7 @@ module.exports = function (conf) {
                 });
             }, function (array) {
                 callback(false, array);
-                events.fire('remove', cleanNull(array));
+                fireEvent('remove', array);
             });
         });
     }; // remove()
