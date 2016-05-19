@@ -79,10 +79,8 @@ module.exports = function (app, express) {
                     httpStatus(res, 409, 'create');
                 } else if (response.partial) {
                     httpStatus(res, 207, doc);
-                    events.fire('create', doc);
                 } else {
                     httpStatus(res, 201, isArray ? doc : doc[0]);
-                    events.fire('create', doc);
                 }
             });
         });
@@ -173,10 +171,8 @@ module.exports = function (app, express) {
                     httpStatus(res, 404, 'update');
                 } else if (response.partial) {
                     httpStatus(res, 207, doc);
-                    events.fire('update', doc);
                 } else {
                     httpStatus(res, 200, 1 < ids.length ? doc : doc[0]);
-                    events.fire('update', doc);
                 }
             });
         });
@@ -211,10 +207,8 @@ module.exports = function (app, express) {
                     httpStatus(res, 404, 'remove');
                 } else if (response.partial) {
                     httpStatus(res, 207, doc);
-                    events.fire('remove', doc);
                 } else {
                     httpStatus(res, 200, 1 < ids.length ? doc : doc[0]);
-                    events.fire('remove', doc);
                 }
             });
         });

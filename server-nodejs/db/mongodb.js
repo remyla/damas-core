@@ -19,6 +19,12 @@ function array_sync(array, walker, callback) {
     })();
 }
 
+function cleanNull(array) {
+    return array.filter(function (item) {
+        return item !== null;
+    });
+}
+
 module.exports = function (conf) {
     var self = this;
     self.conf = conf;
@@ -27,6 +33,7 @@ module.exports = function (conf) {
     self.debug = require('debug')('app:db:mongo:' + process.pid);
 
     var mongo = require('mongodb');
+    var events = require('../events');
     var ObjectID = mongo.ObjectID;
 
     /*
@@ -99,6 +106,7 @@ module.exports = function (conf) {
                 });
             }, function (array) {
                 callback(false, array);
+                events.fire('create', cleanNull(array));
             });
         });
     }; // create()
@@ -153,7 +161,12 @@ module.exports = function (conf) {
                 }
                 self.debug('Update status: ' + status);
                 self.read(ids_o, function (err, nodes) {
-                    callback(err, err ? null : nodes);
+                    if (err) {
+                        callback(true);
+                    } else {
+                        callback(false, nodes);
+                        events.fire('update', cleanNull(nodes));
+                    }
                 });
             });
         });
@@ -172,6 +185,7 @@ module.exports = function (conf) {
                 });
             }, function (array) {
                 callback(false, array);
+                events.fire('remove', cleanNull(array));
             });
         });
     }; // remove()
