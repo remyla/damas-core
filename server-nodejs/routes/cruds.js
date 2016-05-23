@@ -147,7 +147,7 @@ module.exports = function (app, express) {
      * - 404: Not Found (all the nodes do not exist)
      */
     update = function (req, res) {
-        if (Object.keys(req.body).length === 0) {
+        if (Object.keys(req.body).length === 0 || !req.params.id) {
             httpStatus(res, 400, 'update');
             return;
         }
@@ -194,7 +194,19 @@ module.exports = function (app, express) {
      * - 404: Not Found (all the nodes do not exist)
      */
     deleteNode = function (req, res) {
-        var ids = req.params.id.split('<sep>');
+        if (req.params.id) {
+            var ids = req.params.id.split('<sep>');
+            var isArray = ids.length > 1;
+        } else if (req.body) {
+            var ids = req.body;
+            var isArray = Array.isArray(ids);
+            if (!isArray) {
+                ids = [ids];
+            }
+        } else {
+            httpStatus(res, 400, 'read');
+            return;
+        }
         events.fire('pre-remove', ids).then(function (data) {
             if (data.status) {
                 httpStatus(res, data.status, 'remove');
@@ -230,12 +242,19 @@ module.exports = function (app, express) {
      * - 404: Not Found (all the nodes do not exist)
      */
     graph = function (req, res) {
-        var id = req.params.id || req.body.id;
-        if (!id || id == 'undefined') {
-            httpStatus(res, 400, 'graph');
+        if (req.params.id) {
+            var ids = req.params.id.split('<sep>');
+        } else if (req.body) {
+            var ids = req.body;
+            if (!Array.isArray(ids)) {
+                ids = [ids];
+            }
+        } else {
+            httpStatus(res, 400, 'read');
             return;
         }
-        db.graph(id.split('<sep>'), function (error, nodes) {
+
+        db.graph(ids, function (error, nodes) {
             if (error) {
                 httpStatus(res, 409, 'graph');
                 return;
@@ -246,7 +265,8 @@ module.exports = function (app, express) {
             } else if (response.partial) {
                 httpStatus(res, 207, nodes);
             } else {
-                httpStatus(res, 200, true ? nodes : nodes[0]); // FIXME
+                // We never need a single element
+                httpStatus(res, 200, nodes);
             }
         });
     }; // graph()
@@ -499,12 +519,16 @@ module.exports = function (app, express) {
     app.post('/api/read/', read);
     app.put('/api/update/:id', update);
     app.delete('/api/delete/:id', deleteNode);
+    app.delete('/api/delete/', deleteNode);
+    app.post('/api/delete/', deleteNode);
 
     // Search operations
     app.get('/api/search/:query(*)', search);
     app.get('/api/search_one/:query(*)', search_one);
     app.post('/api/search_mongo', search_mongo);
-    app.get('/api/graph/', graph);
+    app.get('/api/graph/', graph); // Fix
+    app.get('/api/graph/:id', graph);
+    app.post('/api/graph/', graph);
 
     // CRUD operations (deprecated)
     app.post('/api/', create);
@@ -513,7 +537,6 @@ module.exports = function (app, express) {
     app.delete('/api/:id', deleteNode);
 
     // Extra operations
-    app.get('/api/graph/:id', graph);
     app.get('/api/file/:path(*)', getFile); // untested
     app.post('/api/import', importJSON); // untested
     //app.get('/subdirs/:path', getSubdirs);
