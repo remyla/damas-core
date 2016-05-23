@@ -203,7 +203,7 @@ frisby.create('CREATE - should create an object in the database')
     //it always return a non empty array
     frisby.create('GRAPH - should throw an error (id empty) - Not found')
         .get(url + 'graph/')
-        .expectStatus(400)
+        .expectStatus(404)
     .toss();
 
     frisby.create('GRAPH - should throw an error (id not found) - Not found')
