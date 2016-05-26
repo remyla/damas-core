@@ -21,23 +21,17 @@ module.exports = function (app) {
      * - 409: Conflict (asset already locked by someone else)
      */
     app.put('/api/lock/:id', function (req, res) {
-        /* this check should not be based on mongo ObjectId, we disable it
-        if (!ObjectId.isValid(req.params.id)) {
-            res.status(400);
-            res.send('lock error: the specified id is not valid');
-            return;
-        }
-        */
-        var n = db.read([req.params.id], function (err, n) {
+        db.read([req.params.id], function (err, n) {
             if (n[0].lock !== undefined) {
                 res.status(409);
                 res.send('lock error, the asset is already locked');
                 return;
             }
-            var keys = {
-                "lock": req.user.username || req.connection.remoteAddress
-            };
-            db.update([req.params.id], keys, function (error, doc) {
+            var keys = [{
+                _id: [n[0]._id],
+                set: {lock: req.user.username || req.connection.remoteAddress}
+            }];
+            db.update(keys, function (error, doc) {
                 if (error) {
                     res.status(409);
                     res.send('lock error, please change your values');
@@ -63,21 +57,18 @@ module.exports = function (app) {
      * - 409: Conflict (asset locked by someone else)
      */
     app.put('/api/unlock/:id', function (req, res) {
-        /*
-        if (!ObjectId.isValid(req.params.id)) {
-            res.status(400);
-            res.send('lock error: the specified id is not valid');
-            return;
-        }
-        */
-        var n = db.read([req.params.id], function (err, n) {
+        db.read([req.params.id], function (err, n) {
             var user = req.user.username || req.connection.remoteAddress;
             if (n[0].lock !== user) {
                 res.status(409);
                 res.send('lock error, the asset is locked by '+ n[0].lock);
                 return;
             }
-            db.update([req.params.id], {"lock": null}, function (error, doc) {
+            var keys = [{
+                _id: [n[0]._id],
+                unset: {'lock': null}
+            }];
+            db.update(keys, function (error, doc) {
                 if (error) {
                     res.status(409);
                     res.send('lock error, please change your values');

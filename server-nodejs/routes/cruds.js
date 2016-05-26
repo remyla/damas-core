@@ -146,18 +146,31 @@ module.exports = function (app, express) {
      * - 404: Not Found (all the nodes do not exist)
      */
     update = function (req, res) {
-        if (0 === Object.keys(req.body).length || !req.params.id) {
-            return httpStatus(res, 400, 'Update');
+        var ids = req.params.id ? req.params.id.split(',') : false;
+        var nodes = Array.isArray(req.body) ? req.body : [req.body];
+        // Transform the nodes in update objects
+        var ups = [];
+        for (var i = 0; i < nodes.length; ++i) {
+            if ('object' !== typeof nodes[i] || !(ids || nodes[i]._id) ||
+                    0 === Object.keys(nodes[i]).length) {
+                return httpStatus(res, 400, 'Update');
+            }
+            ups[i] = { _id: ids, set: {}, unset: {} };
+            for (var key in nodes[i]) {
+                if ('_id' === key) {
+                    ups[i]._id = nodes[i][key];
+                } else if (null === nodes[i][key] || '' === nodes[i][key]) {
+                    ups[i].unset[key] = null;
+                } else {
+                    ups[i].set[key] = nodes[i][key];
+                }
+            }
         }
-        var ids = req.params.id.split(',');
-        var isArray = ids.length > 1;
-        var body = req.body;
-        events.fire('pre-update', ids, body).then(function (data) {
+        events.fire('pre-update', ups).then(function (data) {
             if (data.status) {
                 return httpStatus(res, data.status, 'Update');
             }
-            body = data.body || body;
-            db.update(data.ids || ids, body, function (error, doc) {
+            db.update(data.nodes || ups, function (error, doc) {
                 if (error) {
                     return httpStatus(res, 409, 'Update');
                 }

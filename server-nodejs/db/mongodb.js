@@ -138,40 +138,35 @@ module.exports = function (conf) {
      * @param {object} keys - New keys to define on the nodes
      * @param {function} callback - Callback function to routes.js
      */
-    self.update = function (ids, keys, callback) {
+    self.update = function (nodes, callback) {
         getCollection(callback, function (coll) {
-            var ids_o = exportIds(ids);
-            var keysToUnset = {};
-            var keysToSet = {};
-            var toUpdate = {};
-
-            for (var k in keys) {
-                if (keys[k] === null) {
-                    keysToUnset[k] = '';
-                } else {
-                    keysToSet[k] = keys[k];
+            array_sync(nodes, function (node, cb) {
+                node._id = Array.isArray(node._id) ? node._id : [node._id];
+                var ids = exportIds(node._id);
+                var update = { };
+                if (node.set && Object.keys(node.set).length > 0) {
+                    update.$set = node.set;
                 }
-            }
-            if (Object.keys(keysToSet).length > 0) {
-                toUpdate.$set = keysToSet;
-            }
-            if (Object.keys(keysToUnset).length > 0) {
-                toUpdate.$unset = keysToUnset;
-            }
-            coll.update({_id: {$in: ids_o}}, toUpdate, {multi: true},
-                        function (err, status) {
-                if (err) {
-                    callback(true);
+                if (node.unset && Object.keys(node.unset).length > 0) {
+                    update.$unset = node.unset;
                 }
-                self.debug('Update status: ' + status);
-                self.read(ids_o, function (err, nodes) {
+                coll.update({_id: {$in: ids}}, update, {multi: true},
+                            function (err, status) {
                     if (err) {
                         callback(true);
-                    } else {
-                        callback(false, nodes);
-                        fireEvent('update', nodes);
                     }
+                    self.read(ids, function (err, nodes) {
+                        if (err) {
+                            return cb(null);
+                        }
+                        self.read(node._id, function (err, doc) {
+                            cb(err ? null : doc);
+                        });
+                    });
                 });
+            }, function (array) {
+                callback(false, array);
+                fireEvent('update', array);
             });
         });
     }; // update()
