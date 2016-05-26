@@ -187,7 +187,8 @@
             return false;
         }
         var req = new XMLHttpRequest();
-        req.open('PUT', this.server + "update/" + id, callback !== undefined);
+        req.open('PUT', this.server + "update/" + encodeURIComponent(id),
+            callback !== undefined);
         req.setRequestHeader("Content-type","application/json");
         req.setRequestHeader("Accept","application/json");
         req.setRequestHeader("Authorization","Bearer "+damas.token);
@@ -222,7 +223,8 @@
             return false;
         }
         var req = new XMLHttpRequest();
-        req.open('DELETE', this.server + "delete/" + id, callback !== undefined);
+        req.open('DELETE', this.server + "delete/" + encodeURIComponent(id),
+            callback !== undefined);
         //req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
         req.setRequestHeader("Authorization","Bearer "+damas.token);
         req.onreadystatechange = function(e) {
@@ -255,7 +257,8 @@
             return false;
         }
         var req = new XMLHttpRequest();
-        req.open('GET', this.server + 'search/' + encodeURIComponent(query), callback !== undefined);
+        req.open('GET', this.server + 'search/' + encodeURIComponent(query),
+            callback !== undefined);
         req.setRequestHeader("Authorization","Bearer "+damas.token);
         req.onreadystatechange = function(e) {
             if (req.readyState == 4) {
@@ -279,7 +282,8 @@
             return false;
         }
         var req = new XMLHttpRequest();
-        req.open('GET', this.server + 'search_one/' + encodeURIComponent(query), callback !== undefined);
+        req.open('GET', this.server + 'search_one/' + encodeURIComponent(query),
+            callback !== undefined);
         req.setRequestHeader("Authorization","Bearer "+damas.token);
         req.onreadystatechange = function(e) {
             if (req.readyState == 4) {
@@ -379,7 +383,8 @@
             return false;
         }
         var req = new XMLHttpRequest();
-        req.open('GET', this.server + 'graph/' + encodeURIComponent(ids), callback !== undefined);
+        req.open('GET', this.server + 'graph/' + encodeURIComponent(ids),
+            callback !== undefined);
         req.setRequestHeader("Authorization","Bearer "+damas.token);
         req.onreadystatechange = function(e) {
             if (req.readyState == 4) {
@@ -412,7 +417,8 @@
             return req.status === 200;
         }
         var req = new XMLHttpRequest();
-        req.open('PUT', this.server+'lock/'+id, callback !== undefined);
+        req.open('PUT', this.server+'lock/' + encodeURIComponent(id),
+            callback !== undefined);
         req.setRequestHeader("Content-type","application/json");
         req.setRequestHeader("Accept","application/json");
         req.setRequestHeader("Authorization","Bearer "+damas.token);
@@ -434,7 +440,8 @@
             return req.status === 200;
         }
         var req = new XMLHttpRequest();
-        req.open('PUT', this.server+'unlock/'+id, callback !== undefined);
+        req.open('PUT', this.server+'unlock/' + encodeURIComponent(id),
+            callback !== undefined);
         req.setRequestHeader("Content-type","application/json");
         req.setRequestHeader("Accept","application/json");
         req.setRequestHeader("Authorization","Bearer "+damas.token);
@@ -472,7 +479,8 @@
             return false;
         }
         var req = new XMLHttpRequest();
-        req.open('POST', this.server+'version/'+id, callback !== undefined);
+        req.open('POST', this.server+'version/' + encodeURIComponent(id),
+            callback !== undefined);
         req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
         req.setRequestHeader("Authorization","Bearer "+damas.token);
         req.onreadystatechange = function(e) {
