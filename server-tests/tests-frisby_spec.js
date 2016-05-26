@@ -201,9 +201,9 @@ frisby.create('CREATE - should create an object in the database')
       * Tests for method Graph
       */
     //it always return a non empty array
-    frisby.create('GRAPH - should throw an error (id empty) - Not found')
+    frisby.create('GRAPH - should throw an error (id empty) - Bad Request')
         .get(url + 'graph/')
-        .expectStatus(404)
+        .expectStatus(400)
     .toss();
 
     frisby.create('GRAPH - should throw an error (id not found) - Not found')
@@ -308,9 +308,9 @@ frisby.create('CREATE - should create an object in the database')
     /**
      * Tests for method Delete
      */
-    frisby.create('DELETE - should throw an error (id empty)')
+    frisby.create('DELETE - should throw an error (id empty) - Bad Request')
         .delete(url + 'delete/')
-        .expectStatus(404)
+        .expectStatus(400)
     .toss();
 
     frisby.create('DELETE - should throw an error (id valid but not found in the DB)')
