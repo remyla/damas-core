@@ -1,419 +1,523 @@
-module.exports = function(app, express){
-	var mongo = require( 'mongodb' ),
-	mongoModel = require( '../model.js' ),
-	//methodOverride = require( 'method-override' ),
-	conf = require( '../conf.json' ),
-	fs  = require('fs'),
-	multer  = require('multer'),
-	ObjectId = mongo.ObjectID;
-	mod = new mongoModel(),
+/*
+ * cruds.js - from Damas-Core
+ * Licensed under the GNU GPL v3
+ */
 
-	mod.connection( function(){});
+module.exports = function (app, express) {
+    var db = app.locals.db;
+    //methodOverride = require('method-override'),
+    var fs = require('fs');
+    var events = require('../events');
 
 /*
-	app.use(methodOverride( function(req, res)
-	{
-		if ( req.body && typeof req.body === 'object' && '_method' in req.body )
-		{
-			// look in urlencoded POST bodies and delete it
-			var method = req.body._method;
-			delete req.body._method;
-			return method;
-		}
-	}));
+    app.use(methodOverride(function (req, res) {
+        if (req.body && typeof req.body === 'object' && '_method' in req.body) {
+            // look in urlencoded POST bodies and delete it
+            var method = req.body._method;
+            delete req.body._method;
+            return method;
+        }
+    }));
 
-	//Handle errors
-	app.use( function(err, req, res, next)
-	{
-		if( err )
-		{
-			console.log("An error has occurred: "+ err);
-		}
-		else
-		{
-			next();
-		}
-	});
+    //Handle errors
+    app.use(function (err, req, res, next) {
+        if (err) {
+            console.log('An error has occurred: '+ err);
+        } else {
+            next();
+        }
+    });
 */
 
-	/* CRUD operations */
-	create = function( req, res )
-	{
-		if (Object.keys(req.body).length === 0)
-		{
-			res.status(400).send('create error: the body of the request is empty');
-			return;
-		}
-		var keys = req.body;
-		keys.author = req.user.username || req.connection.remoteAddress;
-		keys.time = Date.now();
-		mod.create(keys, function(error, doc){
-			if (error)
-			{
-				res.status(409).send('create error, please change your values');
-				return;
-			}
-			res.status(201).send(doc);
-		});
-	};
+    /*
+     * CRUD operations
+     */
 
-	read = function( req,res )
-	{
-		var id = req.params.id || req.body.id;
-		if (!id)
-		{
-			res.status(400).send('read error: the specified id is not valid');
-			return;
-		}
-		mod.read( id.split(","), function(error, doc){
-			if (error)
-			{
-				res.status(409).send('read error, please change your values');
-				return;
-			}
-			if (doc.length===0)
-			{
-				res.status(404).send('Id not found');
-				return;
-			}
-			res.status(200).send(doc);
-		});
-	};
 
-	update = function( req, res )
-	{
-/*
-		if (!ObjectId.isValid(req.params.id))
-		{
-			res.status(400).send('update error: the specified id is not valid');
-			return;
-		}
-		if (Object.keys(req.body).length === 0)
-		{
-			res.status(400).send('update error: the body of the request is empty');
-			return;
-		}
-*/
-		mod.update(req.params.id.split(","), req.body, function(error, doc){
-			if (error)
-			{
-				res.status(409).send('update error, please change your values');
-				return;
-			}
-			res.status(200).json(doc);
-		});
-	};
+    /*
+     * create()
+     *
+     * Method: POST
+     * URI: /api/create/
+     *
+     * Insert new nodes
+     *
+     * HTTP status codes:
+     * - 201: Created (nodes created)
+     * - 207: Multi-Status (some nodes already exist with these identifiers)
+     * - 400: Bad request (not formatted correctly)
+     * - 409: Conflict (all nodes already exist with these identifiers)
+     */
+    create = function (req, res) {
+        var nodes = req.body;
+        var isArray = Array.isArray(nodes);
+        if (!isArray) {
+            nodes = [nodes];
+        }
 
-	deleteNode = function(req, res)
-	{
-		if (!ObjectId.isValid(req.params.id))
-		{
-			res.status(400).send('error: the specified id is not valid');
-			return;
-		}
-		mod.deleteNode(req.params.id, function(error, doc){
-			if (error)
-			{
-				res.status(409).send('delete error, please change your values');
-				return;
-			}
-			res.status(200).send(doc.result.n + " documents deleted.");
-		});
-	};
+        // Control properties
+        var author = req.user.username || req.connection.remoteAddress;
+        var time = Date.now();
+        for (var n in nodes) {
+            if ('object' !== typeof nodes[n]) {
+                httpStatus(res, 400, 'create');
+                return;
+            }
+            nodes[n].author = author;
+            nodes[n].time = time;
+        }
 
-	graph = function(req,res) {
-		var id = req.params.id || req.body.id;
-		if (!id || id=="undefined")
-		{
-			res.status(400).send('Bad command');
-			return;
-		}
-		mod.graph( id.split(","), function(error, nodes){
-			if (error)
-			{
-				res.status(409).send('graph error, please change your values');
-				return;
-			}
-			if (nodes)
-			{
-				res.status(200).json(nodes);
-			}
-			else
-				res.status(404).send('Id not found');
-		});
-	};
+        events.fire('pre-create', nodes).then(function (data) {
+            if (data.status) {
+                httpStatus(res, data.status, 'create');
+                return;
+            }
+            nodes = data.nodes || nodes;
+            db.create(nodes, function (error, doc) {
+                var response = getMultipleResponse(doc);
+                if (response.fail) {
+                    httpStatus(res, 409, 'create');
+                } else if (response.partial) {
+                    httpStatus(res, 207, doc);
+                } else {
+                    httpStatus(res, 201, isArray ? doc : doc[0]);
+                }
+            });
+        });
+    }; // create()
 
-	search = function(req, res){
-		var q = req.params.query || req.body.query;
-		if (!q || q=="undefined")
-		{
-			res.status(400);
-			res.send('Bad command');
-			return;
-		}
-		q = q.replace(/\s+/g,' ').trim();
-		//q = q.replace('< ','<');
-		//q = q.replace('<= ','<=');
-		//q = q.replace('>= ','>=');
-		//q = q.replace('> ','>');
-		//q = q.replace(': ',':');
-		var terms = q.split(" ");
-		var pair;
-		var result={};
-		//var j;
-		//var tempField;
-		for(var i=0; i< terms.length; i++){
-			if (terms[i].indexOf('<=') > 0)
-			{
-				pair = terms[i].split('<=');
-				result[pair[0]] = { $lte: decodeURIComponent(pair[1]) };
-				continue;
-			}
-			if (terms[i].indexOf('<') > 0)
-			{
-				pair = terms[i].split('<');
-				result[pair[0]] = { $lt: decodeURIComponent(pair[1]) };
-				continue;
-			}
-			if (terms[i].indexOf('>=') > 0)
-			{
-				pair = terms[i].split('>=');
-				result[pair[0]] = { $gte: decodeURIComponent(pair[1]) };
-				continue;
-			}
-			if (terms[i].indexOf('>') > 0)
-			{
-				pair = terms[i].split('>');
-				result[pair[0]] = { $gt: decodeURIComponent(pair[1]) };
-				continue;
-			}
-			if (terms[i].indexOf(':') > 0)
-			{
-				pair = terms[i].split(':');
-				var value = decodeURIComponent(pair[1]);
-			
-				var flags = value.replace(/.*\/([gimy]*)$/, '$1');
-				var pattern = value.replace(new RegExp('^/(.*?)/'+flags+'$'), '$1');
-				if(flags!=value && pattern!=value)
-				{
-					var regex = new RegExp(pattern, flags);
-					result[pair[0]] = regex;
-				}
-				else
-				{
-					result[pair[0]] = value;
-				}
-/*
-				for(j=1;j<pair.length-1;j++)
-					result[tempField]+=decodeURIComponent(pair[j])+":";
-				if(pair[j]!='')
-					result[tempField]+=decodeURIComponent(pair[j]);
-*/
-				continue;
-			}
-/* implement full text search
-			result['$where'] = function(){
-				for (var key in this)
-				{
-					if (this[key] )
-				}
-			}
-db.things.find({$where: function() {
-  for (var key in this) {
-    if (this[key] === "bar") {
-      return true;
+
+    /*
+     * read()
+     *
+     * Method: GET
+     * URI: /api/read/
+     *
+     * Retrieve the specified nodes
+     *
+     * HTTP status codes:
+     * - 200: OK (nodes retrieved)
+     * - 207: Multi-Status (some nodes do not exist)
+     * - 400: Bad request (not formatted correctly)
+     * - 404: Not Found (all the nodes do not exist)
+     */
+    read = function (req, res) {
+        if (req.params.id) {
+            var ids = req.params.id.split('<sep>');
+            var isArray = ids.length > 1;
+        } else if (req.body) {
+            var ids = req.body;
+            var isArray = Array.isArray(ids);
+            if (!isArray) {
+                ids = [ids];
+            }
+        } else {
+            httpStatus(res, 400, 'read');
+            return;
+        }
+        db.read(ids, function (error, doc) {
+            if (error) {
+                httpStatus(res, 409, 'read');
+                return;
+            }
+            var response = getMultipleResponse(doc);
+            if (response.fail) {
+                httpStatus(res, 404, 'read');
+            } else if (response.partial) {
+                httpStatus(res, 207, doc);
+            } else {
+                httpStatus(res, 200, isArray ? doc : doc[0]);
+            }
+        });
+    }; // read()
+
+
+    /*
+     * update()
+     *
+     * Method: PUT
+     * URI: /api/update/
+     *
+     * Update existing nodes
+     *
+     * HTTP status codes:
+     * - 200: OK (nodes updated)
+     * - 207: Multi-Status (some nodes do not exist)
+     * - 400: Bad request (not formatted correctly)
+     * - 404: Not Found (all the nodes do not exist)
+     */
+    update = function (req, res) {
+        if (Object.keys(req.body).length === 0) {
+            httpStatus(res, 400, 'update');
+            return;
+        }
+
+        var ids = req.params.id.split('<sep>');
+        var body = req.body;
+        events.fire('pre-update', ids, body).then(function (data) {
+            if (data.status) {
+                httpStatus(res, data.status, 'create');
+                return;
+            }
+            ids = data.ids || ids;
+            body = data.body || body;
+            db.update(ids, body, function (error, doc) {
+                if (error) {
+                    httpStatus(res, 409, 'update');
+                    return;
+                }
+                var response = getMultipleResponse(doc);
+                if (response.fail) {
+                    httpStatus(res, 404, 'update');
+                } else if (response.partial) {
+                    httpStatus(res, 207, doc);
+                } else {
+                    httpStatus(res, 200, 1 < ids.length ? doc : doc[0]);
+                }
+            });
+        });
+    }; // update()
+
+
+    /*
+     * deleteNode()
+     *
+     * Method: DELETE
+     * URI: /api/
+     *
+     * Delete nodes
+     *
+     * HTTP status codes:
+     * - 200: OK (nodes deleted (or not found))
+     * - 207: Multi-Status (some nodes do not exist)
+     * - 400: Bad request (not formatted correctly)
+     * - 404: Not Found (all the nodes do not exist)
+     */
+    deleteNode = function (req, res) {
+        var ids = req.params.id.split('<sep>');
+        events.fire('pre-remove', ids).then(function (data) {
+            if (data.status) {
+                httpStatus(res, data.status, 'remove');
+            }
+            ids = data.ids || ids;
+            db.remove(ids, function (error, doc) {
+                console.log(doc);
+                var response = getMultipleResponse(doc);
+                if (response.fail) {
+                    httpStatus(res, 404, 'remove');
+                } else if (response.partial) {
+                    httpStatus(res, 207, doc);
+                } else {
+                    httpStatus(res, 200, 1 < ids.length ? doc : doc[0]);
+                }
+            });
+        });
+    }; // deleteNode()
+
+
+    /*
+     * graph()
+     *
+     * Method: GET
+     * URI: /api/graph/
+     *
+     * Retrieve the graph of nodes by following the links targeting them
+     *
+     * HTTP status codes:
+     * - 200: OK (graph retrieved)
+     * - 207: Multi-Status (some nodes do not exist)
+     * - 400: Bad request (not formatted correctly)
+     * - 404: Not Found (all the nodes do not exist)
+     */
+    graph = function (req, res) {
+        var id = req.params.id || req.body.id;
+        if (!id || id == 'undefined') {
+            httpStatus(res, 400, 'graph');
+            return;
+        }
+        db.graph(id.split('<sep>'), function (error, nodes) {
+            if (error) {
+                httpStatus(res, 409, 'graph');
+                return;
+            }
+            var response = getMultipleResponse(nodes);
+            if (response.fail) {
+                httpStatus(res, 404, 'graph');
+            } else if (response.partial) {
+                httpStatus(res, 207, nodes);
+            } else {
+                httpStatus(res, 200, true ? nodes : nodes[0]); // FIXME
+            }
+        });
+    }; // graph()
+
+
+    /*
+     * search()
+     *
+     * Method: GET
+     * URI: /api/search/
+     *
+     * Search for nodes in the database
+     *
+     * HTTP status codes:
+     * - 200: OK (search successful, even without results)
+     * - 400: Bad Request (not formatted correctly)
+     */
+    search = function (req, res) {
+        var q = req.params.query || req.body.query;
+        if (!q || q == 'undefined') {
+            httpStatus(res, 400, 'search');
+            return;
+        }
+        q = decodeURIComponent(q);
+        q = q.replace(/\s+/g, ' ').trim();
+        db.searchFromText(q, function (error, doc) {
+            if (error) {
+                httpStatus(res, 409, 'search');
+            } else {
+                httpStatus(res, 200, doc);
+            }
+        });
+    }; // search()
+
+
+    /*
+     * search_one()
+     *
+     * Method: GET
+     * URI: /api/search_one/
+     *
+     * Search for nodes in the database, returning the first matching object.
+     *
+     * HTTP status codes:
+     * - 200: OK (search successful, even without results)
+     * - 400: Bad Request (not formatted correctly)
+     */
+    search_one = function (req, res) {
+        var q = req.params.query || req.body.query;
+        if (!q || q == 'undefined') {
+            httpStatus(res, 400, 'search_one');
+            return;
+        }
+        q = decodeURIComponent(q);
+        q = q.replace(/\s+/g, ' ').trim();
+        db.searchFromText(q, function (error, doc) {
+            if (error) {
+                httpStatus(res, 409, 'search_one');
+            } else {
+                db.read([doc[0]], function (error, nodes) {
+                    if (error) {
+                        httpStatus(res, 409, 'search_one');
+                    } else {
+                        httpStatus(res, 200, nodes[0]);
+                    }
+                });
+            }
+        });
+    }; // search_one()
+
+
+    /*
+     * search_mongo()
+     *
+     * Method: POST
+     * URI: /api/search_mongo/
+     *
+     * Perform a research specific to the MongoDB database engine
+     *
+     * HTTP status codes:
+     * - 200: OK (search successful, even without results)
+     * - 400: Bad Request (not formatted correctly)
+     * - 501: Not Implemented (MongoDB not in use)
+     */
+    search_mongo = function (req, res) {
+        if (typeof db.mongo_search !== 'function') {
+            httpStatus(res, 501, 'mongo');
+            return;
+        }
+        var query, sort, limit, skip;
+        if (req.body.queryobj) {
+            var data = JSON.parse(req.body.queryobj);
+            query =  data.query;
+            sort =  data.sort;
+            limit =  data.limit | 0;
+            skip =  data.skip | 0;
+        } else {
+            query = req.body.query;
+            sort = req.body.sort;
+            limit = req.body.limit | 0;
+            skip = req.body.skip | 0;
+        }
+        function prepare_regexes(obj) {
+            for (var key in obj) {
+                if ('object' === typeof obj[key] && null !== obj[key]) {
+                    prepare_regexes(obj[key]);
+                    continue;
+                }
+                if ('string' === typeof obj[key]) {
+                    if (obj[key].indexOf('REGEX_') === 0) {
+                        obj[key] = new RegExp(obj[key].replace('REGEX_', ''));
+                    }
+                }
+            }
+        }
+        prepare_regexes(query);
+        db.mongo_search(query, sort, skip, limit, function (err, ids) {
+            if (err) {
+                httpStatus(res, 409, 'search_mongo');
+            } else {
+                httpStatus(res, 200, ids);
+            }
+        });
+    }; // search_mongo()
+
+
+    /**
+     * Import a JSON graph commit from our current Php Server
+     *
+     */
+    importJSON = function (req, res) {
+        var json = JSON.parse(req.body.text);
+        json.nodes.forEach(function (node, i, nodes) {
+            var keys = node.keys;
+            keys.mysqlid = node.id;
+            db.search({mysqlid:keys.mysqlid}, function (err, res) {
+                if (err) {
+                    console.log('ERROR');
+                    return;
+                }
+                if (res.length === 0) {
+                    db.create(keys, function (err, n) {
+                        if (err) console.log('ERROR create')
+                    });
+                } else {
+                    console.log('found mysqlid:' + keys.mysqlid);
+                }
+                if (i === nodes.length - 1) { // we finished inserting nodes
+                    json.links.forEach(function (link) {
+                        console.log(link);
+                        db.search({mysqlid:link.src_id.toString()},
+                                function (err, res1) {
+                            if (err) {
+                                console.log('LINK ERR');
+                                return;
+                            }
+                            db.search({mysqlid:link.tgt_id.toString()},
+                                    function (err, res2) {
+                                if (err) {
+                                    console.log('LINK ERR');
+                                    return;
+                                }
+                                db.create({src_id: res1[0], tgt_id: res2[0]},
+                                        function () {});
+                            });
+                        });
+                    });
+
+                }
+            })
+        }, json);
+        res.status(200);
+        res.send();
+    }; // importJSON()
+
+
+    /*
+     * getFile()
+     *
+     * Method: GET
+     * URI: /api/file/
+     *
+     * Get a file from the filesystem
+     *
+     * HTTP status codes:
+     * - 200: OK (file retrieved)
+     * - 400: Bad Request (not formatted correctly)
+     * - 404: Not Found (the file does not exist)
+     */
+    getFile = function (req, res) {
+        var path = fileSystem + decodeURIComponent(req.params.path);
+        path = path.replace(/:/g, '').replace(/\/+/g, '/');
+        fs.exists(path, function (exists) {
+            if (!exists) {
+                httpStatus(res, 404, 'file');
+                return;
+            }
+            var stream = fs.createReadStream(path, {bufferSize: 64 * 1024});
+            res.writeHead(200);
+            stream.pipe(res);
+        });
+    }; // getFile()
+
+
+    /**
+     * Sets the appropriate response and status code for multiple params or not
+     * @param {boolean} isArray - did client sent an array or not
+     * @param {array} doc - the database response
+     * @param {} result - the returned object or string
+     * @return {{status: number, content: result}} - the results to send
+     */
+    function getMultipleResponse(doc) {
+        var result = { fail: true, partial: false };
+        for (var i in doc) {
+            if (null === doc[i]) {
+                result.partial = true;
+            } else {
+                result.fail = false;
+            }
+        }
+        return result;
     }
-    return false;
-}});
-*/
-/*
-			if(i==0){
-				continue;
-			}
-			if(result[tempField]!='')
-				result[tempField]+= " "+terms[i];
-			else
-				result[tempField]+=terms[i];
-*/
-		}
-		mod.search( result, function(error, doc){
-			if (error)
-			{
-				res.status(409).send('Read Error, please change your values');
-				return;
-			}
-			res.status(200).send(doc);
-		});
-	}
 
-	search_mongo = function(req, res){
-		var query, sort, limit, skip;
-		if (req.body.queryobj)
-		{
-			var data = JSON.parse(req.body.queryobj);
-			query =  data.query;
-			sort =  data.sort;
-			limit =  data.limit | 0;
-			skip =  data.skip | 0;
-		}
-		else
-		{
-			query = req.body.query;
-			sort = req.body.sort;
-			limit = req.body.limit | 0;
-			skip = req.body.skip | 0;
-		}
-		function mongoops (obj)
-		{
-			for (var key in obj)
-			{
-				if (!key) continue;
-				if (typeof obj[key] === 'object' && obj[key] !== null)
-				{
-					// recursive
-					mongoops(obj[key]);
-				}
-				if (typeof obj[key] === "string")
-				{
-					// replace regexps from json
-					if (obj[key].indexOf('REGEX_') === 0 )
-					{
-						obj[key] = new RegExp(obj[key].replace('REGEX_',''));
-					}
-				}
-			}
-		}
-		mongoops(query);
-		mod.connection( function(err, database )
-		{
-			if (err)
-			{
-				res.status(409).send('mongodb connection error');
-			}
-			else
-			{
-				database.collection("node", function(err, collection) {
-					if (err)
-					{
-						console.log(err);
-						res.status(409).send('mongodb collection retrival error');
-					}
-					else
-					{
-						collection.find(query).sort(sort).skip(skip).limit(limit).toArray(function(err, results) {
-							if (err)
-								res.status(409).send('mongodb find error');
-							else
-							{
-								var ids=[];
-								for(r in results)
-									ids.push((results[r]._id).toString());
-								res.status(200).json(ids);
-							}
-						});
-					}
-				});
-			}
-		});
-	}
+    function httpStatus(res, code, data) {
+        res.status(code);
+        if (code < 300) {
+            res.json(data);
+            return;
+        }
+        var e = data + ' error: ';
+        switch (code) {
+            case 400: e += 'Bad request (empty or not well-formed)'; break;
+            case 401: e += 'Unauthorized (authentication required)'; break;
+            case 403: e += 'Forbidden (permission required)'; break;
+            case 404: e += 'Not found'; break;
+            case 409: e += 'Conflict ()'; break;
+            case 501: e += 'Not implemented (contact an administrator)'; break;
+            default:  e += 'Unknown error code';
+        }
+        res.send(e);
+    }
 
-	/**
-	 * Import a JSON graph commit from our current Php Server
-	 *
-	 */
-	importJSON = function( req, res )
-	{
-		var json = JSON.parse(req.body.text);
-		json.nodes.forEach( function(node, i, nodes){
-			var keys = node.keys;
-			keys.mysqlid = node.id;
-			mod.search({mysqlid:keys.mysqlid}, function(err, res){
-				if(err)
-				{
-					console.log('ERROR');
-					return;
-				}
-				if(res.length === 0)
-				{
-					mod.create( keys, function(err, n){
-						if(err) console.log('ERROR create')
-					});
-				}
-				else
-				{
-					console.log('found mysqlid:'+keys.mysqlid);
-				}
-				if (i===nodes.length -1){  // we finished inserting nodes
-					json.links.forEach( function(link){
-						console.log( link );
-						mod.search({mysqlid:link.src_id.toString()}, function(err, res1){
-							if (!err){
-								mod.search({mysqlid:link.tgt_id.toString()}, function(err, res2){
-									if (!err)
-									{
-										mod.create({src_id: res1[0], tgt_id: res2[0]}, function(){});
-									}
-									else
-									{
-										console.log('LINK ERR');
-									}
-								});
-							}
-							else
-							{
-								console.log('LINK ERR');
-							}
-						});
-					});
+    /*
+     * Register the operations
+     */
 
-				}
-			})
-		}, json);
-		res.status(200);
-		res.send();
-	};
+    // CRUD operations
+    app.post('/api/create/', create);
+    app.get('/api/read/:id', read);
+    app.post('/api/read/', read);
+    app.put('/api/update/:id', update);
+    app.delete('/api/delete/:id', deleteNode);
 
-	getFile= function(req,res){
-		var path = fileSystem+decodeURIComponent(req.params.path).replace(/:/g,"").replace(/\/+/g,"/");
-		fs.exists(path, function(exists){
-			if(exists)
-			{
-				var stream = fs.createReadStream( path, { bufferSize: 64 * 1024});
-				res.writeHead(200);
-				stream.pipe(res);
-			}
-			else
-			{
-				res.status(404);
-				res.send('File not found');
-			}
-		});
-	};
+    // Search operations
+    app.get('/api/search/:query(*)', search);
+    app.get('/api/search_one/:query(*)', search_one);
+    app.post('/api/search_mongo', search_mongo);
+    app.get('/api/graph/', graph);
 
-	//
-	// Extra operations
-	//
-	app.get('/api/graph/:id', graph);
-	app.get('/api/file/:path(*)',getFile);
-	app.post('/api/import', importJSON);
-	//app.get('/subdirs/:path',getSubdirs);
-	//app.get('/subdirs',getSubdirs);
+    // CRUD operations (deprecated)
+    app.post('/api/', create);
+    app.get('/api/:id', read);
+    app.put('/api/:id', update);
+    app.delete('/api/:id', deleteNode);
 
-	//
-	// Alternative Operations ()
-	//
-	app.get('/api/search/:query(*)', search);
-	app.post('/api/search_mongo', search_mongo);
-	app.get('/api/graph/', graph);
-	app.get('/api/', read);
-	//app.put('/', update);
-	//app.delete('/', deleteNode);
-
-	//
-	// CRUDS operations
-	//
-	app.post('/api/', create);
-	app.get('/api/:id', read);
-	app.put('/api/:id', update);
-	app.delete('/api/:id', deleteNode);
+    // Extra operations
+    app.get('/api/graph/:id', graph);
+    app.get('/api/file/:path(*)', getFile); // untested
+    app.post('/api/import', importJSON); // untested
+    //app.get('/subdirs/:path', getSubdirs);
+    //app.get('/subdirs', getSubdirs);
 }
+
+

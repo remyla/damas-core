@@ -19,7 +19,8 @@ Copy the default configuration file `conf_install.json` to `conf.json` and edit 
                 "Cert": "cert.pem",
                 "Key": "key.pem"
         },
-        "mongoDB" : {
+        "db" : "mongodb",
+        "mongodb" : {
                 "host" : "localhost",
                 "collection" : "node",
                 "port" : 27017,
@@ -44,7 +45,8 @@ Edit it according to your needs:
     * `passwordHashAlgorithm`: `sha1` or `md5`
     * `secret`:  encryption salt string
     * `exp`: token expiration time in seconds
-* `mongoDB`: options to connect to the database. Keep the default values to use a mongodb located on the same machine
+* `db`: which Database Management System to use. Available: `debug`, `mongodb`. If unknown, it uses `debug`.
+* `mongodb`: options to connect to the database. Keep the default values to use a mongodb located on the same machine
 * `statics`: a list of relative or absolute pathes to be served by the server. It contains server ressources and possible interfaces
 * `fileSystem`: the path to the indexed files root directory to serve assets from
 
@@ -57,6 +59,10 @@ openssl req -new -x509 -days 9999 -nodes -out cert.pem -keyout key.pem
 Run node in the server folder:
 ```
 DEBUG=app:* node .
+```
+On windows:
+```
+set DEBUG=app:* & node .
 ```
 The server will be listening and waiting for commands on ports 8090 and 8443 by default. You can specify different ports and debug options. This could be useful to run a server for tests:
 ```

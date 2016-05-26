@@ -1,17 +1,18 @@
 module.exports = function(app){
-	var mongoModel = require( '../model.js' );
-	var conf = require( '../conf.json' );
+	var db = app.locals.db;
+	var conf = app.locals.conf;
+
 	var fs = require('fs');
 	var multer = require('multer');
 	var ncp = require('ncp').ncp;
-	var mod = new mongoModel();
 	var mkdirp = require('mkdirp');
 	var crypto = require('crypto');
-	mod.connection( function(){});
+
 	ncp.limit=16;
 	var checksum;
 	var tempFile;
 	var fileSystem=conf.fileSystem;
+
 	app.use( multer({
 		onError: function (error, next) {
 			console.log(error);
@@ -46,7 +47,7 @@ module.exports = function(app){
 			console.log(typeof(req.body.id));
 			if (req.body.id === 'null')
 			{
-				mod.create(keys, function(error, doc)
+				db.create(keys, function(error, doc)
 				{
 					if (error)
 					{
@@ -56,13 +57,13 @@ module.exports = function(app){
 					else
 					{
 						res.status(201);
-						res.send(doc);
+						res.send(doc[0]);
 					}
 				});
 			}
 			else
 			{
-				mod.update([req.body.id], keys, function(error, doc)
+				db.update([req.body.id], keys, function(error, doc)
 				{
 					if (error)
 					{
@@ -101,7 +102,7 @@ module.exports = function(app){
 			keys.time=Date.now();
 			keys.file=decodeURIComponent(req.body.path);
 			keys.checksum=checksum;
-			mod.create(keys, function(error, doc)
+			db.create(keys, function(error, doc)
 			{
 				if( error )
 				{
@@ -138,7 +139,7 @@ module.exports = function(app){
 			keys.author=req.connection.remoteAddress;
 			keys.time=Date.now();
 			keys.checksum=checksum;
-			mod.update(req.body.id,keys, function(error, doc)
+			db.update(req.body.id,keys, function(error, doc)
 			{
 				if( error )
 				{
