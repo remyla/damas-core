@@ -177,7 +177,7 @@
      */
     damas.update = function (id, keys, callback) {
         if (Array.isArray(id)) {
-            id = id.join(',');
+            id = id.join('<sep>');
         }
         function req_callback(req) {
             if (300 > req.status) {

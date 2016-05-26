@@ -103,7 +103,7 @@ module.exports = function (app, express) {
      */
     read = function (req, res) {
         if (req.params.id) {
-            var ids = req.params.id.split(',');
+            var ids = req.params.id.split('<sep>');
             var isArray = ids.length > 1;
         } else if (req.body) {
             var ids = req.body;
@@ -152,7 +152,7 @@ module.exports = function (app, express) {
             return;
         }
 
-        var ids = req.params.id.split(',');
+        var ids = req.params.id.split('<sep>');
         var body = req.body;
         events.fire('pre-update', ids, body).then(function (data) {
             if (data.status) {
@@ -194,7 +194,7 @@ module.exports = function (app, express) {
      * - 404: Not Found (all the nodes do not exist)
      */
     deleteNode = function (req, res) {
-        var ids = req.params.id.split(',');
+        var ids = req.params.id.split('<sep>');
         events.fire('pre-remove', ids).then(function (data) {
             if (data.status) {
                 httpStatus(res, data.status, 'remove');
@@ -235,7 +235,7 @@ module.exports = function (app, express) {
             httpStatus(res, 400, 'graph');
             return;
         }
-        db.graph(id.split(','), function (error, nodes) {
+        db.graph(id.split('<sep>'), function (error, nodes) {
             if (error) {
                 httpStatus(res, 409, 'graph');
                 return;

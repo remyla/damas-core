@@ -77,7 +77,7 @@ class http_connection( object ) :
 		@returns {Hash} updated node or false on failure
 		'''
 		if isinstance(id_, (tuple,list,set)):
-			id_ = ",".join(id_)
+			id_ = "<sep>".join(id_)
 		headers = {'content-type': 'application/json'}
 		headers.update(self.headers)
 		r = requests.put(self.serverURL+'/update/'+urllib.quote(id_, safe=''),
@@ -93,7 +93,7 @@ class http_connection( object ) :
 		@returns {Boolean} True on success, False otherwise
 		'''
 		if isinstance(id_, (tuple,list,set)):
-			id_ = ",".join(id_)
+			id_ = "<sep>".join(id_)
 		r = requests.delete(self.serverURL+'/delete/'+urllib.quote(id_, safe=''),
 			headers=self.headers, verify=False)
 		if r.status_code == 200 or r.status_code == 207:
@@ -142,7 +142,7 @@ class http_connection( object ) :
 		@returns {Hash} node or false on failure
 		'''
 		if isinstance(id_, (tuple,list,set)):
-			id_ = ",".join(id_)
+			id_ = "<sep>".join(id_)
 		r = requests.get(self.serverURL+'/graph/'+urllib.quote(id_, safe=''),
 			headers=self.headers, verify=False)
 		if r.status_code == 200 or r.status_code == 207:
