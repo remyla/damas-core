@@ -12,7 +12,7 @@ function array_sync(array, walker, callback) {
             ++next;
         } else if (next < array.length) {
             walker(array[next++], function (result) {
-                results.push(result);
+                results = results.concat(result);
                 process.nextTick(walk);
             });
         }
@@ -71,7 +71,7 @@ module.exports = function (conf) {
      * @param {function} route - Callback function in case of failure
      * @param {function} callback - Function needing the collection
      */
-    self.getCollection = function (route, callback) {
+    function getCollection (route, callback) {
         self.connect(function (err, conn) {
             if (err || !conn) {
                 route(true);
@@ -100,13 +100,13 @@ module.exports = function (conf) {
      * @param {function} callback - function({boolean} err, {array} nodes)
      */
     self.create = function (nodes, callback) {
-        self.getCollection(callback, function (coll) {
+        getCollection(callback, function (coll) {
             array_sync(nodes, function (node, cb) {
                 if (node._id && ObjectID.isValid(node._id)) {
                     node._id = new ObjectID(node._id);
                 }
                 coll.insert(node, {safe: true}, function (err, result) {
-                    cb(err ? null : result.ops[0]);
+                    cb(err ? null : result.ops);
                 });
             }, function (array) {
                 callback(false, array);
@@ -121,9 +121,9 @@ module.exports = function (conf) {
      * @param {function} callback - Callback function to routes.js
      */
     self.read = function (ids, callback) {
-        self.getCollection(callback, function (coll) {
+        getCollection(callback, function (coll) {
             array_sync(exportIds(ids), function (id, cb) {
-                coll.findOne({'_id': id}, function (err, node) {
+                coll.findOne({_id: id}, function (err, node) {
                     cb(err ? null : node);
                 });
             }, function (array) {
@@ -139,7 +139,7 @@ module.exports = function (conf) {
      * @param {function} callback - Callback function to routes.js
      */
     self.update = function (ids, keys, callback) {
-        self.getCollection(callback, function (coll) {
+        getCollection(callback, function (coll) {
             var ids_o = exportIds(ids);
             var keysToUnset = {};
             var keysToSet = {};
@@ -158,7 +158,7 @@ module.exports = function (conf) {
             if (Object.keys(keysToUnset).length > 0) {
                 toUpdate.$unset = keysToUnset;
             }
-            coll.update({'_id': {$in: ids_o}}, toUpdate, {multi: true},
+            coll.update({_id: {$in: ids_o}}, toUpdate, {multi: true},
                         function (err, status) {
                 if (err) {
                     callback(true);
@@ -182,10 +182,14 @@ module.exports = function (conf) {
      * @param {function} callback - Callback function to routes.js
      */
     self.remove = function (ids, callback) {
-        self.getCollection(callback, function (coll) {
+        getCollection(callback, function (coll) {
             array_sync(exportIds(ids), function (id, cb) {
-                coll.remove({'_id': id}, function (err, result) {
-                    cb((err || 0 === result.result.n) ? null : id);
+                coll.remove({_id: id}, function (err, result) {
+                    if (err || 0 === result.result.n) {
+                        cb(null);
+                    } else {
+                        cb(id);
+                    }
                 });
             }, function (array) {
                 callback(false, array);
@@ -200,8 +204,8 @@ module.exports = function (conf) {
      * @param {function} callback - Callback function to routes.js
      */
     self.search = function (keys, callback) {
-        self.getCollection(callback, function (coll) {
-            coll.find(keys, {'_id':true}).toArray(function (err, results) {
+        getCollection(callback, function (coll) {
+            coll.find(keys, {_id: true}).toArray(function (err, results) {
                 if (err) {
                     callback(true);
                     return;
@@ -223,14 +227,13 @@ module.exports = function (conf) {
      * Higher-level functions
      */
 
-    self.links_r = function (ids, links, callback) {
+    function links_r (ids, links, callback) {
         var newIds = [];
-        var self = this;
-        if (links==null) {
+        if (links == null) {
             links=[];
         }
-        self.getCollection(callback, function (coll) {
-            coll.find({'tgt_id': {$in: ids}}).toArray(function (err, results) {
+        getCollection(callback, function (coll) {
+            coll.find({tgt_id: {$in: ids}}).toArray(function (err, results) {
                 if (err) {
                     callback(true);
                     return;
@@ -248,7 +251,7 @@ module.exports = function (conf) {
                 if (newIds.length < 1) {
                     callback(false, links);
                 } else {
-                    self.links_r(newIds, links, callback);
+                    links_r(newIds, links, callback);
                 }
             });
         });
@@ -260,8 +263,8 @@ module.exports = function (conf) {
      * @param {Array} ids - Array of node indexes
      * @param {Function} callback - function (err, result) to call
      */
-    this.graph = function (ids, callback){
-        self.links_r(ids, null, function (err, links) {
+    self.graph = function (ids, callback){
+        links_r(ids, null, function (err, links) {
             if (err || !links) {
                 callback(true);
                 return;
@@ -302,7 +305,7 @@ module.exports = function (conf) {
      * @param {function} callback - Callback function to routes.js
      */
     self.mongo_search = function (query, sort, skip, limit, callback) {
-        self.getCollection(callback, function (coll) {
+        getCollection(callback, function (coll) {
             var find = coll.find(query).sort(sort).skip(skip).limit(limit);
             find.toArray(function (err, results) {
                 if (err) {
@@ -342,7 +345,7 @@ module.exports = function (conf) {
     }
 
     function textSearch2MongoQuery( str ) {
-        var terms = str.split(" ");
+        var terms = str.split(' ');
         var pair;
         var result = {};
         for (var i = 0; i < terms.length; i++) {
@@ -391,7 +394,7 @@ module.exports = function (conf) {
             }
 db.things.find({$where: function () {
   for (var key in this) {
-    if (this[key] === "bar") {
+    if (this[key] === 'bar') {
       return true;
     }
     return false;
