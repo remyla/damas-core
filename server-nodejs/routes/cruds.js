@@ -8,7 +8,24 @@ module.exports = function (app, express) {
     //methodOverride = require('method-override'),
     var fs = require('fs');
     var events = require('../events');
+    var sep = '<sep>';
 
+    function getRequestIds(req, isArrayCallback) {
+        if (req.params.id) {
+            var ids = req.params.id.split(sep);
+            var isArray = (ids.length > 1);
+        } else if (req.body) {
+            var isArray = Array.isArray(req.body);
+            var ids = isArray ? req.body : [req.body];
+        }
+        if (!ids || ids.some(elem => typeof elem !== 'string')) {
+            return false;
+        }
+        if ('function' === typeof isArrayCallback) {
+            isArrayCallback(isArray);
+        }
+        return ids;
+    }
 /*
     app.use(methodOverride(function (req, res) {
         if (req.body && typeof req.body === 'object' && '_method' in req.body) {
@@ -102,19 +119,12 @@ module.exports = function (app, express) {
      * - 404: Not Found (all the nodes do not exist)
      */
     read = function (req, res) {
-        if (req.params.id) {
-            var ids = req.params.id.split(',');
-            var isArray = ids.length > 1;
-        } else if (req.body) {
-            var ids = req.body;
-            var isArray = Array.isArray(ids);
-            if (!isArray) {
-                ids = [ids];
-            }
-        } else {
-            httpStatus(res, 400, 'read');
-            return;
+        var isArray = false;
+        var ids = getRequestIds(req, function (isIt) { isArray = isIt; });
+        if (!ids) {
+            return httpStatus(res, 400, 'Read');
         }
+
         db.read(ids, function (error, doc) {
             if (error) {
                 httpStatus(res, 409, 'read');
@@ -147,12 +157,12 @@ module.exports = function (app, express) {
      * - 404: Not Found (all the nodes do not exist)
      */
     update = function (req, res) {
-        if (Object.keys(req.body).length === 0) {
+        if (Object.keys(req.body).length === 0 || !req.params.id) {
             httpStatus(res, 400, 'update');
             return;
         }
 
-        var ids = req.params.id.split(',');
+        var ids = req.params.id.split(sep);
         var body = req.body;
         events.fire('pre-update', ids, body).then(function (data) {
             if (data.status) {
@@ -194,7 +204,11 @@ module.exports = function (app, express) {
      * - 404: Not Found (all the nodes do not exist)
      */
     deleteNode = function (req, res) {
-        var ids = req.params.id.split(',');
+        var ids = getRequestIds(req);
+        if (!ids) {
+            return httpStatus(res, 400, 'Remove');
+        }
+
         events.fire('pre-remove', ids).then(function (data) {
             if (data.status) {
                 httpStatus(res, data.status, 'remove');
@@ -208,7 +222,7 @@ module.exports = function (app, express) {
                 } else if (response.partial) {
                     httpStatus(res, 207, doc);
                 } else {
-                    httpStatus(res, 200, 1 < ids.length ? doc : doc[0]);
+                    httpStatus(res, 200, 1 === doc.length ? doc[0] : doc);
                 }
             });
         });
@@ -230,12 +244,12 @@ module.exports = function (app, express) {
      * - 404: Not Found (all the nodes do not exist)
      */
     graph = function (req, res) {
-        var id = req.params.id || req.body.id;
-        if (!id || id == 'undefined') {
-            httpStatus(res, 400, 'graph');
-            return;
+        var ids = getRequestIds(req);
+        if (!ids) {
+            return httpStatus(res, 400, 'Graph');
         }
-        db.graph(id.split(','), function (error, nodes) {
+
+        db.graph(ids, function (error, nodes) {
             if (error) {
                 httpStatus(res, 409, 'graph');
                 return;
@@ -246,7 +260,8 @@ module.exports = function (app, express) {
             } else if (response.partial) {
                 httpStatus(res, 207, nodes);
             } else {
-                httpStatus(res, 200, true ? nodes : nodes[0]); // FIXME
+                // We never need a single element
+                httpStatus(res, 200, nodes);
             }
         });
     }; // graph()
@@ -452,11 +467,9 @@ module.exports = function (app, express) {
 
 
     /**
-     * Sets the appropriate response and status code for multiple params or not
-     * @param {boolean} isArray - did client sent an array or not
+     * Tells whether a response is failed or incomplete (contains null?)
      * @param {array} doc - the database response
-     * @param {} result - the returned object or string
-     * @return {{status: number, content: result}} - the results to send
+     * @return {{fail: boolean, partial: boolean}} - the results to send
      */
     function getMultipleResponse(doc) {
         var result = { fail: true, partial: false };
@@ -499,12 +512,15 @@ module.exports = function (app, express) {
     app.post('/api/read/', read);
     app.put('/api/update/:id', update);
     app.delete('/api/delete/:id', deleteNode);
+    app.delete('/api/delete/', deleteNode);
 
     // Search operations
     app.get('/api/search/:query(*)', search);
     app.get('/api/search_one/:query(*)', search_one);
     app.post('/api/search_mongo', search_mongo);
-    app.get('/api/graph/', graph);
+    app.get('/api/graph/', graph); // Fix
+    app.get('/api/graph/:id', graph);
+    app.post('/api/graph/', graph);
 
     // CRUD operations (deprecated)
     app.post('/api/', create);
@@ -513,7 +529,6 @@ module.exports = function (app, express) {
     app.delete('/api/:id', deleteNode);
 
     // Extra operations
-    app.get('/api/graph/:id', graph);
     app.get('/api/file/:path(*)', getFile); // untested
     app.post('/api/import', importJSON); // untested
     //app.get('/subdirs/:path', getSubdirs);

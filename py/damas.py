@@ -25,10 +25,13 @@
 
 import json
 import requests
+import urllib
 
 #requests.packages.urllib3.disable_warnings() # remove certificate warning
 
 class http_connection( object ) :
+	__sep = '<sep>'
+
 	'''
 	Methods to interact with a remote DAMAS server using HTTP
 	'''
@@ -44,9 +47,10 @@ class http_connection( object ) :
 		@param {Hash} keys of the new node
 		@returns {Hash} New node on success, false otherwise
 		'''
-		headers = {'content-type': 'application/json'}
+		headers = {'Content-Type': 'application/json'}
 		headers.update(self.headers)
-		r = requests.post(self.serverURL+"/create/", data=json.dumps(keys), headers=headers, verify=False)
+		r = requests.post(self.serverURL+"/create/", data=json.dumps(keys),
+			headers=headers, verify=False)
 		if r.status_code == 201 or r.status_code == 207:
 			return json.loads(r.text)
 		return None
@@ -57,9 +61,10 @@ class http_connection( object ) :
 		@param {String} id_ the internal node index to search
 		@returns {Hash} node or false on failure
 		'''
-		headers = {'content-type': 'application/json'}
+		headers = {'Content-Type': 'application/json'}
 		headers.update(self.headers)
-		r = requests.post(self.serverURL+"/read/", data=json.dumps(id_), headers=headers, verify=False)
+		r = requests.post(self.serverURL+"/read/", data=json.dumps(id_),
+			headers=headers, verify=False)
 		if r.status_code == 200 or r.status_code == 207:
 			return json.loads(r.text)
 		return None
@@ -74,10 +79,11 @@ class http_connection( object ) :
 		@returns {Hash} updated node or false on failure
 		'''
 		if isinstance(id_, (tuple,list,set)):
-			id_ = ",".join(id_)
-		headers = {'content-type': 'application/json'}
+			id_ = __sep.join(id_)
+		headers = {'Content-Type': 'application/json'}
 		headers.update(self.headers)
-		r = requests.put(self.serverURL+'/update/'+id_, data=json.dumps(keys), headers=headers, verify=False)
+		r = requests.put(self.serverURL+'/update/'+urllib.quote(id_, safe=''),
+			data=json.dumps(keys), headers=headers, verify=False)
 		if r.status_code == 200 or r.status_code == 207:
 			return json.loads(r.text)
 		return None
@@ -89,8 +95,9 @@ class http_connection( object ) :
 		@returns {Boolean} True on success, False otherwise
 		'''
 		if isinstance(id_, (tuple,list,set)):
-			id_ = ",".join(id_)
-		r = requests.delete(self.serverURL+'/delete/'+id_, headers=self.headers, verify=False)
+			id_ = __sep.join(id_)
+		r = requests.delete(self.serverURL+'/delete/'+urllib.quote(id_, safe=''),
+			headers=self.headers, verify=False)
 		if r.status_code == 200 or r.status_code == 207:
 			return json.loads(r.text)
 		return None
@@ -101,28 +108,30 @@ class http_connection( object ) :
 		@param {String} query string
 		@returns {Array} array of element indexes or None if no element found
 		'''
-		r = requests.get(self.serverURL+'/search/'+query, headers=self.headers, verify=False)
+		r = requests.get(self.serverURL+'/search/'+urllib.quote(query, safe=''),
+			headers=self.headers, verify=False)
 		if r.status_code == 200:
 			return json.loads(r.text)
 		return None
 
 	def search_one( self, query ) :
 		'''
-		Find nodes wearing the specified key(s) and return the first
-                occurence found
+		Find nodes wearing the specified key(s) and return the first occurence
 		@param {String} query string
 		@returns {Array} array of element indexes or None if no element found
 		'''
-		r = requests.get(self.serverURL+'/search_one/'+query, headers=self.headers, verify=False)
+		r = requests.get(self.serverURL+'/search_one/'+
+			urllib.quote(query, safe=''), headers=self.headers, verify=False)
 		if r.status_code == 200:
 			return json.loads(r.text)
 		return None
 
 	def search_mongo( self, query, sort, limit, skip ) :
 		data = {"query":query, "sort":sort, "limit":limit, "skip":skip}
-		headers = {'content-type': 'application/json'}
+		headers = {'Content-Type': 'application/json'}
 		headers.update(self.headers)
-		r = requests.post(self.serverURL+'/search_mongo', data=json.dumps(data), headers=headers, verify=False)
+		r = requests.post(self.serverURL+'/search_mongo', data=json.dumps(data),
+			headers=headers, verify=False)
 		if r.status_code == 200:
 			return json.loads(r.text)
 		return None
@@ -134,8 +143,9 @@ class http_connection( object ) :
 		@returns {Hash} node or false on failure
 		'''
 		if isinstance(id_, (tuple,list,set)):
-			id_ = ",".join(id_)
-		r = requests.get(self.serverURL+'/graph/'+id_, headers=self.headers, verify=False)
+			id_ = __sep.join(id_)
+		r = requests.get(self.serverURL+'/graph/'+urllib.quote(id_, safe=''),
+			headers=self.headers, verify=False)
 		if r.status_code == 200 or r.status_code == 207:
 			return json.loads(r.text)
 		return None
@@ -146,7 +156,8 @@ class http_connection( object ) :
 		@param {String} id_ the internal node index
 		@returns {Boolean} True on success, False otherwise
 		'''
-		r = requests.put(self.serverURL+'/lock/'+id_, headers=self.headers, verify=False)
+		r = requests.put(self.serverURL+'/lock/'+urllib.quote(id_, safe=''),
+			headers=self.headers, verify=False)
 		return r.status_code == 200
 
 	def unlock( self, id_ ) :
@@ -155,7 +166,8 @@ class http_connection( object ) :
 		@param {String} id_ the internal node index
 		@returns {Boolean} True on success, False otherwise
 		'''
-		r = requests.put(self.serverURL+'/unlock/'+id_, headers=self.headers, verify=False)
+		r = requests.put(self.serverURL+'/unlock/'+urllib.quote(id_, safe=''),
+			headers=self.headers, verify=False)
 		return r.status_code == 200
 
 	def version( self, id_, keys ) :
@@ -164,9 +176,10 @@ class http_connection( object ) :
 		@param {Hash} keys of the new node
 		@returns {Hash} New node on success, false otherwise
 		'''
-		headers = {'content-type': 'application/json'}
+		headers = {'Content-Type': 'application/json'}
 		headers.update(self.headers)
-		r = requests.post('%s/version/%s' % (self.serverURL, id_), data=json.dumps(keys), headers=headers, verify=False)
+		r = requests.post('%s/version/%s' % (self.serverURL, id_),
+			data=json.dumps(keys), headers=headers, verify=False)
 		if r.status_code == 201:
 			return json.loads(r.text)
 		return None
@@ -179,7 +192,7 @@ class http_connection( object ) :
 		@returns {Hash} Array of created edges ids on success, None otherwise
 		'''
 		data = {"target":target, "sources":sources, "keys":keys}
-		headers = {'content-type': 'application/json'}
+		headers = {'Content-Type': 'application/json'}
 		headers.update(self.headers)
 		r = requests.post('%s/link' % (self.serverURL), data=json.dumps(data), headers=headers, verify=False)
 		if r.status_code == 200:
@@ -194,7 +207,8 @@ class http_connection( object ) :
 		'''
 		@return {Boolean} True on success, False otherwise
 		'''
-		r = requests.post(self.serverURL+'/signIn', data={"username":username, "password":password}, verify=False)
+		r = requests.post(self.serverURL+'/signIn', data={"username":username,
+			"password":password}, verify=False)
 		if r.status_code == 200:
 			self.token = json.loads(r.text)
 			self.headers['Authorization'] = 'Bearer ' + self.token['token']
@@ -217,7 +231,8 @@ class http_connection( object ) :
 		'''
 		@return {dict} a dictionary containing username and userclass on success, None otherwise
 		'''
-		r = requests.get(self.serverURL+'/verify', headers=self.headers, verify=False )
+		r = requests.get(self.serverURL+'/verify', headers=self.headers,
+			verify=False )
 		if r.status_code == 200:
 			return True
 		return False
