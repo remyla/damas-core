@@ -30,6 +30,8 @@ import urllib
 #requests.packages.urllib3.disable_warnings() # remove certificate warning
 
 class http_connection( object ) :
+	__sep = '<sep>'
+
 	'''
 	Methods to interact with a remote DAMAS server using HTTP
 	'''
@@ -45,7 +47,7 @@ class http_connection( object ) :
 		@param {Hash} keys of the new node
 		@returns {Hash} New node on success, false otherwise
 		'''
-		headers = {'content-type': 'application/json'}
+		headers = {'Content-Type': 'application/json'}
 		headers.update(self.headers)
 		r = requests.post(self.serverURL+"/create/", data=json.dumps(keys),
 			headers=headers, verify=False)
@@ -59,7 +61,7 @@ class http_connection( object ) :
 		@param {String} id_ the internal node index to search
 		@returns {Hash} node or false on failure
 		'''
-		headers = {'content-type': 'application/json'}
+		headers = {'Content-Type': 'application/json'}
 		headers.update(self.headers)
 		r = requests.post(self.serverURL+"/read/", data=json.dumps(id_),
 			headers=headers, verify=False)
@@ -77,8 +79,8 @@ class http_connection( object ) :
 		@returns {Hash} updated node or false on failure
 		'''
 		if isinstance(id_, (tuple,list,set)):
-			id_ = "<sep>".join(id_)
-		headers = {'content-type': 'application/json'}
+			id_ = __sep.join(id_)
+		headers = {'Content-Type': 'application/json'}
 		headers.update(self.headers)
 		r = requests.put(self.serverURL+'/update/'+urllib.quote(id_, safe=''),
 			data=json.dumps(keys), headers=headers, verify=False)
@@ -93,7 +95,7 @@ class http_connection( object ) :
 		@returns {Boolean} True on success, False otherwise
 		'''
 		if isinstance(id_, (tuple,list,set)):
-			id_ = "<sep>".join(id_)
+			id_ = __sep.join(id_)
 		r = requests.delete(self.serverURL+'/delete/'+urllib.quote(id_, safe=''),
 			headers=self.headers, verify=False)
 		if r.status_code == 200 or r.status_code == 207:
@@ -114,8 +116,7 @@ class http_connection( object ) :
 
 	def search_one( self, query ) :
 		'''
-		Find nodes wearing the specified key(s) and return the first
-				occurence found
+		Find nodes wearing the specified key(s) and return the first occurence
 		@param {String} query string
 		@returns {Array} array of element indexes or None if no element found
 		'''
@@ -127,7 +128,7 @@ class http_connection( object ) :
 
 	def search_mongo( self, query, sort, limit, skip ) :
 		data = {"query":query, "sort":sort, "limit":limit, "skip":skip}
-		headers = {'content-type': 'application/json'}
+		headers = {'Content-Type': 'application/json'}
 		headers.update(self.headers)
 		r = requests.post(self.serverURL+'/search_mongo', data=json.dumps(data),
 			headers=headers, verify=False)
@@ -142,7 +143,7 @@ class http_connection( object ) :
 		@returns {Hash} node or false on failure
 		'''
 		if isinstance(id_, (tuple,list,set)):
-			id_ = "<sep>".join(id_)
+			id_ = __sep.join(id_)
 		r = requests.get(self.serverURL+'/graph/'+urllib.quote(id_, safe=''),
 			headers=self.headers, verify=False)
 		if r.status_code == 200 or r.status_code == 207:
@@ -175,7 +176,7 @@ class http_connection( object ) :
 		@param {Hash} keys of the new node
 		@returns {Hash} New node on success, false otherwise
 		'''
-		headers = {'content-type': 'application/json'}
+		headers = {'Content-Type': 'application/json'}
 		headers.update(self.headers)
 		r = requests.post('%s/version/%s' % (self.serverURL, id_),
 			data=json.dumps(keys), headers=headers, verify=False)
@@ -191,7 +192,7 @@ class http_connection( object ) :
 		@returns {Hash} Array of created edges ids on success, None otherwise
 		'''
 		data = {"target":target, "sources":sources, "keys":keys}
-		headers = {'content-type': 'application/json'}
+		headers = {'Content-Type': 'application/json'}
 		headers.update(self.headers)
 		r = requests.post('%s/link' % (self.serverURL), data=json.dumps(data), headers=headers, verify=False)
 		if r.status_code == 200:

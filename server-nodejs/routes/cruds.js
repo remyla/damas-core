@@ -8,11 +8,11 @@ module.exports = function (app, express) {
     //methodOverride = require('method-override'),
     var fs = require('fs');
     var events = require('../events');
-    var $sep = '<sep>';
+    var sep = '<sep>';
 
     function getRequestIds(req, isArrayCallback) {
         if (req.params.id) {
-            var ids = req.params.id.split($sep);
+            var ids = req.params.id.split(sep);
             var isArray = (ids.length > 1);
         } else if (req.body) {
             var isArray = Array.isArray(req.body);
@@ -162,7 +162,7 @@ module.exports = function (app, express) {
             return;
         }
 
-        var ids = req.params.id.split($sep);
+        var ids = req.params.id.split(sep);
         var body = req.body;
         events.fire('pre-update', ids, body).then(function (data) {
             if (data.status) {
@@ -513,7 +513,6 @@ module.exports = function (app, express) {
     app.put('/api/update/:id', update);
     app.delete('/api/delete/:id', deleteNode);
     app.delete('/api/delete/', deleteNode);
-    app.post('/api/delete/', deleteNode);
 
     // Search operations
     app.get('/api/search/:query(*)', search);
