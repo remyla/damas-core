@@ -5,7 +5,24 @@
 
 module.exports = function (app) {
     var db = app.locals.db;
+    var sep = '<sep>';
 
+    function getRequestIds(req, isArrayCallback) {
+        if (req.params.id) {
+            var ids = req.params.id.split(sep);
+            var isArray = (ids.length > 1);
+        } else if (req.body) {
+            var isArray = Array.isArray(req.body);
+            var ids = isArray ? req.body : [req.body];
+        }
+        if (!ids || ids.some(elem => typeof elem !== 'string')) {
+            return false;
+        }
+        if ('function' === typeof isArrayCallback) {
+            isArrayCallback(isArray);
+        }
+        return ids;
+    }
 
     /*
      * Method: PUT
@@ -28,7 +45,7 @@ module.exports = function (app) {
             return;
         }
         */
-        var n = db.read([req.params.id], function (err, n) {
+        var n = db.read(getRequestIds(req), function (err, n) {
             if (n[0].lock !== undefined) {
                 res.status(409);
                 res.send('lock error, the asset is already locked');
@@ -37,14 +54,14 @@ module.exports = function (app) {
             var keys = {
                 "lock": req.user.username || req.connection.remoteAddress
             };
-            db.update([req.params.id], keys, function (error, doc) {
+            db.update(getRequestIds(req), keys, function (error, doc) {
                 if (error) {
                     res.status(409);
                     res.send('lock error, please change your values');
                     return;
                 }
                 res.status(200);
-                res.send('asset locked');
+                res.json(doc[0]);
             });
         });
     });
@@ -70,21 +87,21 @@ module.exports = function (app) {
             return;
         }
         */
-        var n = db.read([req.params.id], function (err, n) {
+        var n = db.read(getRequestIds(req), function (err, n) {
             var user = req.user.username || req.connection.remoteAddress;
             if (n[0].lock !== user) {
                 res.status(409);
                 res.send('lock error, the asset is locked by '+ n[0].lock);
                 return;
             }
-            db.update([req.params.id], {"lock": null}, function (error, doc) {
+            db.update(getRequestIds(req), {"lock": null}, function (error, doc) {
                 if (error) {
                     res.status(409);
                     res.send('lock error, please change your values');
                     return;
                 }
                 res.status(200);
-                res.send('asset unlocked');
+                res.send(doc[0]);
             });
         });
     });
