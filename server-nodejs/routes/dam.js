@@ -22,6 +22,11 @@ module.exports = function (app) {
      */
     app.put('/api/lock/:id', function (req, res) {
         db.read([req.params.id], function (err, n) {
+            if (err) {
+                res.status(400);
+                res.send('lock error, something went wrong');
+                return;
+            }
             if (n[0].lock !== undefined) {
                 res.status(409);
                 res.send('lock error, the asset is already locked');
@@ -58,10 +63,15 @@ module.exports = function (app) {
      */
     app.put('/api/unlock/:id', function (req, res) {
         db.read([req.params.id], function (err, n) {
+            if (err) {
+                res.status(400);
+                res.send('unlock error, something went wrong');
+                return;
+            }
             var user = req.user.username || req.connection.remoteAddress;
             if (n[0].lock !== user) {
                 res.status(409);
-                res.send('lock error, the asset is locked by '+ n[0].lock);
+                res.send('unlock error, the asset is locked by '+ n[0].lock);
                 return;
             }
             var keys = [{
@@ -71,7 +81,7 @@ module.exports = function (app) {
             db.update(keys, function (error, doc) {
                 if (error) {
                     res.status(409);
-                    res.send('lock error, please change your values');
+                    res.send('unlock error, please change your values');
                     return;
                 }
                 res.status(200);

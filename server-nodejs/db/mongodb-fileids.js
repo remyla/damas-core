@@ -347,15 +347,14 @@ module.exports = function (conf) {
             case ObjectID.isValid(ids[i]):
                 var id = {_id: new ObjectID(ids[i])};
                 break;
-            case 'object' === typeof ids[i]:
-                var id = ids[i]._id || ids[i].file;
-                if (id && Array.isArray(id)) {
-                    id = exportIds(id);
-                } else if (0 < Object.keys(ids[i]).length) {
-                    id = ids[i];
+            case 'object' === typeof ids[i] && 0 < Object.keys(ids[i]).length:
+                if (Array.isArray(ids[i]._id || ids[i].file)) {
+                    var id = exportIds(ids[i]._id || ids[i].file);
+                } else {
+                    var id = ids[i];
                 }
                 break;
-            case 'string' === typeof ids[i] && -1 !== ids[i].indexOf('/'):
+            case 'string' === typeof ids[i] && -1 < ids[i].indexOf('/'):
                 var id = {file: ids[i]};
                 break;
             default:
