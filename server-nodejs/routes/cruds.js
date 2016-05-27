@@ -8,7 +8,22 @@ module.exports = function (app, express) {
     //methodOverride = require('method-override'),
     var fs = require('fs');
     var events = require('../events');
+    var $sep = '<sep>';
 
+    function getRequestIds(req, isArray) {
+        if (req.params.id) {
+            var ids = req.params.id.split($sep);
+        } else if (req.body) {
+            var ids = Array.isArray(req.body) ? req.body : [req.body];
+        }
+        if (!ids || ids.some(elem => typeof elem !== 'string')) {
+            return false;
+        }
+        if ('function' === typeof isArray) {
+            isArray(req.params.id || Array.isArray(req.body));
+        }
+        return ids;
+    }
 /*
     app.use(methodOverride(function (req, res) {
         if (req.body && typeof req.body === 'object' && '_method' in req.body) {
@@ -102,19 +117,12 @@ module.exports = function (app, express) {
      * - 404: Not Found (all the nodes do not exist)
      */
     read = function (req, res) {
-        if (req.params.id) {
-            var ids = req.params.id.split('<sep>');
-            var isArray = ids.length > 1;
-        } else if (req.body) {
-            var ids = req.body;
-            var isArray = Array.isArray(ids);
-            if (!isArray) {
-                ids = [ids];
-            }
-        } else {
-            httpStatus(res, 400, 'read');
-            return;
+        var isArray = false;
+        var ids = getRequestIds(req, function (isIt) { isArray = isIt; });
+        if (!ids) {
+            return httpStatus(res, 400, 'Read');
         }
+
         db.read(ids, function (error, doc) {
             if (error) {
                 httpStatus(res, 409, 'read');
@@ -152,7 +160,7 @@ module.exports = function (app, express) {
             return;
         }
 
-        var ids = req.params.id.split('<sep>');
+        var ids = req.params.id.split($sep);
         var body = req.body;
         events.fire('pre-update', ids, body).then(function (data) {
             if (data.status) {
@@ -194,19 +202,11 @@ module.exports = function (app, express) {
      * - 404: Not Found (all the nodes do not exist)
      */
     deleteNode = function (req, res) {
-        if (req.params.id) {
-            var ids = req.params.id.split('<sep>');
-            var isArray = ids.length > 1;
-        } else if (req.body) {
-            var ids = req.body;
-            var isArray = Array.isArray(ids);
-            if (!isArray) {
-                ids = [ids];
-            }
-        } else {
-            httpStatus(res, 400, 'read');
-            return;
+        var ids = getRequestIds(req);
+        if (!ids) {
+            return httpStatus(res, 400, 'Remove');
         }
+
         events.fire('pre-remove', ids).then(function (data) {
             if (data.status) {
                 httpStatus(res, data.status, 'remove');
@@ -242,16 +242,9 @@ module.exports = function (app, express) {
      * - 404: Not Found (all the nodes do not exist)
      */
     graph = function (req, res) {
-        if (req.params.id) {
-            var ids = req.params.id.split('<sep>');
-        } else if (req.body) {
-            var ids = req.body;
-            if (!Array.isArray(ids)) {
-                ids = [ids];
-            }
-        } else {
-            httpStatus(res, 400, 'read');
-            return;
+        var ids = getRequestIds(req);
+        if (!ids) {
+            return httpStatus(res, 400, 'Graph');
         }
 
         db.graph(ids, function (error, nodes) {
@@ -472,11 +465,9 @@ module.exports = function (app, express) {
 
 
     /**
-     * Sets the appropriate response and status code for multiple params or not
-     * @param {boolean} isArray - did client sent an array or not
+     * Tells whether a response is failed or incomplete (contains null?)
      * @param {array} doc - the database response
-     * @param {} result - the returned object or string
-     * @return {{status: number, content: result}} - the results to send
+     * @return {{fail: boolean, partial: boolean}} - the results to send
      */
     function getMultipleResponse(doc) {
         var result = { fail: true, partial: false };
