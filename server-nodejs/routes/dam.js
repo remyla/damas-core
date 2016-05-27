@@ -54,7 +54,7 @@ module.exports = function (app) {
             var keys = {
                 "lock": req.user.username || req.connection.remoteAddress
             };
-            db.update([req.params.id], keys, function (error, doc) {
+            db.update(getRequestIds(req), keys, function (error, doc) {
                 if (error) {
                     res.status(409);
                     res.send('lock error, please change your values');
@@ -94,7 +94,7 @@ module.exports = function (app) {
                 res.send('lock error, the asset is locked by '+ n[0].lock);
                 return;
             }
-            db.update([req.params.id], {"lock": null}, function (error, doc) {
+            db.update(getRequestIds(req), {"lock": null}, function (error, doc) {
                 if (error) {
                     res.status(409);
                     res.send('lock error, please change your values');
