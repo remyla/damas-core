@@ -10,17 +10,19 @@ module.exports = function (app, express) {
     var events = require('../events');
     var $sep = '<sep>';
 
-    function getRequestIds(req, isArray) {
+    function getRequestIds(req, isArrayCallback) {
         if (req.params.id) {
             var ids = req.params.id.split($sep);
+            var isArray = (ids.length > 1);
         } else if (req.body) {
-            var ids = Array.isArray(req.body) ? req.body : [req.body];
+            var isArray = Array.isArray(req.body);
+            var ids = isArray ? req.body : [req.body];
         }
         if (!ids || ids.some(elem => typeof elem !== 'string')) {
             return false;
         }
-        if ('function' === typeof isArray) {
-            isArray(req.params.id || Array.isArray(req.body));
+        if ('function' === typeof isArrayCallback) {
+            isArrayCallback(isArray);
         }
         return ids;
     }
@@ -220,7 +222,7 @@ module.exports = function (app, express) {
                 } else if (response.partial) {
                     httpStatus(res, 207, doc);
                 } else {
-                    httpStatus(res, 200, 1 < ids.length ? doc : doc[0]);
+                    httpStatus(res, 200, 1 === doc.length ? doc[0] : doc);
                 }
             });
         });
