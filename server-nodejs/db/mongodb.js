@@ -102,8 +102,15 @@ module.exports = function (conf) {
     self.create = function (nodes, callback) {
         getCollection(callback, function (coll) {
             array_sync(nodes, function (node, cb) {
-                if (node._id && ObjectID.isValid(node._id)) {
-                    node._id = new ObjectID(node._id);
+                if (node._id) {
+                    var ids = exportIds([node._id]);
+                    delete node._id;
+                    let nodeStub = JSON.stringify(node);
+                    node = [];
+                    for (let i = 0; i < ids.length; ++i) {
+                        node[i] = JSON.parse(nodeStub);
+                        node[i]._id = ids[i]._id;
+                    }
                 }
                 coll.insert(node, {safe: true}, function (err, result) {
                     cb(err ? null : result.ops);
@@ -123,7 +130,7 @@ module.exports = function (conf) {
     self.read = function (ids, callback) {
         getCollection(callback, function (coll) {
             array_sync(exportIds(ids), function (id, cb) {
-                coll.findOne({_id: id}, function (err, node) {
+                coll.findOne(id, function (err, node) {
                     cb(err ? null : node);
                 });
             }, function (array) {
@@ -141,8 +148,15 @@ module.exports = function (conf) {
     self.update = function (nodes, callback) {
         getCollection(callback, function (coll) {
             array_sync(nodes, function (node, cb) {
+                // Replace the updated id
                 node._id = Array.isArray(node._id) ? node._id : [node._id];
                 var ids = exportIds(node._id);
+                var obj = {_id: {$in: []}};
+                for (let i = 0; i < ids.length; ++i) {
+                    obj._id.$in.push(ids[i]._id);
+                }
+
+                // Separate update operations
                 var update = { };
                 if (node.set && Object.keys(node.set).length > 0) {
                     update.$set = node.set;
@@ -150,18 +164,13 @@ module.exports = function (conf) {
                 if (node.unset && Object.keys(node.unset).length > 0) {
                     update.$unset = node.unset;
                 }
-                coll.update({_id: {$in: ids}}, update, {multi: true},
+                coll.update(obj, update, {multi: true},
                             function (err, status) {
                     if (err) {
-                        callback(true);
+                        return cb(null);
                     }
-                    self.read(ids, function (err, nodes) {
-                        if (err) {
-                            return cb(null);
-                        }
-                        self.read(node._id, function (err, doc) {
-                            cb(err ? null : doc);
-                        });
+                    self.read(node._id, function (err, doc) {
+                        cb(err ? null : doc);
                     });
                 });
             }, function (array) {
@@ -179,11 +188,11 @@ module.exports = function (conf) {
     self.remove = function (ids, callback) {
         getCollection(callback, function (coll) {
             array_sync(exportIds(ids), function (id, cb) {
-                coll.remove({_id: id}, function (err, result) {
+                coll.remove(id, function (err, result) {
                     if (err || 0 === result.result.n) {
                         cb(null);
                     } else {
-                        cb(id);
+                        cb(id._id);
                     }
                 });
             }, function (array) {
@@ -329,12 +338,25 @@ module.exports = function (conf) {
      */
     function exportIds(ids) {
         var ids_o = [];
-        for (var i in ids) {
-            if(ObjectID.isValid(ids[i])) {
-                ids_o.push(new ObjectID(ids[i]));
-            } else {
-                ids_o.push(ids[i]);
+        for (let i = 0; i < ids.length; ++i) {
+            switch (true) {
+            case Array.isArray(ids[i]):
+                var id = exportIds(ids[i]);
+                break;
+            case ObjectID.isValid(ids[i]):
+                var id = {_id: new ObjectID(ids[i])};
+                break;
+            case 'object' === typeof ids[i] && ids[i]._id:
+                if (Array.isArray(ids[i]._id)) {
+                    var id = exportIds(ids[i]._id);
+                } else {
+                    var id = ids[i];
+                }
+                break;
+            default:
+                var id = {_id: ids[i]};
             }
+            ids_o = ids_o.concat(id || []);
         }
         return ids_o;
     }

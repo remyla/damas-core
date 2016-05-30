@@ -148,6 +148,7 @@ module.exports = function (conf) {
     self.update = function (nodes, callback) {
         getCollection(callback, function (coll) {
             array_sync(nodes, function (node, cb) {
+                // Replace the updated id
                 node._id = Array.isArray(node._id) ? node._id : [node._id];
                 var ids = exportIds(node._id);
                 var obj = {$or: [{_id: {$in: []}}, {file: {$in: []}}]};
@@ -158,6 +159,8 @@ module.exports = function (conf) {
                 if (node.set && node.set.file) {
                     node._id.concat(node.set.file);
                 }
+
+                // Separate update operations
                 var update = { };
                 if (node.set && Object.keys(node.set).length > 0) {
                     update.$set = node.set;
@@ -347,7 +350,7 @@ module.exports = function (conf) {
             case ObjectID.isValid(ids[i]):
                 var id = {_id: new ObjectID(ids[i])};
                 break;
-            case 'object' === typeof ids[i] && 0 < Object.keys(ids[i]).length:
+            case 'object' === typeof ids[i] && (ids[i]._id || ids[i].file):
                 if (Array.isArray(ids[i]._id || ids[i].file)) {
                     var id = exportIds(ids[i]._id || ids[i].file);
                 } else {
