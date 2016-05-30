@@ -93,7 +93,6 @@ module.exports = function (conf) {
      * Minimal CRUDS operations
      */
 
-
     /**
      * Create nodes, without parent verification.
      * @param {array} nodes - Objects to create in the database
@@ -102,14 +101,15 @@ module.exports = function (conf) {
     self.create = function (nodes, callback) {
         getCollection(callback, function (coll) {
             array_sync(nodes, function (node, cb) {
-                if (node._id) {
-                    var ids = exportIds([node._id]);
-                    delete node._id;
+                if (node._id || node.file) {
+                    var ids = exportIds([node._id || node.file]);
+                    delete node._id, node.file;
                     let nodeStub = JSON.stringify(node);
                     node = [];
                     for (let i = 0; i < ids.length; ++i) {
                         node[i] = JSON.parse(nodeStub);
-                        node[i]._id = ids[i]._id;
+                        let key = ids[i]._id ? '_id' : 'file';
+                        node[i][key] = ids[i][key];
                     }
                 }
                 coll.insert(node, {safe: true}, function (err, result) {
@@ -151,9 +151,13 @@ module.exports = function (conf) {
                 // Replace the updated id
                 node._id = Array.isArray(node._id) ? node._id : [node._id];
                 var ids = exportIds(node._id);
-                var obj = {_id: {$in: []}};
+                var obj = {$or: [{_id: {$in: []}}, {file: {$in: []}}]};
                 for (let i = 0; i < ids.length; ++i) {
-                    obj._id.$in.push(ids[i]._id);
+                    let key = ids[i]._id ? '_id' : 'file';
+                    obj.$or[key === '_id' ? 0 : 1][key].$in.push(ids[i][key]);
+                }
+                if (node.set && node.set.file) {
+                    node._id.concat(node.set.file);
                 }
 
                 // Separate update operations
@@ -165,7 +169,7 @@ module.exports = function (conf) {
                     update.$unset = node.unset;
                 }
                 coll.update(obj, update, {multi: true},
-                            function (err, status) {
+                        function (err, status) {
                     if (err) {
                         return cb(null);
                     }
@@ -192,7 +196,7 @@ module.exports = function (conf) {
                     if (err || 0 === result.result.n) {
                         cb(null);
                     } else {
-                        cb(id._id);
+                        cb(id._id || id.file);
                     }
                 });
             }, function (array) {
@@ -332,7 +336,7 @@ module.exports = function (conf) {
     }; // deleteNode()
 
     /**
-     * Put all ids into a new array, handling ObjectID
+     * Put all ids into a new array, handling ObjectID and file
      * @param {array} ids - ids to put
      * @return {array} - the new array
      */
@@ -346,12 +350,15 @@ module.exports = function (conf) {
             case ObjectID.isValid(ids[i]):
                 var id = {_id: new ObjectID(ids[i])};
                 break;
-            case 'object' === typeof ids[i] && ids[i]._id:
-                if (Array.isArray(ids[i]._id)) {
-                    var id = exportIds(ids[i]._id);
+            case 'object' === typeof ids[i] && (ids[i]._id || ids[i].file):
+                if (Array.isArray(ids[i]._id || ids[i].file)) {
+                    var id = exportIds(ids[i]._id || ids[i].file);
                 } else {
                     var id = ids[i];
                 }
+                break;
+            case 'string' === typeof ids[i] && -1 < ids[i].indexOf('/'):
+                var id = {file: ids[i]};
                 break;
             default:
                 var id = {_id: ids[i]};
