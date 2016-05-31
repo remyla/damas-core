@@ -77,9 +77,9 @@ frisby.create('CREATE - should create an object in the database')
     /**
       * Tests for method Read
       */
-    frisby.create('READ - should throw an error (id empty) - Not found')
+    frisby.create('READ - should throw an error (id empty) - Bad Request')
         .get(url + 'read/')
-        .expectStatus(404)
+        .expectStatus(400)
     .toss();
 
     //it always return a non empty array

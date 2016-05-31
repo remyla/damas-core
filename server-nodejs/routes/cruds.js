@@ -442,29 +442,23 @@ module.exports = function (app, express) {
      * Register the operations
      */
 
-    // CRUD operations
+    // CRUD operations using nodes
     app.post('/api/create/', create);
-    app.get('/api/read/:id', read);
-    app.post('/api/read/', read);
-    app.put('/api/update/:id', update);
+    app.put('/api/update/:id(*)', update);
     app.put('/api/update', update);
-    app.delete('/api/delete/:id', deleteNode);
+
+    // CRUD operations using ids
+    app.get('/api/read/:id(*)', read);
+    app.post('/api/read/', read);
+    app.delete('/api/delete/:id(*)', deleteNode);
     app.delete('/api/delete/', deleteNode);
-    app.post('/api/delete/', deleteNode);
+    app.get('/api/graph/:id(*)', graph);
+    app.post('/api/graph/', graph);
 
     // Search operations
     app.get('/api/search/:query(*)', search);
     app.get('/api/search_one/:query(*)', search_one);
     app.post('/api/search_mongo', search_mongo);
-    app.get('/api/graph/', graph); // FIXME for the read error
-    app.get('/api/graph/:id', graph);
-    app.post('/api/graph/', graph);
-
-    // CRUD operations (deprecated)
-    app.post('/api/', create);
-    app.get('/api/:id', read);
-    app.put('/api/:id', update);
-    app.delete('/api/:id', deleteNode);
 
     // Extra operations
     app.get('/api/file/:path(*)', getFile); // untested
