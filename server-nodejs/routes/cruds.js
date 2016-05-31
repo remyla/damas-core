@@ -9,6 +9,23 @@ module.exports = function (app, express) {
     var fs = require('fs');
     var events = require('../events');
 
+    function isArray(req) {
+        if (req.params.id) {
+            return 1 < req.params.id.split(',');
+        }
+        return Array.isArray(req.body);
+    }
+
+    function getRequestIds(req) {
+        if (req.params.id) {
+            return req.params.id.split(',');
+        } else if (req.body) {
+            var ids = Array.isArray(req.body) ? req.body : [req.body];
+            return ids.some(elem => 'string' !== typeof elem) ? false : ids;
+        }
+        return false;
+    }
+
 /*
     app.use(methodOverride(function (req, res) {
         if (req.body && typeof req.body === 'object' && '_method' in req.body) {
@@ -59,7 +76,7 @@ module.exports = function (app, express) {
         var author = req.user.username || req.connection.remoteAddress;
         var time = Date.now();
         for (var n in nodes) {
-            if ('object' !== typeof nodes[n]) {
+            if ('object' !== typeof nodes[n] || null === nodes[n]) {
                 return httpStatus(res, 400, 'Create');
             }
             nodes[n].author = author;
@@ -99,19 +116,8 @@ module.exports = function (app, express) {
      * - 404: Not Found (all the nodes do not exist)
      */
     read = function (req, res) {
-        if (req.params.id) {
-            var ids = req.params.id.split(',');
-            var isArray = ids.length > 1;
-        } else if (req.body) {
-            var ids = req.body;
-            var isArray = Array.isArray(ids);
-            if (!isArray) {
-                ids = [ids];
-            }
-        } else {
-            return httpStatus(res, 400, 'Read');
-        }
-        if (ids.some(elem => typeof elem !== 'string')) {
+        var ids = getRequestIds(req);
+        if (!ids) {
             return httpStatus(res, 400, 'Read');
         }
 
@@ -124,8 +130,10 @@ module.exports = function (app, express) {
                 httpStatus(res, 404, 'Read');
             } else if (response.partial) {
                 httpStatus(res, 207, doc);
+            } else if (1 === doc.length && !isArray(req)) {
+                httpStatus(res, 200, doc[0]);
             } else {
-                httpStatus(res, 200, isArray ? doc : doc[0]);
+                httpStatus(res, 200, doc);
             }
         });
     }; // read()
@@ -150,7 +158,6 @@ module.exports = function (app, express) {
             return httpStatus(res, 400, 'Update');
         }
         var ids = req.params.id.split(',');
-        var isArray = ids.length > 1;
         var body = req.body;
         events.fire('pre-update', ids, body).then(function (data) {
             if (data.status) {
@@ -166,8 +173,10 @@ module.exports = function (app, express) {
                     httpStatus(res, 404, 'Update');
                 } else if (response.partial) {
                     httpStatus(res, 207, doc);
+                } else if (1 === doc.length && !isArray(req)) {
+                    httpStatus(res, 200, doc[0]);
                 } else {
-                    httpStatus(res, 200, 1 === doc.length ? doc[0] : doc);
+                    httpStatus(res, 200, doc);
                 }
             });
         });
@@ -189,16 +198,11 @@ module.exports = function (app, express) {
      * - 404: Not Found (all the nodes do not exist)
      */
     deleteNode = function (req, res) {
-        if (req.params.id) {
-            var ids = req.params.id.split(',');
-        } else if (req.body) {
-            var ids = Array.isArray(req.body) ? req.body : [req.body];
-        } else {
+        var ids = getRequestIds(req);
+        if (!ids) {
             return httpStatus(res, 400, 'Remove');
         }
-        if (ids.some(elem => typeof elem !== 'string')) {
-            return httpStatus(res, 400, 'Remove');
-        }
+
         events.fire('pre-remove', ids).then(function (data) {
             if (data.status) {
                 return httpStatus(res, data.status, 'Remove');
@@ -209,8 +213,10 @@ module.exports = function (app, express) {
                     httpStatus(res, 404, 'Remove');
                 } else if (response.partial) {
                     httpStatus(res, 207, doc);
+                } else if (1 === doc.length && !isArray(req)) {
+                    httpStatus(res, 200, doc[0]);
                 } else {
-                    httpStatus(res, 200, 1 === doc.length ? doc[0] : doc);
+                    httpStatus(res, 200, doc);
                 }
             });
         });
@@ -232,15 +238,9 @@ module.exports = function (app, express) {
      * - 404: Not Found (all the nodes do not exist)
      */
     graph = function (req, res) {
-        if (req.params.id) {
-            var ids = req.params.id.split(',');
-        } else if (req.body) {
-            var ids = Array.isArray(req.body) ? req.body : [req.body];
-        } else {
-            return httpStatus(res, 400, 'Graph');
-        }
-        if (ids.some(elem => typeof elem !== 'string')) {
-            return httpStatus(res, 400, 'Graph');
+        var ids = getRequestIds(req);
+        if (!ids) {
+            return httpStatus(res, 400, 'Remove');
         }
 
         db.graph(ids, function (error, nodes) {
@@ -253,7 +253,7 @@ module.exports = function (app, express) {
             } else if (response.partial) {
                 httpStatus(res, 207, nodes);
             } else {
-                httpStatus(res, 200, nodes); // We never need a single element
+                httpStatus(res, 200, nodes); // Always send an array for graph
             }
         });
     }; // graph()
@@ -282,7 +282,7 @@ module.exports = function (app, express) {
             if (error) {
                 httpStatus(res, 409, 'Search');
             } else {
-                httpStatus(res, 200, doc);
+                httpStatus(res, 200, doc); // Always send an array for search
             }
         });
     }; // search()
