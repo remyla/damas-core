@@ -5,6 +5,7 @@
 
 module.exports = function (app) {
     var db = app.locals.db;
+    require('./utils');
 
 
     /*
@@ -15,39 +16,47 @@ module.exports = function (app) {
      *
      * HTTP status codes:
      * - 200: OK (asset locked correctly by the current user)
+     * - 207: Multi-Status (some nodes do not exist)
      * - 400: Bad request (not formatted correctly)
-     * - 403: Forbidden (the user does not have the right permissions)
-     * - 404: Not Found (the asset does not exist)
+     * - 404: Not Found (all the nodes do not exist)
      * - 409: Conflict (asset already locked by someone else)
      */
-    app.put('/api/lock/:id', function (req, res) {
-        /* this check should not be based on mongo ObjectId, we disable it
-        if (!ObjectId.isValid(req.params.id)) {
-            res.status(400);
-            res.send('lock error: the specified id is not valid');
-            return;
+    lock = function (req, res) {
+        var ids = getRequestIds(req);
+        if (!ids) {
+            return httpStatus(res, 400, 'Lock');
         }
-        */
-        var n = db.read([req.params.id], function (err, n) {
-            if (n[0].lock !== undefined) {
-                res.status(409);
-                res.send('lock error, the asset is already locked');
-                return;
+
+        var n = db.read(ids, function (err, nodes) {
+            if (err) {
+                return httpStatus(res, 409, 'Lock');
             }
-            var keys = {
-                "lock": req.user.username || req.connection.remoteAddress
-            };
-            db.update([req.params.id], keys, function (error, doc) {
-                if (error) {
-                    res.status(409);
-                    res.send('lock error, please change your values');
-                    return;
+            var user = req.user.username || req.connection.remoteAddress;
+            for (let i = 0; i < nodes.length; ++i) {
+                if (null === nodes[i]) {
+                    continue;
                 }
-                res.status(200);
-                res.send('asset locked');
+                if (undefined !== nodes[i].lock) {
+                    return httpStatus(res, 409, 'Lock');
+                }
+            }
+            db.update(ids, {lock: user}, function (error, doc) {
+                if (error) {
+                    return httpStatus(res, 409, 'Lock');
+                }
+                var response = getMultipleResponse(doc);
+                if (response.fail) {
+                    httpStatus(res, 404, 'Lock');
+                } else if (response.partial) {
+                    httpStatus(res, 207, doc);
+                } else if (1 === doc.length && !isArray(req)) {
+                    httpStatus(res, 200, doc[0]);
+                } else {
+                    httpStatus(res, 200, doc);
+                }
             });
         });
-    });
+    };
 
 
     /*
@@ -58,36 +67,47 @@ module.exports = function (app) {
      *
      * HTTP status codes:
      * - 200: OK (asset unlocked correctly)
+     * - 207: Multi-Status (some nodes do not exist)
      * - 400: Bad request (not formatted correctly)
      * - 404: Not Found (the asset does not exist)
      * - 409: Conflict (asset locked by someone else)
      */
-    app.put('/api/unlock/:id', function (req, res) {
-        /*
-        if (!ObjectId.isValid(req.params.id)) {
-            res.status(400);
-            res.send('lock error: the specified id is not valid');
-            return;
+    unlock = function (req, res) {
+        var ids = getRequestIds(req);
+        if (!ids) {
+            return httpStatus(res, 400, 'Unlock');
         }
-        */
-        var n = db.read([req.params.id], function (err, n) {
-            var user = req.user.username || req.connection.remoteAddress;
-            if (n[0].lock !== user) {
-                res.status(409);
-                res.send('lock error, the asset is locked by '+ n[0].lock);
-                return;
+
+        var n = db.read([req.params.id], function (err, nodes) {
+            if (err) {
+                return httpStatus(res, 409, 'Unlock');
             }
-            db.update([req.params.id], {"lock": null}, function (error, doc) {
-                if (error) {
-                    res.status(409);
-                    res.send('lock error, please change your values');
-                    return;
+            var user = req.user.username || req.connection.remoteAddress;
+            for (let i = 0; i < nodes.length; ++i) {
+                if (null === nodes[i]) {
+                    continue;
                 }
-                res.status(200);
-                res.send('asset unlocked');
+                if (user !== nodes[0].lock) {
+                    return httpStatus(res, 409, 'Unlock');
+                }
+            }
+            db.update(ids, {lock: null}, function (error, doc) {
+                if (error) {
+                    return httpStatus(res, 409, 'Unlock');
+                }
+                var response = getMultipleResponse(doc);
+                if (response.fail) {
+                    httpStatus(res, 404, 'Unlock');
+                } else if (response.partial) {
+                    httpStatus(res, 207, doc);
+                } else if (1 === doc.length && !isArray(req)) {
+                    httpStatus(res, 200, doc[0]);
+                } else {
+                    httpStatus(res, 200, doc);
+                }
             });
         });
-    });
+    };
 
 
     /*
@@ -97,32 +117,25 @@ module.exports = function (app) {
      * Create a new version of the specified node (as a child node)
      *
      * HTTP status codes:
-     * - 200: OK (version created correctly)
+     * - 201: OK (version created correctly)
      * - 400: Bad request (not formatted correctly)
-     * ? 403: Forbidden (the user does not have the right permissions)
-     * - 404: Not Found (the parent node (or the file?) does not exist)
-     * ? 409: Conflict (asset locked by someone else)
+     * - 409: Conflict (asset locked by someone else)
      */
-    app.post('/api/version/:id', function (req, res) {
+    version = function (req, res) {
         var keys = req.body;
         if (!keys.file) {
-            res.status(400);
-            res.send('version error: file key must be specified');
-            return;
+            return httpStatus(res, 400, 'Version');
         }
         keys.author = req.user.username || req.connection.remoteAddress;
         keys.time = Date.now();
         keys['#parent'] = req.params.id;
         db.create(keys, function (error, doc) {
             if (error) {
-                res.status(409);
-                res.send('create error, please change your values');
-                return;
+                return httpStatus(res, 409, 'Version');
             }
-            res.status(201);
-            res.send(doc[0]);
+            httpStatus(res, 201, doc[0]);
         });
-    });
+    };
 
     /* this is added as comment because we will implement this route
 
@@ -135,7 +148,6 @@ module.exports = function (app) {
      * HTTP status codes:
      * - 200: OK (link created correctly)
      * - 400: Bad request (not formatted correctly)
-     * ? 403: Forbidden (the user does not have the right permissions)
      * - 404: Not Found (the source and/or the target does not exist)
 
     app.post('/api/link', function (req, res) {
@@ -185,6 +197,12 @@ module.exports = function (app) {
         res.json(result);
     });
     */
+
+    app.put('/api/lock/:id(*)', lock);
+    app.put('/api/lock', lock);
+    app.put('/api/unlock/:id(*)', unlock);
+    app.put('/api/unlock', unlock);
+    app.post('/api/version/:id', version);
 }
 
 
