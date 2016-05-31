@@ -8,23 +8,8 @@ module.exports = function (app, express) {
     //methodOverride = require('method-override'),
     var fs = require('fs');
     var events = require('../events');
-
-    function isArray(req) {
-        if (req.params.id) {
-            return 1 < req.params.id.split(',');
-        }
-        return Array.isArray(req.body);
-    }
-
-    function getRequestIds(req) {
-        if (req.params.id) {
-            return req.params.id.split(',');
-        } else if (req.body) {
-            var ids = Array.isArray(req.body) ? req.body : [req.body];
-            return ids.some(elem => 'string' !== typeof elem) ? false : ids;
-        }
-        return false;
-    }
+    // getRequestIds(), isArray(), getMultipleResponse(), httpStatus()
+    require('./utils');
 
 /*
     app.use(methodOverride(function (req, res) {
@@ -452,42 +437,6 @@ module.exports = function (app, express) {
         });
     }; // getFile()
 
-
-    /**
-     * Tells whether a response is failed or incomplete (contains null?)
-     * @param {array} doc - the database response
-     * @return {{fail: boolean, partial: boolean}} - the results to send
-     */
-    function getMultipleResponse(doc) {
-        var result = { fail: true, partial: false };
-        for (var i in doc) {
-            if (null === doc[i]) {
-                result.partial = true;
-            } else {
-                result.fail = false;
-            }
-        }
-        return result;
-    }
-
-    function httpStatus(res, code, data) {
-        res.status(code);
-        if (code < 300) {
-            res.json(data);
-            return;
-        }
-        var e = data + ' error: ';
-        switch (code) {
-            case 400: e += 'Bad request (empty or not well-formed)'; break;
-            case 401: e += 'Unauthorized (authentication required)'; break;
-            case 403: e += 'Forbidden (permission required)'; break;
-            case 404: e += 'Not found'; break;
-            case 409: e += 'Conflict'; break;
-            case 501: e += 'Not implemented (contact an administrator)'; break;
-            default:  e += 'Unknown error code';
-        }
-        res.send(e);
-    }
 
     /*
      * Register the operations
