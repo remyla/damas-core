@@ -1,19 +1,17 @@
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
-        define(function () {
-            return (root.returnExportsGlobal = factory());
-        });
+        define(['xmlhttprequest'], factory);
     } else if (typeof exports === 'object') {
         // Node. Does not work with strict CommonJS, but
         // only CommonJS-like enviroments that support module.exports,
         // like Node.
-        module.exports = factory();
+        module.exports = factory(require('xmlhttprequest').XMLHttpRequest);
     } else {
         // Browser globals
-        root.damas = factory();
+        root.damas = factory(root.XMLHttpRequest);
     }
-}(this, function () {
+}(this, function (XHR) {
 
     /**
      * DAMAS HTTP client module for Javascript.
@@ -56,12 +54,54 @@
     damas.token = null;
     damas.user = null;
 
-    //
+
+    /**
+     * Send a request according to the given arguments
+     * @param {object} args - All the given arguments
+     * @return {} - The result of the request
+     */
+    function req(args) {
+        if (undefined === args.async) {
+            args.async = ('function' === typeof args.callback);
+        }
+        var xhr = new XHR();
+        function checkXHR() {
+            if (xhr.status < 300) {
+                return JSON.parse(xhr.responseText);
+            } else {
+                console.warn(xhr.responseText);
+                return false;
+            }
+        }
+        xhr.onreadystatechange = function(e) {
+            if (4 === xhr.readyState) {
+                if (args.async && 'function' === typeof args.callback) {
+                    args.callback(checkXHR());
+                }
+            }
+        }
+        xhr.open(args.method, damas.server + args.url, args.async);
+        xhr.setRequestHeader('Authorization', 'Bearer ' + damas.token);
+
+        if (undefined !== args.data) {
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.send(JSON.stringify(args.data));
+        } else if (undefined !== args.form) {
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.send(args.form);
+        } else {
+            xhr.send();
+        }
+        if (!args.async) {
+            return checkXHR();
+        }
+    }
+
+
     //
     //
     //
     // CRUD METHODS
-    //
     //
     //
     //
@@ -70,7 +110,7 @@
      * This callback type `requestCallback` to handle asynchronous requests results
      *
      * @callback requestCallback
-     * @param {object} req - XMLHttpRequest object
+     * @param {object} req - XHR object
      *
      */
 
@@ -88,35 +128,12 @@
      * var newNode= damas.create(keys);
      */
     damas.create = function (keys, callback) {
-        function req_callback(req) {
-            if (300 > req.status) {
-                return JSON.parse(req.responseText);
-            }
-            console.log(req.responseText);
-            return false;
-        }
-        var req = new XMLHttpRequest();
-        req.open('POST', this.server + "create/", callback !== undefined);
-        req.setRequestHeader("Content-type","application/json");
-        //req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-        req.setRequestHeader("Authorization","Bearer "+damas.token);
-        req.onreadystatechange = function(e) {
-            if (req.readyState == 4) {
-                if (callback) {
-                    callback(req_callback(req));
-                }
-            }
-        }
-        req.send(JSON.stringify(keys));
-        /*
-        var qs = Object.keys(keys).map(function(key) {
-            return encodeURIComponent(key) + '=' + encodeURIComponent(keys[key]);
-        }).join('&');
-        req.send(qs);
-        */
-        if (callback === undefined) {
-            return req_callback(req);
-        }
+        return req({
+            method: 'POST',
+            url: 'create/',
+            data: keys,
+            callback: callback
+        });
     }
 
     /**
@@ -138,34 +155,19 @@
         if (Array.isArray(id) && id.length === 0) {
             return callback([]);
         }
-        function req_callback(req) {
-            if (300 > req.status) {
-                return JSON.parse(req.responseText);
-            }
-            console.log(req.responseText);
-            return false;
-        }
-        var req = new XMLHttpRequest();
-        req.open('POST', this.server + "read/", callback !== undefined);
-        req.setRequestHeader("Content-type","application/json");
-        req.setRequestHeader("Authorization","Bearer " + damas.token);
-        req.onreadystatechange = function(e) {
-            if (req.readyState == 4) {
-                if (callback) {
-                    callback(req_callback(req));
-                }
-            }
-        }
-        req.send(JSON.stringify(id));
-        if (callback === undefined) {
-            return req_callback(req);
-        }
+        return req({
+            method: 'POST',
+            url: 'read/',
+            data: id,
+            callback: callback
+        });
     }
 
     /**
-     * Update the keys of a node. The specified keys overwrite existing keys, others are left untouched. A null key value removes the key.
+     * Update the keys of a node. The specified keys overwrite existing keys,
+     * others are left untouched. A null key value removes the key.
      * @param {string} id - Internal index of the node to update
-     * @param {object} keys - Hash of key:value pairs
+     * @param {object} node - Hash of key:value pairs
      * @returns {object|undefined} Node or nothing in case of asynchronous call
      *
      * @example
@@ -175,33 +177,14 @@
      * //Update the node id with this set of keys
      * var node= damas.update(id, keys);
      */
-    damas.update = function (id, keys, callback) {
-        if (Array.isArray(id)) {
-            id = id.join(',');
-        }
-        function req_callback(req) {
-            if (300 > req.status) {
-                return JSON.parse(req.responseText);
-            }
-            console.log(req.responseText);
-            return false;
-        }
-        var req = new XMLHttpRequest();
-        req.open('PUT', this.server + "update/" + id, callback !== undefined);
-        req.setRequestHeader("Content-type","application/json");
-        req.setRequestHeader("Accept","application/json");
-        req.setRequestHeader("Authorization","Bearer "+damas.token);
-        req.onreadystatechange = function(e) {
-            if (req.readyState === 4) {
-                if (callback) {
-                    callback(req_callback(req));
-                }
-            }
-        }
-        req.send(JSON.stringify(keys));
-        if (callback === undefined) {
-            return req_callback(req);
-        }
+    damas.update = function (id, node, callback) {
+        node._id = id;
+        return req({
+            method: 'PUT',
+            url: 'update/',
+            data: node,
+            callback: callback
+        });
     }
 
     /**
@@ -214,28 +197,12 @@
      * damas.delete(id);
      */
     damas.delete = function (id, callback) {
-        function req_callback(req) {
-            if (300 > req.status) {
-                return JSON.parse(req.responseText);
-            }
-            console.log(req.responseText);
-            return false;
-        }
-        var req = new XMLHttpRequest();
-        req.open('DELETE', this.server + "delete/" + id, callback !== undefined);
-        //req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-        req.setRequestHeader("Authorization","Bearer "+damas.token);
-        req.onreadystatechange = function(e) {
-            if (req.readyState == 4) {
-                if (callback) {
-                    callback(req_callback(req));
-                }
-            }
-        }
-        req.send();
-        if (callback === undefined) {
-            return req_callback(req);
-        }
+        return req({
+            method: 'DELETE',
+            url: 'delete/',
+            data: id,
+            callback: callback
+        });
     }
 
     /**
@@ -247,52 +214,20 @@
      * var matches = damas.search('rabbit type:char');
      */
     damas.search = function (query, callback) {
-        function req_callback(req) {
-            if (300 > req.status) {
-                return JSON.parse(req.responseText);
-            }
-            console.log(req.responseText);
-            return false;
-        }
-        var req = new XMLHttpRequest();
-        req.open('GET', this.server + 'search/' + encodeURIComponent(query), callback !== undefined);
-        req.setRequestHeader("Authorization","Bearer "+damas.token);
-        req.onreadystatechange = function(e) {
-            if (req.readyState == 4) {
-                if (callback) {
-                    callback(req_callback(req));
-                }
-            }
-        }
-        req.send();
-        if (callback === undefined) {
-            return req_callback(req);
-        }
+        return req({
+            method: 'GET',
+            url: 'search/' + encodeURIComponent(query),
+            callback: callback
+        });
     }
 
     damas.search_one = function (query, callback) {
-         function req_callback(req) {
-            if (300 > req.status) {
-                return JSON.parse(req.responseText);
-            }
-            console.log(req.responseText);
-            return false;
-        }
-        var req = new XMLHttpRequest();
-        req.open('GET', this.server + 'search_one/' + encodeURIComponent(query), callback !== undefined);
-        req.setRequestHeader("Authorization","Bearer "+damas.token);
-        req.onreadystatechange = function(e) {
-            if (req.readyState == 4) {
-                if (callback) {
-                    callback(req_callback(req));
-                }
-            }
-        }
-        req.send();
-        if (callback === undefined) {
-            return req_callback(req);
-        }
-   }
+        return req({
+            method: 'GET',
+            url: 'search_one/' + encodeURIComponent(query),
+            callback: callback
+        });
+    }
 
     /**
      * BETA - Expose the find method from mongodb
@@ -302,7 +237,8 @@
      * @param {Integer} skip
      * @returns {Array} array of element indexes or null if no element found
      *
-     * query, sort, limit, skip arguments are respectively passed to mongodb methods of the same names.
+     * query, sort, limit, skip arguments are respectively passed to mongodb
+     * methods of the same names.
      * https://docs.mongodb.org/manual/reference/method/db.collection.find/
      * because the query object is converted to JSON, we use strings with "REGEX_" as suffix to define regular expressions. for example, /.*x$/ will be defined as "REGEX_.*x$" 
      *
@@ -310,33 +246,18 @@
      * damas.search_mongo({"lock": /.*$/}, {"lock":1}, 2,0)
      */
     damas.search_mongo = function (query, sort, limit, skip, callback) {
-        function req_callback(req) {
-            if (300 > req.status) {
-                return JSON.parse(req.responseText);
-            }
-            console.log(req.responseText);
-            return false;
+        var obj = {
+            query: query,
+            sort: sort,
+            limit: limit,
+            skip: skip
         }
-        var req = new XMLHttpRequest();
-        req.open('POST', this.server+"search_mongo", callback !== undefined);
-        req.setRequestHeader("Content-type","application/json");
-        req.setRequestHeader("Authorization","Bearer "+damas.token);
-        req.onreadystatechange = function(e) {
-            if (req.readyState == 4) {
-                if (callback) {
-                    callback(req_callback(req));
-                }
-            }
-        }
-        var obj = {};
-        obj.query = query;
-        obj.sort = sort;
-        obj.limit = limit;
-        obj.skip = skip;
-        req.send(JSON.stringify(obj));
-        if (callback === undefined) {
-            return req_callback(req);
-        }
+        return req({
+            method: 'POST',
+            url: 'search_mongo',
+            data: obj,
+            callback: callback
+        });
     }
 
 
@@ -371,88 +292,56 @@
      * var sources = damas.graph("55687e68e040af7047ee1a53");
      */
     damas.graph = function (ids, callback) {
-        function req_callback(req) {
-            if (300 > req.status) {
-                return JSON.parse(req.responseText);
-            }
-            console.log(req.responseText);
-            return false;
-        }
-        var req = new XMLHttpRequest();
-        req.open('GET', this.server + 'graph/' + encodeURIComponent(ids), callback !== undefined);
-        req.setRequestHeader("Authorization","Bearer "+damas.token);
-        req.onreadystatechange = function(e) {
-            if (req.readyState == 4) {
-                if (callback) {
-                    callback(req_callback(req));
-                }
-            }
-        }
-        req.send();
-        if (callback === undefined) {
-            return req_callback(req);
-        }
+        return req({
+            method: 'POST',
+            url: 'graph/',
+            data: ids,
+            callback: callback
+        });
     }
 
+    // FIXME legacy?
     damas.get_rest = function (query, callback) {
-        var req = new XMLHttpRequest();
-        req.open('GET', this.server + query, callback !== undefined);
-        //req.open('GET', this.server + encodeURIComponent(query), callback !== undefined);
-        req.setRequestHeader("Authorization","Bearer "+damas.token);
-        req.onreadystatechange = function(e) {
-            if (req.readyState == 4) {
-                callback(300 > req.status ? JSON.parse(req.responseText) : false);
-            }
-        }
-        req.send();
+        return req({
+            method: 'GET',
+            url: query,
+            callback: callback
+        });
     }
 
     damas.lock = function (id, callback) {
-        function req_callback(req) {
-            return req.status === 200;
-        }
-        var req = new XMLHttpRequest();
-        req.open('PUT', this.server+'lock/'+id, callback !== undefined);
-        req.setRequestHeader("Content-type","application/json");
-        req.setRequestHeader("Accept","application/json");
-        req.setRequestHeader("Authorization","Bearer "+damas.token);
-        req.onreadystatechange = function(e) {
-            if (req.readyState === 4) {
-                if (callback) {
-                    callback(req_callback(req));
+        var res = req({
+            method: 'PUT',
+            url: 'lock/',
+            data: id,
+            async: callback !== undefined,
+            callback: function (res) {
+                if ('function' === typeof callback) {
+                    callback(res !== false);
                 }
             }
-        }
-        req.send();
-        if (callback === undefined) {
-            return req_callback(req);
-        }
+        });
+        return res !== false;
     }
 
     damas.unlock = function (id, callback) {
-        function req_callback(req) {
-            return req.status === 200;
-        }
-        var req = new XMLHttpRequest();
-        req.open('PUT', this.server+'unlock/'+id, callback !== undefined);
-        req.setRequestHeader("Content-type","application/json");
-        req.setRequestHeader("Accept","application/json");
-        req.setRequestHeader("Authorization","Bearer "+damas.token);
-        req.onreadystatechange = function(e) {
-            if (req.readyState === 4) {
-                if (callback) {
-                    callback(req_callback(req));
+        var res = req({
+            method: 'PUT',
+            url: 'unlock/',
+            data: id,
+            async: callback !== undefined,
+            callback: function (res) {
+                if ('function' === typeof callback) {
+                    callback(res !== false);
                 }
             }
-        }
-        req.send();
-        if (callback === undefined) {
-            return req_callback(req);
-        }
+        });
+        return res !== false;
     }
 
     /**
-     * Creates a node with the specified keys, asynchronously if a callback function is specified or synchronously otherwise.
+     * Creates a node with the specified keys, asynchronously if a callback
+     * function is specified or synchronously otherwise.
      * @param {hash} keys - Hash of key:value pairs
      * @param {function} [callback] - Function with the XHR object as argument to call
      * @returns {object|boolean|undefined} New node on success, false otherwise (or nothing if async)
@@ -465,38 +354,18 @@
      * var newNode= damas.create(keys);
      */
     damas.version = function (id, keys, callback) {
-        function req_callback(req) {
-            if (req.status === 201) {
-                return JSON.parse(req.responseText);
-            }
-            return false;
-        }
-        var req = new XMLHttpRequest();
-        req.open('POST', this.server+'version/'+id, callback !== undefined);
-        req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-        req.setRequestHeader("Authorization","Bearer "+damas.token);
-        req.onreadystatechange = function(e) {
-            if (req.readyState == 4) {
-                if (callback) {
-                    callback(req_callback(req));
-                }
-            }
-        }
-        var qs = Object.keys(keys).map(function(key) {
-            return encodeURIComponent(key) + '=' + encodeURIComponent(keys[key]);
-        }).join('&');
-        req.send(qs);
-        if (callback === undefined) {
-            return req_callback(req);
-        }
+        return req({
+            method: 'POST',
+            url: 'version/' + id,
+            data: keys,
+            callback: callback
+        });
     }
 
     //
     //
     //
-    //
     // USER AUTHENTICATION METHODS
-    //
     //
     //
     //
@@ -508,27 +377,26 @@
      * @return true on success, false otherwise
      */
     damas.signIn = function (username, password, callback) {
-        function req_callback(req) {
-            if (req.status === 200) {
-                damas.user = JSON.parse(req.responseText);
+        function req_callback(result) {
+            if (result !== false) {
+                damas.user = result;
                 damas.token = damas.user.token;
-                return JSON.parse(req.responseText);
             }
-            return false;
+            return result;
         }
-        var req = new XMLHttpRequest();
-        req.open('POST', this.server+"signIn", callback !== undefined);
-        req.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-        req.onreadystatechange = function(e) {
-            if (req.readyState == 4) {
-                if (callback) {
-                    callback(req_callback(req));
+        var res = req({
+            method: 'POST',
+            url: 'signIn',
+            form: 'username='  + encodeURIComponent(username) +
+                  '&password=' + encodeURIComponent(password),
+            callback: function (result) {
+                if ('function' === typeof callback) {
+                    callback(req_callback(result));
                 }
             }
-        }
-        req.send("username="+encodeURIComponent(username) + "&password="+encodeURIComponent(password));
-        if (callback === undefined) {
-            return req_callback(req);
+        });
+        if (undefined !== res) {
+            return req_callback(res);
         }
     }
 
@@ -549,23 +417,17 @@
      * @return true on success, false otherwise
      */
     damas.verify = function (callback) {
-        function req_callback(req) {
-            if (req.status === 200) {
-                return true;
-            }
-            return false;
-        }
-        var req = new XMLHttpRequest();
-        req.open('GET', this.server+"verify", callback !== undefined);
-        req.setRequestHeader("Authorization","Bearer "+damas.token);
-        req.onreadystatechange = function(e) {
-            if (req.readyState == 4) {
-                if (callback) {
-                    callback(req_callback(req));
+        var res = req({
+            method: 'GET',
+            url: 'verify',
+            async: callback !== undefined,
+            callback: function (res) {
+                if ('function' === typeof callback) {
+                    callback(res !== false);
                 }
             }
-        }
-        req.send();
+        });
+        return res !== false;
     }
 
 
