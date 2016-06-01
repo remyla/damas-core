@@ -19,12 +19,14 @@ var utils = {
      */
     getRequestIds: function (req) {
         if (req.params.id) {
-            return req.params.id.split(',');
+            var ids = req.params.id.split(',');
         } else if (req.body) {
             var ids = Array.isArray(req.body) ? req.body : [req.body];
-            return ids.some(elem => 'string' !== typeof elem) ? false : ids;
         }
-        return false;
+        if (!ids || 1 > ids.length || ids.some(id => 'string' !== typeof id)) {
+            return false;
+        }
+        return ids;
     },
 
     /**

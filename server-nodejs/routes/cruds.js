@@ -139,17 +139,22 @@ module.exports = function (app, express) {
      * - 404: Not Found (all the nodes do not exist)
      */
     update = function (req, res) {
-        if (0 === Object.keys(req.body).length || !req.params.id) {
-            return httpStatus(res, 400, 'Update');
+        function checkObject(obj) {
+            return 'object' === typeof obj && 0 < Object.keys(obj).length;
         }
-        var ids = req.params.id.split(',');
-        var body = req.body;
-        events.fire('pre-update', ids, body).then(function (data) {
+        var ids = getRequestIds(req);
+        var nodes = Array.isArray(req.body) ? req.body : [req.body];
+        for (let i = 0; i < nodes.length; ++i) {
+            if (!checkObject(nodes[i]) || !(ids || nodes[i]._id)) {
+                return httpStatus(res, 400, 'Update');
+            }
+            nodes[i]._id = nodes[i]._id || ids;
+        }
+        events.fire('pre-update', nodes).then(function (data) {
             if (data.status) {
                 return httpStatus(res, data.status, 'Update');
             }
-            body = data.body || body;
-            db.update(data.ids || ids, body, function (error, doc) {
+            db.update(data.nodes || nodes, function (error, doc) {
                 if (error) {
                     return httpStatus(res, 409, 'Update');
                 }

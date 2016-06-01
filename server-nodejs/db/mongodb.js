@@ -12,7 +12,7 @@ function array_sync(array, walker, callback) {
             ++next;
         } else if (next < array.length) {
             walker(array[next++], function (result) {
-                results.push(result);
+                results = results.concat(result);
                 process.nextTick(walk);
             });
         }
@@ -138,40 +138,35 @@ module.exports = function (conf) {
      * @param {object} keys - New keys to define on the nodes
      * @param {function} callback - Callback function to routes.js
      */
-    self.update = function (ids, keys, callback) {
+    self.update = function (nodes, callback) {
         self.getCollection(callback, function (coll) {
-            var ids_o = exportIds(ids);
-            var keysToUnset = {};
-            var keysToSet = {};
-            var toUpdate = {};
-
-            for (var k in keys) {
-                if (keys[k] === null) {
-                    keysToUnset[k] = '';
-                } else {
-                    keysToSet[k] = keys[k];
-                }
-            }
-            if (Object.keys(keysToSet).length > 0) {
-                toUpdate.$set = keysToSet;
-            }
-            if (Object.keys(keysToUnset).length > 0) {
-                toUpdate.$unset = keysToUnset;
-            }
-            coll.update({'_id': {$in: ids_o}}, toUpdate, {multi: true},
-                        function (err, status) {
-                if (err) {
-                    callback(true);
-                }
-                self.debug('Update status: ' + status);
-                self.read(ids_o, function (err, nodes) {
-                    if (err) {
-                        callback(true);
-                    } else {
-                        callback(false, nodes);
-                        fireEvent('update', nodes);
+            array_sync(nodes, function (node, cb) {
+                var up = {$set: {}, $unset: {}};
+                var ids = exportIds(node._id);
+                for (let k in node) {
+                    if (k !== '_id') {
+                        let op = (node[k] === null) ? '$unset' : '$set';
+                        up[op][k] = node[k];
                     }
+                }
+                if (0 === Object.keys(up.$set).length) {
+                    delete up.$set;
+                }
+                if (0 === Object.keys(up.$unset).length) {
+                    delete up.$unset;
+                }
+                coll.update({'_id': {$in: ids}}, up, {multi: true},
+                        function (err, stat) {
+                    if (err) {
+                        return cb(null);
+                    }
+                    self.read(ids, function (err, result) {
+                        cb(err ? null : result);
+                    });
                 });
+            }, function (array) {
+                callback(false, array);
+                fireEvent('update', array);
             });
         });
     }; // update()
