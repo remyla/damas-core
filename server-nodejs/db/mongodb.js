@@ -102,11 +102,15 @@ module.exports = function (conf) {
     self.create = function (nodes, callback) {
         self.getCollection(callback, function (coll) {
             array_sync(nodes, function (node, cb) {
-                if (node._id && ObjectID.isValid(node._id)) {
-                    node._id = new ObjectID(node._id);
+                if (node._id) {
+                    var ids = exportIds(node._id);
+                    delete node._id;
+                    node = ids.map(function (id) {
+                        return Object.assign({}, node, {_id: id});
+                    });
                 }
                 coll.insert(node, {safe: true}, function (err, result) {
-                    cb(err ? null : result.ops[0]);
+                    cb(err ? null : result.ops);
                 });
             }, function (array) {
                 callback(false, array);
@@ -325,15 +329,13 @@ module.exports = function (conf) {
      * @return {array} - the new array
      */
     function exportIds(ids) {
-        var ids_o = [];
-        for (var i in ids) {
-            if(ObjectID.isValid(ids[i])) {
-                ids_o.push(new ObjectID(ids[i]));
+        return (Array.isArray(ids) ? ids : [ids]).map(function (id) {
+            if (ObjectID.isValid(id)) {
+                return new ObjectID(id);
             } else {
-                ids_o.push(ids[i]);
+                return id;
             }
-        }
-        return ids_o;
+        });
     }
 
     function textSearch2MongoQuery( str ) {

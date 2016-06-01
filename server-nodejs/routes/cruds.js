@@ -51,21 +51,17 @@ module.exports = function (app, express) {
      * - 409: Conflict (all nodes already exist with these identifiers)
      */
     create = function (req, res) {
-        var nodes = req.body;
-        var isArray = Array.isArray(nodes);
-        if (!isArray) {
-            nodes = [nodes];
-        }
+        var nodes = isArray(req) ? req.body : [req.body];
 
-        // Control properties
-        var author = req.user.username || req.connection.remoteAddress;
-        var time = Date.now();
-        for (var n in nodes) {
-            if ('object' !== typeof nodes[n] || null === nodes[n]) {
+        var controlProperties = {
+            author: req.user.username || req.connection.remoteAddress,
+            time: Date.now()
+        }
+        for (let i = 0; i < nodes.length; ++i) {
+            if ('object' !== typeof nodes[i] || null === nodes[i]) {
                 return httpStatus(res, 400, 'Create');
             }
-            nodes[n].author = author;
-            nodes[n].time = time;
+            Object.assign(nodes[i], controlProperties);
         }
 
         events.fire('pre-create', nodes).then(function (data) {
@@ -73,13 +69,18 @@ module.exports = function (app, express) {
                 return httpStatus(res, data.status, 'Create');
             }
             db.create(data.nodes || nodes, function (error, doc) {
+                if (error) {
+                    return httpStatus(res, 409, 'Create');
+                }
                 var response = getMultipleResponse(doc);
                 if (response.fail) {
                     httpStatus(res, 409, 'Create');
                 } else if (response.partial) {
                     httpStatus(res, 207, doc);
+                } else if (1 === doc.length && !isArray(req)) {
+                    httpStatus(res, 201, doc[0]);
                 } else {
-                    httpStatus(res, 201, isArray ? doc : doc[0]);
+                    httpStatus(res, 201, doc);
                 }
             });
         });
