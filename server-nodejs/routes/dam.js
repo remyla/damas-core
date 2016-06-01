@@ -32,7 +32,7 @@ module.exports = function (app) {
                 return httpStatus(res, 409, 'Lock');
             }
             var user = req.user.username || req.connection.remoteAddress;
-            for (let i = 0; i < nodes.length; ++i) {
+            for (var i = 0; i < nodes.length; ++i) {
                 if (null === nodes[i]) {
                     continue;
                 }
@@ -83,7 +83,7 @@ module.exports = function (app) {
                 return httpStatus(res, 409, 'Unlock');
             }
             var user = req.user.username || req.connection.remoteAddress;
-            for (let i = 0; i < nodes.length; ++i) {
+            for (var i = 0; i < nodes.length; ++i) {
                 if (null === nodes[i]) {
                     continue;
                 }

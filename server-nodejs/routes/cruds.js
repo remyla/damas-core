@@ -57,7 +57,7 @@ module.exports = function (app, express) {
             author: req.user.username || req.connection.remoteAddress,
             time: Date.now()
         }
-        for (let i = 0; i < nodes.length; ++i) {
+        for (var i = 0; i < nodes.length; ++i) {
             if ('object' !== typeof nodes[i] || null === nodes[i]) {
                 return httpStatus(res, 400, 'Create');
             }
@@ -145,7 +145,7 @@ module.exports = function (app, express) {
         }
         var ids = getRequestIds(req);
         var nodes = Array.isArray(req.body) ? req.body : [req.body];
-        for (let i = 0; i < nodes.length; ++i) {
+        for (var i = 0; i < nodes.length; ++i) {
             if (!checkObject(nodes[i]) || !(ids || nodes[i]._id)) {
                 return httpStatus(res, 400, 'Update');
             }

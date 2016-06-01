@@ -147,9 +147,9 @@ module.exports = function (conf) {
             array_sync(nodes, function (node, cb) {
                 var up = {$set: {}, $unset: {}};
                 var ids = exportIds(node._id);
-                for (let k in node) {
+                for (var k in node) {
                     if (k !== '_id') {
-                        let op = (node[k] === null) ? '$unset' : '$set';
+                        var op = (node[k] === null) ? '$unset' : '$set';
                         up[op][k] = node[k];
                     }
                 }

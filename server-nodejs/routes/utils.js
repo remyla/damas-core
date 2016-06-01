@@ -13,20 +13,35 @@ var utils = {
     },
 
     /**
-     * Extract the ids from the request
+     * Extract the ids from the request body
+     * @param {object} req - The Express request to process
+     * @return {array|false} - The ids of the request, false on failure
+     */
+    getBodyIds: function (req) {
+        if (req.body) {
+            var ids = Array.isArray(req.body) ? req.body : [req.body];
+            if (0 < ids.length && !ids.some(function (id) {
+                return 'string' !== typeof id;
+            })) {
+                return ids;
+            }
+        }
+        return false;
+    },
+
+    /**
+     * Extract the ids from the request URI or body
      * @param {object} req - The Express request to process
      * @return {array|false} - The ids of the request, false on failure
      */
     getRequestIds: function (req) {
         if (req.params.id) {
             var ids = req.params.id.split(',');
-        } else if (req.body) {
-            var ids = Array.isArray(req.body) ? req.body : [req.body];
+            if (0 < ids.length) {
+                return ids;
+            }
         }
-        if (!ids || 1 > ids.length || ids.some(id => 'string' !== typeof id)) {
-            return false;
-        }
-        return ids;
+        return utils.getBodyIds(req);
     },
 
     /**
