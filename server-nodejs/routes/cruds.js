@@ -8,7 +8,6 @@ module.exports = function (app, express) {
     //methodOverride = require('method-override'),
     var fs = require('fs');
     var events = require('../events');
-    // getRequestIds(), isArray(), getMultipleResponse(), httpStatus()
     require('./utils');
 
 /*
@@ -143,13 +142,11 @@ module.exports = function (app, express) {
         function checkObject(obj) {
             return 'object' === typeof obj && 0 < Object.keys(obj).length;
         }
-        var ids = getRequestIds(req);
         var nodes = Array.isArray(req.body) ? req.body : [req.body];
         for (var i = 0; i < nodes.length; ++i) {
-            if (!checkObject(nodes[i]) || !(ids || nodes[i]._id)) {
+            if (!checkObject(nodes[i]) || !nodes[i]._id) {
                 return httpStatus(res, 400, 'Update');
             }
-            nodes[i]._id = nodes[i]._id || ids;
         }
         events.fire('pre-update', nodes).then(function (data) {
             if (data.status) {
@@ -189,7 +186,7 @@ module.exports = function (app, express) {
      * - 404: Not Found (all the nodes do not exist)
      */
     deleteNode = function (req, res) {
-        var ids = getRequestIds(req);
+        var ids = getBodyIds(req);
         if (!ids) {
             return httpStatus(res, 400, 'Remove');
         }
@@ -450,13 +447,11 @@ module.exports = function (app, express) {
 
     // CRUD operations using nodes
     app.post('/api/create/', create);
-    app.put('/api/update/:id(*)', update);
-    app.put('/api/update', update);
+    app.put('/api/update/', update);
 
     // CRUD operations using ids
     app.get('/api/read/:id(*)', read);
     app.post('/api/read/', read);
-    app.delete('/api/delete/:id(*)', deleteNode);
     app.delete('/api/delete/', deleteNode);
     app.get('/api/graph/:id(*)', graph);
     app.post('/api/graph/', graph);
@@ -464,11 +459,11 @@ module.exports = function (app, express) {
     // Search operations
     app.get('/api/search/:query(*)', search);
     app.get('/api/search_one/:query(*)', search_one);
-    app.post('/api/search_mongo', search_mongo);
+    app.post('/api/search_mongo/', search_mongo);
 
     // Extra operations
     app.get('/api/file/:path(*)', getFile); // untested
-    app.post('/api/import', importJSON); // untested
+    app.post('/api/import/', importJSON); // untested
     //app.get('/subdirs/:path', getSubdirs);
     //app.get('/subdirs', getSubdirs);
 }

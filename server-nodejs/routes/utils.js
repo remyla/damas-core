@@ -89,6 +89,7 @@ var utils = {
 
 // Extend the global Node object (add these methods to the global context)
 global.isArray = utils.isArray;
+global.getBodyIds = utils.getBodyIds;
 global.getRequestIds = utils.getRequestIds;
 global.httpStatus = utils.httpStatus;
 global.getMultipleResponse = utils.getMultipleResponse;

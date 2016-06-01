@@ -22,7 +22,7 @@ module.exports = function (app) {
      * - 409: Conflict (asset already locked by someone else)
      */
     lock = function (req, res) {
-        var ids = getRequestIds(req);
+        var ids = getBodyIds(req);
         if (!ids) {
             return httpStatus(res, 400, 'Lock');
         }
@@ -73,7 +73,7 @@ module.exports = function (app) {
      * - 409: Conflict (asset locked by someone else)
      */
     unlock = function (req, res) {
-        var ids = getRequestIds(req);
+        var ids = getBodyIds(req);
         if (!ids) {
             return httpStatus(res, 400, 'Unlock');
         }
@@ -198,10 +198,8 @@ module.exports = function (app) {
     });
     */
 
-    app.put('/api/lock/:id(*)', lock);
-    app.put('/api/lock', lock);
-    app.put('/api/unlock/:id(*)', unlock);
-    app.put('/api/unlock', unlock);
+    app.put('/api/lock/', lock);
+    app.put('/api/unlock/', unlock);
     app.post('/api/version/:id', version);
 }
 
