@@ -269,7 +269,7 @@ frisby.create('CREATE - should create an object in the database')
 
     frisby.create('LOCK - should throw an error (already locked)')
         .put(url + 'lock/' + idCustomEncoded)
-        .expectStatus(409)
+        .expectStatus(200)
     .toss();
 
     /**
@@ -302,7 +302,7 @@ frisby.create('CREATE - should create an object in the database')
 
     frisby.create('UNLOCK - should throw an error (already unlocked)')
         .put(url + 'unlock/' + idCustomEncoded)
-        .expectStatus(409)
+        .expectStatus(200)
     .toss();
 
     /**

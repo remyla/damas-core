@@ -36,7 +36,7 @@ module.exports = function (app) {
                 if (null === nodes[i]) {
                     continue;
                 }
-                if (undefined !== nodes[i].lock) {
+                if (undefined !== nodes[i].lock && user !== nodes[i].lock) {
                     return httpStatus(res, 409, 'Lock');
                 }
             }
@@ -78,7 +78,7 @@ module.exports = function (app) {
             return httpStatus(res, 400, 'Unlock');
         }
 
-        var n = db.read([req.params.id], function (err, nodes) {
+        var n = db.read(ids, function (err, nodes) {
             if (err) {
                 return httpStatus(res, 409, 'Unlock');
             }
@@ -87,7 +87,7 @@ module.exports = function (app) {
                 if (null === nodes[i]) {
                     continue;
                 }
-                if (user !== nodes[0].lock) {
+                if (undefined !== nodes[i].lock && user !== nodes[i].lock) {
                     return httpStatus(res, 409, 'Unlock');
                 }
             }
