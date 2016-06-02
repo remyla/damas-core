@@ -25,6 +25,7 @@
 
 import json
 import requests
+import urllib.parse
 
 #requests.packages.urllib3.disable_warnings() # remove certificate warning
 
@@ -100,6 +101,7 @@ class http_connection( object ) :
 		@param {String} query string
 		@returns {Array} array of element indexes or None if no element found
 		'''
+		query = urllib.parse.quote_plus(query)
 		r = requests.get(self.serverURL+'/search/'+query, headers=self.headers, verify=False)
 		if r.status_code == 200:
 			return json.loads(r.text)
@@ -111,6 +113,7 @@ class http_connection( object ) :
 		@param {String} query string
 		@returns {Array} array of element indexes or None if no element found
 		'''
+		query = urllib.parse.quote_plus(query)
 		r = requests.get(self.serverURL+'/search_one/'+query, headers=self.headers, verify=False)
 		if r.status_code == 200:
 			return json.loads(r.text)
