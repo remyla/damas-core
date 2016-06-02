@@ -21,6 +21,9 @@ var utils = {
         if (req.body) {
             var ids = Array.isArray(req.body) ? req.body : [req.body];
             if (0 < ids.length && !ids.some(function (id) {
+                if ('number' === typeof id) {
+                    id = id.toString();
+                }
                 return 'string' !== typeof id;
             })) {
                 return ids;

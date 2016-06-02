@@ -339,7 +339,7 @@ module.exports = function (conf) {
     }
 
     function textSearch2MongoQuery( str ) {
-        var terms = str.split(" ");
+        var terms = str.split(' ');
         var pair;
         var result = {};
         for (var i = 0; i < terms.length; i++) {
@@ -388,7 +388,7 @@ module.exports = function (conf) {
             }
 db.things.find({$where: function () {
   for (var key in this) {
-    if (this[key] === "bar") {
+    if (this[key] === 'bar') {
       return true;
     }
     return false;

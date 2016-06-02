@@ -50,7 +50,7 @@ module.exports = function (app, express) {
      * - 409: Conflict (all nodes already exist with these identifiers)
      */
     create = function (req, res) {
-        var nodes = isArray(req) ? req.body : [req.body];
+        var nodes = Array.isArray(req.body) ? req.body : [req.body];
 
         var controlProperties = {
             author: req.user.username || req.connection.remoteAddress,
@@ -140,7 +140,8 @@ module.exports = function (app, express) {
      */
     update = function (req, res) {
         function checkObject(obj) {
-            return 'object' === typeof obj && 0 < Object.keys(obj).length;
+            // Needs at least 2 keys, _id + a key to update
+            return 'object' === typeof obj && 1 < Object.keys(obj).length;
         }
         var nodes = Array.isArray(req.body) ? req.body : [req.body];
         for (var i = 0; i < nodes.length; ++i) {
