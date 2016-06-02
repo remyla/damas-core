@@ -3,33 +3,6 @@
  * Licensed under the GNU GPL v3
  */
 
-function array_sync(array, walker, callback) {
-    var next = 0;
-    var results = [];
-    (function walk() {
-        if (next === array.length) {
-            callback(results);
-            ++next;
-        } else if (next < array.length) {
-            walker(array[next++], function (result) {
-                results = results.concat(result);
-                process.nextTick(walk);
-            });
-        }
-    })();
-}
-
-var events = require('../events');
-/*
- * Attempt to fire an event, if the given array is valid
- */
-function fireEvent(name, array) {
-    var clean = array.filter(function (item) { return item !== null; });
-    if (0 < clean.length) {
-        events.fire(name, clean);
-    }
-}
-
 module.exports = function (conf) {
     var self = this;
     self.conf = conf;
@@ -39,6 +12,7 @@ module.exports = function (conf) {
 
     var mongo = require('mongodb');
     var ObjectID = mongo.ObjectID;
+    require('./utils');
 
     /*
      * Initialize the connection.
@@ -103,7 +77,7 @@ module.exports = function (conf) {
         self.getCollection(callback, function (coll) {
             array_sync(nodes, function (node, cb) {
                 if (node._id) {
-                    var ids = exportIds(node._id);
+                    var ids = self.exportIds(node._id);
                     delete node._id;
                     node = ids.map(function (id) {
                         return Object.assign({}, node, id);
@@ -126,7 +100,7 @@ module.exports = function (conf) {
      */
     self.read = function (ids, callback) {
         self.getCollection(callback, function (coll) {
-            array_sync(exportIds(ids), function (id, cb) {
+            array_sync(self.exportIds(ids), function (id, cb) {
                 coll.findOne(id, function (err, doc) {
                     cb(err ? null : doc);
                 });
@@ -146,7 +120,7 @@ module.exports = function (conf) {
         self.getCollection(callback, function (coll) {
             array_sync(nodes, function (node, cb) {
                 // Get the ids
-                var ids = exportIds(node._id);
+                var ids = self.exportIds(node._id);
                 var query = {_id: {$in: []}};
                 for (var i = 0; i < ids.length; ++i) {
                     query._id.$in.push(ids[i]._id);
@@ -188,7 +162,7 @@ module.exports = function (conf) {
      */
     self.remove = function (ids, callback) {
         self.getCollection(callback, function (coll) {
-            array_sync(exportIds(ids), function (id, cb) {
+            array_sync(self.exportIds(ids), function (id, cb) {
                 coll.remove(id, function (err, result) {
                     if (err || 0 === result.result.n) {
                         return cb(null);
@@ -337,7 +311,7 @@ module.exports = function (conf) {
      * @param {array} ids - ids to put
      * @return {array} - the new array
      */
-    function exportIds(ids) {
+    self.exportIds = function (ids) {
         return (Array.isArray(ids) ? ids : [ids]).map(function (id) {
             if (ObjectID.isValid(id)) {
                 return {_id: new ObjectID(id)};
