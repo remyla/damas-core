@@ -106,7 +106,7 @@ module.exports = function (conf) {
                     var ids = exportIds(node._id);
                     delete node._id;
                     node = ids.map(function (id) {
-                        return Object.assign({}, node, {_id: id});
+                        return Object.assign({}, node, id);
                     });
                 }
                 coll.insert(node, {safe: true}, function (err, result) {
@@ -127,8 +127,8 @@ module.exports = function (conf) {
     self.read = function (ids, callback) {
         self.getCollection(callback, function (coll) {
             array_sync(exportIds(ids), function (id, cb) {
-                coll.findOne({'_id': id}, function (err, node) {
-                    cb(err ? null : node);
+                coll.findOne(id, function (err, doc) {
+                    cb(err ? null : doc);
                 });
             }, function (array) {
                 callback(false, array);
@@ -145,8 +145,15 @@ module.exports = function (conf) {
     self.update = function (nodes, callback) {
         self.getCollection(callback, function (coll) {
             array_sync(nodes, function (node, cb) {
-                var up = {$set: {}, $unset: {}};
+                // Get the ids
                 var ids = exportIds(node._id);
+                var query = {_id: {$in: []}};
+                for (var i = 0; i < ids.length; ++i) {
+                    query._id.$in.push(ids[i]._id);
+                }
+
+                // Separate operations
+                var up = {$set: {}, $unset: {}};
                 for (var k in node) {
                     if (k !== '_id') {
                         var op = (node[k] === null) ? '$unset' : '$set';
@@ -159,13 +166,12 @@ module.exports = function (conf) {
                 if (0 === Object.keys(up.$unset).length) {
                     delete up.$unset;
                 }
-                coll.update({'_id': {$in: ids}}, up, {multi: true},
-                        function (err, stat) {
+                coll.update(query, up, {multi: true}, function (err, stat) {
                     if (err) {
                         return cb(null);
                     }
-                    self.read(ids, function (err, result) {
-                        cb(err ? null : result);
+                    self.read(node._id, function (err, doc) {
+                        cb(err ? null : doc);
                     });
                 });
             }, function (array) {
@@ -183,8 +189,11 @@ module.exports = function (conf) {
     self.remove = function (ids, callback) {
         self.getCollection(callback, function (coll) {
             array_sync(exportIds(ids), function (id, cb) {
-                coll.remove({'_id': id}, function (err, result) {
-                    cb((err || 0 === result.result.n) ? null : id);
+                coll.remove(id, function (err, result) {
+                    if (err || 0 === result.result.n) {
+                        return cb(null);
+                    }
+                    cb(id);
                 });
             }, function (array) {
                 callback(false, array);
@@ -200,7 +209,7 @@ module.exports = function (conf) {
      */
     self.search = function (keys, callback) {
         self.getCollection(callback, function (coll) {
-            coll.find(keys, {'_id':true}).toArray(function (err, results) {
+            coll.find(keys, {_id: true}).toArray(function (err, results) {
                 if (err) {
                     callback(true);
                     return;
@@ -229,7 +238,7 @@ module.exports = function (conf) {
             links=[];
         }
         self.getCollection(callback, function (coll) {
-            coll.find({'tgt_id': {$in: ids}}).toArray(function (err, results) {
+            coll.find({tgt_id: {$in: ids}}).toArray(function (err, results) {
                 if (err) {
                     callback(true);
                     return;
@@ -331,10 +340,11 @@ module.exports = function (conf) {
     function exportIds(ids) {
         return (Array.isArray(ids) ? ids : [ids]).map(function (id) {
             if (ObjectID.isValid(id)) {
-                return new ObjectID(id);
-            } else {
-                return id;
+                return {_id: new ObjectID(id)};
+            } else if ('string' !== typeof id) {
+                return;
             }
+            return {_id: id};
         });
     }
 
