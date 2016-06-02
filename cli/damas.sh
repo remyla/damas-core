@@ -96,7 +96,6 @@ damas_version() {
 }
 
 damas_signin() {
-  echo $TOKEN
   TOKEN=$(curl -s --fail -d "username=$1&password=$2" $URL'signIn' \
     | sed 's/\\\\\//\//g' | sed 's/[{}]//g' | awk \
     '{n=split($0,a,","); for (i=1; i<=n; i++) print a[i]}' | sed 's/\"//g' \
@@ -209,9 +208,12 @@ done
 
 # Verify if in a .damas directory
 upsearch '.damas'
-source $DIRECTORY'/.damas/config'
-
-# Verify authentication
+CONFIG=$DIRECTORY'/.damas/config'
+if [ ! -f $CONFIG ]; then
+    echo "config file does not exist. Creating one.."
+    echo 'URL="http://localhost:8090/api/"' > $CONFIG
+fi
+source $CONFIG
 
 # main operation
 if [ ! -n "$ACTION" ]; then
@@ -283,6 +285,9 @@ case $ACTION in
 
     signin)
       damas_signin $1 $2
+      if [ ! -n $TOKEN ]; then
+        exit 2
+      fi
       exit 0
       ;;
 
