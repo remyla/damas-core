@@ -1,11 +1,10 @@
 /**
- * REST API Testing using Frisby.js - Assigning values to variables in conf.json file
- * Remember: You must configure the parameters and variables in conf-tests-frisby.
- * @requires module:frisby
- * @requires ./conf.json
+ * REST API Testing using Frisby.js
+ * Configuration: conf-tests.js
  */
- var frisby = require('frisby'),
-conf = require('./conf-tests-frisby');
+
+var frisby = require('frisby'),
+conf = require('./conf-tests');
 
 //To test with https
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
