@@ -96,6 +96,7 @@ damas_version() {
 }
 
 damas_signin() {
+  echo $TOKEN
   TOKEN=$(curl -s --fail -d "username=$1&password=$2" $URL'signIn' \
     | sed 's/\\\\\//\//g' | sed 's/[{}]//g' | awk \
     '{n=split($0,a,","); for (i=1; i<=n; i++) print a[i]}' | sed 's/\"//g' \
@@ -133,10 +134,10 @@ upsearch() {
 }
 
 auth() {
-  TOKEN=$(cat /tmp/damas-$USER 2> /dev/null)
+  local TOKEN=$(cat /tmp/damas-$USER 2> /dev/null)
   AUTH="Authorization: Bearer $TOKEN"
   if [ $(curl -s -o /dev/null -w '%{http_code}' -H "$AUTH" $URL'verify/') -gt "400" ]; then
-    TOKEN=""
+    TOKEN=
     while [ ! -n "$TOKEN" ]; do
       echo "Please identify yourself"
       read -p "login: " USERN
@@ -156,6 +157,31 @@ show_help_msg() {
 # MAIN
 ACTION=$1
 shift
+
+case $ACTION in
+    -h)
+      echo "usage: damas <command>"
+      exit 1
+      ;;
+
+    --help)
+      echo "    add      [-j <json>] <file>   create a new node for the specified file"
+      echo "    read     <file>               show the keys of the file"
+      echo "    update   -j <json> <file>        update"
+      echo "    remove   <file>               delete"
+      echo "    search   <query>              search"
+      echo "    search_mongo  <query> <sort> <limit> <skip>  does something"
+      echo "    write    -m <comment> <file>  write a message node on a file"
+      echo "    log      <file>               show history of file (children nodes)"
+      echo "    graph    <file>               show all files and links related"
+      echo "    lock     <file>               lock a file"
+      echo "    unlock   <file>               unlock a file"
+      echo "    version  -j <json> <file>     set a new version of a file"
+      echo "    signin   <username> <pass>    set the authorization token"
+      echo "    signout                       remove authorization token"
+      exit 0
+      ;;
+esac
 
 # loop through arguments
 while true; do
@@ -195,29 +221,6 @@ if [ ! -n "$ACTION" ]; then
 fi
 
 case $ACTION in
-    -h)
-      echo "usage: damas <command>"
-      exit 1
-      ;;
-
-    --help)
-      echo "    add      [-j <json>] <file>   create a new node for the specified file"
-      echo "    read     <file>               show the keys of the file"
-      echo "    update   -j <json> <file>        update"
-      echo "    remove   <file>               delete"
-      echo "    search   <query>              search"
-      echo "    search_mongo  <query> <sort> <limit> <skip>  does something"
-      echo "    write    -m <comment> <file>  write a message node on a file"
-      echo "    log      <file>               show history of file (children nodes)"
-      echo "    graph    <file>               show all files and links related"
-      echo "    lock     <file>               lock a file"
-      echo "    unlock   <file>               unlock a file"
-      echo "    version  -j <json> <file>     set a new version of a file"
-      echo "    signin   <username> <pass>    set the authorization token"
-      echo "    signout                       remove authorization token"
-      exit 0
-      ;;
-
     add)
       auth
       damas_add $@
