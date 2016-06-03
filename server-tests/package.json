@@ -5,12 +5,11 @@
   "main": "node-tests-frisby_spec.js",
   "dependencies": {
     "frisby": "^0.8.5",
-    "jasmine": "^2.3.2",
     "jasmine-node": "^1.14.5"
   },
   "devDependencies": {},
   "scripts": {
-    "test": "./node_modules/.bin/jasmine-node ."
+    "test": "./node_modules/.bin/jasmine-node 2-3-6_spec.js"
   },
   "author": "Joaquin GALVAN",
   "license": "GPL v3"

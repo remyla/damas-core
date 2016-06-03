@@ -16,6 +16,10 @@ module.exports = function (type, settings) {
         var dbClass = require('./mongodb');
         db = new dbClass(settings);
         break;
+    case 'mongodb-fileids':
+        var dbClass = require('./mongodb-fileids');
+        db = dbClass(settings);
+        break;
     default:
         var dbClass = require('./debug');
         db = new dbClass(settings);
