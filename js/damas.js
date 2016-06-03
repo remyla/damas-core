@@ -127,11 +127,11 @@
      * //Create a new node using this set of keys
      * var newNode= damas.create(keys);
      */
-    damas.create = function (keys, callback) {
+    damas.create = function (nodes, callback) {
         return req({
             method: 'POST',
             url: 'create/',
-            data: keys,
+            data: nodes,
             callback: callback
         });
     }

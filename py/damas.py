@@ -47,7 +47,8 @@ class http_connection( object ) :
 		'''
 		headers = {'content-type': 'application/json'}
 		headers.update(self.headers)
-		r = requests.post(self.serverURL+"/create/", data=json.dumps(keys), headers=headers, verify=False)
+		r = requests.post(self.serverURL+"/create/", data=json.dumps(keys),
+			headers=headers, verify=False)
 		if r.status_code == 201 or r.status_code == 207:
 			return json.loads(r.text)
 		return None
@@ -60,7 +61,8 @@ class http_connection( object ) :
 		'''
 		headers = {'content-type': 'application/json'}
 		headers.update(self.headers)
-		r = requests.post(self.serverURL+"/read/", data=json.dumps(id_), headers=headers, verify=False)
+		r = requests.post(self.serverURL+"/read/", data=json.dumps(id_),
+			headers=headers, verify=False)
 		if r.status_code == 200 or r.status_code == 207:
 			return json.loads(r.text)
 		return None
@@ -77,7 +79,8 @@ class http_connection( object ) :
 		node['_id'] = id_;
 		headers = {'content-type': 'application/json'}
 		headers.update(self.headers)
-		r = requests.put(self.serverURL+'/update/', data=json.dumps(node), headers=headers, verify=False)
+		r = requests.put(self.serverURL+'/update/', data=json.dumps(node),
+			headers=headers, verify=False)
 		if r.status_code == 200 or r.status_code == 207:
 			return json.loads(r.text)
 		return None
@@ -90,7 +93,8 @@ class http_connection( object ) :
 		'''
 		headers = {'content-type': 'application/json'}
 		headers.update(self.headers)
-		r = requests.delete(self.serverURL+'/delete/', data=json.dumps(id_), headers=headers, verify=False)
+		r = requests.delete(self.serverURL+'/delete/', data=json.dumps(id_),
+			headers=headers, verify=False)
 		if r.status_code == 200 or r.status_code == 207:
 			return json.loads(r.text)
 		return None
@@ -101,8 +105,9 @@ class http_connection( object ) :
 		@param {String} query string
 		@returns {Array} array of element indexes or None if no element found
 		'''
-		query = urllib.parse.quote_plus(query)
-		r = requests.get(self.serverURL+'/search/'+query, headers=self.headers, verify=False)
+		query = urllib.parse.quote(query, safe='')
+		r = requests.get(self.serverURL+'/search/'+query,
+			headers=self.headers, verify=False)
 		if r.status_code == 200:
 			return json.loads(r.text)
 		return None
@@ -113,8 +118,9 @@ class http_connection( object ) :
 		@param {String} query string
 		@returns {Array} array of element indexes or None if no element found
 		'''
-		query = urllib.parse.quote_plus(query)
-		r = requests.get(self.serverURL+'/search_one/'+query, headers=self.headers, verify=False)
+		query = urllib.parse.quote(query, safe='')
+		r = requests.get(self.serverURL+'/search_one/'+query,
+			headers=self.headers, verify=False)
 		if r.status_code == 200:
 			return json.loads(r.text)
 		return None
@@ -123,7 +129,8 @@ class http_connection( object ) :
 		data = {"query":query, "sort":sort, "limit":limit, "skip":skip}
 		headers = {'content-type': 'application/json'}
 		headers.update(self.headers)
-		r = requests.post(self.serverURL+'/search_mongo', data=json.dumps(data), headers=headers, verify=False)
+		r = requests.post(self.serverURL+'/search_mongo',
+			data=json.dumps(data), headers=headers, verify=False)
 		if r.status_code == 200:
 			return json.loads(r.text)
 		return None
@@ -136,7 +143,8 @@ class http_connection( object ) :
 		'''
 		headers = {'content-type': 'application/json'}
 		headers.update(self.headers)
-		r = requests.post(self.serverURL+'/graph/', data=json.dumps(id_), headers=headers, verify=False)
+		r = requests.post(self.serverURL+'/graph/', data=json.dumps(id_),
+			headers=headers, verify=False)
 		if r.status_code == 200 or r.status_code == 207:
 			return json.loads(r.text)
 		return None
@@ -149,7 +157,8 @@ class http_connection( object ) :
 		'''
 		headers = {'content-type': 'application/json'}
 		headers.update(self.headers)
-		r = requests.put(self.serverURL+'/lock/', data=json.dumps(id_), headers=headers, verify=False)
+		r = requests.put(self.serverURL+'/lock/', data=json.dumps(id_),
+			headers=headers, verify=False)
 		return r.status_code == 200
 
 	def unlock( self, id_ ) :
@@ -160,7 +169,8 @@ class http_connection( object ) :
 		'''
 		headers = {'content-type': 'application/json'}
 		headers.update(self.headers)
-		r = requests.put(self.serverURL+'/unlock/', data=json.dumps(id_), headers=headers, verify=False)
+		r = requests.put(self.serverURL+'/unlock/', data=json.dumps(id_),
+			headers=headers, verify=False)
 		return r.status_code == 200
 
 	def version( self, id_, keys ) :
@@ -171,7 +181,8 @@ class http_connection( object ) :
 		'''
 		headers = {'content-type': 'application/json'}
 		headers.update(self.headers)
-		r = requests.post('%s/version/%s' % (self.serverURL, id_), data=json.dumps(keys), headers=headers, verify=False)
+		r = requests.post('%s/version/%s' % (self.serverURL, id_),
+			data=json.dumps(keys), headers=headers, verify=False)
 		if r.status_code == 201:
 			return json.loads(r.text)
 		return None
