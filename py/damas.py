@@ -57,7 +57,9 @@ class http_connection( object ) :
 		@param {String} id_ the internal node index to search
 		@returns {Hash} node or false on failure
 		'''
-		r = requests.post(self.serverURL+"/read/", data=json.dumps(id_), headers=self.headers, verify=False)
+		headers = {'content-type': 'application/json'}
+		headers.update(self.headers)
+		r = requests.post(self.serverURL+"/read/", data=json.dumps(id_), headers=headers, verify=False)
 		if r.status_code == 200:
 			return json.loads(r.text)
 		return None
