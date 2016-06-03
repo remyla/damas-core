@@ -1,10 +1,11 @@
 /**
- * REST API Testing using Frisby.js
- * Configuration: conf-tests.js
+ * REST API Testing using Frisby.js - Assigning values to variables in conf.json file
+ * Remember: You must configure the parameters and variables in conf-tests-frisby.
+ * @requires module:frisby
+ * @requires ./conf.json
  */
-
-var frisby = require('frisby'),
-conf = require('./conf-tests');
+ var frisby = require('frisby'),
+conf = require('./conf-tests-frisby');
 
 //To test with https
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -76,9 +77,9 @@ frisby.create('CREATE - should create an object in the database')
     /**
       * Tests for method Read
       */
-    frisby.create('READ - should throw an error (id empty) - Bad Request')
+    frisby.create('READ - should throw an error (id empty) - Not found')
         .get(url + 'read/')
-        .expectStatus(400)
+        .expectStatus(404)
     .toss();
 
     //it always return a non empty array
@@ -102,12 +103,6 @@ frisby.create('CREATE - should create an object in the database')
         .get(url + 'read/' + idCustomEncoded)
         .expectStatus(200)
         .expectHeaderContains('Content-Type', tjson)
-    .toss();
-
-    frisby.create('READ - should throw an error (invalid id) - POST')
-        .addHeader('Content-Type', tjson)
-        .post(url + 'read/', {}, asJSON)
-        .expectStatus(400)
     .toss();
 
     frisby.create('READ - should get a record valid with custom id - POST')
@@ -206,7 +201,7 @@ frisby.create('CREATE - should create an object in the database')
       * Tests for method Graph
       */
     //it always return a non empty array
-    frisby.create('GRAPH - should throw an error (id empty) - Bad Request')
+    frisby.create('GRAPH - should throw an error (id empty) - Not found')
         .get(url + 'graph/')
         .expectStatus(400)
     .toss();
@@ -274,7 +269,7 @@ frisby.create('CREATE - should create an object in the database')
 
     frisby.create('LOCK - should throw an error (already locked)')
         .put(url + 'lock/' + idCustomEncoded)
-        .expectStatus(200)
+        .expectStatus(409)
     .toss();
 
     /**
@@ -307,15 +302,15 @@ frisby.create('CREATE - should create an object in the database')
 
     frisby.create('UNLOCK - should throw an error (already unlocked)')
         .put(url + 'unlock/' + idCustomEncoded)
-        .expectStatus(200)
+        .expectStatus(409)
     .toss();
 
     /**
      * Tests for method Delete
      */
-    frisby.create('DELETE - should throw an error (id empty) - Bad Request')
+    frisby.create('DELETE - should throw an error (id empty)')
         .delete(url + 'delete/')
-        .expectStatus(400)
+        .expectStatus(404)
     .toss();
 
     frisby.create('DELETE - should throw an error (id valid but not found in the DB)')
