@@ -3,6 +3,33 @@
  * Licensed under the GNU GPL v3
  */
 
+function array_sync(array, walker, callback) {
+    var next = 0;
+    var results = [];
+    (function walk() {
+        if (next === array.length) {
+            callback(results);
+            ++next;
+        } else if (next < array.length) {
+            walker(array[next++], function (result) {
+                results.push(result);
+                process.nextTick(walk);
+            });
+        }
+    })();
+}
+
+var events = require('../events');
+/*
+ * Attempt to fire an event, if the given array is valid
+ */
+function fireEvent(name, array) {
+    var clean = array.filter(function (item) { return item !== null; });
+    if (0 < clean.length) {
+        events.fire(name, clean);
+    }
+}
+
 module.exports = function (conf) {
     var self = this;
     self.conf = conf;
@@ -12,7 +39,6 @@ module.exports = function (conf) {
 
     var mongo = require('mongodb');
     var ObjectID = mongo.ObjectID;
-    require('./utils');
 
     /*
      * Initialize the connection.
@@ -76,15 +102,11 @@ module.exports = function (conf) {
     self.create = function (nodes, callback) {
         self.getCollection(callback, function (coll) {
             array_sync(nodes, function (node, cb) {
-                if (node._id) {
-                    var ids = self.exportIds(node._id);
-                    delete node._id;
-                    node = ids.map(function (id) {
-                        return Object.assign({}, node, id);
-                    });
+                if (node._id && ObjectID.isValid(node._id)) {
+                    node._id = new ObjectID(node._id);
                 }
                 coll.insert(node, {safe: true}, function (err, result) {
-                    cb(err ? null : result.ops);
+                    cb(err ? null : result.ops[0]);
                 });
             }, function (array) {
                 callback(false, array);
@@ -100,9 +122,9 @@ module.exports = function (conf) {
      */
     self.read = function (ids, callback) {
         self.getCollection(callback, function (coll) {
-            array_sync(self.exportIds(ids), function (id, cb) {
-                coll.findOne(id, function (err, doc) {
-                    cb(err ? null : doc);
+            array_sync(exportIds(ids), function (id, cb) {
+                coll.findOne({'_id': id}, function (err, node) {
+                    cb(err ? null : node);
                 });
             }, function (array) {
                 callback(false, array);
@@ -116,41 +138,40 @@ module.exports = function (conf) {
      * @param {object} keys - New keys to define on the nodes
      * @param {function} callback - Callback function to routes.js
      */
-    self.update = function (nodes, callback) {
+    self.update = function (ids, keys, callback) {
         self.getCollection(callback, function (coll) {
-            array_sync(nodes, function (node, cb) {
-                // Get the ids
-                var ids = self.exportIds(node._id);
-                var query = {_id: {$in: []}};
-                for (var i = 0; i < ids.length; ++i) {
-                    query._id.$in.push(ids[i]._id);
-                }
+            var ids_o = exportIds(ids);
+            var keysToUnset = {};
+            var keysToSet = {};
+            var toUpdate = {};
 
-                // Separate operations
-                var up = {$set: {}, $unset: {}};
-                for (var k in node) {
-                    if (k !== '_id') {
-                        var op = (node[k] === null) ? '$unset' : '$set';
-                        up[op][k] = node[k];
-                    }
+            for (var k in keys) {
+                if (keys[k] === null) {
+                    keysToUnset[k] = '';
+                } else {
+                    keysToSet[k] = keys[k];
                 }
-                if (0 === Object.keys(up.$set).length) {
-                    delete up.$set;
+            }
+            if (Object.keys(keysToSet).length > 0) {
+                toUpdate.$set = keysToSet;
+            }
+            if (Object.keys(keysToUnset).length > 0) {
+                toUpdate.$unset = keysToUnset;
+            }
+            coll.update({'_id': {$in: ids_o}}, toUpdate, {multi: true},
+                        function (err, status) {
+                if (err) {
+                    callback(true);
                 }
-                if (0 === Object.keys(up.$unset).length) {
-                    delete up.$unset;
-                }
-                coll.update(query, up, {multi: true}, function (err, stat) {
+                self.debug('Update status: ' + status);
+                self.read(ids_o, function (err, nodes) {
                     if (err) {
-                        return cb(null);
+                        callback(true);
+                    } else {
+                        callback(false, nodes);
+                        fireEvent('update', nodes);
                     }
-                    self.read(node._id, function (err, doc) {
-                        cb(err ? null : doc);
-                    });
                 });
-            }, function (array) {
-                callback(false, array);
-                fireEvent('update', array);
             });
         });
     }; // update()
@@ -162,12 +183,9 @@ module.exports = function (conf) {
      */
     self.remove = function (ids, callback) {
         self.getCollection(callback, function (coll) {
-            array_sync(self.exportIds(ids), function (id, cb) {
-                coll.remove(id, function (err, result) {
-                    if (err || 0 === result.result.n) {
-                        return cb(null);
-                    }
-                    cb(id);
+            array_sync(exportIds(ids), function (id, cb) {
+                coll.remove({'_id': id}, function (err, result) {
+                    cb((err || 0 === result.result.n) ? null : id);
                 });
             }, function (array) {
                 callback(false, array);
@@ -183,7 +201,7 @@ module.exports = function (conf) {
      */
     self.search = function (keys, callback) {
         self.getCollection(callback, function (coll) {
-            coll.find(keys, {_id: true}).toArray(function (err, results) {
+            coll.find(keys, {'_id':true}).toArray(function (err, results) {
                 if (err) {
                     callback(true);
                     return;
@@ -212,7 +230,7 @@ module.exports = function (conf) {
             links=[];
         }
         self.getCollection(callback, function (coll) {
-            coll.find({tgt_id: {$in: ids}}).toArray(function (err, results) {
+            coll.find({'tgt_id': {$in: ids}}).toArray(function (err, results) {
                 if (err) {
                     callback(true);
                     return;
@@ -311,19 +329,20 @@ module.exports = function (conf) {
      * @param {array} ids - ids to put
      * @return {array} - the new array
      */
-    self.exportIds = function (ids) {
-        return (Array.isArray(ids) ? ids : [ids]).map(function (id) {
-            if (ObjectID.isValid(id)) {
-                return {_id: new ObjectID(id)};
-            } else if ('string' !== typeof id) {
-                return;
+    function exportIds(ids) {
+        var ids_o = [];
+        for (var i in ids) {
+            if(ObjectID.isValid(ids[i])) {
+                ids_o.push(new ObjectID(ids[i]));
+            } else {
+                ids_o.push(ids[i]);
             }
-            return {_id: id};
-        });
+        }
+        return ids_o;
     }
 
     function textSearch2MongoQuery( str ) {
-        var terms = str.split(' ');
+        var terms = str.split(" ");
         var pair;
         var result = {};
         for (var i = 0; i < terms.length; i++) {
@@ -372,7 +391,7 @@ module.exports = function (conf) {
             }
 db.things.find({$where: function () {
   for (var key in this) {
-    if (this[key] === 'bar') {
+    if (this[key] === "bar") {
       return true;
     }
     return false;

@@ -8,7 +8,6 @@ module.exports = function (app, express) {
     //methodOverride = require('method-override'),
     var fs = require('fs');
     var events = require('../events');
-    require('./utils');
 
 /*
     app.use(methodOverride(function (req, res) {
@@ -50,36 +49,38 @@ module.exports = function (app, express) {
      * - 409: Conflict (all nodes already exist with these identifiers)
      */
     create = function (req, res) {
-        var nodes = Array.isArray(req.body) ? req.body : [req.body];
-
-        var controlProperties = {
-            author: req.user.username || req.connection.remoteAddress,
-            time: Date.now()
+        var nodes = req.body;
+        var isArray = Array.isArray(nodes);
+        if (!isArray) {
+            nodes = [nodes];
         }
-        for (var i = 0; i < nodes.length; ++i) {
-            if ('object' !== typeof nodes[i] || null === nodes[i]) {
-                return httpStatus(res, 400, 'Create');
+
+        // Control properties
+        var author = req.user.username || req.connection.remoteAddress;
+        var time = Date.now();
+        for (var n in nodes) {
+            if ('object' !== typeof nodes[n]) {
+                httpStatus(res, 400, 'create');
+                return;
             }
-            Object.assign(nodes[i], controlProperties);
+            nodes[n].author = author;
+            nodes[n].time = time;
         }
 
         events.fire('pre-create', nodes).then(function (data) {
             if (data.status) {
-                return httpStatus(res, data.status, 'Create');
+                httpStatus(res, data.status, 'create');
+                return;
             }
-            db.create(data.nodes || nodes, function (error, doc) {
-                if (error) {
-                    return httpStatus(res, 409, 'Create');
-                }
+            nodes = data.nodes || nodes;
+            db.create(nodes, function (error, doc) {
                 var response = getMultipleResponse(doc);
                 if (response.fail) {
-                    httpStatus(res, 409, 'Create');
+                    httpStatus(res, 409, 'create');
                 } else if (response.partial) {
                     httpStatus(res, 207, doc);
-                } else if (1 === doc.length && !isArray(req)) {
-                    httpStatus(res, 201, doc[0]);
                 } else {
-                    httpStatus(res, 201, doc);
+                    httpStatus(res, 201, isArray ? doc : doc[0]);
                 }
             });
         });
@@ -101,24 +102,31 @@ module.exports = function (app, express) {
      * - 404: Not Found (all the nodes do not exist)
      */
     read = function (req, res) {
-        var ids = getRequestIds(req);
-        if (!ids) {
-            return httpStatus(res, 400, 'Read');
+        if (req.params.id) {
+            var ids = req.params.id.split(',');
+            var isArray = ids.length > 1;
+        } else if (req.body) {
+            var ids = req.body;
+            var isArray = Array.isArray(ids);
+            if (!isArray) {
+                ids = [ids];
+            }
+        } else {
+            httpStatus(res, 400, 'read');
+            return;
         }
-
         db.read(ids, function (error, doc) {
             if (error) {
-                return httpStatus(res, 409, 'Read');
+                httpStatus(res, 409, 'read');
+                return;
             }
             var response = getMultipleResponse(doc);
             if (response.fail) {
-                httpStatus(res, 404, 'Read');
+                httpStatus(res, 404, 'read');
             } else if (response.partial) {
                 httpStatus(res, 207, doc);
-            } else if (1 === doc.length && !isArray(req)) {
-                httpStatus(res, 200, doc[0]);
             } else {
-                httpStatus(res, 200, doc);
+                httpStatus(res, 200, isArray ? doc : doc[0]);
             }
         });
     }; // read()
@@ -139,33 +147,32 @@ module.exports = function (app, express) {
      * - 404: Not Found (all the nodes do not exist)
      */
     update = function (req, res) {
-        function checkObject(obj) {
-            // Needs at least 2 keys, _id + a key to update
-            return 'object' === typeof obj && 1 < Object.keys(obj).length;
+        if (Object.keys(req.body).length === 0) {
+            httpStatus(res, 400, 'update');
+            return;
         }
-        var nodes = Array.isArray(req.body) ? req.body : [req.body];
-        for (var i = 0; i < nodes.length; ++i) {
-            if (!checkObject(nodes[i]) || !nodes[i]._id) {
-                return httpStatus(res, 400, 'Update');
-            }
-        }
-        events.fire('pre-update', nodes).then(function (data) {
+
+        var ids = req.params.id.split(',');
+        var body = req.body;
+        events.fire('pre-update', ids, body).then(function (data) {
             if (data.status) {
-                return httpStatus(res, data.status, 'Update');
+                httpStatus(res, data.status, 'create');
+                return;
             }
-            db.update(data.nodes || nodes, function (error, doc) {
+            ids = data.ids || ids;
+            body = data.body || body;
+            db.update(ids, body, function (error, doc) {
                 if (error) {
-                    return httpStatus(res, 409, 'Update');
+                    httpStatus(res, 409, 'update');
+                    return;
                 }
                 var response = getMultipleResponse(doc);
                 if (response.fail) {
-                    httpStatus(res, 404, 'Update');
+                    httpStatus(res, 404, 'update');
                 } else if (response.partial) {
                     httpStatus(res, 207, doc);
-                } else if (1 === doc.length && !isArray(req)) {
-                    httpStatus(res, 200, doc[0]);
                 } else {
-                    httpStatus(res, 200, doc);
+                    httpStatus(res, 200, 1 < ids.length ? doc : doc[0]);
                 }
             });
         });
@@ -187,25 +194,21 @@ module.exports = function (app, express) {
      * - 404: Not Found (all the nodes do not exist)
      */
     deleteNode = function (req, res) {
-        var ids = getBodyIds(req);
-        if (!ids) {
-            return httpStatus(res, 400, 'Remove');
-        }
-
+        var ids = req.params.id.split(',');
         events.fire('pre-remove', ids).then(function (data) {
             if (data.status) {
-                return httpStatus(res, data.status, 'Remove');
+                httpStatus(res, data.status, 'remove');
             }
-            db.remove(data.ids || ids, function (error, doc) {
+            ids = data.ids || ids;
+            db.remove(ids, function (error, doc) {
+                console.log(doc);
                 var response = getMultipleResponse(doc);
                 if (response.fail) {
-                    httpStatus(res, 404, 'Remove');
+                    httpStatus(res, 404, 'remove');
                 } else if (response.partial) {
                     httpStatus(res, 207, doc);
-                } else if (1 === doc.length && !isArray(req)) {
-                    httpStatus(res, 200, doc[0]);
                 } else {
-                    httpStatus(res, 200, doc);
+                    httpStatus(res, 200, 1 < ids.length ? doc : doc[0]);
                 }
             });
         });
@@ -227,22 +230,23 @@ module.exports = function (app, express) {
      * - 404: Not Found (all the nodes do not exist)
      */
     graph = function (req, res) {
-        var ids = getRequestIds(req);
-        if (!ids) {
-            return httpStatus(res, 400, 'Remove');
+        var id = req.params.id || req.body.id;
+        if (!id || id == 'undefined') {
+            httpStatus(res, 400, 'graph');
+            return;
         }
-
-        db.graph(ids, function (error, nodes) {
+        db.graph(id.split(','), function (error, nodes) {
             if (error) {
-                return httpStatus(res, 409, 'Graph');
+                httpStatus(res, 409, 'graph');
+                return;
             }
             var response = getMultipleResponse(nodes);
             if (response.fail) {
-                httpStatus(res, 404, 'Graph');
+                httpStatus(res, 404, 'graph');
             } else if (response.partial) {
                 httpStatus(res, 207, nodes);
             } else {
-                httpStatus(res, 200, nodes); // Always send an array for graph
+                httpStatus(res, 200, true ? nodes : nodes[0]); // FIXME
             }
         });
     }; // graph()
@@ -263,15 +267,16 @@ module.exports = function (app, express) {
     search = function (req, res) {
         var q = req.params.query || req.body.query;
         if (!q || q == 'undefined') {
-            return httpStatus(res, 400, 'Search');
+            httpStatus(res, 400, 'search');
+            return;
         }
         q = decodeURIComponent(q);
         q = q.replace(/\s+/g, ' ').trim();
         db.searchFromText(q, function (error, doc) {
             if (error) {
-                httpStatus(res, 409, 'Search');
+                httpStatus(res, 409, 'search');
             } else {
-                httpStatus(res, 200, doc); // Always send an array for search
+                httpStatus(res, 200, doc);
             }
         });
     }; // search()
@@ -292,21 +297,23 @@ module.exports = function (app, express) {
     search_one = function (req, res) {
         var q = req.params.query || req.body.query;
         if (!q || q == 'undefined') {
-            return httpStatus(res, 400, 'Search_one');
+            httpStatus(res, 400, 'search_one');
+            return;
         }
         q = decodeURIComponent(q);
         q = q.replace(/\s+/g, ' ').trim();
         db.searchFromText(q, function (error, doc) {
             if (error) {
-                return httpStatus(res, 409, 'Search_one');
+                httpStatus(res, 409, 'search_one');
+            } else {
+                db.read([doc[0]], function (error, nodes) {
+                    if (error) {
+                        httpStatus(res, 409, 'search_one');
+                    } else {
+                        httpStatus(res, 200, nodes[0]);
+                    }
+                });
             }
-            db.read([doc[0]], function (error, nodes) {
-                if (error) {
-                    httpStatus(res, 409, 'Search_one');
-                } else {
-                    httpStatus(res, 200, nodes[0]);
-                }
-            });
         });
     }; // search_one()
 
@@ -326,7 +333,8 @@ module.exports = function (app, express) {
      */
     search_mongo = function (req, res) {
         if (typeof db.mongo_search !== 'function') {
-            return httpStatus(res, 501, 'Mongo');
+            httpStatus(res, 501, 'mongo');
+            return;
         }
         var query, sort, limit, skip;
         if (req.body.queryobj) {
@@ -348,7 +356,7 @@ module.exports = function (app, express) {
                     continue;
                 }
                 if ('string' === typeof obj[key]) {
-                    if (0 === obj[key].indexOf('REGEX_')) {
+                    if (obj[key].indexOf('REGEX_') === 0) {
                         obj[key] = new RegExp(obj[key].replace('REGEX_', ''));
                     }
                 }
@@ -357,7 +365,7 @@ module.exports = function (app, express) {
         prepare_regexes(query);
         db.mongo_search(query, sort, skip, limit, function (err, ids) {
             if (err) {
-                httpStatus(res, 409, 'Search_mongo');
+                httpStatus(res, 409, 'search_mongo');
             } else {
                 httpStatus(res, 200, ids);
             }
@@ -379,7 +387,7 @@ module.exports = function (app, express) {
                     console.log('ERROR');
                     return;
                 }
-                if (0 === res.length) {
+                if (res.length === 0) {
                     db.create(keys, function (err, n) {
                         if (err) console.log('ERROR create')
                     });
@@ -433,7 +441,8 @@ module.exports = function (app, express) {
         path = path.replace(/:/g, '').replace(/\/+/g, '/');
         fs.exists(path, function (exists) {
             if (!exists) {
-                return httpStatus(res, 404, 'File');
+                httpStatus(res, 404, 'file');
+                return;
             }
             var stream = fs.createReadStream(path, {bufferSize: 64 * 1024});
             res.writeHead(200);
@@ -442,29 +451,71 @@ module.exports = function (app, express) {
     }; // getFile()
 
 
+    /**
+     * Sets the appropriate response and status code for multiple params or not
+     * @param {boolean} isArray - did client sent an array or not
+     * @param {array} doc - the database response
+     * @param {} result - the returned object or string
+     * @return {{status: number, content: result}} - the results to send
+     */
+    function getMultipleResponse(doc) {
+        var result = { fail: true, partial: false };
+        for (var i in doc) {
+            if (null === doc[i]) {
+                result.partial = true;
+            } else {
+                result.fail = false;
+            }
+        }
+        return result;
+    }
+
+    function httpStatus(res, code, data) {
+        res.status(code);
+        if (code < 300) {
+            res.json(data);
+            return;
+        }
+        var e = data + ' error: ';
+        switch (code) {
+            case 400: e += 'Bad request (empty or not well-formed)'; break;
+            case 401: e += 'Unauthorized (authentication required)'; break;
+            case 403: e += 'Forbidden (permission required)'; break;
+            case 404: e += 'Not found'; break;
+            case 409: e += 'Conflict ()'; break;
+            case 501: e += 'Not implemented (contact an administrator)'; break;
+            default:  e += 'Unknown error code';
+        }
+        res.send(e);
+    }
+
     /*
      * Register the operations
      */
 
-    // CRUD operations using nodes
+    // CRUD operations
     app.post('/api/create/', create);
-    app.put('/api/update/', update);
-
-    // CRUD operations using ids
-    app.get('/api/read/:id(*)', read);
+    app.get('/api/read/:id', read);
     app.post('/api/read/', read);
-    app.delete('/api/delete/', deleteNode);
-    app.get('/api/graph/:id(*)', graph);
-    app.post('/api/graph/', graph);
+    app.put('/api/update/:id', update);
+    app.delete('/api/delete/:id', deleteNode);
 
     // Search operations
     app.get('/api/search/:query(*)', search);
     app.get('/api/search_one/:query(*)', search_one);
-    app.post('/api/search_mongo/', search_mongo);
+    app.post('/api/search_mongo', search_mongo);
+    app.get('/api/graph/', graph);
+
+    // CRUD operations (deprecated)
+    app.post('/api/', create);
+    app.get('/api/:id', read);
+    app.put('/api/:id', update);
+    app.delete('/api/:id', deleteNode);
 
     // Extra operations
+    app.get('/api/graph/:id', graph);
     app.get('/api/file/:path(*)', getFile); // untested
-    app.post('/api/import/', importJSON); // untested
+    app.post('/api/import', importJSON); // untested
     //app.get('/subdirs/:path', getSubdirs);
     //app.get('/subdirs', getSubdirs);
 }
