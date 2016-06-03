@@ -104,6 +104,8 @@ create('should create an object in the database', {key: 'value', num: 3})
         .expectStatus(400).toss();
     read('should throw an error (missing id)', [])
         .expectStatus(400).toss();
+    read('should throw an error (missing id)', {})
+        .expectStatus(400).toss();
     read('should throw an error (invalid id)', [{a: null}])
         .expectStatus(400).toss();
 

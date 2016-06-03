@@ -104,6 +104,12 @@ frisby.create('CREATE - should create an object in the database')
         .expectHeaderContains('Content-Type', tjson)
     .toss();
 
+    frisby.create('READ - should throw an error (invalid id) - POST')
+        .addHeader('Content-Type', tjson)
+        .post(url + 'read/', {}, asJSON)
+        .expectStatus(400)
+    .toss();
+
     frisby.create('READ - should get a record valid with custom id - POST')
         .addHeader('Content-Type', tjson)
         .post(url + 'read/', [idCustom], asJSON)
