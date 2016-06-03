@@ -23,32 +23,32 @@ JSON="Content-Type: application/json"
 # FUNCTIONS
 damas_add() {
   get_ids $@
-  RES=$(curl -s -H "$AUTH" -H "$JSON" \
+  RES=$(curl -ks -H "$AUTH" -H "$JSON" \
     -d '{"_id": '"$IDS$JSONARG"'}' $URL'create/')
 }
 
 damas_read() {
   get_ids $@
-  RES=$(curl -s -H "$AUTH" -H "$JSON" -d "$IDS" $URL'read/')
+  RES=$(curl -ks -H "$AUTH" -H "$JSON" -d "$IDS" $URL'read/')
 }
 
 damas_update() {
   get_ids $@
-  RES=$(curl -s -X PUT -H "$AUTH" -H "$JSON" \
+  RES=$(curl -ks -X PUT -H "$AUTH" -H "$JSON" \
     -d '{"_id": '"$IDS$JSONARG"'}' $URL'update/')
 }
 
 damas_remove() {
   get_ids $@
-  RES=$(curl -s -X DELETE -H "$AUTH" -H "$JSON" -d "$IDS" $URL'delete/')
+  RES=$(curl -ks -X DELETE -H "$AUTH" -H "$JSON" -d "$IDS" $URL'delete/')
 }
 
 damas_search() {
-  RES=$(curl -s -H "$AUTH" $URL'search/'$1)
+  RES=$(curl -ks -H "$AUTH" $URL'search/'$1)
 }
 
 damas_search_mongo() {
-  RES=$(curl -s -H "$AUTH" -H "$JSON" $URL'search_mongo/' \
+  RES=$(curl -ks -H "$AUTH" -H "$JSON" $URL'search_mongo/' \
     -d '{"query": "'$1'", "sort": "'$2'", "limit": "'$3'", "skip": "'$4'"}')
 }
 
@@ -59,7 +59,7 @@ damas_write() {
   RES=
   for id in $@; do
     get_real_path $id
-    RES=$RES$(curl -s -H "$AUTH" -H "$JSON" \
+    RES=$RES$(curl -ks -H "$AUTH" -H "$JSON" \
       -d '{"message": "'"$COMMARG"'", "#parent": "'$FILEPATH'"}'  $URL'create/')
   done
 }
@@ -69,34 +69,34 @@ damas_log() {
   for id in $@; do
     get_real_path $id
     damas_search "%23parent:$FILEPATH"
-    RES=$RES$(curl -s -H "$AUTH" -H "$JSON" -d "$RES" $URL'read/')
+    RES=$RES$(curl -ks -H "$AUTH" -H "$JSON" -d "$RES" $URL'read/')
   done
 }
 
 damas_graph() {
   get_ids $@
-  RES=$(curl -s -H "$AUTH" -H "$JSON" -d "$IDS" $URL'graph/')
+  RES=$(curl -ks -H "$AUTH" -H "$JSON" -d "$IDS" $URL'graph/')
 }
 
 damas_lock() {
   get_ids $@
-  RES=$(curl -s -X PUT -H "$AUTH" -H "$JSON" -d "$IDS" $URL'lock/')
+  RES=$(curl -ks -X PUT -H "$AUTH" -H "$JSON" -d "$IDS" $URL'lock/')
 }
 
 damas_unlock() {
   get_ids $@
-  RES=$(curl -s -X PUT -H "$AUTH" -H "$JSON" -d "$IDS" $URL'unlock/')
+  RES=$(curl -ks -X PUT -H "$AUTH" -H "$JSON" -d "$IDS" $URL'unlock/')
 }
 
 damas_version() {
   for id in $@; do
     get_real_path $id
-    RES=$(curl -s -H "$AUTH" -H "$JSON" -d $JSONARG $URL'version/'$FILEPATH)
+    RES=$(curl -ks -H "$AUTH" -H "$JSON" -d $JSONARG $URL'version/'$FILEPATH)
   done
 }
 
 damas_signin() {
-  TOKEN=$(curl -s --fail -d "username=$1&password=$2" $URL'signIn' \
+  TOKEN=$(curl -ks --fail -d "username=$1&password=$2" $URL'signIn' \
     | sed 's/\\\\\//\//g' | sed 's/[{}]//g' | awk \
     '{n=split($0,a,","); for (i=1; i<=n; i++) print a[i]}' | sed 's/\"//g' \
     | grep -w "token" | sed 's/token://')
@@ -135,7 +135,7 @@ upsearch() {
 auth() {
   local TOKEN=$(cat /tmp/damas-$USER 2> /dev/null)
   AUTH="Authorization: Bearer $TOKEN"
-  if [ $(curl -s -o /dev/null -w '%{http_code}' -H "$AUTH" $URL'verify/') -gt "400" ]; then
+  if [ $(curl -ks -o /dev/null -w '%{http_code}' -H "$AUTH" $URL'verify/') -gt "400" ]; then
     TOKEN=
     while [ ! -n "$TOKEN" ]; do
       echo "Please identify yourself"
