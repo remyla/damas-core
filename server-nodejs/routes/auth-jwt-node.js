@@ -55,7 +55,7 @@ module.exports = function (app) {
                     return res.status(401).json('Invalid username or password');
                 }
                 debug("User authenticated, generating token");
-                user.token = jwt.sign({ _id: user._id, username: user.username }, conf.jwt.secret, { expiresInMinutes: conf.jwt.exp });
+                user.token = jwt.sign({ _id: user._id, username: user.username }, conf.jwt.secret, { expiresIn: conf.jwt.exp*60 });
                 var decoded = jwt.decode(user.token);
                 user.token_exp = decoded.exp;
                 user.token_iat = decoded.iat;
