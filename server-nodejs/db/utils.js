@@ -1,19 +1,19 @@
 
 global.array_sync = function (array, walker, callback) {
-    var next = 0;
-    var results = [];
-    (function walk() {
-        if (next === array.length) {
-            callback(results);
-            ++next;
-        } else if (next < array.length) {
-            walker(array[next++], function (result) {
-                results = results.concat(result);
-                process.nextTick(walk);
-            });
+    var iterator = {
+        count: array.length,
+        out: [],
+        next: function (i, res) {
+            this.out[i] = res;
+            if (0 === --this.count) {
+                callback(this.out);
+            }
         }
-    })();
-}
+    };
+    for (var index = 0; index < array.length; ++index) {
+        walker.apply(iterator, [array[index], index]);
+    }
+};
 
 /*
  * Attempt to fire an event, if the given array is valid
@@ -24,5 +24,20 @@ global.fireEvent = function (name, array) {
     if (0 < clean.length) {
         events.fire(name, clean);
     }
-}
+};
+
+global.unfoldIds = function (nodes) {
+    var array = [];
+    for (var i = 0; i < nodes.length; ++i) {
+        if (Array.isArray(nodes[i]._id)) {
+            array = array.concat(nodes[i]._id.map(function (id) {
+                return Object.assign({}, nodes[i], {_id: id});
+            }));
+        } else {
+            array.push(nodes[i]);
+        }
+    }
+    return array;
+};
+
 
