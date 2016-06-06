@@ -75,16 +75,13 @@ module.exports = function (conf) {
      */
     self.create = function (nodes, callback) {
         self.getCollection(callback, function (coll) {
-            array_sync(nodes, function (node, cb) {
+            array_sync(unfoldIds(nodes), function (node, i) {
+                var it = this;
                 if (node._id) {
-                    var ids = self.exportIds(node._id);
-                    delete node._id;
-                    node = ids.map(function (id) {
-                        return Object.assign({}, node, id);
-                    });
+                    node._id = self.exportIds(node._id)[0]._id;
                 }
                 coll.insert(node, {safe: true}, function (err, result) {
-                    cb(err ? null : result.ops);
+                    it.next(i, err ? null : result.ops[0]);
                 });
             }, function (array) {
                 callback(false, array);
@@ -100,9 +97,10 @@ module.exports = function (conf) {
      */
     self.read = function (ids, callback) {
         self.getCollection(callback, function (coll) {
-            array_sync(self.exportIds(ids), function (id, cb) {
+            array_sync(self.exportIds(ids), function (id, i) {
+                var it = this;
                 coll.findOne(id, function (err, doc) {
-                    cb(err ? null : doc);
+                    it.next(i, err ? null : doc);
                 });
             }, function (array) {
                 callback(false, array);
@@ -118,13 +116,9 @@ module.exports = function (conf) {
      */
     self.update = function (nodes, callback) {
         self.getCollection(callback, function (coll) {
-            array_sync(nodes, function (node, cb) {
+            array_sync(unfoldIds(nodes), function (node, i) {
                 // Get the ids
-                var ids = self.exportIds(node._id);
-                var query = {_id: {$in: []}};
-                for (var i = 0; i < ids.length; ++i) {
-                    query._id.$in.push(ids[i]._id);
-                }
+                var query = self.exportIds(node._id)[0];
 
                 // Separate operations
                 var up = {$set: {}, $unset: {}};
@@ -140,17 +134,15 @@ module.exports = function (conf) {
                 if (0 === Object.keys(up.$unset).length) {
                     delete up.$unset;
                 }
-                coll.update(query, up, {multi: true}, function (err, stat) {
-                    if (err) {
-                        return cb(null);
-                    }
-                    self.read(node._id, function (err, doc) {
-                        cb(err ? null : doc);
-                    });
+                var it = this;
+                coll.update(query, up, function (err, stat) {
+                    it.next(i, err ? null : node._id);
                 });
             }, function (array) {
-                callback(false, array);
-                fireEvent('update', array);
+                self.read(array, function (err, doc) {
+                    callback(false, doc);
+                    fireEvent('update', array);
+                });
             });
         });
     }; // update()
@@ -162,12 +154,13 @@ module.exports = function (conf) {
      */
     self.remove = function (ids, callback) {
         self.getCollection(callback, function (coll) {
-            array_sync(self.exportIds(ids), function (id, cb) {
+            array_sync(self.exportIds(ids), function (id, i) {
+                var it = this;
                 coll.remove(id, function (err, result) {
                     if (err || 0 === result.result.n) {
-                        return cb(null);
+                        it.next(i, null);
                     }
-                    cb(id);
+                    it.next(i, id);
                 });
             }, function (array) {
                 callback(false, array);
