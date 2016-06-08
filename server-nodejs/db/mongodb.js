@@ -3,6 +3,8 @@
  * Licensed under the GNU GPL v3
  */
 
+var async = require('async');
+
 module.exports = function (conf) {
     var self = this;
     self.conf = conf;
@@ -12,6 +14,7 @@ module.exports = function (conf) {
 
     var mongo = require('mongodb');
     var ObjectID = mongo.ObjectID;
+    require('./utils');
 
     /*
      * Initialize the connection.
@@ -91,21 +94,20 @@ module.exports = function (conf) {
      */
     self.read = function (ids, callback) {
         self.getCollection(callback, function (coll) {
-            var ids_o = exportIds(ids);
-            var array = [];
-            function findNext(cursor) {
-                if (cursor === ids_o.length) {
-                    callback(false, array);
-                    return;
-                }
-                coll.findOne({'_id': ids_o[cursor]}, function (err, node) {
-                    if (!err) {
-                        array.push(node);
-                        findNext(++cursor);
-                    }
-                });
+            var query = self.querify(ids);
+            var idHash = {};
+            for (var i = 0; i < ids.length; ++i) {
+                idHash[ids[i]] = i;
             }
-            findNext(0);
+            coll.find(query).toArray(function (err, nodes) {
+                if (err) {
+                    return callback(true);
+                }
+                callback(false, nodes.reduce(function (res, node) {
+                    res[idHash[node._id.toString()]] = node;
+                    return res;
+                }, ids.map(function () { return null; })));
+            });
         });
     }; // read()
 
@@ -117,7 +119,6 @@ module.exports = function (conf) {
      */
     self.update = function (ids, keys, callback) {
         self.getCollection(callback, function (coll) {
-            var ids_o = exportIds(ids);
             var keysToUnset = {};
             var keysToSet = {};
             var toUpdate = {};
@@ -136,13 +137,13 @@ module.exports = function (conf) {
             if (Object.keys(keysToUnset).length > 0) {
                 toUpdate.$unset = keysToUnset;
             }
-            coll.update({'_id': {$in: ids_o}}, toUpdate, {multi: true},
+            coll.update(self.querify(ids), toUpdate, {multi: true},
                         function (err, status) {
                 if (err) {
                     callback(true);
                 }
                 self.debug('Update status: ' + status);
-                self.read(ids_o, function (err, nodes) {
+                self.read(ids, function (err, nodes) {
                     callback(err, err ? null : nodes);
                 });
             });
@@ -156,8 +157,7 @@ module.exports = function (conf) {
      */
     self.remove = function (ids, callback) {
         self.getCollection(callback, function (coll) {
-            var ids_o = exportIds(ids);
-            coll.remove({'_id': {$in: ids_o}}, function (err, result) {
+            coll.remove(self.querify(ids), function (err, result) {
                 if (err || result.result.n === 0) {
                     callback(true);
                     return;
@@ -174,7 +174,7 @@ module.exports = function (conf) {
      */
     self.search = function (keys, callback) {
         self.getCollection(callback, function (coll) {
-            coll.find(keys, {'_id':true}).toArray(function (err, results) {
+            coll.find(keys, {_id: true}).toArray(function (err, results) {
                 if (err) {
                     callback(true);
                     return;
@@ -203,7 +203,7 @@ module.exports = function (conf) {
             links=[];
         }
         self.getCollection(callback, function (coll) {
-            coll.find({'tgt_id': {$in: ids}}).toArray(function (err, results) {
+            coll.find({tgt_id: {$in: ids}}).toArray(function (err, results) {
                 if (err) {
                     callback(true);
                     return;
@@ -298,24 +298,30 @@ module.exports = function (conf) {
     }; // deleteNode()
 
     /**
-     * Put all ids into a new array, handling ObjectID
+     * Transform the ids into a Mongo query object
+     * @param {array} ids - ids to process
+     * @return {object} - Mongo query object
+     */
+    self.querify = function (ids) {
+        return {_id: {$in: ids.map(self.exportId)}};
+    }
+
+    /**
+     * Put the id into an object, handling ObjectID
      * @param {array} ids - ids to put
      * @return {array} - the new array
      */
-    function exportIds(ids) {
-        var ids_o = [];
-        for (var i in ids) {
-            if(24 == ids[i].length && -1 == ids[i].indexOf('/')) {
-                ids_o.push(new ObjectID(ids[i]));
-            } else {
-                ids_o.push(ids[i]);
-            }
+    self.exportId = function (id) {
+        if (ObjectID.isValid(id)) {
+            return new ObjectID(id);
+        } else if ('string' === typeof id) {
+            return id;
         }
-        return ids_o;
+        return null;
     }
 
     function textSearch2MongoQuery( str ) {
-        var terms = str.split(" ");
+        var terms = str.split(' ');
         var pair;
         var result = {};
         for (var i = 0; i < terms.length; i++) {
@@ -364,7 +370,7 @@ module.exports = function (conf) {
             }
 db.things.find({$where: function () {
   for (var key in this) {
-    if (this[key] === "bar") {
+    if (this[key] === 'bar') {
       return true;
     }
     return false;
