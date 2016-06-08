@@ -103,14 +103,21 @@ module.exports = function (conf) {
             var query = self.querify(ids);
             var idHash = {};
             for (var i = 0; i < ids.length; ++i) {
-                idHash[ids[i]] = i;
+                if (Array.isArray(idHash[ids[i]])) {
+                    idHash[ids[i]].push(i);
+                } else {
+                    idHash[ids[i]] = [i];
+                }
             }
             coll.find(query).toArray(function (err, nodes) {
                 if (err) {
                     return callback(true);
                 }
                 callback(false, nodes.reduce(function (res, node) {
-                    res[idHash[node._id.toString()]] = node;
+                    var id = node._id.toString();
+                    for (var i = 0; i < idHash[id].length; ++i) {
+                        res[idHash[id][i]] = node;
+                    }
                     return res;
                 }, ids.map(function () { return null; })));
             });
