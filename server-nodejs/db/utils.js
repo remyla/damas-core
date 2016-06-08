@@ -1,20 +1,4 @@
 
-global.array_sync = function (array, walker, callback) {
-    var iterator = {
-        count: array.length,
-        out: [],
-        next: function (i, res) {
-            this.out[i] = res;
-            if (0 === --this.count) {
-                callback(this.out);
-            }
-        }
-    };
-    for (var index = 0; index < array.length; ++index) {
-        walker.apply(iterator, [array[index], index]);
-    }
-};
-
 /*
  * Attempt to fire an event, if the given array is valid
  */

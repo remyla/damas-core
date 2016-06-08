@@ -15,93 +15,66 @@ var ObjectID = mongo.ObjectID;
 require('./utils');
 
 /**
- * Update nodes. Existing values are overwritten, null removes the key.
- * @param {array} ids - Identifiers of the nodes to update
- * @param {object} keys - New keys to define on the nodes
+ * Retrieve nodes as key->value objects.
+ * @param {array} ids - Identifiers of the nodes to retrieve.
  * @param {function} callback - Callback function to routes.js
  */
-self.update = function (nodes, callback) {
+self.read = function (ids, callback) {
     self.getCollection(callback, function (coll) {
-        array_sync(nodes, function (node, cb) {
-            // Get the ids
-            node._id = Array.isArray(node._id) ? node._id : [node._id];
-            var ids = self.exportIds(node._id);
-            var query = {$or: [{_id: {$in: []}}, {file: {$in: []}}]};
-            for (var i = 0; i < ids.length; ++i) {
-                var key = Object.keys(ids[i])[0];
-                query.$or[key == '_id' ? 0 : 1][key].$in.push(ids[i][key]);
+        var query = self.querify(ids);
+        var idHash = {};
+        ids = query.$or[0]._id.$in.concat(query.$or[1].file.$in);
+        for (var i = 0; i < ids.length; ++i) {
+            idHash[ids[i]] = i;
+        }
+        coll.find(query).toArray(function (err, nodes) {
+            if (err) {
+                return callback(true);
             }
-            if (node.file) {
-                node._id = node.file;
-            }
-
-            // Separate operations
-            var up = {$set: {}, $unset: {}};
-            for (var k in node) {
-                if (k !== '_id') {
-                    var op = (node[k] === null) ? '$unset' : '$set';
-                    up[op][k] = node[k];
+            callback(false, nodes.reduce(function (res, node) {
+                if ('undefined' !== typeof idHash[node._id.toString()]) {
+                    res[idHash[node._id.toString()]] = node;
+                } else {
+                    res[idHash[node.file]] = node;
                 }
-            }
-            if (0 === Object.keys(up.$set).length) {
-                delete up.$set;
-            }
-            if (0 === Object.keys(up.$unset).length) {
-                delete up.$unset;
-            }
-            coll.update(query, up, {multi: true}, function (err, stat) {
-                if (err) {
-                    return cb(null);
-                }
-                self.read(node._id, function (err, doc) {
-                    cb(err ? null : doc);
-                });
-            });
-        }, function (array) {
-            callback(false, array);
-            fireEvent('update', array);
+                return res;
+            }, ids.map(function () { return null; })));
         });
     });
-}; // update()
+}; // read()
 
 /**
- * Delete specified nodes.
- * @param {array} ids - List of node ids to delete
- * @param {function} callback - Callback function to routes.js
- */
-self.remove = function (ids, callback) {
-    self.getCollection(callback, function (coll) {
-        array_sync(self.exportIds(ids), function (id, cb) {
-            coll.remove(id, function (err, result) {
-                if (err || 0 === result.result.n) {
-                    return cb(null);
-                }
-                cb(id._id || id.file);
-            });
-        }, function (array) {
-            callback(false, array);
-            fireEvent('remove', array);
-        });
-    });
-}; // remove()
-
-/**
- * Put all ids into a new array, handling ObjectID and file
+ * Put the id into an object, handling ObjectID and file
  * @param {array} ids - ids to put
  * @return {array} - the new array
  */
-self.exportIds = function (ids) {
-    return (Array.isArray(ids) ? ids : [ids]).map(function (id) {
-        if (ObjectID.isValid(id)) {
-            return {_id: new ObjectID(id)};
-        } else if ('string' !== typeof id) {
-            return;
-        }
-        if (-1 < id.indexOf('/')) {
-            return {file: id};
-        } else {
-            return {_id: id};
-        }
-    });
-}
+self.exportId = function (id) {
+    if (ObjectID.isValid(id)) {
+        return {_id: new ObjectID(id)};
+    } else if ('string' !== typeof id) {
+        return null;
+    }
+    if (-1 < id.indexOf('/')) {
+        return {file: id};
+    } else {
+        return {_id: id};
+    }
+};
+
+/**
+ * Transform the ids into a Mongo query object
+ * @param {array} ids - ids to process
+ * @return {object} - Mongo query object
+ */
+self.querify = function (ids) {
+    var ids_o = ids.map(self.exportId);
+    var query = {$or: [{_id: {$in: []}}, {file: {$in: []}}]};
+
+    for (var i = 0; i < ids_o.length; ++i) {
+        var key = Object.keys(ids_o[i])[0];
+        query.$or[key == '_id' ? 0 : 1][key].$in.push(ids_o[i][key]);
+    }
+    return query;
+};
+
 
