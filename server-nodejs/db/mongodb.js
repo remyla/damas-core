@@ -3,6 +3,8 @@
  * Licensed under the GNU GPL v3
  */
 
+var async = require('async');
+
 module.exports = function (conf) {
     var self = this;
     self.conf = conf;
@@ -75,18 +77,16 @@ module.exports = function (conf) {
      */
     self.create = function (nodes, callback) {
         self.getCollection(callback, function (coll) {
-            array_sync(nodes, function (node, cb) {
+            function createNode(node, next) {
                 if (node._id) {
-                    var ids = self.exportIds(node._id);
-                    delete node._id;
-                    node = ids.map(function (id) {
-                        return Object.assign({}, node, id);
-                    });
+                    node = Object.assign(node, self.exportId(node._id));
                 }
                 coll.insert(node, {safe: true}, function (err, result) {
-                    cb(err ? null : result.ops);
+                    next(null, err ? null : result.ops[0]);
                 });
-            }, function (array) {
+            }
+            async.mapLimit(unfoldIds(nodes), 100, createNode,
+                    function (err, array) {
                 callback(false, array);
                 fireEvent('create', array);
             });
@@ -100,12 +100,26 @@ module.exports = function (conf) {
      */
     self.read = function (ids, callback) {
         self.getCollection(callback, function (coll) {
-            array_sync(self.exportIds(ids), function (id, cb) {
-                coll.findOne(id, function (err, doc) {
-                    cb(err ? null : doc);
-                });
-            }, function (array) {
-                callback(false, array);
+            var query = self.querify(ids);
+            var idHash = {};
+            for (var i = 0; i < ids.length; ++i) {
+                if (Array.isArray(idHash[ids[i]])) {
+                    idHash[ids[i]].push(i);
+                } else {
+                    idHash[ids[i]] = [i];
+                }
+            }
+            coll.find(query).toArray(function (err, nodes) {
+                if (err) {
+                    return callback(true);
+                }
+                callback(false, nodes.reduce(function (res, node) {
+                    var id = node._id.toString();
+                    for (var i = 0; i < idHash[id].length; ++i) {
+                        res[idHash[id][i]] = node;
+                    }
+                    return res;
+                }, ids.map(function () { return null; })));
             });
         });
     }; // read()
@@ -118,13 +132,8 @@ module.exports = function (conf) {
      */
     self.update = function (nodes, callback) {
         self.getCollection(callback, function (coll) {
-            array_sync(nodes, function (node, cb) {
-                // Get the ids
-                var ids = self.exportIds(node._id);
-                var query = {_id: {$in: []}};
-                for (var i = 0; i < ids.length; ++i) {
-                    query._id.$in.push(ids[i]._id);
-                }
+            function updateNode(node, next) {
+                var query = self.exportId(node._id);
 
                 // Separate operations
                 var up = {$set: {}, $unset: {}};
@@ -140,18 +149,18 @@ module.exports = function (conf) {
                 if (0 === Object.keys(up.$unset).length) {
                     delete up.$unset;
                 }
-                coll.update(query, up, {multi: true}, function (err, stat) {
-                    if (err) {
-                        return cb(null);
-                    }
-                    self.read(node._id, function (err, doc) {
-                        cb(err ? null : doc);
+                coll.update(query, up, function (err, stat) {
+                    var id = query[Object.keys(query)[0]];
+                    next(null, err ? null : id);
+                });
+            }
+            async.mapLimit(unfoldIds(nodes), 100, updateNode,
+                function (err, ids) {
+                    self.read(ids, function (err, doc) {
+                        callback(false, doc);
+                        fireEvent('update', doc);
                     });
                 });
-            }, function (array) {
-                callback(false, array);
-                fireEvent('update', array);
-            });
         });
     }; // update()
 
@@ -162,14 +171,17 @@ module.exports = function (conf) {
      */
     self.remove = function (ids, callback) {
         self.getCollection(callback, function (coll) {
-            array_sync(self.exportIds(ids), function (id, cb) {
+            function deleteNode(id, next) {
                 coll.remove(id, function (err, result) {
                     if (err || 0 === result.result.n) {
-                        return cb(null);
+                        next(null, null);
+                    } else {
+                        next(null, id[Object.keys(id)[0]]);
                     }
-                    cb(id);
                 });
-            }, function (array) {
+            }
+            async.mapLimit(ids.map(self.exportId), 100, deleteNode,
+                    function (err, array) {
                 callback(false, array);
                 fireEvent('remove', array);
             });
@@ -300,26 +312,33 @@ module.exports = function (conf) {
         });
     }; // mongo_search()
 
-    // Compatibility
-    // As deleteNode() can actually delete multiple nodes
-    self.deleteNode = function (ids, callback) {
-        self.remove(ids, callback);
-    }; // deleteNode()
+    /**
+     * Transform the ids into a Mongo query object
+     * @param {array} ids - ids to process
+     * @return {object} - Mongo query object
+     */
+    self.querify = function (ids) {
+        var ids_o = ids.map(self.exportId);
+        var query = {_id: {$in: []}};
+
+        for (var i = 0; i < ids_o.length; ++i) {
+            query._id.$in.push(ids_o[i]._id);
+        }
+        return query;
+    }
 
     /**
-     * Put all ids into a new array, handling ObjectID
+     * Put the id into an object, handling ObjectID
      * @param {array} ids - ids to put
      * @return {array} - the new array
      */
-    self.exportIds = function (ids) {
-        return (Array.isArray(ids) ? ids : [ids]).map(function (id) {
-            if (ObjectID.isValid(id)) {
-                return {_id: new ObjectID(id)};
-            } else if ('string' !== typeof id) {
-                return;
-            }
+    self.exportId = function (id) {
+        if (ObjectID.isValid(id)) {
+            return {_id: new ObjectID(id)};
+        } else if ('string' === typeof id) {
             return {_id: id};
-        });
+        }
+        return null;
     }
 
     function textSearch2MongoQuery( str ) {
