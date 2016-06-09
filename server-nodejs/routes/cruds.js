@@ -121,8 +121,17 @@ module.exports = function (app, express) {
                 res.send('Id not found');
                 return;
             }*/
+            res.setHeader('Content-Type', 'application/json');
             res.status(200);
-            res.json(doc);
+            res.write('[');
+            doc.forEach(function (obj, id) {
+                res.write(JSON.stringify(obj));
+                if(doc.length - 1 !== id) {
+                    res.write(',');
+                }
+            });
+            res.write(']');
+            res.end();
         });
     }; // read()
 
