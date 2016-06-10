@@ -70,7 +70,7 @@
                 return JSON.parse(xhr.responseText);
             } else {
                 console.warn(xhr.responseText);
-                return false;
+                return null;
             }
         }
         xhr.onreadystatechange = function(e) {
@@ -118,7 +118,7 @@
      * Creates a node with the specified keys, asynchronously if a callback function is specified or synchronously otherwise.
      * @param {hash} keys - Hash of key:value pairs
      * @param {function} [callback] - Function with the XHR object as argument to call
-     * @returns {object|boolean|undefined} New node on success, false otherwise (or nothing if async)
+     * @returns {object|boolean|undefined} New node on success, null otherwise (or nothing if async)
      *
      * @example
      * //Create a set of keys for our node
@@ -191,7 +191,7 @@
      * Delete the specified node
      * @param {string} id - Node internal index to delete
      * @param {function} callback - Function to call, boolean argument
-     * @returns {boolean} true on success, false otherwise
+     * @returns {boolean} true on success, null otherwise
      *
      * @example
      * damas.delete(id);
@@ -317,11 +317,11 @@
             async: callback !== undefined,
             callback: function (res) {
                 if ('function' === typeof callback) {
-                    callback(res !== false);
+                    callback(res !== null);
                 }
             }
         });
-        return res !== false;
+        return res !== null;
     }
 
     damas.unlock = function (id, callback) {
@@ -332,11 +332,11 @@
             async: callback !== undefined,
             callback: function (res) {
                 if ('function' === typeof callback) {
-                    callback(res !== false);
+                    callback(res !== null);
                 }
             }
         });
-        return res !== false;
+        return res !== null;
     }
 
     /**
@@ -344,7 +344,7 @@
      * function is specified or synchronously otherwise.
      * @param {hash} keys - Hash of key:value pairs
      * @param {function} [callback] - Function with the XHR object as argument to call
-     * @returns {object|boolean|undefined} New node on success, false otherwise (or nothing if async)
+     * @returns {object|boolean|undefined} New node on success, null otherwise (or nothing if async)
      *
      * @example
      * //Create a set of keys for our node
@@ -378,7 +378,7 @@
      */
     damas.signIn = function (username, password, callback) {
         function req_callback(result) {
-            if (result !== false) {
+            if (result !== null) {
                 damas.user = result;
                 damas.token = damas.user.token;
             }
@@ -402,7 +402,6 @@
 
     /**
      * Sign out using the server embeded authentication system
-     * @return true on success, false otherwise
      */
     damas.signOut = function (callback) {
         damas.token = null;
@@ -423,11 +422,11 @@
             async: callback !== undefined,
             callback: function (res) {
                 if ('function' === typeof callback) {
-                    callback(res !== false);
+                    callback(res !== null);
                 }
             }
         });
-        return res !== false;
+        return res !== null;
     }
 
 
