@@ -1,9 +1,9 @@
 
-var events = require('./');
 var debug = require('debug')('app:io:' + process.pid);
 var SocketServer = require('socket.io');
+var events = require('.');
 
-module.exports = io = new SocketServer();
+var io = module.exports = new SocketServer();
 
 /*
  * Socket management
