@@ -1,6 +1,6 @@
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) { // AMD
-        define(['socket.io-client'], factory);
+        define(['socket.io'], factory);
     } else if (typeof module === 'object' && module.exports) { // Node
         module.exports = factory(require('socket.io-client'));
     } else { // Browser globals
