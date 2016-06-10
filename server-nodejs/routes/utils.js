@@ -1,4 +1,17 @@
 
+function sendJSON(res, data) {
+    if (!Array.isArray(data) || 0 === data.length) {
+        res.json(data);
+        return;
+    }
+    res.setHeader('Content-Type', 'application/json');
+    res.write('[' + JSON.stringify(data.shift()));
+    while (0 < data.length) {
+        res.write(',' + JSON.stringify(data.shift()));
+    }
+    res.end(']');
+}
+
 var utils = {
     /**
      * Tells whether the request contains an array
@@ -56,7 +69,7 @@ var utils = {
     httpStatus: function (res, code, data) {
         res.status(code);
         if (code < 300) {
-            res.json(data);
+            sendJSON(res, data);
             return;
         }
         var e = data + ' error: ';
