@@ -40,7 +40,8 @@ module.exports = function (app) {
                     return httpStatus(res, 409, 'Lock');
                 }
             }
-            db.update([{_id: ids, lock: user}], function (error, doc) {
+            nodes = unfoldIds([{_id: ids, lock: user}]);
+            db.update(nodes, function (error, doc) {
                 if (error) {
                     return httpStatus(res, 409, 'Lock');
                 }
@@ -91,7 +92,8 @@ module.exports = function (app) {
                     return httpStatus(res, 409, 'Unlock');
                 }
             }
-            db.update([{_id: ids, lock: null}], function (error, doc) {
+            nodes = unfoldIds([{_id: ids, lock: null}]);
+            db.update(nodes, function (error, doc) {
                 if (error) {
                     return httpStatus(res, 409, 'Unlock');
                 }

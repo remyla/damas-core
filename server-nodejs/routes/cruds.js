@@ -62,6 +62,7 @@ module.exports = function (app, express) {
             }
             Object.assign(nodes[i], controlProperties);
         }
+        nodes = unfoldIds(nodes);
 
         events.fire('pre-create', nodes).then(function (data) {
             if (data.status) {
@@ -149,6 +150,7 @@ module.exports = function (app, express) {
                 return httpStatus(res, 400, 'Update');
             }
         }
+        nodes = unfoldIds(nodes);
         events.fire('pre-update', nodes).then(function (data) {
             if (data.status) {
                 return httpStatus(res, data.status, 'Update');

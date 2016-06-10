@@ -84,8 +84,7 @@ module.exports = function (conf) {
                     next(null, err ? null : result.ops[0]);
                 });
             }
-            async.mapLimit(unfoldIds(nodes), 100, createNode,
-                    function (err, array) {
+            async.mapLimit(nodes, 100, createNode, function (err, array) {
                 callback(false, array);
                 fireEvent('create', array);
             });
@@ -153,8 +152,7 @@ module.exports = function (conf) {
                     next(null, err ? null : id);
                 });
             }
-            async.mapLimit(unfoldIds(nodes), 100, updateNode,
-                function (err, ids) {
+            async.mapLimit(nodes, 100, updateNode, function (err, ids) {
                     self.read(ids, function (err, doc) {
                         callback(false, doc);
                         fireEvent('update', doc);
