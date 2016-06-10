@@ -92,6 +92,24 @@ global.unfoldIds = function (nodes) {
 };
 
 /**
+ * Send a JSON document by splitting it if it is an array
+ * @param {object} res - The Express response object receiving the data
+ * @param {} data - The data to send as JSON
+ */
+function sendJSON(res, data) {
+    if (!Array.isArray(data) || 0 === data.length) {
+        res.json(data);
+        return;
+    }
+    res.setHeader('Content-Type', 'application/json');
+    res.write('[' + JSON.stringify(data.shift()));
+    while (0 < data.length) {
+        res.write(',' + JSON.stringify(data.shift()));
+    }
+    res.end(']');
+}
+
+/**
  * Send the desired HTTP status code
  * @param {object} res - The Express response object receiving the data
  * @param {integer} code - The wanted HTTP status code (< 300 for success)
@@ -100,7 +118,7 @@ global.unfoldIds = function (nodes) {
 global.httpStatus = function (res, code, data) {
     res.status(code);
     if (code < 300) {
-        res.json(data);
+        sendJSON(res, data);
         return;
     }
     var e = data + ' error: ';
