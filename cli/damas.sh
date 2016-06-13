@@ -141,7 +141,8 @@ upsearch() {
 auth() {
   local TOKEN=$(cat /tmp/damas-$USER 2> /dev/null)
   AUTH="Authorization: Bearer $TOKEN"
-  if [ $(curl -ks -o /dev/null -w '%{http_code}' -H "$AUTH" $URL'verify/') -gt "400" ]; then
+  VERIF=$(curl -ks -o /dev/null -w '%{http_code}' -H "$AUTH" $URL'verify/')
+  if [ "400" == VERIF ]; then
     TOKEN=
     while [ ! -n "$TOKEN" ]; do
       echo "Please identify yourself"
@@ -151,6 +152,9 @@ auth() {
       printf "\n\n"
     done
     AUTH="Authorization: Bearer $TOKEN"
+  elif [ "000" == $VERIF ]; then
+    echo "damas: server unreachable"
+    exit 3
   fi
 }
 
