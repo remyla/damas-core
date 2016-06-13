@@ -1,3 +1,6 @@
+/*
+ * Licensed under the GNU GPL v3
+ */
 
 var debug = require('debug')('app:io:' + process.pid);
 var SocketServer = require('socket.io');
