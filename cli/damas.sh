@@ -33,9 +33,7 @@ damas_read() {
 }
 
 damas_update() {
-  get_ids $@
-  RES=$(curl -ks -X PUT -H "$AUTH" -H "$JSON" \
-    -d '{"_id": '"$IDS$JSONARG"'}' $URL'update/')
+  RES=$(curl -ks -X PUT -H "$AUTH" -H "$JSON" -d "$1" $URL'update/')
 }
 
 damas_remove() {
@@ -166,7 +164,7 @@ case $ACTION in
     --help)
       echo "    add      [-j <json>] <file>   create a new node for the specified file"
       echo "    read     <file>               show the keys of the file"
-      echo "    update   -j <json> <file>        update"
+      echo "    update   <full-json>          update"
       echo "    remove   <file>               delete"
       echo "    search   <query>              search"
       echo "    search_mongo  <query> <sort> <limit> <skip>  does something"
