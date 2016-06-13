@@ -103,9 +103,7 @@ damas_version() {
 
 damas_signin() {
   TOKEN=$(curl -ks --fail -d "username=$1&password=$2" $URL'signIn' \
-    | sed 's/\\\\\//\//g' | sed 's/[{}]//g' | awk \
-    '{n=split($0,a,","); for (i=1; i<=n; i++) print a[i]}' | sed 's/\"//g' \
-    | grep -w "token" | sed 's/token://')
+    | sed 's/^.*\"token\":\"\(.*\)\",.*$/\1/')
   echo $TOKEN > /tmp/damas-$USER
   chmod go-rw /tmp/damas-$USER
 }
