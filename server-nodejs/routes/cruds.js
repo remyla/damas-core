@@ -229,12 +229,13 @@ module.exports = function (app, express) {
      * - 404: Not Found (all the nodes do not exist)
      */
     graph = function (req, res) {
+        var depth = req.params.depth || 0;
         var ids = getRequestIds(req);
         if (!ids) {
             return httpStatus(res, 400, 'Remove');
         }
 
-        db.graph(ids, function (error, nodes) {
+        db.graph(ids, depth, function (error, nodes) {
             if (error) {
                 return httpStatus(res, 409, 'Graph');
             }
@@ -456,8 +457,8 @@ module.exports = function (app, express) {
     app.get('/api/read/:id(*)', read);
     app.post('/api/read/', read);
     app.delete('/api/delete/', deleteNode);
-    app.get('/api/graph/:id(*)', graph);
-    app.post('/api/graph/', graph);
+    app.get('/api/graph/:depth/:id(*)', graph);
+    app.post('/api/graph/:depth', graph);
 
     // Search operations
     app.get('/api/search/:query(*)', search);

@@ -143,7 +143,7 @@ class http_connection( object ) :
 		'''
 		headers = {'content-type': 'application/json'}
 		headers.update(self.headers)
-		r = requests.post(self.serverURL+'/graph/', data=json.dumps(id_),
+		r = requests.post(self.serverURL+'/graph/0/', data=json.dumps(id_),
 			headers=headers, verify=False)
 		if r.status_code == 200 or r.status_code == 207:
 			return json.loads(r.text)

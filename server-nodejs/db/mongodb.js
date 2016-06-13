@@ -214,12 +214,9 @@ module.exports = function (conf) {
      * Higher-level functions
      */
 
-    self.links_r = function (ids, links, callback) {
+    self.links_r = function (ids, depth, links, callback) {
         var newIds = [];
         var self = this;
-        if (links==null) {
-            links=[];
-        }
         self.getCollection(callback, function (coll) {
             coll.find({tgt_id: {$in: ids}}).toArray(function (err, results) {
                 if (err) {
@@ -236,10 +233,10 @@ module.exports = function (conf) {
                         links[results[r]._id] = results[r];
                     }
                 }
-                if (newIds.length < 1) {
+                if (--depth === 0 || newIds.length < 1) {
                     callback(false, links);
                 } else {
-                    self.links_r(newIds, links, callback);
+                    self.links_r(newIds, depth, links, callback);
                 }
             });
         });
@@ -251,8 +248,8 @@ module.exports = function (conf) {
      * @param {Array} ids - Array of node indexes
      * @param {Function} callback - function (err, result) to call
      */
-    this.graph = function (ids, callback){
-        self.links_r(ids, null, function (err, links) {
+    this.graph = function (ids, depth, callback){
+        self.links_r(ids, depth, [], function (err, links) {
             if (err || !links) {
                 callback(true);
                 return;

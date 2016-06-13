@@ -294,7 +294,7 @@
     damas.graph = function (ids, callback) {
         return req({
             method: 'POST',
-            url: 'graph/',
+            url: 'graph/0/',
             data: ids,
             callback: callback
         });
