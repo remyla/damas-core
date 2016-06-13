@@ -63,12 +63,20 @@ damas_write() {
 }
 
 damas_log() {
-  RES=
+  RESPONSE=
+  ERRORS=
   for id in $@; do
     get_real_path $id
     damas_search "%23parent:$FILEPATH"
-    RES=$RES$(curl -ks -H "$AUTH" -H "$JSON" -d "$RES" $URL'read/')
+    RESULT=$(curl -ks -H "$AUTH" -H "$JSON" -d "$RES" $URL'read/')","
+    if [[ \[* == $RESULT ]]; then
+      REPONSE=$REPONSE$RESULT
+    else
+      ERRORS=$ERRORS"\nNo entry found for $FILEPATH"
+    fi
   done
+  RESPONSE=${RESPONSE:0:2}']'
+  RES=$RESPONSE$ERRORS
 }
 
 damas_graph() {
