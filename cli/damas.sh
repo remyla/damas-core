@@ -176,6 +176,19 @@ case $ACTION in
       echo "    version  -j <json> <file>     set a new version of a file"
       echo "    signin   <username> <pass>    set the authorization token"
       echo "    signout                       remove authorization token"
+      echo "    init                          make your directory available for damas"
+      exit 0
+      ;;
+
+    init)
+      read -p "remote URL (default = localhost:8090): " URL
+      if [  -z $URL ]; then
+        URL='localhost:8090'
+      fi
+      mkdir '.damas'
+      echo 'URL="http://'$URL'/api/"' > '.damas/config'
+      echo 'Initialized empty Damas repository in '$(realpath .) \
+        '/.damas/ with remote http://'$URL'/api/'
       exit 0
       ;;
 esac
