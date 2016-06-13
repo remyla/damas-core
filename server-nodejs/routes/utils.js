@@ -103,10 +103,14 @@ function sendJSON(res, data) {
     }
     res.setHeader('Content-Type', 'application/json');
     res.write('[' + JSON.stringify(data.shift()));
-    while (0 < data.length) {
-        res.write(',' + JSON.stringify(data.shift()));
+    var chunkSize = 64;
+    for (var i = 0; i < data.length; i += chunkSize) {
+        res.write(',' +
+            JSON.stringify(data.slice(i, i + chunkSize))
+            .slice(1, -1));
     }
     res.end(']');
+    delete data;
 }
 
 /**
