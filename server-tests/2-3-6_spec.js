@@ -18,44 +18,44 @@ var url = conf.protocol + '://' + conf.host + ':' + conf[conf.protocol].port +
 var idCustom = '/file/;.*?<>#%';
 var idCustomEncoded = encodeURIComponent(idCustom);
 var idNotFound = 100000001;
-var asJSON = {json: true};
+var idVersion = 'versiontest';
 
 /*
  * Utility functions to ease test creation
  */
 function create(desc, data) {
     return frisby.create('POST CREATE - ' + desc)
-        .post(url + 'create/', data, asJSON);
+        .post(url + 'create/', data, {json: true});
 }
 
 function read(desc, data) {
     return frisby.create('POST READ - ' + desc)
-        .post(url + 'read/', data, asJSON);
+        .post(url + 'read/', data, {json: true});
 }
 
 function update(desc, data) {
     return frisby.create('PUT UPDATE - ' + desc)
-        .put(url + 'update/', data, asJSON);
+        .put(url + 'update/', data, {json: true});
 }
 
 function remove(desc, data) {
     return frisby.create('DELETE REMOVE - ' + desc)
-        .delete(url + 'delete/', data, asJSON);
+        .delete(url + 'delete/', data, {json: true});
 }
 
 function graph(desc, data) {
     return frisby.create('POST GRAPH - ' + desc)
-        .post(url + 'graph/', data, asJSON);
+        .post(url + 'graph/0/', data, {json: true});
 }
 
 function lock(desc, data) {
     return frisby.create('PUT LOCK - ' + desc)
-        .put(url + 'lock/', data, asJSON);
+        .put(url + 'lock/', data, {json: true});
 }
 
 function unlock(desc, data) {
     return frisby.create('PUT UNLOCK - ' + desc)
-        .put(url + 'unlock/', data, asJSON);
+        .put(url + 'unlock/', data, {json: true});
 }
 
 function read_get(desc, uri) {
@@ -65,21 +65,30 @@ function read_get(desc, uri) {
 
 function graph_get(desc, uri) {
     uri = Array.isArray(uri) ? uri.join(',') : uri;
-    return frisby.create('GET GRAPH - ' + desc).get(url + 'graph/' + uri);
+    return frisby.create('GET GRAPH - ' + desc).get(url + 'graph/0/' + uri);
+}
+
+function version(desc, parent, keys) {
+    return frisby.create('POST VERSION - ' + desc)
+        .post(url + 'version/' + parent, keys, {json: true});
 }
 
 create('should create an object in the database', {key: 'value', num: 3})
-    .expectStatus(201)
-    .expectJSON({key: 'value', num: 3})
+    .expectStatus(201).expectJSON({key: 'value', num: 3})
     .after(function (error, response, body) {
 
-    idFound = body._id;
+    var idFound = body._id;
+
+    create('should create an empty object', {})
+    .expectStatus(201).after(function (error, response, body) {
+
+    var idFound2 = body._id;
 
     /*
      * Create tests
      */
     create('should create an empty object', {})
-        .expectStatus(201).toss();
+        .expectStatus(201).toss(); // We should get the id of this object
 
     create('should throw an error ([{}] | {} expected)', [null])
         .expectStatus(400).toss();
@@ -242,6 +251,21 @@ create('should create an object in the database', {key: 'value', num: 3})
     // */
 
     /*
+     * Version tests
+     */
+    version('should throw an error (empty id)', '', '')
+        .expectStatus(400).toss();
+
+    version('should throw an error (missing file key)', idFound, {})
+        .expectStatus(400).toss();
+
+/*    version('should throw an error (id not found)', idNotFound, {file: '/'})
+        .expectStatus(404).toss();*/
+
+    version('should create a version', idFound, {file: '/', _id: idVersion})
+        .expectStatus(201).toss();
+
+    /*
      * Delete tests
      */
     remove('should throw an error (empty id)', '')
@@ -254,6 +278,9 @@ create('should create an object in the database', {key: 'value', num: 3})
         .expectStatus(200).toss();
 
     remove('should delete a custom-id node', idCustom)
+        .expectStatus(200).toss();
+
+    remove('should delete two nodes', [idFound2, idVersion])
         .expectStatus(200).toss();
 
     /**
@@ -288,5 +315,6 @@ create('should create an object in the database', {key: 'value', num: 3})
         }).toss();
 
     }).toss();
+}).toss();
 }).toss();
 
