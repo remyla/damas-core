@@ -8,7 +8,6 @@ module.exports = function (app, express) {
     //methodOverride = require('method-override'),
     var fs = require('fs');
     var events = require('../events');
-    require('./utils');
 
 /*
     app.use(methodOverride(function (req, res) {
@@ -53,7 +52,7 @@ module.exports = function (app, express) {
         var nodes = Array.isArray(req.body) ? req.body : [req.body];
 
         var controlProperties = {
-            author: req.user.username || req.connection.remoteAddress,
+            author: req.user.username,
             time: Date.now()
         }
         for (var i = 0; i < nodes.length; ++i) {

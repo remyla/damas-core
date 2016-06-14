@@ -5,6 +5,7 @@
 module.exports = function (app, express){
     var conf = app.locals.conf;
     var debug = require('debug')('app:init');
+    require('./utils');
 
     var bodyParser = require( 'body-parser' );
     app.use( bodyParser.urlencoded( { limit: '50mb', extended : true } ) );

@@ -31,7 +31,7 @@ module.exports = function (app) {
             if (err) {
                 return httpStatus(res, 409, 'Lock');
             }
-            var user = req.user.username || req.connection.remoteAddress;
+            var user = req.user.username;
             for (var i = 0; i < nodes.length; ++i) {
                 if (null === nodes[i]) {
                     continue;
@@ -83,7 +83,7 @@ module.exports = function (app) {
             if (err) {
                 return httpStatus(res, 409, 'Unlock');
             }
-            var user = req.user.username || req.connection.remoteAddress;
+            var user = req.user.username;
             for (var i = 0; i < nodes.length; ++i) {
                 if (null === nodes[i]) {
                     continue;
@@ -124,15 +124,16 @@ module.exports = function (app) {
      * - 409: Conflict (asset locked by someone else)
      */
     version = function (req, res) {
-        var keys = req.body;
-        if (!keys.file) {
+        if (!req.body.file) {
             return httpStatus(res, 400, 'Version');
         }
-        keys.author = req.user.username || req.connection.remoteAddress;
-        keys.time = Date.now();
-        keys['#parent'] = req.params.id;
-        db.create(keys, function (error, doc) {
-            if (error) {
+        var node = Object.assign(req.body, {
+            author: req.user.username,
+            time: Date.now(),
+            '#parent': req.params.id,
+        });
+        db.create([node], function (error, doc) {
+            if (error || null === doc[0]) {
                 return httpStatus(res, 409, 'Version');
             }
             httpStatus(res, 201, doc[0]);
@@ -168,7 +169,7 @@ module.exports = function (app) {
         var sources = req.body.sources
         var keys = req.body.keys || {}
         var result = [];
-        keys.author = req.user.username || req.connection.remoteAddress;
+        keys.author = req.user.username;
         keys.time = Date.now();
         mod.search({file:req.body.target}, function (err, res) {
             if (err) {
@@ -202,7 +203,7 @@ module.exports = function (app) {
 
     app.put('/api/lock/', lock);
     app.put('/api/unlock/', unlock);
-    app.post('/api/version/:id', version);
+    app.post('/api/version/:id(*)', version);
 }
 
 
