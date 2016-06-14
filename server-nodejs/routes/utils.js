@@ -101,9 +101,9 @@ function sendJSON(res, data) {
         res.json(data);
         return;
     }
-    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
     res.write('[' + JSON.stringify(data.shift()));
-    var chunkSize = 64;
+    var chunkSize = 100;
     for (var i = 0; i < data.length; i += chunkSize) {
         res.write(',' +
             JSON.stringify(data.slice(i, i + chunkSize))
