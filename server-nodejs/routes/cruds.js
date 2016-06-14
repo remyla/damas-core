@@ -121,17 +121,16 @@ module.exports = function (app, express) {
                 res.send('Id not found');
                 return;
             }*/
-            res.setHeader('Content-Type', 'application/json');
+            res.setHeader('Content-Type', 'application/json; charset=utf-8');
             res.status(200);
-            res.write('[');
-            doc.forEach(function (obj, id) {
-                res.write(JSON.stringify(obj));
-                if(doc.length - 1 !== id) {
-                    res.write(',');
-                }
-            });
-            res.write(']');
-            res.end();
+            res.write('[' + JSON.stringify(doc.shift()));
+            var chunkSize = 100;
+            for (var i = 0; i < doc.length; i += chunkSize) {
+                res.write(',' +
+                    JSON.stringify(doc.slice(i, i + chunkSize))
+                    .slice(1, -1));
+            }
+            res.end(']');
         });
     }; // read()
 
