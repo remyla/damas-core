@@ -25,15 +25,27 @@ damas_add() {
   get_ids $@
   RES=$(curl -ks -H "$AUTH" -H "$JSON" \
     -d '{"_id": '"$IDS$JSONARG"'}' $URL'create/')
+  if [ $HUMAN ]; then
+    parse_json "$RES"
+    RES=$PARSED
+  fi
 }
 
 damas_read() {
   get_ids $@
   RES=$(curl -ks -H "$AUTH" -H "$JSON" -d "$IDS" $URL'read/')
+  if [ $HUMAN ]; then
+    parse_json "$RES"
+    RES=$PARSED
+  fi
 }
 
 damas_update() {
   RES=$(curl -ks -X PUT -H "$AUTH" -H "$JSON" -d "$1" $URL'update/')
+  if [ $HUMAN ]; then
+    parse_json "$RES"
+    RES=$PARSED
+  fi
 }
 
 damas_remove() {
@@ -60,6 +72,10 @@ damas_write() {
     RES=$RES$(curl -ks -H "$AUTH" -H "$JSON" \
       -d '{"message": "'"$COMMARG"'", "#parent": "'$FILEPATH'"}'  $URL'create/')
   done
+  if [ $HUMAN ]; then
+    parse_log "$RES"
+    RES=$PARSED
+  fi
 }
 
 damas_log() {
@@ -69,19 +85,29 @@ damas_log() {
     get_real_path $id
     damas_search "%23parent:$FILEPATH"
     RESULT=$(curl -ks -H "$AUTH" -H "$JSON" -d "$RES" $URL'read/')","
-    if [[ \[* == $RESULT ]]; then
-      REPONSE=$REPONSE$RESULT
+    if [[ $RESULT == \[* ]]; then
+      RESPONSE=$RESPONSE$RESULT
     else
       ERRORS=$ERRORS"\nNo entry found for $FILEPATH"
     fi
   done
-  RESPONSE=${RESPONSE:0:2}']'
+  if [  -n "$RESPONSE" ]; then
+    RESPONSE=${RESPONSE:0:-2}']'
+  fi
   RES=$RESPONSE$ERRORS
+  if [ $HUMAN ]; then
+    parse_log "$RES"
+    RES=$PARSED
+  fi
 }
 
 damas_graph() {
   get_ids $@
   RES=$(curl -ks -H "$AUTH" -H "$JSON" -d "$IDS" $URL'graph/')
+  if [ $HUMAN ]; then
+    parse_json "$RES"
+    RES=$PARSED
+  fi
 }
 
 damas_lock() {
@@ -97,19 +123,37 @@ damas_unlock() {
 damas_version() {
   for id in $@; do
     get_real_path $id
-    RES=$(curl -ks -H "$AUTH" -H "$JSON" -d $JSONARG $URL'version/'$FILEPATH)
+    RES=$(curl -ks -H "$AUTH" -H "$JSON" -d "$JSONARG" $URL'version/'$FILEPATH)
   done
 }
 
 damas_signin() {
   TOKEN=$(curl -ks --fail -d "username=$1&password=$2" $URL'signIn' \
-    | sed 's/^.*\"token\":\"\(.*\)\",.*$/\1/')
-  echo $TOKEN > /tmp/damas-$USER
-  chmod go-rw /tmp/damas-$USER
+    | sed 's/^.*"token":"\([^"]*\)".*$/\1/')
+  echo $TOKEN > "/tmp/damas-$USER"
+  chmod go-rw "/tmp/damas-$USER"
 }
 
 damas_signout() {
-  rm /tmp/damas-$USER
+  rm "/tmp/damas-$USER"
+}
+
+parse_json() {
+  PARSED=$(sed 's/[]{}"\[]//g' <<< $1 \
+    | awk '{n=split($0,key,","); for (i=1; i<=n; ++i) print key[i]}' \
+    | sed 's/^\([^_id:]\)/    \1/' | sed 's/_id://')
+}
+
+parse_log() {
+  PARSED=$(sed 's/[^,]{\|}[^,]//g' <<< $1 \
+    | awk '{n=split($0,key,"},{"); for (i=1; i<=n; ++i) print key[i]}' \
+    | while read l; do \
+      m=$(echo "$l" | sed 's/.*"time":\([^"]*\).*/\1/')
+      m=$(date -d @${m:0:-3} +"%b %d %Y %R%t")
+      n=$(echo "$l" | sed 's/\("_id":"\|"#parent":"\|"time":\)[^"]*\|"//g' \
+        | sed 's/,/ /g')
+      echo "$m$n"
+    done)
 }
 
 get_ids() {
@@ -118,7 +162,7 @@ get_ids() {
     get_real_path $id
      IDS=$IDS'"'$FILEPATH'", '
   done
-  IDS=${IDS::-2}']'
+  IDS=${IDS:0:-2}']'
 }
 
 get_real_path() {
@@ -140,7 +184,7 @@ auth() {
   local TOKEN=$(cat /tmp/damas-$USER 2> /dev/null)
   AUTH="Authorization: Bearer $TOKEN"
   VERIF=$(curl -ks -o /dev/null -w '%{http_code}' -H "$AUTH" $URL'verify/')
-  if [ "400" == VERIF ]; then
+  if [ "401" == $VERIF ]; then
     TOKEN=
     while [ ! -n "$TOKEN" ]; do
       echo "Please identify yourself"
@@ -214,6 +258,11 @@ while true; do
     -m | --messsage)
       COMMARG=$2
       shift 2
+      ;;
+
+    -h | --human)
+      HUMAN=true
+      shift 1
       ;;
 
     -*)
@@ -318,11 +367,11 @@ case $ACTION in
       ;;
 
     *)
-      echo "damas: invalid operation '$action'" >&2
+      echo "damas: invalid operation '$ACTION'" >&2
       show_help_msg
       exit 1
       ;;
 
 esac
 
-echo $RES
+echo -e "$RES"
