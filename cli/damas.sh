@@ -70,12 +70,42 @@ damas_write() {
   for id in $@; do
     get_real_path $id
     RES=$RES$(curl -ks -H "$AUTH" -H "$JSON" \
-      -d '{"message": "'"$COMMARG"'", "#parent": "'$FILEPATH'"}'  $URL'create/')
+      -d '{"message": "'"$COMMARG"'", "#parent": "'$FILEPATH'"}' \
+      $URL'create/')","
   done
+  RES='['${RES:0:-2}'}]'
   if [ $HUMAN ]; then
     parse_log "$RES"
     RES=$PARSED
   fi
+}
+
+damas_link() {
+  RES=
+  ERRORS=
+  get_real_path $1
+  TARGET=$FILEPATH
+  shift
+  for id in $@; do
+    get_real_path $id
+    KNOWN=$(curl -ks -H "$AUTH" -H "$JSON" \
+      $URL'search/src_id:'"$FILEPATH"'%20tgt_id:'"$TARGET")
+    if [[ "[]" == "$KNOWN" ]]; then
+      RES=$RES$(curl -ks -H "$AUTH" -H "$JSON" \
+        -d '{"src_id": "'"$FILEPATH"'", "tgt_id": "'"$TARGET"'"'"$JSONARG"'}' \
+        $URL'create/')","
+    else
+      ERRORS=$ERRORS"\nLink $FILEPATH -> $TARGET already exists"
+    fi
+  done;
+  if [  -n "$RES" ]; then
+    RES='['${RES:0:-2}'}]'
+    if [ $HUMAN ]; then
+      parse_json "$RES"
+      RES=$PARSED
+    fi
+  fi
+  RES=$RES$ERRORS
 }
 
 damas_log() {
@@ -93,12 +123,12 @@ damas_log() {
   done
   if [  -n "$RESPONSE" ]; then
     RESPONSE=${RESPONSE:0:-2}']'
+    if [ $HUMAN ]; then
+      parse_log "$RESPONSE"
+      RESPONSE=$PARSED
+    fi
   fi
   RES=$RESPONSE$ERRORS
-  if [ $HUMAN ]; then
-    parse_log "$RES"
-    RES=$PARSED
-  fi
 }
 
 damas_graph() {
@@ -141,12 +171,12 @@ damas_signout() {
 parse_json() {
   PARSED=$(sed 's/[]{}"\[]//g' <<< $1 \
     | awk '{n=split($0,key,","); for (i=1; i<=n; ++i) print key[i]}' \
-    | sed 's/^\([^_id:]\)/    \1/' | sed 's/_id://')
+    | sed 's/^\([^_id:]\)/    \1/' | sed 's/^_id://')
 }
 
 parse_log() {
-  PARSED=$(sed 's/[^,]{\|}[^,]//g' <<< $1 \
-    | awk '{n=split($0,key,"},{"); for (i=1; i<=n; ++i) print key[i]}' \
+  PARSED=$(sed 's/^\[{\|}]$//g' <<< $1 \
+    | awk '{n=split($0,key,"},{|}],\\[{"); for (i=1; i<=n; ++i) print key[i]}' \
     | while read l; do \
       m=$(echo "$l" | sed 's/.*"time":\([^"]*\).*/\1/')
       m=$(date -d @${m:0:-3} +"%b %d %Y %R%t")
@@ -211,7 +241,7 @@ shift
 
 case $ACTION in
     -h)
-      echo "usage: damas <action>"
+      echo "usage: damas <operation>"
       exit 1
       ;;
 
@@ -354,6 +384,11 @@ case $ACTION in
     write)
       auth
       damas_write $@
+      ;;
+
+    link)
+      auth
+      damas_link $@
       ;;
 
     log)
