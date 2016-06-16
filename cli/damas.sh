@@ -25,17 +25,27 @@ damas_add() {
   get_ids $@
   RES=$(curl -ks -H "$AUTH" -H "$JSON" \
     -d '{"_id": '"$IDS$JSONARG"'}' $URL'create/')
+  if [ $HUMAN ]; then
+    parse_json "$RES"
+    RES=$PARSED
+  fi
 }
 
 damas_read() {
   get_ids $@
   RES=$(curl -ks -H "$AUTH" -H "$JSON" -d "$IDS" $URL'read/')
+  if [ $HUMAN ]; then
+    parse_json "$RES"
+    RES=$PARSED
+  fi
 }
 
 damas_update() {
-  get_ids $@
-  RES=$(curl -ks -X PUT -H "$AUTH" -H "$JSON" \
-    -d '{"_id": '"$IDS$JSONARG"'}' $URL'update/')
+  RES=$(curl -ks -X PUT -H "$AUTH" -H "$JSON" -d "$1" $URL'update/')
+  if [ $HUMAN ]; then
+    parse_json "$RES"
+    RES=$PARSED
+  fi
 }
 
 damas_remove() {
@@ -60,22 +70,74 @@ damas_write() {
   for id in $@; do
     get_real_path $id
     RES=$RES$(curl -ks -H "$AUTH" -H "$JSON" \
-      -d '{"message": "'"$COMMARG"'", "#parent": "'$FILEPATH'"}'  $URL'create/')
+      -d '{"message": "'"$COMMARG"'", "#parent": "'$FILEPATH'"}' \
+      $URL'create/')","
   done
+  RES='['${RES:0:-2}'}]'
+  if [ $HUMAN ]; then
+    parse_log "$RES"
+    RES=$PARSED
+  fi
+}
+
+damas_link() {
+  RES=
+  ERRORS=
+  get_real_path $1
+  TARGET=$FILEPATH
+  shift
+  for id in $@; do
+    get_real_path $id
+    KNOWN=$(curl -ks -H "$AUTH" -H "$JSON" \
+      $URL'search/src_id:'"$FILEPATH"'%20tgt_id:'"$TARGET")
+    if [[ "[]" == "$KNOWN" ]]; then
+      RES=$RES$(curl -ks -H "$AUTH" -H "$JSON" \
+        -d '{"src_id": "'"$FILEPATH"'", "tgt_id": "'"$TARGET"'"'"$JSONARG"'}' \
+        $URL'create/')","
+    else
+      ERRORS=$ERRORS"\nLink $FILEPATH -> $TARGET already exists"
+    fi
+  done;
+  if [  -n "$RES" ]; then
+    RES='['${RES:0:-2}'}]'
+    if [ $HUMAN ]; then
+      parse_json "$RES"
+      RES=$PARSED
+    fi
+  fi
+  RES=$RES$ERRORS
 }
 
 damas_log() {
-  RES=
+  RESPONSE=
+  ERRORS=
   for id in $@; do
     get_real_path $id
     damas_search "%23parent:$FILEPATH"
-    RES=$RES$(curl -ks -H "$AUTH" -H "$JSON" -d "$RES" $URL'read/')
+    RESULT=$(curl -ks -H "$AUTH" -H "$JSON" -d "$RES" $URL'read/')","
+    if [[ $RESULT == \[* ]]; then
+      RESPONSE=$RESPONSE$RESULT
+    else
+      ERRORS=$ERRORS"\nNo entry found for $FILEPATH"
+    fi
   done
+  if [  -n "$RESPONSE" ]; then
+    RESPONSE=${RESPONSE:0:-2}']'
+    if [ $HUMAN ]; then
+      parse_log "$RESPONSE"
+      RESPONSE=$PARSED
+    fi
+  fi
+  RES=$RESPONSE$ERRORS
 }
 
 damas_graph() {
   get_ids $@
   RES=$(curl -ks -H "$AUTH" -H "$JSON" -d "$IDS" $URL'graph/')
+  if [ $HUMAN ]; then
+    parse_json "$RES"
+    RES=$PARSED
+  fi
 }
 
 damas_lock() {
@@ -91,21 +153,37 @@ damas_unlock() {
 damas_version() {
   for id in $@; do
     get_real_path $id
-    RES=$(curl -ks -H "$AUTH" -H "$JSON" -d $JSONARG $URL'version/'$FILEPATH)
+    RES=$(curl -ks -H "$AUTH" -H "$JSON" -d "$JSONARG" $URL'version/'$FILEPATH)
   done
 }
 
 damas_signin() {
   TOKEN=$(curl -ks --fail -d "username=$1&password=$2" $URL'signIn' \
-    | sed 's/\\\\\//\//g' | sed 's/[{}]//g' | awk \
-    '{n=split($0,a,","); for (i=1; i<=n; i++) print a[i]}' | sed 's/\"//g' \
-    | grep -w "token" | sed 's/token://')
-  echo $TOKEN > /tmp/damas-$USER
-  chmod go-rw /tmp/damas-$USER
+    | sed 's/^.*"token":"\([^"]*\)".*$/\1/')
+  echo $TOKEN > "/tmp/damas-$USER"
+  chmod go-rw "/tmp/damas-$USER"
 }
 
 damas_signout() {
-  rm /tmp/damas-$USER
+  rm "/tmp/damas-$USER"
+}
+
+parse_json() {
+  PARSED=$(sed 's/[]{}"\[]//g' <<< $1 \
+    | awk '{n=split($0,key,","); for (i=1; i<=n; ++i) print key[i]}' \
+    | sed 's/^\([^_id:]\)/    \1/' | sed 's/^_id://')
+}
+
+parse_log() {
+  PARSED=$(sed 's/^\[{\|}]$//g' <<< $1 \
+    | awk '{n=split($0,key,"},{|}],\\[{"); for (i=1; i<=n; ++i) print key[i]}' \
+    | while read l; do \
+      m=$(echo "$l" | sed 's/.*"time":\([^"]*\).*/\1/')
+      m=$(date -d @${m:0:-3} +"%b %d %Y %R%t")
+      n=$(echo "$l" | sed 's/\("_id":"\|"#parent":"\|"time":\)[^"]*\|"//g' \
+        | sed 's/,/ /g')
+      echo "$m$n"
+    done)
 }
 
 get_ids() {
@@ -114,7 +192,7 @@ get_ids() {
     get_real_path $id
      IDS=$IDS'"'$FILEPATH'", '
   done
-  IDS=${IDS::-2}']'
+  IDS=${IDS:0:-2}']'
 }
 
 get_real_path() {
@@ -135,7 +213,8 @@ upsearch() {
 auth() {
   local TOKEN=$(cat /tmp/damas-$USER 2> /dev/null)
   AUTH="Authorization: Bearer $TOKEN"
-  if [ $(curl -ks -o /dev/null -w '%{http_code}' -H "$AUTH" $URL'verify/') -gt "400" ]; then
+  VERIF=$(curl -ks -o /dev/null -w '%{http_code}' -H "$AUTH" $URL'verify/')
+  if [ "401" == $VERIF ]; then
     TOKEN=
     while [ ! -n "$TOKEN" ]; do
       echo "Please identify yourself"
@@ -145,6 +224,9 @@ auth() {
       printf "\n\n"
     done
     AUTH="Authorization: Bearer $TOKEN"
+  elif [ "000" == $VERIF ]; then
+    echo "damas: server unreachable"
+    exit 3
   fi
 }
 
@@ -159,25 +241,66 @@ shift
 
 case $ACTION in
     -h)
-      echo "usage: damas <command>"
+      echo "usage: damas <operation>"
       exit 1
       ;;
 
     --help)
-      echo "    add      [-j <json>] <file>   create a new node for the specified file"
-      echo "    read     <file>               show the keys of the file"
-      echo "    update   -j <json> <file>        update"
-      echo "    remove   <file>               delete"
-      echo "    search   <query>              search"
-      echo "    search_mongo  <query> <sort> <limit> <skip>  does something"
-      echo "    write    -m <comment> <file>  write a message node on a file"
-      echo "    log      <file>               show history of file (children nodes)"
-      echo "    graph    <file>               show all files and links related"
-      echo "    lock     <file>               lock a file"
-      echo "    unlock   <file>               unlock a file"
-      echo "    version  -j <json> <file>     set a new version of a file"
-      echo "    signin   <username> <pass>    set the authorization token"
-      echo "    signout                       remove authorization token"
+      echo "    add"
+      echo "        [-h] [-j <json>] <file>"
+      echo "        create a new node for the specified file"
+      echo "    read"
+      echo "        [-h] <file>"
+      echo "        show the keys of the file"
+      echo "    update"
+      echo "        [-h] <full-json>"
+      echo "        update nodes"
+      echo "    remove"
+      echo "        <file>"
+      echo "        delete the node of the specified file"
+      echo "    search"
+      echo "        <query>"
+      echo "        search"
+      echo "    search_mongo"
+      echo "        <query> <sort> <limit> <skip>"
+      echo "        search with MongoDB parameters"
+      echo "    write"
+      echo "        [-h] [-m <comment>] <file>"
+      echo "        write a message node on a file"
+      echo "    log"
+      echo "        [-h] <file>"
+      echo "        show history of file (children nodes)"
+      echo "    graph"
+      echo "        [-h] <file>"
+      echo "        show all files and links related"
+      echo "    lock"
+      echo "        <file>"
+      echo "        lock a file"
+      echo "    unlock"
+      echo "        <file>"
+      echo "        unlock a file"
+      echo "    version"
+      echo "        -j <json> <file>"
+      echo "        set a new version of a file"
+      echo "    signin"
+      echo "        <username> <pass>"
+      echo "        set the authorization token"
+      echo "    signout"
+      echo "        remove authorization token"
+      echo "    init"
+      echo "        make your directory and subdirectories available for damas"
+      exit 0
+      ;;
+
+    init)
+      read -p "remote URL (default = localhost:8090): " URL
+      if [  -z $URL ]; then
+        URL='localhost:8090'
+      fi
+      mkdir '.damas'
+      echo 'URL="http://'$URL'/api/"' > '.damas/config'
+      echo 'Initialized empty Damas repository in '$(realpath .) \
+        '/.damas/ with remote http://'$URL'/api/'
       exit 0
       ;;
 esac
@@ -193,6 +316,11 @@ while true; do
     -m | --messsage)
       COMMARG=$2
       shift 2
+      ;;
+
+    -h | --human)
+      HUMAN=true
+      shift 1
       ;;
 
     -*)
@@ -258,6 +386,11 @@ case $ACTION in
       damas_write $@
       ;;
 
+    link)
+      auth
+      damas_link $@
+      ;;
+
     log)
       auth
       damas_log $@
@@ -297,11 +430,11 @@ case $ACTION in
       ;;
 
     *)
-      echo "damas: invalid operation '$action'" >&2
+      echo "damas: invalid operation '$ACTION'" >&2
       show_help_msg
       exit 1
       ;;
 
 esac
 
-echo $RES
+echo -e "$RES"
