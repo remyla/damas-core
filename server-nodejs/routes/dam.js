@@ -96,19 +96,46 @@ module.exports = function (app, routes) {
      * - 409: Conflict (asset locked by someone else)
      */
     var version = function (req, res) {
-        if (!req.body.file) {
+        var upload = req.upload ? req.upload : {};
+        if (!req.body.file || !req.params.id) {
             return httpStatus(res, 400, 'Version');
         }
-        var node = Object.assign(req.body, {
-            author: req.user.username,
-            time: Date.now(),
-            '#parent': req.params.id,
-        });
-        db.create([node], function (error, doc) {
-            if (error || null === doc[0]) {
-                return httpStatus(res, 409, 'Version');
+        var head = {
+            _id:  upload.id   || req.params.id,
+            time: upload.time || Date.now(),
+            file: upload.file || req.body.file,
+            author: req.user.username
+        };
+        db.read([head._id], function (err, previous) {
+            if (err || null === previous[0]) {
+                return httpStatus(res, 404, 'Version');
             }
-            httpStatus(res, 201, doc[0]);
+            var file = previous[0].file || head.file;
+            var child = Object.assign(previous[0], {
+                '#parent': head._id,
+                file: formatVersion(file, previous[0].time)
+            });
+            delete child._id;
+            delete child.version;
+
+            db.create([child], function (err, result) {
+                if (err) {
+                    return httpStatus(res, 409, 'Version');
+                }
+                for (var key in child) {
+                    child[key] = null;
+                }
+                db.search({'#parent': head._id}, function (err, doc) {
+                    head = Object.assign(child, req.body, head);
+                    head.version = 1 + (err ? 0 : doc.length);
+                    db.update([head], function (err, doc) {
+                        if (err || null === doc[0]) {
+                            return httpStatus(res, 409, 'Version');
+                        }
+                        httpStatus(res, 201, doc[0]);
+                    });
+                });
+            });
         });
     };
 

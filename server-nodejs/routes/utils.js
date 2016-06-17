@@ -31,7 +31,7 @@ if (typeof Object.assign != 'function') {
  * @return {boolean} - Whether the request contains an array
  */
 global.isArray = function (req) {
-    if (req.params.id) {
+    if (req.params && req.params.id) {
         return 1 < req.params.id.split(',');
     }
     return Array.isArray(req.body);
@@ -89,6 +89,16 @@ global.unfoldIds = function (nodes) {
         }
     }
     return array;
+};
+
+/**
+ * Format the name of a file to insert the suffix before the file extension
+ * @param {string} name - The name to format
+ * @param {string} suffix - The suffix to insert into the name
+ * @return {string} - The formatted string
+ */
+global.formatVersion = function (name, suffix) {
+    return name.replace(/(\.(?!.*[\/\\].+)|\/$|$)/, '_' + suffix + '$1');
 };
 
 /**

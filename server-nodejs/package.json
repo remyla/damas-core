@@ -23,11 +23,10 @@
     "express-unless": "^0.3.0",
     "jsonwebtoken": "^5.0.5",
     "method-override": "^2.3.4",
-    "mkdirp": "^0.5.1",
     "mongodb": "^2.1.0-alpha",
     "morgan": "^1.6.1",
     "multer": "^0.1.8",
-    "ncp": "^2.0.0",
+    "mv": "^2.1.1",
     "socket.io": "^1.4.6"
   },
   "devDependencies": {
