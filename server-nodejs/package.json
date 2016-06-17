@@ -23,7 +23,7 @@
     "express-unless": "^0.3.0",
     "jsonwebtoken": "^5.0.5",
     "method-override": "^2.3.4",
-    "mongodb": "^2.1.0-alpha",
+    "mongodb": "^2.1.21",
     "morgan": "^1.6.1",
     "multer": "^0.1.8",
     "mv": "^2.1.1",

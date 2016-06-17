@@ -40,7 +40,7 @@ module.exports = function (app, routes) {
             /*
              * Attempt to save the previous version
              */
-            if (!req.body.id || 'null' === req.body.id) {
+            if (req.body.id && 'null' !== req.body.id) {
                 db.read([req.body.id], function (err, versions) {
                     if (err) {
                         return moveUploadedFile();
@@ -56,6 +56,8 @@ module.exports = function (app, routes) {
                         moveUploadedFile();
                     });
                 });
+            } else {
+                moveUploadedFile();
             }
 
             /*
