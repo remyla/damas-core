@@ -3,8 +3,9 @@
  * Licensed under the GNU GPL v3
  */
 
-module.exports = function (app, express) {
+module.exports = function (app, routes) {
     var db = app.locals.db;
+    var conf = app.locals.conf;
     //methodOverride = require('method-override'),
     var fs = require('fs');
     var events = require('../events');
@@ -59,7 +60,7 @@ module.exports = function (app, express) {
             if ('object' !== typeof nodes[i] || null === nodes[i]) {
                 return httpStatus(res, 400, 'Create');
             }
-            Object.assign(nodes[i], controlProperties);
+            nodes[i] = Object.assign({}, controlProperties, nodes[i]);
         }
         nodes = unfoldIds(nodes);
 
@@ -378,11 +379,10 @@ module.exports = function (app, express) {
             keys.mysqlid = node.id;
             db.search({mysqlid:keys.mysqlid}, function (err, res) {
                 if (err) {
-                    console.log('ERROR');
-                    return;
+                    return console.log('ERROR');
                 }
                 if (0 === res.length) {
-                    db.create(keys, function (err, n) {
+                    db.create([keys], function (err, n) {
                         if (err) console.log('ERROR create')
                     });
                 } else {
@@ -403,7 +403,7 @@ module.exports = function (app, express) {
                                     console.log('LINK ERR');
                                     return;
                                 }
-                                db.create({src_id: res1[0], tgt_id: res2[0]},
+                                db.create([{src_id: res1[0], tgt_id: res2[0]}],
                                         function () {});
                             });
                         });
@@ -431,7 +431,7 @@ module.exports = function (app, express) {
      * - 404: Not Found (the file does not exist)
      */
     getFile = function (req, res) {
-        var path = fileSystem + decodeURIComponent(req.params.path);
+        var path = conf.fileSystem + decodeURIComponent(req.params.path);
         path = path.replace(/:/g, '').replace(/\/+/g, '/');
         fs.exists(path, function (exists) {
             if (!exists) {

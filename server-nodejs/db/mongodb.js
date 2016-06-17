@@ -149,15 +149,15 @@ module.exports = function (conf) {
                 }
                 coll.update(query, up, function (err, stat) {
                     var id = query[Object.keys(query)[0]];
-                    next(null, err ? null : id);
+                    next(null, err ? '' : id);
                 });
             }
             async.mapLimit(nodes, 100, updateNode, function (err, ids) {
-                    self.read(ids, function (err, doc) {
-                        callback(false, doc);
-                        fireEvent('update', doc);
-                    });
+                self.read(ids, function (err, doc) {
+                    callback(false, doc);
+                    fireEvent('update', doc);
                 });
+            });
         });
     }; // update()
 

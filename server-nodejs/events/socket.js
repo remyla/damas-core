@@ -4,7 +4,7 @@
 
 var debug = require('debug')('app:io:' + process.pid);
 var SocketServer = require('socket.io');
-var events = require('.');
+var events = require('./');
 
 var io = module.exports = new SocketServer();
 
