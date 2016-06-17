@@ -469,6 +469,16 @@ module.exports = function (app, routes) {
     app.post('/api/import/', importJSON); // untested
     //app.get('/subdirs/:path', getSubdirs);
     //app.get('/subdirs', getSubdirs);
+
+    routes = Object.assign(routes, {
+        create: create,
+        read: read,
+        update: update,
+        deleteNode: deleteNode,
+        graph: graph,
+        search: search,
+        search_one: search_one,
+    });
 }
 
 

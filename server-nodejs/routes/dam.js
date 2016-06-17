@@ -3,7 +3,7 @@
  * Licensed under the GNU GPL v3
  */
 
-module.exports = function (app) {
+module.exports = function (app, routes) {
     var db = app.locals.db;
     require('./utils');
 
@@ -21,7 +21,7 @@ module.exports = function (app) {
      * - 404: Not Found (all the nodes do not exist)
      * - 409: Conflict (asset already locked by someone else)
      */
-    lock = function (req, res) {
+    var lock = function (req, res) {
         var ids = getBodyIds(req);
         if (!ids) {
             return httpStatus(res, 400, 'Lock');
@@ -40,22 +40,8 @@ module.exports = function (app) {
                     return httpStatus(res, 409, 'Lock');
                 }
             }
-            nodes = unfoldIds([{_id: ids, lock: user}]);
-            db.update(nodes, function (error, doc) {
-                if (error) {
-                    return httpStatus(res, 409, 'Lock');
-                }
-                var response = getMultipleResponse(doc);
-                if (response.fail) {
-                    httpStatus(res, 404, 'Lock');
-                } else if (response.partial) {
-                    httpStatus(res, 207, doc);
-                } else if (1 === doc.length && !isArray(req)) {
-                    httpStatus(res, 200, doc[0]);
-                } else {
-                    httpStatus(res, 200, doc);
-                }
-            });
+            req.body = {_id: ids, lock: user};
+            routes.update(req, res);
         });
     };
 
@@ -73,7 +59,7 @@ module.exports = function (app) {
      * - 404: Not Found (the asset does not exist)
      * - 409: Conflict (asset locked by someone else)
      */
-    unlock = function (req, res) {
+    var unlock = function (req, res) {
         var ids = getBodyIds(req);
         if (!ids) {
             return httpStatus(res, 400, 'Unlock');
@@ -92,22 +78,8 @@ module.exports = function (app) {
                     return httpStatus(res, 409, 'Unlock');
                 }
             }
-            nodes = unfoldIds([{_id: ids, lock: null}]);
-            db.update(nodes, function (error, doc) {
-                if (error) {
-                    return httpStatus(res, 409, 'Unlock');
-                }
-                var response = getMultipleResponse(doc);
-                if (response.fail) {
-                    httpStatus(res, 404, 'Unlock');
-                } else if (response.partial) {
-                    httpStatus(res, 207, doc);
-                } else if (1 === doc.length && !isArray(req)) {
-                    httpStatus(res, 200, doc[0]);
-                } else {
-                    httpStatus(res, 200, doc);
-                }
-            });
+            req.body = {_id: ids, lock: null};
+            routes.update(req, res);
         });
     };
 
@@ -123,7 +95,7 @@ module.exports = function (app) {
      * - 400: Bad request (not formatted correctly)
      * - 409: Conflict (asset locked by someone else)
      */
-    version = function (req, res) {
+    var version = function (req, res) {
         if (!req.body.file) {
             return httpStatus(res, 400, 'Version');
         }
@@ -204,6 +176,12 @@ module.exports = function (app) {
     app.put('/api/lock/', lock);
     app.put('/api/unlock/', unlock);
     app.post('/api/version/:id(*)', version);
+
+    routes = Object.assign(routes, {
+        lock: lock,
+        unlock: unlock,
+        version: version
+    });
 }
 
 

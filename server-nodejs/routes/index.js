@@ -40,9 +40,10 @@ module.exports = function (app, express){
     require('./permissions')(app);
 
     // Routes
-    require('./dam')(app);
-    require('./cruds')(app);
-    require('./upload')(app);
+    var routes = {};
+    require('./cruds')(app, routes);
+    require('./dam')(app, routes);
+    require('./upload')(app, routes);
 }
 
 
