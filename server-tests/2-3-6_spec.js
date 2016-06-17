@@ -18,7 +18,6 @@ var url = conf.protocol + '://' + conf.host + ':' + conf[conf.protocol].port +
 var idCustom = '/file/;.*?<>#%';
 var idCustomEncoded = encodeURIComponent(idCustom);
 var idNotFound = 100000001;
-var idVersion = 'versiontest';
 
 /*
  * Utility functions to ease test creation
@@ -58,6 +57,11 @@ function unlock(desc, data) {
         .put(url + 'unlock/', data, {json: true});
 }
 
+function version(desc, parent, keys) {
+    return frisby.create('POST VERSION - ' + desc)
+        .post(url + 'version/' + parent, keys, {json: true});
+}
+
 function read_get(desc, uri) {
     uri = Array.isArray(uri) ? uri.join(',') : uri;
     return frisby.create('GET READ - ' + desc).get(url + 'read/' + uri);
@@ -68,9 +72,9 @@ function graph_get(desc, uri) {
     return frisby.create('GET GRAPH - ' + desc).get(url + 'graph/0/' + uri);
 }
 
-function version(desc, parent, keys) {
-    return frisby.create('POST VERSION - ' + desc)
-        .post(url + 'version/' + parent, keys, {json: true});
+function search(desc, query) {
+    query = encodeURIComponent(query);
+    return frisby.create('GET SEARCH - ' + desc).get(url + 'search/' + query);
 }
 
 create('should create an object in the database', {key: 'value', num: 3})
@@ -87,16 +91,13 @@ create('should create an object in the database', {key: 'value', num: 3})
     /*
      * Create tests
      */
-    create('should create an empty object', {})
-        .expectStatus(201).toss(); // We should get the id of this object
-
     create('should throw an error ([{}] | {} expected)', [null])
         .expectStatus(400).toss();
 
-    create('should throw an error ([{}] | {} expected)', ['abc'])
+    create('should throw an error (objects expected)', ['abc'])
         .expectStatus(400).toss();
 
-    create('should throw an error ([{}] | {} expected)', [{}, 'abc'])
+    create('should throw an error (objects expected)', [{}, 'abc'])
         .expectStatus(400).toss();
 
     create('should create an object with custom id', {_id: idCustom})
@@ -155,8 +156,8 @@ create('should create an object in the database', {key: 'value', num: 3})
     update('should throw an error (not found)', {_id: idNotFound, key: 'val'})
         .expectStatus(404).toss();
 
-    update('should update a node (valid)', {_id: idFound, a: 'c'})
-        .expectStatus(200).expectJSON({a: 'c'}).toss();
+    update('should update a node (valid)', {_id: idFound, '#parent': idFound})
+        .expectStatus(200).expectJSON({'#parent': idFound}).toss();
 
     update('should update a node with an integer', {_id: idFound, b: 2})
         .expectStatus(200).expectJSON({b: 2}).toss();
@@ -259,11 +260,19 @@ create('should create an object in the database', {key: 'value', num: 3})
     version('should throw an error (missing file key)', idFound, {})
         .expectStatus(400).toss();
 
-/*    version('should throw an error (id not found)', idNotFound, {file: '/'})
-        .expectStatus(404).toss();*/
+    version('should throw an error (id not found)', idNotFound, {file: '/'})
+        .expectStatus(404).toss();
 
-    version('should create a version', idFound, {file: '/', _id: idVersion})
-        .expectStatus(201).toss();
+    version('should create a version', idFound, {file: '/path/abc.ext'})
+        .expectStatus(201).after(function (error, response, body) {
+            // Now delete the two versions
+            search('should return one id', '#parent:' + body._id)
+                .expectStatus(200).expectJSONTypes({0: String})
+                .after(function (error, response, body) {
+                    remove('should delete two nodes', [idFound, JSON.parse(body)[0]])
+                        .expectStatus(200).toss();
+                }).toss();
+        }).toss();
 
     /*
      * Delete tests
@@ -274,13 +283,10 @@ create('should create an object in the database', {key: 'value', num: 3})
     remove('should throw an error (id not found)', idNotFound)
         .expectStatus(404).toss();
 
-    remove('should delete a node', idFound)
+    remove('should delete a node', idFound2)
         .expectStatus(200).toss();
 
     remove('should delete a custom-id node', idCustom)
-        .expectStatus(200).toss();
-
-    remove('should delete two nodes', [idFound2, idVersion])
         .expectStatus(200).toss();
 
     /**
