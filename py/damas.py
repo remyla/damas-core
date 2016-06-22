@@ -116,7 +116,7 @@ class http_connection( object ) :
 			return json.loads(r.text)
 		return None
 
-	def search_mongo( self, query, sort=None, limit=None, skip=None)
+	def search_mongo( self, query, sort=None, limit=None, skip=None):
 		data = {"query":query, "sort":sort, "limit":limit, "skip":skip}
 		headers = {'content-type': 'application/json'}
 		headers.update(self.headers)
