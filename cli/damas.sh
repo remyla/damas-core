@@ -196,7 +196,7 @@ get_ids() {
 }
 
 get_real_path() {
-  FILEPATH="/"$(realpath --relative-to $DIRECTORY $1)
+  FILEPATH="/"$(realpath --relative-base $DIRECTORY $1 | sed 's/\.$//')
 }
 
 upsearch() {
