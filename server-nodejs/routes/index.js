@@ -34,4 +34,9 @@ module.exports = function (app, express){
 	require('./dam')(app);
 	require('./cruds')(app);
 	require('./upload')(app);
+
+	// Shortcuts
+	app.get('/console', function( req, res ){
+		res.sendFile('console.html', { root: '../public' });
+	});
 }
