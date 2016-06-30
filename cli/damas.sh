@@ -70,7 +70,7 @@ damas_write() {
   for id in $@; do
     get_real_path $id
     RES=$RES$(curl -ks -H "$AUTH" -H "$JSON" \
-      -d '{"message": "'"$COMMARG"'", "#parent": "'$FILEPATH'"}' \
+      -d '{"comment": "'"$COMMARG"'", "#parent": "'$FILEPATH'"}' \
       $URL'create/')","
   done
   RES='['${RES:0:-2}'}]'
@@ -196,7 +196,7 @@ get_ids() {
 }
 
 get_real_path() {
-  FILEPATH="/"$(realpath --relative-to $DIRECTORY $1)
+  FILEPATH="/"$(realpath --relative-base $DIRECTORY $1 | sed 's/\.$//')
 }
 
 upsearch() {
