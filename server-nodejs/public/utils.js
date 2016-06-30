@@ -8,7 +8,7 @@ JSON_tooltip = function ( obj )
     var text = '';
     var keys = Object.keys(obj).sort();
     for (i = 0; i < keys.length ; i++){
-        text += keys[i] + ": " + obj[keys[i]];
+        text += " (" + typeof obj[keys[i]] + ") " + keys[i] + "  : " + obj[keys[i]];
         if (i !== keys.length - 1) {
             text += '\n';
        }
