@@ -112,7 +112,7 @@
 			});
 		}
 		function show_log(){
-				damas.search_mongo({'time': {$exists:true}}, {"time":-1},200,0, function(res){
+				damas.search_mongo({'time': {$exists:true, $type: 1}}, {"time":-1},200,0, function(res){
 				//damas.search_mongo({'time': 'REGEX_.*'}, {"time":-1},200,0, function(res){
 				damas.read(res, function(assets){
 					var out = document.querySelector('#contents');
@@ -137,8 +137,9 @@
 		}
 
         function show_wait(){
+                    //{online:"1", file:{$exists: true}, ino_write: {$exists: false}, time: { $gt: 1463200887000} },
                 damas.search_mongo(
-                    {online:"1", file:{$exists: true}, ino_write: {$exists: false}, time: { $gt: 1463200887000} },
+                    {online:"1", file:{$exists: true}, $or: [{ $where: "this.ino_write < this.time"}, {ino_write: {$exists: false} }], time: { $gt: 1463200887000} },
                     {origin:1, file:1}, 0,0, function(res){
 
                 damas.read(res, function(assets){
@@ -203,7 +204,7 @@
 			Connecté.e en tant que <span class="username"></span>
 		</div>
 		<div id="menubar2" class="menubar">
-			<button id="but_wait">wait</button><button id="but_log">log</button><button id="but_locks">locks</button><button id="but_users">users</button>
+			<button id="but_wait">upload queue</button><button id="but_log">log</button><button id="but_locks">locks</button><button id="but_users">users</button>
 			<button id="signOut">sign out</button>
 		</div>
 		<div id="connection">
