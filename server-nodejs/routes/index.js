@@ -37,6 +37,6 @@ module.exports = function (app, express){
 
 	// Shortcuts
 	app.get('/console', function( req, res ){
-		res.sendFile('console.html', { root: '../public' });
+		res.sendFile('public/console.html', { root: '.' });
 	});
 }
