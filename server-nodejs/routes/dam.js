@@ -3,7 +3,7 @@
  * Licensed under the GNU GPL v3
  */
 
-module.exports = function (app) {
+module.exports = function (app, routes) {
     var db = app.locals.db;
     require('./utils');
 
@@ -21,7 +21,7 @@ module.exports = function (app) {
      * - 404: Not Found (all the nodes do not exist)
      * - 409: Conflict (asset already locked by someone else)
      */
-    lock = function (req, res) {
+    var lock = function (req, res) {
         var ids = getBodyIds(req);
         if (!ids) {
             return httpStatus(res, 400, 'Lock');
@@ -31,7 +31,7 @@ module.exports = function (app) {
             if (err) {
                 return httpStatus(res, 409, 'Lock');
             }
-            var user = req.user.username || req.connection.remoteAddress;
+            var user = req.user.username;
             for (var i = 0; i < nodes.length; ++i) {
                 if (null === nodes[i]) {
                     continue;
@@ -40,21 +40,8 @@ module.exports = function (app) {
                     return httpStatus(res, 409, 'Lock');
                 }
             }
-            db.update([{_id: ids, lock: user}], function (error, doc) {
-                if (error) {
-                    return httpStatus(res, 409, 'Lock');
-                }
-                var response = getMultipleResponse(doc);
-                if (response.fail) {
-                    httpStatus(res, 404, 'Lock');
-                } else if (response.partial) {
-                    httpStatus(res, 207, doc);
-                } else if (1 === doc.length && !isArray(req)) {
-                    httpStatus(res, 200, doc[0]);
-                } else {
-                    httpStatus(res, 200, doc);
-                }
-            });
+            req.body = {_id: ids, lock: user};
+            routes.update(req, res);
         });
     };
 
@@ -72,7 +59,7 @@ module.exports = function (app) {
      * - 404: Not Found (the asset does not exist)
      * - 409: Conflict (asset locked by someone else)
      */
-    unlock = function (req, res) {
+    var unlock = function (req, res) {
         var ids = getBodyIds(req);
         if (!ids) {
             return httpStatus(res, 400, 'Unlock');
@@ -82,7 +69,7 @@ module.exports = function (app) {
             if (err) {
                 return httpStatus(res, 409, 'Unlock');
             }
-            var user = req.user.username || req.connection.remoteAddress;
+            var user = req.user.username;
             for (var i = 0; i < nodes.length; ++i) {
                 if (null === nodes[i]) {
                     continue;
@@ -91,21 +78,8 @@ module.exports = function (app) {
                     return httpStatus(res, 409, 'Unlock');
                 }
             }
-            db.update([{_id: ids, lock: null}], function (error, doc) {
-                if (error) {
-                    return httpStatus(res, 409, 'Unlock');
-                }
-                var response = getMultipleResponse(doc);
-                if (response.fail) {
-                    httpStatus(res, 404, 'Unlock');
-                } else if (response.partial) {
-                    httpStatus(res, 207, doc);
-                } else if (1 === doc.length && !isArray(req)) {
-                    httpStatus(res, 200, doc[0]);
-                } else {
-                    httpStatus(res, 200, doc);
-                }
-            });
+            req.body = {_id: ids, lock: null};
+            routes.update(req, res);
         });
     };
 
@@ -121,19 +95,47 @@ module.exports = function (app) {
      * - 400: Bad request (not formatted correctly)
      * - 409: Conflict (asset locked by someone else)
      */
-    version = function (req, res) {
-        var keys = req.body;
-        if (!keys.file) {
+    var version = function (req, res) {
+        var upload = req.upload ? req.upload : {};
+        if (!req.body.file || !req.params.id) {
             return httpStatus(res, 400, 'Version');
         }
-        keys.author = req.user.username || req.connection.remoteAddress;
-        keys.time = Date.now();
-        keys['#parent'] = req.params.id;
-        db.create(keys, function (error, doc) {
-            if (error) {
-                return httpStatus(res, 409, 'Version');
+        var head = {
+            _id:  upload.id   || req.params.id,
+            time: upload.time || Date.now(),
+            file: upload.file || req.body.file,
+            author: req.user.username
+        };
+        db.read([head._id], function (err, previous) {
+            if (err || null === previous[0]) {
+                return httpStatus(res, 404, 'Version');
             }
-            httpStatus(res, 201, doc[0]);
+            var file = previous[0].file || head.file;
+            var child = Object.assign(previous[0], {
+                '#parent': head._id,
+                file: formatVersion(file, previous[0].time)
+            });
+            delete child._id;
+            delete child.version;
+
+            db.create([child], function (err, result) {
+                if (err) {
+                    return httpStatus(res, 409, 'Version');
+                }
+                for (var key in child) {
+                    child[key] = null;
+                }
+                db.search({'#parent': head._id}, function (err, doc) {
+                    head = Object.assign(child, req.body, head);
+                    head.version = 1 + (err ? 0 : doc.length);
+                    db.update([head], function (err, doc) {
+                        if (err || null === doc[0]) {
+                            return httpStatus(res, 409, 'Version');
+                        }
+                        httpStatus(res, 201, doc[0]);
+                    });
+                });
+            });
         });
     };
 
@@ -166,7 +168,7 @@ module.exports = function (app) {
         var sources = req.body.sources
         var keys = req.body.keys || {}
         var result = [];
-        keys.author = req.user.username || req.connection.remoteAddress;
+        keys.author = req.user.username;
         keys.time = Date.now();
         mod.search({file:req.body.target}, function (err, res) {
             if (err) {
@@ -200,7 +202,13 @@ module.exports = function (app) {
 
     app.put('/api/lock/', lock);
     app.put('/api/unlock/', unlock);
-    app.post('/api/version/:id', version);
+    app.post('/api/version/:id(*)', version);
+
+    routes = Object.assign(routes, {
+        lock: lock,
+        unlock: unlock,
+        version: version
+    });
 }
 
 

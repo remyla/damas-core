@@ -3,12 +3,12 @@
  * Licensed under the GNU GPL v3
  */
 
-module.exports = function (app, express) {
+module.exports = function (app, routes) {
     var db = app.locals.db;
+    var conf = app.locals.conf;
     //methodOverride = require('method-override'),
     var fs = require('fs');
     var events = require('../events');
-    require('./utils');
 
 /*
     app.use(methodOverride(function (req, res) {
@@ -53,15 +53,16 @@ module.exports = function (app, express) {
         var nodes = Array.isArray(req.body) ? req.body : [req.body];
 
         var controlProperties = {
-            author: req.user.username || req.connection.remoteAddress,
+            author: req.user.username,
             time: Date.now()
         }
         for (var i = 0; i < nodes.length; ++i) {
             if ('object' !== typeof nodes[i] || null === nodes[i]) {
                 return httpStatus(res, 400, 'Create');
             }
-            Object.assign(nodes[i], controlProperties);
+            nodes[i] = Object.assign({}, controlProperties, nodes[i]);
         }
+        nodes = unfoldIds(nodes);
 
         events.fire('pre-create', nodes).then(function (data) {
             if (data.status) {
@@ -149,6 +150,7 @@ module.exports = function (app, express) {
                 return httpStatus(res, 400, 'Update');
             }
         }
+        nodes = unfoldIds(nodes);
         events.fire('pre-update', nodes).then(function (data) {
             if (data.status) {
                 return httpStatus(res, data.status, 'Update');
@@ -227,12 +229,13 @@ module.exports = function (app, express) {
      * - 404: Not Found (all the nodes do not exist)
      */
     graph = function (req, res) {
+        var depth = req.params.depth || 0;
         var ids = getRequestIds(req);
         if (!ids) {
             return httpStatus(res, 400, 'Remove');
         }
 
-        db.graph(ids, function (error, nodes) {
+        db.graph(ids, depth, function (error, nodes) {
             if (error) {
                 return httpStatus(res, 409, 'Graph');
             }
@@ -376,11 +379,10 @@ module.exports = function (app, express) {
             keys.mysqlid = node.id;
             db.search({mysqlid:keys.mysqlid}, function (err, res) {
                 if (err) {
-                    console.log('ERROR');
-                    return;
+                    return console.log('ERROR');
                 }
                 if (0 === res.length) {
-                    db.create(keys, function (err, n) {
+                    db.create([keys], function (err, n) {
                         if (err) console.log('ERROR create')
                     });
                 } else {
@@ -401,7 +403,7 @@ module.exports = function (app, express) {
                                     console.log('LINK ERR');
                                     return;
                                 }
-                                db.create({src_id: res1[0], tgt_id: res2[0]},
+                                db.create([{src_id: res1[0], tgt_id: res2[0]}],
                                         function () {});
                             });
                         });
@@ -429,7 +431,7 @@ module.exports = function (app, express) {
      * - 404: Not Found (the file does not exist)
      */
     getFile = function (req, res) {
-        var path = fileSystem + decodeURIComponent(req.params.path);
+        var path = conf.fileSystem + decodeURIComponent(req.params.path);
         path = path.replace(/:/g, '').replace(/\/+/g, '/');
         fs.exists(path, function (exists) {
             if (!exists) {
@@ -454,8 +456,8 @@ module.exports = function (app, express) {
     app.get('/api/read/:id(*)', read);
     app.post('/api/read/', read);
     app.delete('/api/delete/', deleteNode);
-    app.get('/api/graph/:id(*)', graph);
-    app.post('/api/graph/', graph);
+    app.get('/api/graph/:depth/:id(*)', graph);
+    app.post('/api/graph/:depth', graph);
 
     // Search operations
     app.get('/api/search/:query(*)', search);
@@ -467,6 +469,16 @@ module.exports = function (app, express) {
     app.post('/api/import/', importJSON); // untested
     //app.get('/subdirs/:path', getSubdirs);
     //app.get('/subdirs', getSubdirs);
+
+    routes = Object.assign(routes, {
+        create: create,
+        read: read,
+        update: update,
+        deleteNode: deleteNode,
+        graph: graph,
+        search: search,
+        search_one: search_one,
+    });
 }
 
 
