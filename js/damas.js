@@ -1,7 +1,7 @@
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
-        define(['xmlhttprequest'], factory);
+        define(factory.bind(factory, root.XMLHttpRequest));
     } else if (typeof exports === 'object') {
         // Node. Does not work with strict CommonJS, but
         // only CommonJS-like enviroments that support module.exports,
@@ -70,7 +70,7 @@
                 return JSON.parse(xhr.responseText);
             } else {
                 console.warn(xhr.responseText);
-                return false;
+                return null;
             }
         }
         xhr.onreadystatechange = function(e) {
@@ -118,7 +118,7 @@
      * Creates a node with the specified keys, asynchronously if a callback function is specified or synchronously otherwise.
      * @param {hash} keys - Hash of key:value pairs
      * @param {function} [callback] - Function with the XHR object as argument to call
-     * @returns {object|boolean|undefined} New node on success, false otherwise (or nothing if async)
+     * @returns {object|boolean|undefined} New node on success, null otherwise (or nothing if async)
      *
      * @example
      * //Create a set of keys for our node
@@ -191,7 +191,7 @@
      * Delete the specified node
      * @param {string} id - Node internal index to delete
      * @param {function} callback - Function to call, boolean argument
-     * @returns {boolean} true on success, false otherwise
+     * @returns {boolean} true on success, null otherwise
      *
      * @example
      * damas.delete(id);
@@ -294,7 +294,7 @@
     damas.graph = function (ids, callback) {
         return req({
             method: 'POST',
-            url: 'graph/',
+            url: 'graph/0/',
             data: ids,
             callback: callback
         });
@@ -317,11 +317,11 @@
             async: callback !== undefined,
             callback: function (res) {
                 if ('function' === typeof callback) {
-                    callback(res !== false);
+                    callback(res !== null);
                 }
             }
         });
-        return res !== false;
+        return res !== null;
     }
 
     damas.unlock = function (id, callback) {
@@ -332,11 +332,11 @@
             async: callback !== undefined,
             callback: function (res) {
                 if ('function' === typeof callback) {
-                    callback(res !== false);
+                    callback(res !== null);
                 }
             }
         });
-        return res !== false;
+        return res !== null;
     }
 
     /**
@@ -344,7 +344,7 @@
      * function is specified or synchronously otherwise.
      * @param {hash} keys - Hash of key:value pairs
      * @param {function} [callback] - Function with the XHR object as argument to call
-     * @returns {object|boolean|undefined} New node on success, false otherwise (or nothing if async)
+     * @returns {object|boolean|undefined} New node on success, null otherwise (or nothing if async)
      *
      * @example
      * //Create a set of keys for our node
@@ -378,7 +378,7 @@
      */
     damas.signIn = function (username, password, callback) {
         function req_callback(result) {
-            if (result !== false) {
+            if (result !== null) {
                 damas.user = result;
                 damas.token = damas.user.token;
             }
@@ -402,7 +402,6 @@
 
     /**
      * Sign out using the server embeded authentication system
-     * @return true on success, false otherwise
      */
     damas.signOut = function (callback) {
         damas.token = null;
@@ -423,11 +422,11 @@
             async: callback !== undefined,
             callback: function (res) {
                 if ('function' === typeof callback) {
-                    callback(res !== false);
+                    callback(res !== null);
                 }
             }
         });
-        return res !== false;
+        return res !== null;
     }
 
 
