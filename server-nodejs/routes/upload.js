@@ -35,11 +35,12 @@ module.exports = function (app, routes) {
                     console.error(err);
                     return httpStatus(res, 500, 'Upload');
                 }
+                var sha1 = checksum.digest('hex');
                 var node = {
                     '#parent': path,
                     author: req.user.username,
                     comment: req.body.comment,
-                    sha1: checksum.digest('hex'),
+                    sha1: sha1,
                     size: file.size,
                     time: Date.now()
                 };
@@ -49,7 +50,7 @@ module.exports = function (app, routes) {
                             '_id': path,
                             author: req.user.username,
                             comment: req.body.comment,
-                            sha1: checksum.digest('hex'),
+                            sha1: sha1,
                             size: file.size,
                             time: Date.now()
                         };
