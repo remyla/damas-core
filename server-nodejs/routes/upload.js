@@ -36,16 +36,35 @@ module.exports = function (app, routes) {
                     return httpStatus(res, 500, 'Upload');
                 }
                 var node = {
+                    '#parent': path,
                     author: req.user.username,
                     comment: req.body.comment,
-                    time: Date.now(),
-                    '#parent': path,
                     sha1: checksum.digest('hex'),
-                    size: file.size
+                    size: file.size,
+                    time: Date.now()
                 };
-                db.create([node], function (err, nodes) {
-			httpStatus(res, 201, nodes[0]);
-		});
+                db.create([node], function(err,nodes){
+                    db.read([path], function ( err, nodes){
+                        var node = {
+                            '_id': path,
+                            author: req.user.username,
+                            comment: req.body.comment,
+                            sha1: checksum.digest('hex'),
+                            size: file.size,
+                            time: Date.now()
+                        };
+                        if (nodes[0] === null) {
+                            db.create([node], function(err,nodes){
+                                return httpStatus(res, 201, nodes[0]);
+                            });
+                        }
+                        else {
+                            db.update([node], function(err,nodes){
+                                return httpStatus(res, 201, nodes[0]);
+                            });
+                        }
+                    });
+                });
             });
 
             /*
