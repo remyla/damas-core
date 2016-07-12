@@ -9,10 +9,11 @@ module.exports = function (app, routes) {
     var multer = require('multer');
     var crypto = require('crypto');
     var mv = require('mv');
+    var fs = require('fs');
 
     var checksum;
     var fileSystem = conf.fileSystem;
-    var versionDir = conf.fileSystem + '.damas/versions/';
+    //var versionDir = conf.fileSystem + '.damas/versions/';
 
     app.use(multer({
         onError: function (error, next) {
@@ -26,20 +27,31 @@ module.exports = function (app, routes) {
             checksum.update(data);
         },
         onFileUploadComplete: function (file, req, res) {
-            var node = {
-                author: req.user.username,
-                time: Date.now(),
-                file: decodeURIComponent(req.body.path),
-                checksum: checksum.digest('hex'),
-                size: file.size,
-                version: 1
-            };
-            var dest = fileSystem + node.file.replace(/:/g, '');
+            var path = decodeURIComponent(req.body.path);
+            var dest = fileSystem + path.replace(/:/g, '');
             dest = dest.replace(/\/+/g, '/');
+            mv(file.path, dest, {mkdirp: true}, function (err) {
+                if (err) {
+                    console.error(err);
+                    return httpStatus(res, 500, 'Upload');
+                }
+                var node = {
+                    author: req.user.username,
+                    comment: req.body.comment,
+                    time: Date.now(),
+                    '#parent': path,
+                    sha1: checksum.digest('hex'),
+                    size: file.size
+                };
+                db.create([node], function (err, nodes) {
+			httpStatus(res, 201, nodes[0]);
+		});
+            });
 
             /*
              * Attempt to save the previous version
              */
+/*
             if (req.body.id && 'null' !== req.body.id) {
                 db.read([req.body.id], function (err, versions) {
                     if (err) {
@@ -59,10 +71,12 @@ module.exports = function (app, routes) {
             } else {
                 moveUploadedFile();
             }
+*/
 
             /*
              * Move the uploaded file in the right place, then save its node
              */
+/*
             function moveUploadedFile() {
                 mv(file.path, dest, {mkdirp: true}, function (err) {
                     if (err) {
@@ -81,6 +95,7 @@ module.exports = function (app, routes) {
                     }
                 });
             }
+*/
         }
     }));
 
