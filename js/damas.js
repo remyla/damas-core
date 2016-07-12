@@ -164,10 +164,9 @@
     }
 
     /**
-     * Update the keys of a node. The specified keys overwrite existing keys,
+     * Update the keys of one or several node(s). The specified keys overwrite existing keys,
      * others are left untouched. A null key value removes the key.
-     * @param {string} id - Internal index of the node to update
-     * @param {object} node - Hash of key:value pairs
+     * @param {object|array} node - Node or array of nodes
      * @returns {object|undefined} Node or nothing in case of asynchronous call
      *
      * @example
@@ -177,8 +176,7 @@
      * //Update the node id with this set of keys
      * var node= damas.update(id, keys);
      */
-    damas.update = function (id, node, callback) {
-        node._id = id;
+    damas.update = function (node, callback) {
         return req({
             method: 'PUT',
             url: 'update/',
