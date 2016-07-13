@@ -1,9 +1,56 @@
 <html>
 	<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+		<script type="text/javascript">//<![CDATA[
+
+function loadCss(url) {
+	var link = document.createElement("link");
+	link.type = "text/css";
+	link.rel = "stylesheet";
+	link.href = url;
+	document.getElementsByTagName("head")[0].appendChild(link);
+}
+window.loadCss = loadCss;
+
+loadCss('generic-ui/scripts/uiComponents/ui_upload.css');
+
+		</script>
+<!--
+<link href="generic-ui/scripts/uiComponents/ui_upload.css" rel="stylesheet" type="text/css">
+-->
+
+
+
 		<script src="damas.js"></script>
 		<script src="utils.js"></script>
-		<script type="text/javascript">
+		<script src="generic-ui/scripts/uiComponents/ui_upload.js"></script>
+		<script src="generic-ui/scripts/uiLayout/ui_layout.js"></script>
+		<script src="/socket.io/socket.io.js"></script>
+		<script src="socket.js"></script>
+
+
+		<script type="text/javascript">//<![CDATA[
+
 			document.addEventListener('DOMContentLoaded', function() {
+
+var scrollElem = window;
+
+	scrollElem.addEventListener('scroll', function(){
+	//console.log(scrollElem.scrollY);
+		//if (scrollElem.scrollHeight - scrollElem.scrollTop === scrollElem.clientHeight){
+		if (scrollElem.scrollY === scrollElem.scrollMaxY){
+			damas.search_mongo({'time': {$exists:true}, '#parent':{$exists:true}}, {"time":-1},nbElements,offsetElements, function(res){
+				damas.read(res, function(assets){
+					tableLogContent(tableBody, assets);
+					offsetElements += nbElements;
+				});
+			});
+		}
+	});
+
 
 				/* UI */
 				var signOut = document.getElementById('signOut');
@@ -47,10 +94,12 @@
 				button.addEventListener('click', function(e){
 					show_log();
 				});
+/*
 				var button = document.getElementById('but_wait');
 				button.addEventListener('click', function(e){
 					show_wait();
 				});
+*/
 
 				/* START */
 				damas.server = '/api/';
@@ -112,22 +161,50 @@
 			});
 		}
 		function show_log(){
-				damas.search_mongo({'time': {$exists:true, $type: 1}}, {"time":-1},200,0, function(res){
+/*
+				damas.search_mongo({'time': {$exists:true}, '#parent':{$exists:true}}, {"time":-1},200,0, function(res){
 				//damas.search_mongo({'time': 'REGEX_.*'}, {"time":-1},200,0, function(res){
 				damas.read(res, function(assets){
 					var out = document.querySelector('#contents');
-					var str = '<table><tr><th>time &xutri;</th><th>file</th><th>collected</th><th>origin</th><th>&lt;author&gt; comment</th></tr>';
+					var str = '<table><tr><th>time &xutri;</th><th>file</th><th>&lt;author&gt; comment</th></tr>';
+					window.assets = assets;
 					for(var i=0; i<assets.length; i++)
 					{
+						var file = assets[i].file || assets[i]['#parent'];
 						var time = new Date(parseInt(assets[i].time));
 						var ino_write = new Date(parseInt(assets[i].ino_write));
 						str +=  '<tr>';
 						str +=  '<td title="'+time+'">'+ ('00'+time.getHours()).slice(-2)+':'+('00'+time.getMinutes()).slice(-2)+':'+('00'+time.getSeconds()).slice(-2)+'</td>';
-						str +=  '<td title="'+JSON_tooltip(assets[i])+'">'+assets[i].file+'</td>';
-						//str +=  '<td>'+assets[i].author+'</td>';
-						str +=  '<td title="'+ino_write+'">'+((parseInt(assets[i].ino_write) >= parseInt(assets[i].time))? 'yes':'no')+'</td>';
-						str +=  '<td>'+assets[i].origin+'</td>';
+						str +=  '<td title="'+JSON_tooltip(assets[i])+'"><span class="nomobile">'+file.split('/').slice(0,-1).join('/')+'/</span>'+file.split('/').pop()+'</td>';
+						//str +=  '<td title="'+ino_write+'">'+((parseInt(assets[i].ino_write) >= parseInt(assets[i].time))? 'yes':'no')+'</td>';
+						//str +=  '<td>'+assets[i].origin+'</td>';
 						str +=  '<td style="white-space:normal">&lt;'+assets[i].author+'&gt; '+assets[i].comment+'</td>';
+						str +=  '</tr>';
+					}
+					str += '</table>';
+					out.innerHTML = str;
+				});
+			});
+*/
+			offsetElements = 0;
+			compLog(document.querySelector('#contents'));
+			tableBody = document.querySelector('#contents tbody');
+		}
+
+		function show_wait(){
+				damas.search_mongo(
+					{online:"1", file:{$exists: true}, ino_write: {$exists: false}, time: { $gt: 1463200887000} },
+					{origin:1, file:1}, 0,0, function(res){
+
+				damas.read(res, function(assets){
+					var out = document.querySelector('#contents');
+					var str = '<table><tr><th>file</th><th>origin &xutri;</th></tr>';
+					for(var i=0; i<assets.length; i++)
+					{
+						str +=  '<tr>';
+						//str +=  '<td title="'+JSON_tooltip(assets[i])+'">'+assets[i].file+'</td>';
+						 str +=  '<td title="'+JSON_tooltip(assets[i])+'"><span class="nomobile">'+assets[i].file.split('/').slice(0,-1).join('/')+'/</span>'+assets[i].file.split('/').pop()+'</td>';
+						str +=  '<td>'+(assets[i].origin||'?')+'</td>';
 						str +=  '</tr>';
 					}
 					str += '</table>';
@@ -136,29 +213,106 @@
 			});
 		}
 
-        function show_wait(){
-                    //{online:"1", file:{$exists: true}, ino_write: {$exists: false}, time: { $gt: 1463200887000} },
-                damas.search_mongo(
-                    {online:"1", file:{$exists: true}, $or: [{ $where: "this.ino_write < this.time"}, {ino_write: {$exists: false} }], time: { $gt: 1463200887000} },
-                    {origin:1, file:1}, 0,0, function(res){
+nbElements = 100;
+offsetElements = 0;
 
-                damas.read(res, function(assets){
-                    var out = document.querySelector('#contents');
-                    var str = '<table><tr><th>file</th><th>origin &xutri;</th></tr>';
-                    for(var i=0; i<assets.length; i++)
-                    {
-                        str +=  '<tr>';
-                        //str +=  '<td title="'+JSON_tooltip(assets[i])+'">'+assets[i].file+'</td>';
-						 str +=  '<td title="'+JSON_tooltip(assets[i])+'"><span class="nomobile">'+assets[i].file.split('/').slice(0,-1).join('/')+'/</span>'+assets[i].file.split('/').pop()+'</td>';
-                        str +=  '<td>'+(assets[i].origin||'?')+'</td>';
-                        str +=  '</tr>';
-                    }
-                    str += '</table>';
-                    out.innerHTML = str;
-                });
-            });
-        }
+compLog = function(container){
+	container.innerHTML = '';
+	var tableBody = tableLog(container);
+	damas.search_mongo({'time': {$exists:true}, '#parent':{$exists:true}}, {"time":-1},nbElements,offsetElements, function(res){
+		damas.read(res, function(assets){ 
+			tableLogContent(tableBody, assets);
+					offsetElements += nbElements;
+		});
+	});
 
+};
+
+
+/**
+* Generate Table
+* 
+*/
+
+function tableLog(container) {
+	var table = document.createElement('table');
+	var thead = document.createElement('thead');
+	var th1 = document.createElement('th');
+	var th2 = document.createElement('th');
+	var th3 = document.createElement('th');
+	var tbody = document.createElement('tbody');
+
+	th1.innerHTML = 'time &xutri;';
+	th2.innerHTML = 'file';
+	th3.innerHTML = '&lt;author&gt; comment';
+	
+	table.appendChild(thead);
+	thead.appendChild(th1);
+	thead.appendChild(th2);
+	thead.appendChild(th3);
+	table.appendChild(tbody);
+
+	container.appendChild(table);
+	return tbody;
+}
+
+/**
+* Generate Table Content
+* 
+*/
+function tableLogContent(container, assets) {
+	for (var i=0; i<assets.length; i++) {
+		var tr = document.createElement('tr');
+		var td1 = document.createElement('td');
+		var td2 = document.createElement('td');
+		var td3 = document.createElement('td');
+
+		td2.className = 'clickable';
+
+	var time = new Date(parseInt(assets[i].time));
+	var file = assets[i].file || assets[i]['#parent'];
+	td1.setAttribute('title', time);
+		td1.innerHTML = ('00'+time.getHours()).slice(-2)+':'+('00'+time.getMinutes()).slice(-2)+':'+('00'+time.getSeconds()).slice(-2);
+	td2.setAttribute('title', JSON_tooltip(assets[i]));
+		td2.innerHTML = '<span class="nomobile">'+file.split('/').slice(0,-1).join('/')+'/</span>'+file.split('/').pop();
+
+	td3.style.whiteSpace = 'normal';
+		td3.innerHTML = '&lt;'+assets[i].author+'&gt; '+assets[i].comment;
+
+		tr.appendChild(td1);
+		tr.appendChild(td2);
+		tr.appendChild(td3);
+		container.appendChild(tr);
+
+
+	}
+}
+
+function tableLogTr(asset) {
+	var tr = document.createElement('tr');
+	var td1 = document.createElement('td');
+	var td2 = document.createElement('td');
+	var td3 = document.createElement('td');
+	td2.className = 'clickable';
+
+	var time = new Date(parseInt(asset.time));
+	var file = asset.file || asset['#parent'];
+	td1.setAttribute('title', time);
+		td1.innerHTML = ('00'+time.getHours()).slice(-2)+':'+('00'+time.getMinutes()).slice(-2)+':'+('00'+time.getSeconds()).slice(-2);
+	td2.setAttribute('title', JSON_tooltip(asset));
+		td2.innerHTML = '<span class="nomobile">'+file.split('/').slice(0,-1).join('/')+'/</span>'+file.split('/').pop();
+
+	td3.style.whiteSpace = 'normal';
+		td3.innerHTML = '&lt;'+asset.author+'&gt; '+asset.comment;
+
+		tr.appendChild(td1);
+		tr.appendChild(td2);
+		tr.appendChild(td3);
+		return tr;
+
+
+}
+//]]>
 
 		</script>
 		<style>
@@ -184,6 +338,9 @@
 			#contents {
 				text-align: left;
 			}
+			table {
+				width: 100%;
+			}
 			th {
 				text-align: left;
 			}
@@ -191,11 +348,14 @@
 				white-space: nowrap;
 				vertical-align: top;
 			}
-            @media screen and (max-width: 900px) {
-            .nomobile {
-                display: none;
-            }
-            }
+			tr {
+				transition: opacity 2s;
+			}
+			@media screen and (max-width: 900px) {
+			.nomobile {
+				display: none;
+			}
+			}
 
 		</style>
 	</head>
@@ -204,7 +364,7 @@
 			Connecté.e en tant que <span class="username"></span>
 		</div>
 		<div id="menubar2" class="menubar">
-			<button id="but_wait">upload queue</button><button id="but_log">log</button><button id="but_locks">locks</button><button id="but_users">users</button>
+			<!--<button id="but_wait">wait</button>--><button id="but_log">log</button><button id="but_locks">locks</button><button id="but_users">users</button>
 			<button id="signOut">sign out</button>
 		</div>
 		<div id="connection">
@@ -221,3 +381,4 @@
 		</div>
 	</body>
 </html>
+

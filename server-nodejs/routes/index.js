@@ -24,7 +24,17 @@ module.exports = function (app, express){
     });
 
     //Static routes
+    for (var route in conf.staticRoutes) {
+        if (!conf.staticRoutes.hasOwnProperty(route)) {
+            continue;
+        }
+        debug('Registered static route: ' + route + " -> " + conf.staticRoutes[route]);
+        app.get(route, function( req, res ){
+            res.sendFile(conf.staticRoutes[req.url], { root: '.' });
+        });
+    }
     for (var route in conf.publiclyServedFolders) {
+        debug('Registered publicly served folder: ' + conf.publiclyServedFolders[route]);
         app.use(express.static(conf.publiclyServedFolders[route]));
     }
 
@@ -45,9 +55,6 @@ module.exports = function (app, express){
     require('./dam')(app, routes);
     require('./upload')(app, routes);
     // Shortcuts
-    app.get('/console', function( req, res ){
-        res.sendFile('public/console.html', { root: '.' });
-    });
 }
 
 

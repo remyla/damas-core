@@ -16,6 +16,9 @@
         "secret" : "webtokensecret",
         "exp" : 1440
     },
+    "staticRoutes": {
+        "/console": "public/console.html"
+    },
     "publiclyServedFolders" : [
         "public", "../js"
     ],
