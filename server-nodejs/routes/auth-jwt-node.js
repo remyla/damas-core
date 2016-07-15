@@ -35,9 +35,9 @@ module.exports = function (app) {
 
     app.use('/api', middleware().unless({path:['/api/signIn']}));
 
-    var jwtMiddleware = expressJwt({secret:conf.jwt.secret});
-    jwtMiddleware.unless = unless;
-    app.use('/api', jwtMiddleware.unless({path:['/api/signIn']}));
+    //var jwtMiddleware = expressJwt({secret:conf.jwt.secret});
+    //jwtMiddleware.unless = unless;
+    //app.use('/api', jwtMiddleware.unless({path:['/api/signIn']}));
 
     var authenticate = function (req, res, next) {
         debug('Processing authenticate middleware');
