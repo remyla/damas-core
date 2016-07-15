@@ -7,6 +7,7 @@ module.exports = function (app) {
         switch (req.params.route) {
         case 'lock':
         case 'unlock':
+        case 'upload':
         case 'version':
             // User class must be at least 'user'
             if (['user', 'editor', 'admin'].indexOf(req.user.class) === -1) {
