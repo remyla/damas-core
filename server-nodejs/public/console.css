@@ -1,0 +1,47 @@
+body {
+	text-align: center;
+	font-family: monospace;
+}
+#connection {
+	display: none;
+}
+#menubar1 {
+	display: none;
+}
+#signOut {
+	display: none;
+}
+/*
+#menubar2 {
+	display: none;
+}
+*/
+.menubar {
+	text-align: right;
+}
+#contents {
+	text-align: left;
+}
+table.log {
+	width: 100%;
+	table-layout: fixed;
+}
+table.log th {
+	white-space: nowrap;
+	text-align: left;
+}
+table.log td {
+	white-space: nowrap;
+	vertical-align: top;
+	overflow: hidden;
+}
+table.log tr {
+	transition: opacity 2s;
+}
+@media screen and (max-width: 900px) {
+.nomobile {
+	display: none;
+}
+}
+
+
