@@ -30,7 +30,7 @@ module.exports = function (app, express){
         }
         debug('Registered static route: ' + route + " -> " + conf.staticRoutes[route]);
         app.get(route, function( req, res ){
-            res.sendFile(conf.staticRoutes[req.url], { root: '.' });
+            res.sendFile(conf.staticRoutes[req.path], { root: '.' });
         });
     }
     for (var route in conf.publiclyServedFolders) {
@@ -54,7 +54,6 @@ module.exports = function (app, express){
     require('./cruds')(app, routes);
     require('./dam')(app, routes);
     require('./upload')(app, routes);
-    // Shortcuts
 }
 
 
