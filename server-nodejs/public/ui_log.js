@@ -64,10 +64,13 @@ function tableLog(container) {
 	var th3 = document.createElement('th');
 	var tbody = document.createElement('tbody');
 
+	table.className = 'log';
+
 	th1.innerHTML = 'time &xutri;';
 	th2.innerHTML = 'file';
 	th3.innerHTML = 'comment';
 
+	th1.style.width = '15ex';
 	th1.style.width = '15ex';
 	
 	thead.appendChild(th1);
