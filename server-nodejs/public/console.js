@@ -4,10 +4,11 @@ require.config({
 		'utils': "utils",
 		'ui_log': "ui_log",
 		'ui_upload': 'generic-ui/scripts/uiComponents/ui_upload',
-		'domReady': '//raw.githubusercontent.com/requirejs/domReady/latest/domReady'
+		'domReady': '//cdn.rawgit.com/requirejs/domReady/2.0.1/domReady'
 	},
 	urlArgs: "v=" +  (new Date()).getTime()
 });
+		//'domReady': '//raw.githubusercontent.com/requirejs/domReady/latest/domReady'
 
 require(['domReady', "damas", "utils"], function (domReady, damas) {
 	require(["ui_log","ui_upload"], function () {
