@@ -12,6 +12,7 @@
         "options" : { "auto_reconnect" : true }
     },
     "jwt" : {
+        "required": false,
         "passwordHashAlgorithm" : "sha1",
         "secret" : "webtokensecret",
         "exp" : 1440

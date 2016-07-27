@@ -33,7 +33,7 @@
 						if (window.location.href.indexOf('back')!==-1)
 							window.location = window.location.href.match(/^.*back=(.*)$/)[1]
 						else
-							document.location.reload();
+							window.history.back(-1);
 					});
 					return false;
 				});
@@ -47,8 +47,11 @@
 							document.querySelector('#signOut').style.display = 'inline';
 							document.querySelector('#menubar1').style.display = 'block';
 						}
+						else {
+							document.querySelector('#connection').style.display = 'block';
+						}
 						document.querySelector('#menubar2').style.display = 'block';
-						show_log();
+						//show_log();
 					}
 					else
 					{
@@ -102,7 +105,7 @@
 		<div id="connection">
 			<h1>Connexion</h1>
 			<form id="signInForm">
-				<input type="" placeholder="login" required="required" name="username"/>
+				<input type="text" placeholder="login" required="required" name="username"/>
 				<br/>
 				<input type="password" placeholder="password" required="required" name="password"/>
 				<br/>

@@ -54,4 +54,28 @@ function loadCss(url) {
 window.loadCss = loadCss;
 
 
+
+function getHash() {
+    if(!window.location.hash) return {};
+    var hash = window.location.hash.slice(1);
+    var array = hash.split("&");
+    var result = {};
+    for (var i = 0; i < array.length; i += 1) {
+        var key = array[i].split("=");
+        result[key[0]] = key[1];
+    }
+    return(result);
+}
+
+function doHash( obj ) {
+    var arr = [];
+    for (key in obj) {
+        arr.push(key + '=' + obj[key]);
+    }
+    window.location.hash = arr.join('&');
+}
+
+window.getHash = getHash;
+window.doHash = doHash;
+
 }));

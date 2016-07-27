@@ -11,11 +11,17 @@ module.exports = function (app) {
     var unless = require('express-unless');
     var crypto = require('crypto');
     var debug = require('debug')('app:routes:auth:' + process.pid);
+debug('qwewqewqeqwe:');
     //var bodyParser = require('body-parser');
     //app.use(bodyParser.urlencoded());
 
     var middleware = function () {
         var func = function (req, res, next) {
+            if (conf.jwt.required === false ) {
+                req.user = {};
+                next();
+		return;
+            }
             var token = fetch(req.headers);
             jwt.verify(token, conf.jwt.secret, function (err, decode) {
                 if (err) {
@@ -112,6 +118,9 @@ module.exports = function (app) {
 
     app.get('/api/verify', function (req, res) {
         var token = fetch(req.headers);
+        if (conf.jwt.required === false ) {
+            return res.status(200).json(req.user);
+        }
         jwt.verify(token, conf.jwt.secret, function (err, decode) {
             if (err) {
                 req.user = undefined;

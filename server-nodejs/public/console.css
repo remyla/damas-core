@@ -19,6 +19,12 @@ body {
 .menubar {
 	text-align: right;
 }
+#menubar2 a, #menubar2 .clickable {
+	text-decoration: none;
+	background-color: #8db8c6;
+	color: white;
+	padding: 0 1ex;
+}
 #contents {
 	text-align: left;
 }
@@ -31,7 +37,7 @@ table.log th {
 	text-align: left;
 }
 table.log td {
-	white-space: nowrap;
+	white-spacee: nowrap;
 	vertical-align: top;
 	overflow: hidden;
 }
@@ -44,4 +50,6 @@ table.log tr {
 }
 }
 
-
+table.users .userclass {
+	text-align: center;
+}

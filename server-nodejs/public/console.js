@@ -10,6 +10,27 @@ require.config({
 });
 		//'domReady': '//raw.githubusercontent.com/requirejs/domReady/latest/domReady'
 
+
+window.addEventListener("hashchange", function() {                                                                    
+    process_hash();
+});
+
+process_hash = function() {
+	//if(/#graph=/.test(location.hash))
+	var keys = getHash();
+	if (keys.hasOwnProperty('users')) {
+		show_users();
+		return;
+	}
+	if (keys.hasOwnProperty('locks')) {
+		show_locks();
+		return;
+	}
+	show_log();
+};
+
+
+
 require(['domReady', "damas", "utils"], function (domReady, damas) {
 	require(["ui_log","ui_upload"], function () {
 	window.damas = damas;
@@ -23,16 +44,19 @@ require(['domReady', "damas", "utils"], function (domReady, damas) {
 			{
 				document.querySelector('.username').innerHTML = damas.user.username;
 				document.querySelector('#signOut').style.display = 'inline';
+				document.querySelector('#signIn').style.display = 'none';
 				document.querySelector('#menubar1').style.display = 'block';
 			}
 			document.querySelector('#menubar2').style.display = 'block';
-			show_log();
+			//show_log();
+			process_hash();
 		}
 		else
 		{
 			document.querySelector('#connection').style.display = 'block';
 		}
 
+/*
 				var button = document.getElementById('but_locks');
 				button.addEventListener('click', function(e){
 					show_locks();
@@ -41,6 +65,7 @@ require(['domReady', "damas", "utils"], function (domReady, damas) {
 				button.addEventListener('click', function(e){
 					show_users();
 				});
+*/
 
 
 				/* UI */
@@ -49,10 +74,24 @@ require(['domReady', "damas", "utils"], function (domReady, damas) {
 					damas.signOut( function(e){
 						localStorage.removeItem("token");
 						localStorage.removeItem("user");
-						window.location='/signIn?back=console'
-						//document.location.reload();
+						//window.location='/signIn?back=console'
+						document.location.reload();
 					});
 				});
+
+
+/*
+window.show_users = show_users;
+window.show_locks = show_locks;
+window.show_log = show_log;
+*/
+
+	});
+
+	});
+});
+
+
 
 		/**
 		 * Methods
@@ -61,14 +100,16 @@ require(['domReady', "damas", "utils"], function (domReady, damas) {
 			//damas.search('username:/.*/', function(res){
 			damas.search_mongo({'username':'REGEX_.*'}, {"username":1},0,0, function(res){
 				damas.read(res, function(users){
-					console.log(users);
+					//console.log(users);
 					window.users = users;
 					var out = document.querySelector('#contents');
-					out.innerHTML = '';
-					for(var i=0; i<users.length; i++)
-					{
-						out.innerHTML +=  '<li title="'+JSON_tooltip(users[i])+'">'+users[i].username+'</li>';
+					var str = '<table class="users"><tr><th>username &xdtri;</th><th class="userclass">class</th></tr>';
+					for (var i=0; i<users.length; i++) {
+						//out.innerHTML +=  '<li title="'+JSON_tooltip(users[i])+'">'+users[i].username+'</li>';
+						str +=  '<tr title="'+JSON_tooltip(users[i])+'"><td>'+users[i].username+'</td><td class="userclass">'+users[i].class+'</td></tr>';
 					}
+					str += '</table>';
+					out.innerHTML = str;
 				});
 			});
 		}
@@ -111,6 +152,3 @@ require(['domReady', "damas", "utils"], function (domReady, damas) {
 			});
 		}
 
-	});
-	});
-});
