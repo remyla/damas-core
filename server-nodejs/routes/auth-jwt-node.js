@@ -11,20 +11,24 @@ module.exports = function (app) {
     var unless = require('express-unless');
     var crypto = require('crypto');
     var debug = require('debug')('app:routes:auth:' + process.pid);
-debug('qwewqewqeqwe:');
     //var bodyParser = require('body-parser');
     //app.use(bodyParser.urlencoded());
 
     var middleware = function () {
         var func = function (req, res, next) {
-            if (conf.jwt.required === false ) {
+            var token = fetch(req.headers);
+            if (token === null && conf.jwt.required === false) {
                 req.user = {};
                 next();
 		return;
             }
-            var token = fetch(req.headers);
             jwt.verify(token, conf.jwt.secret, function (err, decode) {
                 if (err) {
+                    if (conf.jwt.required === false ) {
+                        req.user = {};
+                        next();
+		        return;
+                    }
                     req.user = undefined;
                     return res.status(401).json('invalid token');
                 }
