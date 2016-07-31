@@ -5,7 +5,7 @@ body {
 #connection {
 	display: none;
 }
-#menubar1 {
+#authInfo {
 	display: none;
 }
 #signOut {
@@ -21,10 +21,19 @@ body {
 }
 #menubar2 a, #menubar2 .clickable {
 	text-decoration: none;
+	border: 1px solid black;
+/*
 	background-color: #8db8c6;
-	color: white;
+*/
+	color: black;
 	padding: 0 1ex;
 }
+#menubar2 a.selected, #menubar2 .clickable.selected {
+	color: white;
+	background-color: black;
+	cursor: default;
+}
+
 #contents {
 	text-align: left;
 }

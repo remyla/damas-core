@@ -18,14 +18,20 @@ window.addEventListener("hashchange", function() {
 process_hash = function() {
 	//if(/#graph=/.test(location.hash))
 	var keys = getHash();
+	for (var elem of document.querySelectorAll('#menubar2 .selected')) {
+		elem.classList.remove('selected');
+	}
 	if (keys.hasOwnProperty('users')) {
+		document.querySelector('#but_users').classList.add('selected');
 		show_users();
 		return;
 	}
 	if (keys.hasOwnProperty('locks')) {
+		document.querySelector('#but_locks').classList.add('selected');
 		show_locks();
 		return;
 	}
+	document.querySelector('#but_log').classList.add('selected');
 	show_log();
 };
 
@@ -45,7 +51,7 @@ require(['domReady', "damas", "utils"], function (domReady, damas) {
 				document.querySelector('.username').innerHTML = damas.user.username;
 				document.querySelector('#signOut').style.display = 'inline';
 				document.querySelector('#signIn').style.display = 'none';
-				document.querySelector('#menubar1').style.display = 'block';
+				document.querySelector('#authInfo').style.display = 'inline';
 			}
 			document.querySelector('#menubar2').style.display = 'block';
 			//show_log();

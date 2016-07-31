@@ -2,14 +2,6 @@
     require(['domReady'], function (domReady) {
         domReady(function () {
             //loadBtUpload(); 
-
-
-				var button = document.getElementById('but_log');
-				button.addEventListener('click', function(e){
-					show_log();
-				});
-
-
         });
     });
 
