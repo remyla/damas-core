@@ -2,8 +2,12 @@ require.config({
 	paths: {
 		'damas': "damas",
 		'utils': "utils",
-		'ui_log': "ui_log",
+//		'ui_log': "ui_log",
+        'ui_log': "generic-ui/scripts/uiComponents/ui_log",
 		'ui_upload': 'generic-ui/scripts/uiComponents/ui_upload',
+//		'ui_search': 'generic-ui/scripts/uiComponents/ui_search',
+//		'ui_editor': 'generic-ui/scripts/uiComponents/ui_editor',
+		'ui_overlay': 'generic-ui/scripts/uiComponents/ui_overlay',
 		'domReady': '//cdn.rawgit.com/requirejs/domReady/2.0.1/domReady'
 	},
 	urlArgs: "v=" +  (new Date()).getTime()
@@ -32,13 +36,14 @@ process_hash = function() {
 		return;
 	}
 	document.querySelector('#but_log').classList.add('selected');
-	show_log();
+//	show_log();
 };
 
 
 
 require(['domReady', "damas", "utils"], function (domReady, damas) {
-	require(["ui_log","ui_upload"], function () {
+//	require(["ui_log","ui_upload", "ui_search", "ui_editor", "ui_overlay"], function () {
+    require(["ui_log","ui_upload", "ui_overlay"], function () {
 	window.damas = damas;
 	loadCss('console.css');
 	damas_connect('/api/', function (res) {
@@ -157,4 +162,36 @@ window.show_log = show_log;
 				});
 			});
 		}
+
+function previousHash(){
+    var currentHash = window.location.hash;
+    var splitHash = currentHash.split('&');
+    splitHash.pop();
+    window.location.hash = splitHash.join('&');
+}
+
+function viewHashNode(){
+    var currentHash = window.location.hash;
+    var nHash = currentHash.substr(1);
+    var splitHash = nHash.split('&');
+    for (var i=0; i<splitHash.length; i++){
+        if (/(view|edit)=/.test(splitHash[i])){
+            var filepath = splitHash[i].replace(/.*=/,'');
+            return filepath;
+        }
+    }
+}
+
+function addHash(hash){
+    var currentHash = window.location.hash;
+    var splitHash = currentHash.split('&');
+    var arr = [];
+    for (var i=0; i<splitHash.length; i++){
+        if (splitHash[i] !== ''){
+            arr.push(splitHash[i]);
+        }
+    }
+    arr.push(hash);
+    window.location.hash = arr.join('&');
+}
 
