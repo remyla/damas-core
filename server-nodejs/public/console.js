@@ -5,8 +5,6 @@ require.config({
 //		'ui_log': "ui_log",
         'ui_log': "generic-ui/scripts/uiComponents/ui_log",
 		'ui_upload': 'generic-ui/scripts/uiComponents/ui_upload',
-//		'ui_search': 'generic-ui/scripts/uiComponents/ui_search',
-//		'ui_editor': 'generic-ui/scripts/uiComponents/ui_editor',
 		'ui_overlay': 'generic-ui/scripts/uiComponents/ui_overlay',
 		'domReady': '//cdn.rawgit.com/requirejs/domReady/2.0.1/domReady'
 	},
@@ -42,7 +40,6 @@ process_hash = function() {
 
 
 require(['domReady', "damas", "utils"], function (domReady, damas) {
-//	require(["ui_log","ui_upload", "ui_search", "ui_editor", "ui_overlay"], function () {
     require(["ui_log","ui_upload", "ui_overlay"], function () {
 	window.damas = damas;
 	loadCss('console.css');
