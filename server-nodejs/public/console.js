@@ -1,4 +1,5 @@
 require.config({
+//    baseUrl: "/generic-ui/scripts",
 	paths: {
 		'damas': "damas",
 		'utils': "utils",
@@ -40,9 +41,10 @@ process_hash = function() {
 
 
 require(['domReady', "damas", "utils"], function (domReady, damas) {
-    require(["ui_log","ui_upload", "ui_overlay"], function () {
+	require(["ui_log","ui_upload", "ui_overlay"], function () {
 	window.damas = damas;
 	loadCss('console.css');
+    loadCss('console_design.css');
 	damas_connect('/api/', function (res) {
 		if (!res) {
 			window.location='/signIn?back=console'
