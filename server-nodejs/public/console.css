@@ -1,7 +1,10 @@
-body {
-	text-align: center;
-	font-family: monospace;
+body, html {
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
 }
+/* HEADER */
 #connection {
 	display: none;
 }
@@ -11,54 +14,107 @@ body {
 #signOut {
 	display: none;
 }
-/*
-#menubar2 {
-	display: none;
+.homeHeader {
+    display: table;
+    width: 100%;
 }
-*/
+.headerLeft, .headerRight {
+    display: table-cell;
+    vertical-align: middle;
+}
+.headerCentral {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+}
+/* CONTENTS */
+body {
+    display: box;
+	display: -webkit-box;
+	display: -moz-box;
+	display: -moz-flex;
+	display: -ms-flexbox;
+	display: -webkit-flex;
+	display: flex;
+}
+#panelPrincipal {
+    position: relative;
+	-webkit-box-flex: 1 1 auto;
+	-moz-box-flex: 1 1 auto;
+	-webkit-flex:  1 1 auto;
+	-ms-flex:  1 1 auto;
+	box-flex: 1 1 auto;
+	flex: 1 1 auto;
+	-webkit-box-ordinal-group: 1;  
+	-moz-box-ordinal-group: 1;	 
+	-ms-flex-order: 1;	  
+	-webkit-order: 1;
+	order: 1;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+.panelSecond {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 100;
+}
+.panelContent {
+    width: 100%;
+    height: 100%;
+}
 .menubar {
 	text-align: right;
 }
-#menubar2 a, #menubar2 .clickable {
-	text-decoration: none;
-	border: 1px solid black;
-/*
-	background-color: #8db8c6;
-*/
-	color: black;
-	padding: 0 1ex;
-}
-#menubar2 a.selected, #menubar2 .clickable.selected {
-	color: white;
-	background-color: black;
-	cursor: default;
-}
-
 #contents {
 	text-align: left;
 }
 table.log {
 	width: 100%;
-	table-layout: fixed;
+    border-collapse: collapse;
+/*	table-layout: fixed;*/
 }
 table.log th {
 	white-space: nowrap;
 	text-align: left;
 }
 table.log td {
-	white-spacee: nowrap;
+/*	white-space: nowrap;*/
 	vertical-align: top;
 	overflow: hidden;
 }
-table.log tr {
-	transition: opacity 2s;
-}
-@media screen and (max-width: 900px) {
 .nomobile {
-	display: none;
-}
+    display: none;
 }
 
 table.users .userclass {
 	text-align: center;
+}
+@media screen and (min-width: 800px) {
+    /* CONTENTS */
+    .panelSecond {
+        display: inline-block;
+        position: relative;
+        -webkit-box-flex: 0 0 auto;
+        -moz-box-flex: 0 0 auto;
+        -webkit-flex:  0 0 auto;
+        -ms-flex:  0 0 auto;
+        box-flex: 0 0 auto;
+        flex: 0 0 auto;
+        -webkit-box-ordinal-group: 2;  
+        -moz-box-ordinal-group: 2;	 
+        -ms-flex-order: 2;
+        -webkit-order: 2;
+        order: 2;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+    .nomobile {
+        display: inline-block;
+    }
 }
