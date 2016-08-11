@@ -1,0 +1,43 @@
+body {
+	font-family: monospace;
+/*    font-family: 'Roboto', sans-serif;*/
+}
+/* HEADER */
+.homeHeader {
+    height: 30px;
+}
+#header a {
+	text-decoration: none;
+	border: 1px solid black;
+	color: black;
+	padding: 0 1ex;
+}
+
+#header a:hover {
+    background-color: black; 
+    color: white;
+}
+#menubar2 a.selected, #menubar2 .clickable.selected {
+	color: white;
+	background-color: black;
+	cursor: default;
+}
+
+/* CONTENTS */
+#contents {
+    padding: 6px;
+}
+table.log {
+    font-size: 13px;
+}
+table.log tr {
+	transition: opacity 2s;
+    height: 24px;
+}
+
+@media screen and (min-width: 800px) {
+    /* PANEL */
+    .panelSecond {
+    	width: 240px;
+    }
+}
