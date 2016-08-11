@@ -1,13 +1,10 @@
-body {
-	text-align: center;
-	font-family: monospace;
-}
 body, html {
     height: 100%;
     padding: 0;
     margin: 0;
     overflow: hidden;
 }
+/* HEADER */
 #connection {
 	display: none;
 }
@@ -17,9 +14,7 @@ body, html {
 #signOut {
 	display: none;
 }
-/* HEADER */
 .homeHeader {
-    height: 30px;
     display: table;
     width: 100%;
 }
@@ -68,35 +63,14 @@ body {
     left: 0;
     top: 0;
     z-index: 100;
-    background-color: #ffffff;
 }
 .panelContent {
-    width: 90%;
-    height: 90%;
+    width: 100%;
+    height: 100%;
 }
-/*
-#menubar2 {
-	display: none;
-}
-*/
 .menubar {
 	text-align: right;
 }
-#header a {
-	text-decoration: none;
-	border: 1px solid black;
-/*
-	background-color: #8db8c6;
-*/
-	color: black;
-	padding: 0 1ex;
-}
-#menubar2 a.selected, #menubar2 .clickable.selected {
-	color: white;
-	background-color: black;
-	cursor: default;
-}
-
 #contents {
 	text-align: left;
 }
@@ -110,17 +84,12 @@ table.log th {
 	text-align: left;
 }
 table.log td {
-	white-spacee: nowrap;
+/*	white-space: nowrap;*/
 	vertical-align: top;
 	overflow: hidden;
 }
-table.log tr {
-	transition: opacity 2s;
-}
-@media screen and (max-width: 900px) {
 .nomobile {
-	display: none;
-}
+    display: none;
 }
 
 table.users .userclass {
@@ -144,10 +113,8 @@ table.users .userclass {
         order: 2;
         overflow-y: auto;
         overflow-x: hidden;
-    	width: 240px;
     }
-    .panelContent {
-        width: 100%;
-        height: 100%;
+    .nomobile {
+        display: inline-block;
     }
 }
