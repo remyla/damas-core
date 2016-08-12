@@ -94,13 +94,13 @@ function tableLogTr(asset) {
 	var td3 = document.createElement('td');
 	//td2.className = 'clickable';
 	var time = new Date(parseInt(asset.time));
-	var file = asset.file || asset['#parent'];
+	var file = asset.file || asset['#parent'] || asset._id;
 	td1.setAttribute('title', time);
 	td1.style.width = '15ex';
 	td1.innerHTML = ('00'+time.getDate()).slice(-2)+'/'+('00'+time.getMonth()).slice(-2)+' '+('00'+time.getHours()).slice(-2)+':'+('00'+time.getMinutes()).slice(-2)+':'+('00'+time.getSeconds()).slice(-2);
 	td2.setAttribute('title', JSON_tooltip(asset));
 	if (file) {
-		td2.innerHTML = '<span class="nomobile">'+file.split('/').slice(0,-1).join('/')+'/</span>'+file.split('/').pop();
+		td2.innerHTML = '<a href="#view=/api/file'+file+'"><span class="nomobile">'+file.split('/').slice(0,-1).join('/')+'/</span>'+file.split('/').pop()+'</a>';
 	} 
 	//td3.style.whiteSpace = 'normal';
 	td3.innerHTML = '&lt;'+asset.author+'&gt; '+asset.comment;

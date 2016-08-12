@@ -11,23 +11,24 @@ module.exports = function (app) {
     var unless = require('express-unless');
     var crypto = require('crypto');
     var debug = require('debug')('app:routes:auth:' + process.pid);
+    var cookieParser = require('cookie-parser')
     //var bodyParser = require('body-parser');
     //app.use(bodyParser.urlencoded());
 
     var middleware = function () {
         var func = function (req, res, next) {
-            var token = fetch(req.headers);
+            var token = fetch(req.headers) || req.cookies.token;
             if (token === null && conf.jwt.required === false) {
                 req.user = {};
                 next();
-		return;
+                return;
             }
             jwt.verify(token, conf.jwt.secret, function (err, decode) {
                 if (err) {
                     if (conf.jwt.required === false ) {
                         req.user = {};
                         next();
-		        return;
+                        return;
                     }
                     req.user = undefined;
                     return res.status(401).json('invalid token');
@@ -43,6 +44,7 @@ module.exports = function (app) {
         return func;
     };
 
+    app.use(cookieParser())
     app.use('/api', middleware().unless({path:['/api/signIn']}));
 
     //var jwtMiddleware = expressJwt({secret:conf.jwt.secret});

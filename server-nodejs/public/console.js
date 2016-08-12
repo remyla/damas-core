@@ -40,6 +40,7 @@ process_hash = function() {
 require(['domReady', "damas", "utils"], function (domReady, damas) {
 	require(["ui_log"], function () {
 	require(["ui_upload"]);
+	require(["scripts/assetViewer/ui_overlay"]);
 	window.damas = damas;
 	loadCss('console.css');
 	damas_connect('/api/', function (res) {
@@ -81,6 +82,7 @@ require(['domReady', "damas", "utils"], function (domReady, damas) {
 					damas.signOut( function(e){
 						localStorage.removeItem("token");
 						localStorage.removeItem("user");
+						document.cookie = "username=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
 						//window.location='/signIn?back=console'
 						document.location.reload();
 					});

@@ -1,11 +1,11 @@
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
-		// AMD. Register as an anonymous module.
-		define([], factory);
-	} else {
-		// Browser globals
-		root.ui_upload = factory();
-	}
+        // AMD. Register as an anonymous module.
+        define([], factory);
+    } else {
+        // Browser globals
+        root.ui_upload = factory();
+    }
 }(this, function () {
 
 /**
@@ -38,17 +38,18 @@ damas_connect = function (server_url, callback)
     damas.server = server_url;
     if (localStorage) {                                                                                                              
         damas.token = localStorage.getItem("token");
-	damas.user = JSON.parse(localStorage.getItem("user"));
+        document.cookie = "token="+damas.token;
+        damas.user = JSON.parse(localStorage.getItem("user"));
     }
     damas.verify(callback);
 }
 
 function loadCss(url) {
-	var link = document.createElement("link");
-	link.type = "text/css";
-	link.rel = "stylesheet";
-	link.href = url;
-	document.getElementsByTagName("head")[0].appendChild(link);
+    var link = document.createElement("link");
+    link.type = "text/css";
+    link.rel = "stylesheet";
+    link.href = url;
+    document.getElementsByTagName("head")[0].appendChild(link);
 }
 
 window.loadCss = loadCss;

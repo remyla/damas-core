@@ -27,6 +27,7 @@
 						if (localStorage)
 						{
 							localStorage.setItem("token", damas.token);
+							document.cookies = "token="+damas.token;
 							damas.user.token = undefined;
 							localStorage.setItem("user", JSON.stringify(damas.user));
 						}
