@@ -1,0 +1,51 @@
+@font-face {
+    font-family: Roboto;
+    src: url(https://fonts.googleapis.com/css?family=Roboto);
+}
+
+body {
+/*	font-family: monospace;*/
+    font-family: Roboto, sans-serif;
+}
+/* HEADER */
+#header {
+    height: 45px;
+    background-color: #808a89;
+}
+#headerRight {
+    padding: 0 10px 0 0;
+}
+#header a {
+    border-radius: 3px;
+    font-size: 12px;
+    padding: 6px 12px;
+    text-decoration: none;
+    border: none;
+    background-color: #fff; 
+    color: black;
+}
+#header a:hover {
+    background-color: black; 
+    color: white;
+}
+#menubar2 a.selected, #menubar2 .clickable.selected {
+	color: white;
+	background-color: black;
+	cursor: default;
+}
+#contents {
+    padding: 6px;
+}
+#contents table {
+    font-size: 13px;
+}
+#contents table tr {
+	transition: opacity 2s;
+    height: 24px;
+}
+@media screen and (min-width: 800px) {
+    /* CONTENTS */
+    .panelSecond {
+    	width: 240px;
+    }
+}
