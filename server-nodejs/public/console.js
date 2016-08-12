@@ -38,7 +38,8 @@ process_hash = function() {
 
 
 require(['domReady', "damas", "utils"], function (domReady, damas) {
-	require(["ui_log","ui_upload"], function () {
+	require(["ui_log"], function () {
+	require(["ui_upload"]);
 	window.damas = damas;
 	loadCss('console.css');
 	damas_connect('/api/', function (res) {

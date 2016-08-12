@@ -23,7 +23,8 @@
 	compLog = function(container){
 		container.innerHTML = '';
 		var tableBody = tableLog(container);
-		damas.search_mongo({'time': {$exists:true}, '#parent':{$exists:true}}, {"time":-1},nbElements,offsetElements, function(res){
+		//damas.search_mongo({'time': {$exists:true}, '#parent':{$exists:true}}, {"time":-1},nbElements,offsetElements, function(res){
+		damas.search_mongo({'time': {$exists:true, $type: 1}}, {"time":-1},nbElements,offsetElements, function(res){
 			damas.read(res, function(assets){ 
 				tableLogContent(tableBody, assets);
 					offsetElements += nbElements;
@@ -37,7 +38,8 @@
 	//console.log(scrollElem.scrollY);
 		//if (scrollElem.scrollHeight - scrollElem.scrollTop === scrollElem.clientHeight){
 		if (scrollElem.scrollY === scrollElem.scrollMaxY){
-			damas.search_mongo({'time': {$exists:true}, '#parent':{$exists:true}}, {"time":-1},nbElements,offsetElements, function(res){
+			//damas.search_mongo({'time': {$exists:true}, '#parent':{$exists:true}}, {"time":-1},nbElements,offsetElements, function(res){
+			damas.search_mongo({'time': {$exists:true, $type: 1}}, {"time":-1},nbElements,offsetElements, function(res){
 				damas.read(res, function(assets){
 					tableLogContent(tableBody, assets);
 					offsetElements += nbElements;
@@ -97,7 +99,9 @@ function tableLogTr(asset) {
 	td1.style.width = '15ex';
 	td1.innerHTML = ('00'+time.getDate()).slice(-2)+'/'+('00'+time.getMonth()).slice(-2)+' '+('00'+time.getHours()).slice(-2)+':'+('00'+time.getMinutes()).slice(-2)+':'+('00'+time.getSeconds()).slice(-2);
 	td2.setAttribute('title', JSON_tooltip(asset));
-	td2.innerHTML = '<span class="nomobile">'+file.split('/').slice(0,-1).join('/')+'/</span>'+file.split('/').pop();
+	if (file) {
+		td2.innerHTML = '<span class="nomobile">'+file.split('/').slice(0,-1).join('/')+'/</span>'+file.split('/').pop();
+	} 
 	//td3.style.whiteSpace = 'normal';
 	td3.innerHTML = '&lt;'+asset.author+'&gt; '+asset.comment;
 	tr.appendChild(td1);
