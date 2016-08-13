@@ -61,7 +61,7 @@ process_hash = function() {
 
 define(['domReady', "damas", "utils", "assetViewer"], function (domReady, damas) {
 	require(["ui_log"], function () {
-	//require(["ui_upload"]);
+	require(["ui_upload"]);
 	//require(["scripts/assetViewer/ui_overlay"]);
 	//require(["assetViewer"]);
 	window.damas = damas;

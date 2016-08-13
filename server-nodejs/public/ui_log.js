@@ -57,13 +57,15 @@ function tableLog(container) {
 	var th1 = document.createElement('th');
 	var th2 = document.createElement('th');
 	var th3 = document.createElement('th');
+	var th4 = document.createElement('th');
 	var tbody = document.createElement('tbody');
 
 	table.className = 'log';
 
 	th1.innerHTML = 'time &xutri;';
 	th2.innerHTML = 'file';
-	th3.innerHTML = 'comment';
+	th3.innerHTML = 'size';
+	th4.innerHTML = 'comment';
 
 	th1.style.width = '15ex';
 	th1.style.width = '15ex';
@@ -93,6 +95,7 @@ function tableLogTr(asset) {
 	var td1 = document.createElement('td');
 	var td2 = document.createElement('td');
 	var td3 = document.createElement('td');
+	var td4 = document.createElement('td');
 	//td2.className = 'clickable';
 	var time = new Date(parseInt(asset.time));
 	var file = asset.file || asset['#parent'] || asset._id;
@@ -104,10 +107,13 @@ function tableLogTr(asset) {
 		td2.innerHTML = '<a href="#view=/api/file'+file+'"><span class="nomobile">'+file.split('/').slice(0,-1).join('/')+'/</span>'+file.split('/').pop()+'</a>';
 	} 
 	//td3.style.whiteSpace = 'normal';
-	td3.innerHTML = '&lt;'+asset.author+'&gt; '+asset.comment;
+	td3.innerHTML = human_size( asset.bytes || asset.source_size);
+	td3.setAttribute('title', asset.bytes || asset.source_size);
+	td4.innerHTML = '&lt;'+asset.author+'&gt; '+asset.comment;
 	tr.appendChild(td1);
 	tr.appendChild(td2);
 	tr.appendChild(td3);
+	tr.appendChild(td4);
 	return tr;
 }
 

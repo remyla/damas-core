@@ -79,4 +79,22 @@ function doHash( obj ) {
 window.getHash = getHash;
 window.doHash = doHash;
 
+
+human_size = function ( filesize )
+{
+    var t = typeof filesize;
+    if( !( t === 'number' || t === 'string') )
+        return "?";
+    if (filesize>1024*1024*1024*1024)
+        return (filesize/1024/1024/1024/1024).toFixed(2) + " TiB";
+    if (filesize>1024*1024*1024)
+        return (filesize/1024/1024/1024).toFixed(2) + " GiB";
+    if (filesize>1024*1024)
+        return (filesize/1024/1024).toFixed(2) + " MiB";
+    if (filesize>1024)
+        return (filesize/1024).toFixed(2) + " KiB";
+    return filesize + " Bytes";
+}
+
+
 }));
