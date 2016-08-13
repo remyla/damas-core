@@ -66,7 +66,8 @@ define(['domReady', "damas", "utils", "assetViewer"], function (domReady, damas)
 	//require(["assetViewer"]);
 	window.damas = damas;
 	loadCss('console.css');
-	loadCss('console_design.css');
+	//loadCss('console_design.css');
+	loadCss('console_mono.css');
 	damas_connect('/api/', function (res) {
 		if (!res) {
 			window.location='/signIn?back=console'

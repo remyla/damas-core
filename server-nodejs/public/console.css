@@ -96,10 +96,8 @@ body {
 }
 #contents table th {
 	white-space: nowrap;
-	text-align: left;
 }
 #contents table td {
-/*	white-space: nowrap;*/
 	vertical-align: top;
 	overflow: hidden;
 }
@@ -107,6 +105,16 @@ body {
     display: none;
 }
 
+table.log th.comment {
+	text-align: left;
+}
+table.log td.file {
+}
+table.log td.size {
+	text-align: right;
+	padding-right: 1ex;
+	white-space: nowrap;
+}
 table.users .userclass {
 	text-align: center;
 }
