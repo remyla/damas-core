@@ -32,12 +32,13 @@
 		});
 	};
 
-	var scrollElem = window;
+	var scrollElem = document.getElementById('panelPrincipal');
 
 	scrollElem.addEventListener('scroll', function(){
 	//console.log(scrollElem.scrollY);
 		//if (scrollElem.scrollHeight - scrollElem.scrollTop === scrollElem.clientHeight){
-		if (scrollElem.scrollY === scrollElem.scrollMaxY){
+		//if (scrollElem.scrollY === scrollElem.scrollMaxY){
+		if (this.scrollHeight - this.scrollTop === this.clientHeight) {
 			//damas.search_mongo({'time': {$exists:true}, '#parent':{$exists:true}}, {"time":-1},nbElements,offsetElements, function(res){
 			damas.search_mongo({'time': {$exists:true, $type: 1}}, {"time":-1},nbElements,offsetElements, function(res){
 				damas.read(res, function(assets){
@@ -97,7 +98,7 @@ function tableLogTr(asset) {
 	var file = asset.file || asset['#parent'] || asset._id;
 	td1.setAttribute('title', time);
 	td1.style.width = '15ex';
-	td1.innerHTML = ('00'+time.getDate()).slice(-2)+'/'+('00'+time.getMonth()).slice(-2)+' '+('00'+time.getHours()).slice(-2)+':'+('00'+time.getMinutes()).slice(-2)+':'+('00'+time.getSeconds()).slice(-2);
+	td1.innerHTML = ('00'+time.getDate()).slice(-2)+'/'+('00'+(time.getMonth()+1)).slice(-2)+' '+('00'+time.getHours()).slice(-2)+':'+('00'+time.getMinutes()).slice(-2)+':'+('00'+time.getSeconds()).slice(-2);
 	td2.setAttribute('title', JSON_tooltip(asset));
 	if (file) {
 		td2.innerHTML = '<a href="#view=/api/file'+file+'"><span class="nomobile">'+file.split('/').slice(0,-1).join('/')+'/</span>'+file.split('/').pop()+'</a>';

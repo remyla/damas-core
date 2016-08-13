@@ -1,4 +1,12 @@
 require.config({
+	packages: ['assetViewer'],
+/*
+	packages: [{
+		name: 'assetViewer',
+		location: 'scripts/assetViewer',
+		main: 'ui_overlay'
+	}],
+*/
 	paths: {
 		'damas': "damas",
 		'utils': "utils",
@@ -18,31 +26,47 @@ window.addEventListener("hashchange", function() {
 process_hash = function() {
 	//if(/#graph=/.test(location.hash))
 	var keys = getHash();
+
+	if (/#view=/.test(window.previousHash)) {
+		window.previousHash = location.hash;
+		return;
+	}
+	if (/#view=/.test(location.hash)) {
+		window.previousHash = location.hash;
+		return;
+	}
 	for (var elem of document.querySelectorAll('#menubar2 .selected')) {
 		elem.classList.remove('selected');
 	}
 	if (keys.hasOwnProperty('users')) {
 		document.querySelector('#but_users').classList.add('selected');
 		show_users();
+		window.previousHash = location.hash;
 		return;
 	}
 	if (keys.hasOwnProperty('locks')) {
 		document.querySelector('#but_locks').classList.add('selected');
 		show_locks();
+		window.previousHash = location.hash;
 		return;
 	}
-	document.querySelector('#but_log').classList.add('selected');
-	show_log();
+	if (/#log/.test(location.hash) || location.hash === '' ) {
+		document.querySelector('#but_log').classList.add('selected');
+		show_log();
+	}
+	window.previousHash = location.hash;
 };
 
 
 
-require(['domReady', "damas", "utils"], function (domReady, damas) {
+define(['domReady', "damas", "utils", "assetViewer"], function (domReady, damas) {
 	require(["ui_log"], function () {
-	require(["ui_upload"]);
-	require(["scripts/assetViewer/ui_overlay"]);
+	//require(["ui_upload"]);
+	//require(["scripts/assetViewer/ui_overlay"]);
+	//require(["assetViewer"]);
 	window.damas = damas;
 	loadCss('console.css');
+	loadCss('console_design.css');
 	damas_connect('/api/', function (res) {
 		if (!res) {
 			window.location='/signIn?back=console'
@@ -58,6 +82,7 @@ require(['domReady', "damas", "utils"], function (domReady, damas) {
 			document.querySelector('#menubar2').style.display = 'block';
 			//show_log();
 			process_hash();
+			window.previousHash = location.hash;
 		}
 		else
 		{
@@ -129,9 +154,10 @@ window.show_log = show_log;
 				damas.read(res, function(assets){
 					var out = document.querySelector('#contents');
 					var str = '<table><tr><th>lock &xdtri;</th><th>file</th></tr>'
-					for(var i=0; i<assets.length; i++)
-					{
-						str +=  '<tr title="'+JSON_tooltip(assets[i])+'"><td>'+assets[i].lock+'</td><td>'+assets[i].file+'</td></tr>';
+					for (var i=0; i<assets.length; i++) {
+						var file = assets[i].file;
+						var a = '<a href="#view=/api/file'+file+'"><span class="nomobile">'+file.split('/').slice(0,-1).join('/')+'/</span>'+file.split('/').pop()+'</a>';
+						str +=  '<tr title="'+JSON_tooltip(assets[i])+'"><td>'+assets[i].lock+'</td><td>'+a+'</td></tr>';
 					}
 					str += '</table>';
 					out.innerHTML = str;
