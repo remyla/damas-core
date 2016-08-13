@@ -68,11 +68,16 @@ function tableLog(container) {
 	th4.innerHTML = 'comment';
 
 	th1.style.width = '15ex';
-	th1.style.width = '15ex';
+
+	th1.classList.add('date');
+	th2.classList.add('file');
+	th3.classList.add('size');
+	th4.classList.add('comment');
 	
 	thead.appendChild(th1);
 	thead.appendChild(th2);
 	thead.appendChild(th3);
+	thead.appendChild(th4);
 	table.appendChild(thead);
 	table.appendChild(tbody);
 
@@ -96,6 +101,8 @@ function tableLogTr(asset) {
 	var td2 = document.createElement('td');
 	var td3 = document.createElement('td');
 	var td4 = document.createElement('td');
+	td2.classList.add('file');
+	td3.classList.add('size');
 	//td2.className = 'clickable';
 	var time = new Date(parseInt(asset.time));
 	var file = asset.file || asset['#parent'] || asset._id;

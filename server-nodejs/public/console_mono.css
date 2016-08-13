@@ -1,0 +1,40 @@
+body {
+	font-family: monospace;
+}
+/* HEADER */
+#header {
+	padding: 1ex 1ex 0 0;
+}
+#header a {
+}
+#header a:hover {
+    background-color: black; 
+    color: white;
+}
+#menubar2 a {
+	border: 1px solid black;
+    text-decoration: none;
+	padding: 0 1ex;
+	color: black;
+}
+#menubar2 a.selected, #menubar2 .clickable.selected {
+	color: white;
+	background-color: black;
+	cursor: default;
+}
+#authInfo {
+}
+#contents {
+    padding: 0 1ex;
+}
+#contents table {
+}
+#contents table tr {
+	transition: opacity 2s;
+}
+@media screen and (min-width: 800px) {
+    /* CONTENTS */
+    .panelSecond {
+    	width: 240px;
+    }
+}
