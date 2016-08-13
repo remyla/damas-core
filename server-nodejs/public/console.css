@@ -130,6 +130,6 @@ table.users .userclass {
         overflow-x: hidden;
     }
     .nomobile {
-        display: inline-block;
+        display: inline;
     }
 }

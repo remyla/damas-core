@@ -107,8 +107,8 @@ function tableLogTr(asset) {
 		td2.innerHTML = '<a href="#view=/api/file'+file+'"><span class="nomobile">'+file.split('/').slice(0,-1).join('/')+'/</span>'+file.split('/').pop()+'</a>';
 	} 
 	//td3.style.whiteSpace = 'normal';
-	td3.innerHTML = human_size( asset.bytes || asset.source_size);
-	td3.setAttribute('title', asset.bytes || asset.source_size);
+	td3.innerHTML = human_size( asset.bytes || asset.size || asset.source_size);
+	td3.setAttribute('title', asset.bytes || asset.size || asset.source_size);
 	td4.innerHTML = '&lt;'+asset.author+'&gt; '+asset.comment;
 	tr.appendChild(td1);
 	tr.appendChild(td2);
