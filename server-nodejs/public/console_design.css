@@ -9,18 +9,17 @@ body {
 }
 /* HEADER */
 #header {
-    height: 45px;
     background-color: #808a89;
+    padding: 15px;
 }
-#headerRight {
-    padding: 0 10px 0 0;
+#menubar2 > * {
+    vertical-align: middle;
+    font-size: 12px;
 }
 #header a {
     border-radius: 3px;
-    font-size: 12px;
     padding: 6px 12px;
     text-decoration: none;
-    border: none;
     background-color: #fff; 
     color: black;
 }
@@ -32,6 +31,9 @@ body {
 	color: white;
 	background-color: black;
 	cursor: default;
+}
+#authInfo {
+    color: #fff;
 }
 #contents {
     padding: 6px;
