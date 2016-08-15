@@ -108,6 +108,9 @@ body {
 table.log th.comment {
 	text-align: left;
 }
+table.log td.time {
+	white-space: nowrap;
+}
 table.log td.file {
 }
 table.log td.size {

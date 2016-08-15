@@ -38,3 +38,7 @@ body {
     	width: 240px;
     }
 }
+
+table.log td.time {
+	width: 16ex;
+}

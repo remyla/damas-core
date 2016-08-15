@@ -23,8 +23,8 @@
 	compLog = function(container){
 		container.innerHTML = '';
 		var tableBody = tableLog(container);
-		//damas.search_mongo({'time': {$exists:true}, '#parent':{$exists:true}}, {"time":-1},nbElements,offsetElements, function(res){
-		damas.search_mongo({'time': {$exists:true, $type: 1}}, {"time":-1},nbElements,offsetElements, function(res){
+		damas.search_mongo({'time': {$exists:true}, '#parent':{$exists:true}}, {"time":-1},nbElements,offsetElements, function(res){
+		//damas.search_mongo({'time': {$exists:true, $type: 1}}, {"time":-1},nbElements,offsetElements, function(res){
 			damas.read(res, function(assets){ 
 				tableLogContent(tableBody, assets);
 					offsetElements += nbElements;
@@ -39,8 +39,8 @@
 		//if (scrollElem.scrollHeight - scrollElem.scrollTop === scrollElem.clientHeight){
 		//if (scrollElem.scrollY === scrollElem.scrollMaxY){
 		if (this.scrollHeight - this.scrollTop === this.clientHeight) {
-			//damas.search_mongo({'time': {$exists:true}, '#parent':{$exists:true}}, {"time":-1},nbElements,offsetElements, function(res){
-			damas.search_mongo({'time': {$exists:true, $type: 1}}, {"time":-1},nbElements,offsetElements, function(res){
+			damas.search_mongo({'time': {$exists:true}, '#parent':{$exists:true}}, {"time":-1},nbElements,offsetElements, function(res){
+			//damas.search_mongo({'time': {$exists:true, $type: 1}}, {"time":-1},nbElements,offsetElements, function(res){
 				damas.read(res, function(assets){
 					tableLogContent(tableBody, assets);
 					offsetElements += nbElements;
@@ -49,6 +49,21 @@
 		}
 	});
 
+	function getChildrenLog( id, out ){
+		damas.search_mongo({'#parent': id }, {"time":1},100, 0, function(res){
+			//console.log(res);
+			damas.read(res, function(children){
+				for(var i=0; i< children.length; i++){
+					var n =  children[i];
+					var div = document.createElement('div');
+					div.innerHTML = human_time(new Date(parseInt(n.time)))+" "+ n.author+" "+human_size(n.bytes);
+					div.setAttribute('title', JSON_tooltip(n));
+					out.appendChild(div);
+				}
+				//console.log(str);
+			});
+		});
+	}
 
 
 function tableLog(container) {
@@ -67,9 +82,7 @@ function tableLog(container) {
 	th3.innerHTML = 'size';
 	th4.innerHTML = 'comment';
 
-	th1.style.width = '15ex';
-
-	th1.classList.add('date');
+	th1.classList.add('time');
 	th2.classList.add('file');
 	th3.classList.add('size');
 	th4.classList.add('comment');
@@ -101,6 +114,7 @@ function tableLogTr(asset) {
 	var td2 = document.createElement('td');
 	var td3 = document.createElement('td');
 	var td4 = document.createElement('td');
+	td1.classList.add('time');
 	td2.classList.add('file');
 	td3.classList.add('size');
 	//td2.className = 'clickable';
@@ -121,6 +135,14 @@ function tableLogTr(asset) {
 	tr.appendChild(td2);
 	tr.appendChild(td3);
 	tr.appendChild(td4);
+
+	var td2d1 = document.createElement('div');
+	td2d1.classList.add('children');
+	td2.appendChild(td2d1);
+
+	td1.addEventListener('click', function(e){
+		getChildrenLog(asset['#parent'], e.target.parentNode.querySelector('.children'));
+	});
 	return tr;
 }
 
@@ -162,14 +184,15 @@ function tableLogTr(asset) {
         console.log(nodes);
         var tbody = document.querySelector('tbody');
         nodes.forEach(function(node){
-            if (node.time !== undefined && node['#parent'] !== undefined ) {
-                var tr = tableLogTr(node);
-                tr.style.opacity = '0';
-                tbody.insertBefore(tr, tbody.firstChild);
-                setTimeout(function() {
-                    tr.style.opacity = '1';
-                }, 1);
-            }
+            if (node.time === undefined || node['#parent'] !== undefined ) {
+				return;
+			}
+            var tr = tableLogTr(node);
+            tr.style.opacity = '0';
+            tbody.insertBefore(tr, tbody.firstChild);
+            setTimeout(function() {
+                tr.style.opacity = '1';
+            }, 1);
         });
     });
 

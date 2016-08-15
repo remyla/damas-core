@@ -96,5 +96,11 @@ human_size = function ( filesize )
     return filesize + " Bytes";
 }
 
+// dd.mm hh:mm:ss
+human_time = function ( time )
+{
+    return ('00'+time.getDate()).slice(-2)+'.'+('00'+(time.getMonth()+1)).slice(-2)+' '+('00'+time.getHours()).slice(-2)+':'+('00'+time.getMinutes()).slice(-2)+':'+('00'+time.getSeconds()).slice(-2);
+}
+
 
 }));
