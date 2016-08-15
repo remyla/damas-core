@@ -21,6 +21,14 @@
 JSON="Content-Type: application/json"
 
 # FUNCTIONS
+damas_create() {
+  RES=$(curl -ks -H "$AUTH" -H "$JSON" -d "$*" $URL'create/')
+  if [ $HUMAN ]; then
+    parse_json "$RES"
+    RES=$PARSED
+  fi
+}
+
 damas_add() {
   get_ids $@
   RES=$(curl -ks -H "$AUTH" -H "$JSON" \
@@ -41,7 +49,7 @@ damas_read() {
 }
 
 damas_update() {
-  RES=$(curl -ks -X PUT -H "$AUTH" -H "$JSON" -d "$1" $URL'update/')
+  RES=$(curl -ks -X PUT -H "$AUTH" -H "$JSON" -d "$*" $URL'update/')
   if [ $HUMAN ]; then
     parse_json "$RES"
     RES=$PARSED
@@ -351,6 +359,10 @@ if [ ! -n "$ACTION" ]; then
 fi
 
 case $ACTION in
+    create)
+      auth
+      damas_create $@
+      ;;
     add)
       auth
       damas_add $@
