@@ -105,6 +105,9 @@ body {
     display: none;
 }
 
+table.log tr.history {
+	opacity: .5;
+}
 table.log th.comment {
 	text-align: left;
 }
@@ -112,6 +115,7 @@ table.log td.time {
 	white-space: nowrap;
 }
 table.log td.file {
+	white-space: nowrap;
 }
 table.log td.size {
 	text-align: right;

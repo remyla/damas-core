@@ -84,7 +84,7 @@ human_size = function ( filesize )
 {
     var t = typeof filesize;
     if( !( t === 'number' || t === 'string') )
-        return "?";
+        return "? Bytes";
     if (filesize>1024*1024*1024*1024)
         return (filesize/1024/1024/1024/1024).toFixed(2) + " TiB";
     if (filesize>1024*1024*1024)

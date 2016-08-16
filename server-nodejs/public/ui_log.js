@@ -23,8 +23,8 @@
 	compLog = function(container){
 		container.innerHTML = '';
 		var tableBody = tableLog(container);
-		damas.search_mongo({'time': {$exists:true}, '#parent':{$exists:true}}, {"time":-1},nbElements,offsetElements, function(res){
-		//damas.search_mongo({'time': {$exists:true, $type: 1}}, {"time":-1},nbElements,offsetElements, function(res){
+		//damas.search_mongo({'time': {$exists:true}, '#parent':{$exists:true}}, {"time":-1},nbElements,offsetElements, function(res){
+		damas.search_mongo({'time': {$exists:true, $type: 1}}, {"time":-1},nbElements,offsetElements, function(res){
 			damas.read(res, function(assets){ 
 				tableLogContent(tableBody, assets);
 					offsetElements += nbElements;
@@ -39,8 +39,8 @@
 		//if (scrollElem.scrollHeight - scrollElem.scrollTop === scrollElem.clientHeight){
 		//if (scrollElem.scrollY === scrollElem.scrollMaxY){
 		if (this.scrollHeight - this.scrollTop === this.clientHeight) {
-			damas.search_mongo({'time': {$exists:true}, '#parent':{$exists:true}}, {"time":-1},nbElements,offsetElements, function(res){
-			//damas.search_mongo({'time': {$exists:true, $type: 1}}, {"time":-1},nbElements,offsetElements, function(res){
+			//damas.search_mongo({'time': {$exists:true}, '#parent':{$exists:true}}, {"time":-1},nbElements,offsetElements, function(res){
+			damas.search_mongo({'time': {$exists:true, $type: 1}}, {"time":-1},nbElements,offsetElements, function(res){
 				damas.read(res, function(assets){
 					tableLogContent(tableBody, assets);
 					offsetElements += nbElements;
@@ -53,12 +53,26 @@
 		damas.search_mongo({'#parent': id }, {"time":1},100, 0, function(res){
 			//console.log(res);
 			damas.read(res, function(children){
+				var td_time = out.querySelector('td.time');
+				var td_file = out.querySelector('td.file');
+				var td_size = out.querySelector('td.file');
 				for(var i=0; i< children.length; i++){
 					var n =  children[i];
+
+					var tr = tableLogTr(n);
+					tr.classList.add('history');
+					out.parentNode.insertBefore(tr, out.nextSibling);
+/*
+
 					var div = document.createElement('div');
-					div.innerHTML = human_time(new Date(parseInt(n.time)))+" "+ n.author+" "+human_size(n.bytes);
+					div.innerHTML = human_time(new Date(parseInt(n.time)));
+					td_time.appendChild(div);
+
+					var div = document.createElement('div');
+					div.innerHTML = human_time(new Date(parseInt(n.time)))+" "+ n.author+" "+human_size(n.bytes || n.size || n.source_size);
 					div.setAttribute('title', JSON_tooltip(n));
-					out.appendChild(div);
+					td_file.appendChild(div);
+*/
 				}
 				//console.log(str);
 			});
@@ -122,7 +136,7 @@ function tableLogTr(asset) {
 	var file = asset.file || asset['#parent'] || asset._id;
 	td1.setAttribute('title', time);
 	td1.style.width = '15ex';
-	td1.innerHTML = ('00'+time.getDate()).slice(-2)+'/'+('00'+(time.getMonth()+1)).slice(-2)+' '+('00'+time.getHours()).slice(-2)+':'+('00'+time.getMinutes()).slice(-2)+':'+('00'+time.getSeconds()).slice(-2);
+	td1.innerHTML= human_time(new Date(parseInt(asset.time)))
 	td2.setAttribute('title', JSON_tooltip(asset));
 	if (file) {
 		td2.innerHTML = '<a href="#view=/api/file'+file+'"><span class="nomobile">'+file.split('/').slice(0,-1).join('/')+'/</span>'+file.split('/').pop()+'</a>';
@@ -141,7 +155,14 @@ function tableLogTr(asset) {
 	td2.appendChild(td2d1);
 
 	td1.addEventListener('click', function(e){
-		getChildrenLog(asset['#parent'], e.target.parentNode.querySelector('.children'));
+		if (asset['#parent']) {
+			//getChildrenLog(asset['#parent'], e.target.parentNode.querySelector('.children'));
+			getChildrenLog(asset['#parent'], e.target.parentNode);
+		}
+		else {
+			//getChildrenLog(asset._id, e.target.parentNode.querySelector('.children'));
+			getChildrenLog(asset._id, e.target.parentNode);
+		}
 	});
 	return tr;
 }
