@@ -23,8 +23,8 @@
 	compLog = function(container){
 		container.innerHTML = '';
 		var tableBody = tableLog(container);
-		//damas.search_mongo({'time': {$exists:true}, '#parent':{$exists:true}}, {"time":-1},nbElements,offsetElements, function(res){
-		damas.search_mongo({'time': {$exists:true, $type: 1}}, {"time":-1},nbElements,offsetElements, function(res){
+		damas.search_mongo({'time': {$exists:true}, '#parent':{$exists:true}}, {"time":-1},nbElements,offsetElements, function(res){
+		//damas.search_mongo({'time': {$exists:true, $type: 1}}, {"time":-1},nbElements,offsetElements, function(res){
 			damas.read(res, function(assets){ 
 				tableLogContent(tableBody, assets);
 					offsetElements += nbElements;
@@ -39,8 +39,8 @@
 		//if (scrollElem.scrollHeight - scrollElem.scrollTop === scrollElem.clientHeight){
 		//if (scrollElem.scrollY === scrollElem.scrollMaxY){
 		if (this.scrollHeight - this.scrollTop === this.clientHeight) {
-			//damas.search_mongo({'time': {$exists:true}, '#parent':{$exists:true}}, {"time":-1},nbElements,offsetElements, function(res){
-			damas.search_mongo({'time': {$exists:true, $type: 1}}, {"time":-1},nbElements,offsetElements, function(res){
+			damas.search_mongo({'time': {$exists:true}, '#parent':{$exists:true}}, {"time":-1},nbElements,offsetElements, function(res){
+			//damas.search_mongo({'time': {$exists:true, $type: 1}}, {"time":-1},nbElements,offsetElements, function(res){
 				damas.read(res, function(assets){
 					tableLogContent(tableBody, assets);
 					offsetElements += nbElements;
@@ -128,6 +128,7 @@ function tableLogTr(asset) {
 	var td2 = document.createElement('td');
 	var td3 = document.createElement('td');
 	var td4 = document.createElement('td');
+	var td5 = document.createElement('td');
 	td1.classList.add('time');
 	td2.classList.add('file');
 	td3.classList.add('size');
@@ -149,6 +150,7 @@ function tableLogTr(asset) {
 	tr.appendChild(td2);
 	tr.appendChild(td3);
 	tr.appendChild(td4);
+	tr.appendChild(td5);
 
 	var td2d1 = document.createElement('div');
 	td2d1.classList.add('children');
@@ -162,6 +164,16 @@ function tableLogTr(asset) {
 		else {
 			//getChildrenLog(asset._id, e.target.parentNode.querySelector('.children'));
 			getChildrenLog(asset._id, e.target.parentNode);
+		}
+	});
+
+
+	var td5span1 = document.createElement('span');
+	td5span1.innerHTML = 'x';
+	td5.appendChild(td5span1);
+	td5span1.addEventListener('click', function(e){
+		if (confirm('Delete '+asset._id+' ?')) {
+			damas.delete(asset._id);
 		}
 	});
 	return tr;
