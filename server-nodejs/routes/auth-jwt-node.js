@@ -31,7 +31,7 @@ module.exports = function (app) {
                         return;
                     }
                     req.user = undefined;
-                    return res.status(401).json('invalid token');
+                    return res.status(401).json('401 Unauthorized (invalid token and authentication is required)');
                 }
                 db.read([decode._id], function (err, user) {
                     // we could add decode properties to the user object here
@@ -123,6 +123,8 @@ module.exports = function (app) {
 */
 
     app.get('/api/verify', function (req, res) {
+        return res.status(200).json(req.user);
+/* This is useless ! processed by the middleware - double check before removing it
         var token = fetch(req.headers);
         if (conf.jwt.required === false ) {
             return res.status(200).json(req.user);
@@ -134,6 +136,7 @@ module.exports = function (app) {
             }
             return res.status(200).json(req.user);
         });
+*/
     });
 
     app.route('/api/signIn').post(authenticate, function (req, res, next) {
