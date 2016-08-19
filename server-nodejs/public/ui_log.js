@@ -49,36 +49,44 @@
 		}
 	});
 
-	function getChildrenLog( id, out ){
+	function getChildrenLog( id, clickedChild, out ){
 		damas.search_mongo({'#parent': id }, {"time":1},100, 0, function(res){
-			//console.log(res);
 			damas.read(res, function(children){
 				var td_time = out.querySelector('td.time');
 				var td_file = out.querySelector('td.file');
 				var td_size = out.querySelector('td.file');
 				for(var i=0; i< children.length; i++){
 					var n =  children[i];
-
-					var tr = tableLogTr(n);
+					var tr = tableLogTr(n, true);
 					tr.classList.add('history');
+					if (n._id === clickedChild) {
+						out.style.display= 'none';
+						tr.classList.add('clicked');
+					}
+					td_time = tr.querySelector('td.time');
+					td_time.addEventListener('click', function(e){
+						out.style.display= 'table-row';
+						var trnext = out.nextElementSibling;
+						while(trnext) {
+							if(trnext.classList.contains('last')) {
+								trnext.remove();
+								break;
+							}
+							trnext.remove();
+							trnext = out.nextElementSibling;
+						}
+					});
+					if (i === 0) {
+						tr.classList.add('last');
+					}
+					if (i === children.length - 1) {
+						tr.classList.add('first');
+					}
 					out.parentNode.insertBefore(tr, out.nextSibling);
-/*
-
-					var div = document.createElement('div');
-					div.innerHTML = human_time(new Date(parseInt(n.time)));
-					td_time.appendChild(div);
-
-					var div = document.createElement('div');
-					div.innerHTML = human_time(new Date(parseInt(n.time)))+" "+ n.author+" "+human_size(n.bytes || n.size || n.source_size);
-					div.setAttribute('title', JSON_tooltip(n));
-					td_file.appendChild(div);
-*/
 				}
-				//console.log(str);
 			});
 		});
 	}
-
 
 function tableLog(container) {
 	var table = document.createElement('table');
@@ -122,7 +130,10 @@ function tableLogContent(container, assets) {
 	}
 }
 
-function tableLogTr(asset) {
+/*
+ * noclickontimebool is an optional boolean
+ */
+function tableLogTr(asset, noclickontimebool) {
 	var tr = document.createElement('tr');
 	var td1 = document.createElement('td');
 	var td2 = document.createElement('td');
@@ -132,6 +143,8 @@ function tableLogTr(asset) {
 	td1.classList.add('time');
 	td2.classList.add('file');
 	td3.classList.add('size');
+	td4.classList.add('comment');
+	td5.classList.add('buttons');
 	//td2.className = 'clickable';
 	var time = new Date(parseInt(asset.time));
 	var file = asset.file || asset['#parent'] || asset._id;
@@ -140,9 +153,21 @@ function tableLogTr(asset) {
 	td1.innerHTML= human_time(new Date(parseInt(asset.time)))
 	td2.setAttribute('title', JSON_tooltip(asset));
 	if (file) {
-		td2.innerHTML = '<a href="#view=/api/file'+file+'"><span class="nomobile">'+file.split('/').slice(0,-1).join('/')+'/</span>'+file.split('/').pop()+'</a>';
+		if (asset.synced_online && asset.synced_online > asset.time) {
+			var a = document.createElement('a');
+			// we want a real link to the file while firing the viewer when clicked
+			a.setAttribute('href', '/api/file'+file);
+			a.innerHTML = '<span class="nomobile">'+file.split('/').slice(0,-1).join('/')+'/</span>'+file.split('/').pop();
+			td2.appendChild(a);
+			a.addEventListener('click', function(e){
+				e.preventDefault()
+				window.location.hash = '#view=/api/file'+file;
+			});
+		}
+		else {
+			td2.innerHTML = '<span class="nomobile">'+file.split('/').slice(0,-1).join('/')+'/</span>'+file.split('/').pop();
+		}
 	} 
-	//td3.style.whiteSpace = 'normal';
 	td3.innerHTML = human_size( asset.bytes || asset.size || asset.source_size);
 	td3.setAttribute('title', asset.bytes || asset.size || asset.source_size);
 	td4.innerHTML = '&lt;'+asset.author+'&gt; '+asset.comment;
@@ -151,25 +176,29 @@ function tableLogTr(asset) {
 	tr.appendChild(td3);
 	tr.appendChild(td4);
 	tr.appendChild(td5);
-
 	var td2d1 = document.createElement('div');
 	td2d1.classList.add('children');
 	td2.appendChild(td2d1);
-
-	td1.addEventListener('click', function(e){
-		if (asset['#parent']) {
-			//getChildrenLog(asset['#parent'], e.target.parentNode.querySelector('.children'));
-			getChildrenLog(asset['#parent'], e.target.parentNode);
-		}
-		else {
-			//getChildrenLog(asset._id, e.target.parentNode.querySelector('.children'));
-			getChildrenLog(asset._id, e.target.parentNode);
-		}
-	});
-
-
+	if (noclickontimebool!==true) {
+		td1.addEventListener('click', function(e){
+			if (asset['#parent']) {
+				//getChildrenLog(asset['#parent'], e.target.parentNode.querySelector('.children'));
+				getChildrenLog(asset['#parent'], asset._id, e.target.parentNode);
+			}
+			else {
+				//getChildrenLog(asset._id, e.target.parentNode.querySelector('.children'));
+				getChildrenLog(asset._id, e.target.parentNode);
+			}
+		});
+	}
+	var td5span0 = document.createElement('span');
 	var td5span1 = document.createElement('span');
+	td5span0.setAttribute('title', 'edit');
+	td5span1.setAttribute('title', 'delete');
+	td5span1.classList.add('delete');
+	td5span0.innerHTML = '&#7451;';
 	td5span1.innerHTML = 'x';
+	td5.appendChild(td5span0);
 	td5.appendChild(td5span1);
 	td5span1.addEventListener('click', function(e){
 		if (confirm('Delete '+asset._id+' ?')) {

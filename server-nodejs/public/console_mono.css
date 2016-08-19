@@ -27,11 +27,28 @@ body {
 #contents {
     padding: 0 1ex;
 }
-#contents table {
-}
+/*
 #contents table tr {
 	transition: opacity 2s;
 }
+#contents table td {
+	transition-property: background;
+	transition-duration: .1s;
+}
+*/
+#contents table tr:hover {
+	background : rgba(128,128,128,.1);
+	background-opacity:.1;
+/*
+	transition: none;
+	font-weight: bold;
+*/
+}
+/*
+#contents table tr:hover {
+	box-shadow: 0px -4px 2px -2px #888 inset;
+}
+*/
 @media screen and (min-width: 800px) {
     /* CONTENTS */
     .panelSecond {
@@ -41,4 +58,34 @@ body {
 
 table.log td.time {
 	width: 16ex;
+	cursor: zoom-in;
+}
+
+table.log td.buttons span {
+	margin: 0 0 0 .5ex;
+	cursor: pointer;
+	opacity: 0;
+}
+table.log td.buttons span.delete {
+	opacity: 1;
+}
+table.log td.buttons span:hover {
+	background: black;
+	color: white;
+}
+table.log tr:hover td.buttons span {
+	opacity: 1;
+}
+
+/*
+table.log tr.history.first {
+	border-top: 1px solid #666;
+}
+table.log tr.history.last {
+	box-shadow: 0px -4px 2px -2px #888 inset;
+	border-bottom: 1px solid #666;
+}
+*/
+table.log tr.history td.time {
+	cursor: zoom-out;
 }

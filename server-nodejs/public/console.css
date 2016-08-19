@@ -105,8 +105,11 @@ body {
     display: none;
 }
 
-table.log tr.history {
+table.log tr.history td {
 	opacity: .5;
+}
+table.log tr.history.clicked td {
+	opacity: 1;
 }
 table.log th.comment {
 	text-align: left;
@@ -122,10 +125,13 @@ table.log td.size {
 	padding-right: 1ex;
 	white-space: nowrap;
 }
+table.log td.comment {
+	overflow: hidden;
+}
 table.users .userclass {
 	text-align: center;
 }
-@media screen and (min-width: 800px) {
+@media screen and (min-width: 900px) {
     /* CONTENTS */
     .panelSecond {
         display: inline-block;
