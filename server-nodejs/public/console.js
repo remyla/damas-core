@@ -12,6 +12,7 @@ require.config({
 		'utils': "utils",
 		'ui_log': "ui_log",
 		'ui_upload': 'generic-ui/scripts/uiComponents/ui_upload',
+		'ui_editor': 'generic-ui/scripts/uiComponents/ui_editor',
 		'domReady': '//cdn.rawgit.com/requirejs/domReady/2.0.1/domReady'
 	},
 	urlArgs: "v=" +  (new Date()).getTime()
@@ -62,6 +63,7 @@ process_hash = function() {
 define(['domReady', "damas", "utils", "assetViewer"], function (domReady, damas) {
 	require(["ui_log"], function () {
 	require(["ui_upload"]);
+	require(["ui_editor"]);
 	//require(["scripts/assetViewer/ui_overlay"]);
 	//require(["assetViewer"]);
 	window.damas = damas;
@@ -135,16 +137,44 @@ window.show_log = show_log;
 			//damas.search('username:/.*/', function(res){
 			damas.search_mongo({'username':'REGEX_.*'}, {"username":1},0,0, function(res){
 				damas.read(res, function(users){
-					//console.log(users);
 					window.users = users;
 					var out = document.querySelector('#contents');
-					var str = '<table class="users"><tr><th>username &xdtri;</th><th class="userclass">class</th></tr>';
+					var table = document.createElement('table');
+					var thead = document.createElement('thead');
+					var tbody = document.createElement('tbody');
+					var th1 = document.createElement('th');
+					var th2 = document.createElement('th');
+					table.classList.add('users');
+					th1.classList.add('username');
+					th2.classList.add('userclass');
+					th1.innerHTML = 'username &xutri;';
+					th2.innerHTML = 'class';
+					thead.appendChild(th1);
+					thead.appendChild(th2);
+					table.appendChild(thead);
+					table.appendChild(tbody);
+					out.innerHTML = '';
+					out.appendChild(table);
 					for (var i=0; i<users.length; i++) {
-						//out.innerHTML +=  '<li title="'+JSON_tooltip(users[i])+'">'+users[i].username+'</li>';
-						str +=  '<tr title="'+JSON_tooltip(users[i])+'"><td>'+users[i].username+'</td><td class="userclass">'+users[i].class+'</td></tr>';
+						var tr = document.createElement('tr');
+						var td1 = document.createElement('td');
+						var td2 = document.createElement('td');
+						td1.classList.add('username');
+						td2.classList.add('userclass');
+						tr.setAttribute('title', JSON_tooltip(users[i]));
+						td1.innerHTML= users[i].username;
+						td2.innerHTML= users[i].class;
+						tr.appendChild(td1);
+						tr.appendChild(td2);
+						tbody.appendChild(tr);
+						(function (node){
+							if (require.specified('ui_editor')) {
+								tr.addEventListener('click', function(){
+									initEditor(node);
+								});
+							}
+						}(users[i]));
 					}
-					str += '</table>';
-					out.innerHTML = str;
 				});
 			});
 		}
@@ -154,14 +184,44 @@ window.show_log = show_log;
 			damas.search_mongo({'lock':'REGEX_.*'}, {"lock":1},0,0, function(res){
 				damas.read(res, function(assets){
 					var out = document.querySelector('#contents');
-					var str = '<table><tr><th>lock &xdtri;</th><th>file</th></tr>'
+					var table = document.createElement('table');
+					var thead = document.createElement('thead');
+					var tbody = document.createElement('tbody');
+					var th1 = document.createElement('th');
+					var th2 = document.createElement('th');
+					table.classList.add('locks');
+					th1.classList.add('lock');
+					th2.classList.add('file');
+					th1.innerHTML = 'lock &xdtri;';
+					th2.innerHTML = 'file';
+					thead.appendChild(th1);
+					thead.appendChild(th2);
+					table.appendChild(thead);
+					table.appendChild(tbody);
+					out.innerHTML = '';
+					out.appendChild(table);
 					for (var i=0; i<assets.length; i++) {
-						var file = assets[i].file;
+						var file = assets[i].file || assets[i]['#parent'];
 						var a = '<a href="#view=/api/file'+file+'"><span class="nomobile">'+file.split('/').slice(0,-1).join('/')+'/</span>'+file.split('/').pop()+'</a>';
-						str +=  '<tr title="'+JSON_tooltip(assets[i])+'"><td>'+assets[i].lock+'</td><td>'+a+'</td></tr>';
+						var tr = document.createElement('tr');
+						var td1 = document.createElement('td');
+						var td2 = document.createElement('td');
+						td1.classList.add('lock');
+						td2.classList.add('file');
+						tr.setAttribute('title', JSON_tooltip(assets[i]));
+						td1.innerHTML= assets[i].lock;
+						td2.innerHTML= a;
+						tr.appendChild(td1);
+						tr.appendChild(td2);
+						tbody.appendChild(tr);
+						(function (node){
+							if (require.specified('ui_editor')) {
+								tr.addEventListener('click', function(){
+									initEditor(node);
+								});
+							}
+						}(assets[i]));
 					}
-					str += '</table>';
-					out.innerHTML = str;
 				});
 			});
 		}

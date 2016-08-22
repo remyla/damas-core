@@ -91,24 +91,23 @@
 function tableLog(container) {
 	var table = document.createElement('table');
 	var thead = document.createElement('thead');
+	var tbody = document.createElement('tbody');
 	var th1 = document.createElement('th');
 	var th2 = document.createElement('th');
 	var th3 = document.createElement('th');
 	var th4 = document.createElement('th');
-	var tbody = document.createElement('tbody');
 
-	table.className = 'log';
-
-	th1.innerHTML = 'time &xutri;';
-	th2.innerHTML = 'file';
-	th3.innerHTML = 'size';
-	th4.innerHTML = 'comment';
-
+	table.classList.add('log');
 	th1.classList.add('time');
 	th2.classList.add('file');
 	th3.classList.add('size');
 	th4.classList.add('comment');
 	
+	th1.innerHTML = 'time &xutri;';
+	th2.innerHTML = 'file';
+	th3.innerHTML = 'size';
+	th4.innerHTML = 'comment';
+
 	thead.appendChild(th1);
 	thead.appendChild(th2);
 	thead.appendChild(th3);
@@ -145,15 +144,15 @@ function tableLogTr(asset, noclickontimebool) {
 	td3.classList.add('size');
 	td4.classList.add('comment');
 	td5.classList.add('buttons');
-	//td2.className = 'clickable';
 	var time = new Date(parseInt(asset.time));
-	var file = asset.file || asset['#parent'] || asset._id;
 	td1.setAttribute('title', time);
 	td1.style.width = '15ex';
-	td1.innerHTML= human_time(new Date(parseInt(asset.time)))
+	td1.innerHTML= human_time(new Date(parseInt(asset.time)));
 	td2.setAttribute('title', JSON_tooltip(asset));
+	var file = asset.file || asset['#parent'] || asset._id;
 	if (file) {
-		if (asset.synced_online && asset.synced_online > asset.time) {
+		// here we want to know if we are in the zombillenium case or in the white fang case
+		if ( (asset['#parent'] && !asset.file) || ( asset.synced_online && asset.synced_online > asset.time )) {
 			var a = document.createElement('a');
 			// we want a real link to the file while firing the viewer when clicked
 			a.setAttribute('href', '/api/file'+file);
@@ -196,10 +195,21 @@ function tableLogTr(asset, noclickontimebool) {
 	td5span0.setAttribute('title', 'edit');
 	td5span1.setAttribute('title', 'delete');
 	td5span1.classList.add('delete');
-	td5span0.innerHTML = '&#7451;';
+	if (require.specified('ui_editor')) {
+		tr.addEventListener('click', function(){
+			initEditor(asset);
+/*
+			if (document.querySelector('tr.selected')){
+				document.querySelector('tr.selected').classList.remove('selected');
+			}
+			tdEdit.parentNode.className = 'selected';
+*/
+		});
+	}
+
 	td5span1.innerHTML = 'x';
-	td5.appendChild(td5span0);
 	td5.appendChild(td5span1);
+
 	td5span1.addEventListener('click', function(e){
 		if (confirm('Delete '+asset._id+' ?')) {
 			damas.delete(asset._id);

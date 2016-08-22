@@ -131,6 +131,9 @@ table.log td.comment {
 table.users .userclass {
 	text-align: center;
 }
+table.log td.buttons {
+	text-align: right;
+}
 @media screen and (min-width: 900px) {
     /* CONTENTS */
     .panelSecond {
