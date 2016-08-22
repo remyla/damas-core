@@ -60,8 +60,9 @@ process_hash = function() {
 
 
 
-define(['domReady', "damas", "utils", "assetViewer"], function (domReady, damas) {
+define(['domReady', "damas", "utils"], function (domReady, damas) {
 	require(["ui_log"], function () {
+	require(["assetViewer"]);
 	require(["ui_upload"]);
 	require(["ui_editor"]);
 	//require(["scripts/assetViewer/ui_overlay"]);
