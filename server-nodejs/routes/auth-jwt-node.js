@@ -73,10 +73,13 @@ module.exports = function (app) {
                 user.token_iat = decoded.iat;
                 delete user.password;
                 debug('Token generated for user: %s, token: %s', user.username, user.token);
-                req.user = user;
-                req.user.address = req.connection.remoteAddress;
-                req.user.class = req.user.class || 'guest';
-                return res.status(200).json(req.user);
+				user.lastlogin = Date.now();
+                db.update([user], function(err, nodes){
+                	req.user = user;
+                	req.user.address = req.connection.remoteAddress;
+                	req.user.class = req.user.class || 'guest';
+                	return res.status(200).json(req.user);
+				});
             });
         });
     };
