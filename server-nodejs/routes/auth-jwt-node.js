@@ -67,19 +67,19 @@ module.exports = function (app) {
                     return res.status(401).json('Invalid username or password');
                 }
                 debug('User authenticated, generating token');
-                user.token = jwt.sign({ _id: user._id, username: user.username }, conf.jwt.secret, { expiresIn: conf.jwt.exp*60 });
-                var decoded = jwt.decode(user.token);
-                user.token_exp = decoded.exp;
-                user.token_iat = decoded.iat;
-                delete user.password;
-                debug('Token generated for user: %s, token: %s', user.username, user.token);
-				user.lastlogin = Date.now();
+                user.lastlogin = Date.now();
                 db.update([user], function(err, nodes){
-                	req.user = user;
-                	req.user.address = req.connection.remoteAddress;
-                	req.user.class = req.user.class || 'guest';
-                	return res.status(200).json(req.user);
-				});
+                    user.token = jwt.sign({ _id: user._id, username: user.username }, conf.jwt.secret, { expiresIn: conf.jwt.exp*60 });
+                    var decoded = jwt.decode(user.token);
+                    user.token_exp = decoded.exp;
+                    user.token_iat = decoded.iat;
+                    delete user.password;
+                    debug('Token generated for user: %s, token: %s', user.username, user.token);
+                    req.user = user;
+                    req.user.address = req.connection.remoteAddress;
+                    req.user.class = req.user.class || 'guest';
+                    return res.status(200).json(req.user);
+                });
             });
         });
     };
