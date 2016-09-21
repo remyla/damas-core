@@ -24,13 +24,14 @@ module.exports = function (app, express){
     });
 
     //Static routes
+    var path = require('path');
     for (var route in conf.staticRoutes) {
         if (!conf.staticRoutes.hasOwnProperty(route)) {
             continue;
         }
         debug('Registered static route: ' + route + " -> " + conf.staticRoutes[route]);
         app.get(route, function( req, res ){
-            res.sendFile(conf.staticRoutes[req.path], { root: '.' });
+            res.sendFile(path.resolve(conf.staticRoutes[req.path]));
         });
     }
     for (var route in conf.publiclyServedFolders) {

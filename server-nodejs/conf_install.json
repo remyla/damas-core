@@ -18,7 +18,10 @@
         "exp" : 1440
     },
     "staticRoutes": {
-        "/console": "public/console.html"
+        "/console": "public/console.html",
+        "/signIn": "public/signIn.html",
+        "/damas.py": "../py/damas.py",
+        "/damas.sh": "../cli/damas.sh"
     },
     "publiclyServedFolders" : [
         "public", "../js"
