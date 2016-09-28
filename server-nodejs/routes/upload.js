@@ -41,7 +41,7 @@ module.exports = function (app, routes) {
                     author: req.user.username,
                     comment: req.body.comment,
                     sha1: sha1,
-                    size: file.size,
+                    file_size: file.size,
                     time: Date.now()
                 };
                 db.create([node], function(err,nodes){
@@ -51,7 +51,7 @@ module.exports = function (app, routes) {
                             author: req.user.username,
                             comment: req.body.comment,
                             sha1: sha1,
-                            size: file.size,
+                            file_size: file.size,
                             time: Date.now()
                         };
                         if (nodes[0] === null) {
