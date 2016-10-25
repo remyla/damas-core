@@ -70,6 +70,13 @@
                 return JSON.parse(xhr.responseText);
             } else {
                 console.warn(xhr.responseText);
+                var myEvent = new CustomEvent("damasapi:error", {
+                    detail: {
+                        error: xhr.status,
+                        text: xhr.responseText
+                    }
+                });
+                window.dispatchEvent(myEvent);
                 return null;
             }
         }
