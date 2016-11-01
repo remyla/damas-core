@@ -7,11 +7,11 @@ module.exports = function (app, routes) {
     var conf = app.locals.conf;
 
     var multer = require('multer');
-    var crypto = require('crypto');
+    //var crypto = require('crypto');
     var mv = require('mv');
     var fs = require('fs');
 
-    var checksum;
+    //var checksum;
     var fileSystem = conf.fileSystem;
     //var versionDir = conf.fileSystem + '.damas/versions/';
 
@@ -21,10 +21,10 @@ module.exports = function (app, routes) {
             next(error);
         },
         onFileUploadStart: function (file) {
-            checksum = crypto.createHash('sha1');
+            //checksum = crypto.createHash('sha1');
         },
         onFileUploadData: function (file, data, req, res) {
-            checksum.update(data);
+            //checksum.update(data);
         },
         onFileUploadComplete: function (file, req, res) {
             var path = decodeURIComponent(req.body.path);
@@ -35,13 +35,14 @@ module.exports = function (app, routes) {
                     console.error(err);
                     return httpStatus(res, 500, 'Upload');
                 }
-                var sha1 = checksum.digest('hex');
+                //var sha1 = checksum.digest('hex');
                 var node = {
                     '#parent': path,
                     author: req.user.username,
                     comment: req.body.comment,
-                    sha1: sha1,
                     file_size: file.size,
+                    'origin': 'online',
+                    //sha1: sha1,
                     time: Date.now()
                 };
                 db.create([node], function(err,nodes){
@@ -50,8 +51,9 @@ module.exports = function (app, routes) {
                             '_id': path,
                             author: req.user.username,
                             comment: req.body.comment,
-                            sha1: sha1,
                             file_size: file.size,
+                            'origin': 'online',
+                            //sha1: sha1,
                             time: Date.now()
                         };
                         if (nodes[0] === null) {
