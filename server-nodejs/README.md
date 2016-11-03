@@ -31,10 +31,12 @@ Copy the default configuration file `conf_install.json` to `conf.json` and edit 
                 "secret" : "webtokensecret",
                 "exp" : 1440
         },
-        "statics" : [
-                "static",
-                "/home/damas/bin/"
+        "staticRoutes" : [
+                "/console": "public/console.html"
         ],
+        "publiclyServedFolders" : [
+                "public", "../js"
+        ]
         "fileSystem": "/PRODUCTIONS/"
 }
 ```

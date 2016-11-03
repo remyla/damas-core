@@ -1,11 +1,10 @@
 /**
- * REST API Testing using Frisby.js - Assigning values to variables in conf.json file
- * Remember: You must configure the parameters and variables in conf-tests-frisby.
- * @requires module:frisby
- * @requires ./conf.json
+ * REST API Testing using Frisby.js
+ * Configuration: conf-tests.js
  */
- var frisby = require('frisby'),
-conf = require('./conf-tests-frisby');
+
+var frisby = require('frisby'),
+conf = require('./conf-tests');
 
 //To test with https
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
@@ -77,9 +76,9 @@ frisby.create('CREATE - should create an object in the database')
     /**
       * Tests for method Read
       */
-    frisby.create('READ - should throw an error (id empty) - Not found')
+    frisby.create('READ - should throw an error (id empty) - Bad Request')
         .get(url + 'read/')
-        .expectStatus(404)
+        .expectStatus(400)
     .toss();
 
     //it always return a non empty array
@@ -88,7 +87,7 @@ frisby.create('CREATE - should create an object in the database')
         .expectStatus(404)
     .toss();
 
-    frisby.create('READ - should throw an error (id empty) - Not found - GET')
+    frisby.create('READ - should throw an error (id not found) - Not found - GET')
         .get(url + 'read/' + idCustom)
         .expectStatus(404)
     .toss();
@@ -99,17 +98,44 @@ frisby.create('CREATE - should create an object in the database')
         .expectHeaderContains('Content-Type', tjson)
     .toss();
 
-    frisby.create('READ - should a record valid with custom id - GET')
+    frisby.create('READ - should get a record valid with custom id - GET')
         .get(url + 'read/' + idCustomEncoded)
         .expectStatus(200)
         .expectHeaderContains('Content-Type', tjson)
     .toss();
 
-    frisby.create('READ - should a record valid with custom id - POST')
+    frisby.create('READ - should throw an error (invalid id) - POST')
         .addHeader('Content-Type', tjson)
-        .post(url + 'read', [idCustom], asJSON)
+        .post(url + 'read/', {}, asJSON)
+        .expectStatus(400)
+    .toss();
+
+    frisby.create('READ - should get a record valid with custom id - POST')
+        .addHeader('Content-Type', tjson)
+        .post(url + 'read/', [idCustom], asJSON)
         .expectStatus(200)
         .expectHeaderContains('Content-Type', tjson)
+    .toss();
+
+    frisby.create('READ - should get 2 records valid - GET')
+        .get(url + 'read/' + idFoundInDb + ',' + idCustomEncoded)
+        .expectStatus(200)
+        .expectHeaderContains('Content-Type', tjson)
+        .expectJSONTypes({
+            0: Object,
+            1: Object
+        })
+    .toss();
+
+    frisby.create('READ - should get 2 records valid - POST')
+        .addHeader('Content-Type', tjson)
+        .post(url + 'read/', [idFoundInDb,idCustom], asJSON)
+        .expectStatus(200)
+        .expectHeaderContains('Content-Type', tjson)
+        .expectJSONTypes({
+            0: Object,
+            1: Object
+        })
     .toss();
 
     /**
@@ -121,9 +147,9 @@ frisby.create('CREATE - should create an object in the database')
         .expectStatus(400)
     .toss();
 
-    frisby.create('UPDATE - should throw an error (invald custom id)')
+    frisby.create('UPDATE - should throw an error (invalid custom id)')
         .addHeader('Content-Type', tjson)
-        .put(url + 'update/' + idCustom, {'key' : ''}, asJSON)
+        .put(url + 'update/' + idCustom, {'key' : 'val'}, asJSON)
         .expectStatus(404)
     .toss();
 
@@ -133,10 +159,10 @@ frisby.create('CREATE - should create an object in the database')
         .expectStatus(400)
     .toss();
 
-    frisby.create('UPDATE - should throw an error (format data invalid) with invalid id')
+    frisby.create('UPDATE - should throw an error (id not found)')
         .addHeader('Content-Type', tjson)
-        .put(url + 'update/' + idNotFoundinDb, {}, asJSON)
-        .expectStatus(400)
+        .put(url + 'update/' + idNotFoundinDb, {'key': 'val'}, asJSON)
+        .expectStatus(404)
     .toss();
 
     frisby.create('UPDATE - should throw an error (null data) with valid id')
@@ -148,6 +174,7 @@ frisby.create('CREATE - should create an object in the database')
         .addHeader('Content-Type', tjson)
         .put(url + 'update/' + idFoundInDb, {'a':'c'}, asJSON)
         .expectHeaderContains('Content-Type', tjson)
+        .expectJSON({'a': 'c'})
         .expectStatus(200)
     .toss();
 
@@ -155,9 +182,7 @@ frisby.create('CREATE - should create an object in the database')
         .addHeader('Content-Type', tjson)
         .put(url + 'update/' + idFoundInDb, {'b': 2}, asJSON)
         .expectHeaderContains('Content-Type', tjson)
-        .expectJSONTypes({
-            0: {'b': Number}
-        })
+        .expectJSON({'b': 2})
         .expectStatus(200)
     .toss();
 
@@ -168,35 +193,54 @@ frisby.create('CREATE - should create an object in the database')
         .expectStatus(200)
     .toss();
 
-    /**
+    frisby.create('UPDATE - should update 2 documents')
+        .addHeader('Content-Type', tjson)
+        .put(url + 'update/' + idFoundInDb + ',' + idCustomEncoded, {'c':'d'},
+            asJSON)
+        .expectHeaderContains('Content-Type', tjson)
+        .expectJSONTypes('*', {'c':'d'})
+        .expectStatus(200)
+    .toss();
+
+     /**
       * Tests for method Graph
       */
     //it always return a non empty array
-    frisby.create('GRAPH - should throw an error (id empty) - Not found')
-        .get(url + 'graph')
-        .expectStatus(404)
+    frisby.create('GRAPH - should throw an error (id empty) - Bad Request')
+        .get(url + 'graph/')
+        .expectStatus(400)
     .toss();
 
     frisby.create('GRAPH - should throw an error (id not found) - Not found')
-        .get(url + 'graph' + idNotFoundinDb)
+        .get(url + 'graph/' + idNotFoundinDb)
         .expectStatus(404)
     .toss();
 
     frisby.create('GRAPH - should throw an error (id empty) - Not found')
-        .get(url + 'graph' + idCustom)
+        .get(url + 'graph/' + idCustom)
         .expectStatus(404)
     .toss();
 
     frisby.create('GRAPH - should get a record valid')
-        .get(url + 'graph' + idFoundInDb)
+        .get(url + 'graph/' + idFoundInDb)
         .expectStatus(200)
         .expectHeaderContains('Content-Type', tjson)
     .toss();
 
     frisby.create('GRAPH - should a record valid with custom id')
-        .get(url + 'graph' + idCustomEncoded)
+        .get(url + 'graph/' + idCustomEncoded)
         .expectStatus(200)
         .expectHeaderContains('Content-Type', tjson)
+    .toss();
+
+    frisby.create('GRAPH - should get 2 records valid')
+        .get(url + 'graph/' + idFoundInDb + ',' + idCustomEncoded)
+        .expectStatus(200)
+        .expectHeaderContains('Content-Type', tjson)
+        .expectJSONTypes({
+            0: Object,
+            1: Object
+        })
     .toss();
 
     /**
@@ -230,7 +274,7 @@ frisby.create('CREATE - should create an object in the database')
 
     frisby.create('LOCK - should throw an error (already locked)')
         .put(url + 'lock/' + idCustomEncoded)
-        .expectStatus(409)
+        .expectStatus(200)
     .toss();
 
     /**
@@ -263,22 +307,20 @@ frisby.create('CREATE - should create an object in the database')
 
     frisby.create('UNLOCK - should throw an error (already unlocked)')
         .put(url + 'unlock/' + idCustomEncoded)
-        .expectStatus(409)
+        .expectStatus(200)
     .toss();
 
     /**
      * Tests for method Delete
      */
-    //404 could be better
-    frisby.create('DELETE - should throw an error (id empty)')
+    frisby.create('DELETE - should throw an error (id empty) - Bad Request')
         .delete(url + 'delete/')
-        .expectStatus(409)
+        .expectStatus(400)
     .toss();
 
-    //404 could be better
     frisby.create('DELETE - should throw an error (id valid but not found in the DB)')
         .delete(url + 'delete/' + idNotFoundinDb)
-        .expectStatus(409)
+        .expectStatus(404)
     .toss();
 
     frisby.create('DELETE - should delete a document with an id valid')
@@ -290,4 +332,46 @@ frisby.create('CREATE - should create an object in the database')
         .delete(url + 'delete/' + idCustomEncoded)
         .expectStatus(200)
     .toss();
+
+    /**
+     * Tests for methods Create and Delete with multiple parameters
+     */
+    frisby.create('CREATE - should create 2 objects in the database')
+        .addHeader('Content-Type', tjson)
+        .post(url + 'create/', [
+            {'key': 'value', num: 3},
+            {'_id': idCustom, 'key': 'value', num: 3}
+         ], asJSON)
+        .expectStatus(201)
+        .expectHeaderContains('Content-Type', tjson)
+        .expectJSON('*', {
+            'key': 'value',
+            'num': 3
+        })
+        .after(function (error, response, body) {
+
+        var res = response.body,
+        idFoundInDb = res[0]._id;
+
+        frisby.create('DELETE - should delete 2 documents')
+            .delete(url + 'delete/' + idFoundInDb + ',' + idCustomEncoded)
+            .expectStatus(200)
+        .toss();
+
+        frisby.create('CREATE - should throw an error (duplicate id)')
+            .addHeader('Content-Type', tjson)
+            .post(url + 'create/',
+                [{'_id': idCustom, 'key': 'value'}, {'_id': idCustom}], asJSON)
+            .expectStatus(207)
+            .expectHeaderContains('Content-Type', tjson)
+            .after(function (error, response, body) {
+
+            frisby.create('DELETE - should throw an error (not all document deleted)')
+                .delete(url + 'delete/' + idCustomEncoded + ',' + idNotFoundinDb)
+                .expectStatus(207)
+            .toss();
+
+        }).toss();
+
+    }).toss();
 }).toss();

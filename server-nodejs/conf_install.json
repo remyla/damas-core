@@ -12,9 +12,16 @@
         "options" : { "auto_reconnect" : true }
     },
     "jwt" : {
+        "required": false,
         "passwordHashAlgorithm" : "sha1",
         "secret" : "webtokensecret",
         "exp" : 1440
+    },
+    "staticRoutes": {
+        "/console": "public/console.html",
+        "/signIn": "public/signIn.html",
+        "/damas.py": "../py/damas.py",
+        "/damas.sh": "../cli/damas.sh"
     },
     "publiclyServedFolders" : [
         "public", "../js"

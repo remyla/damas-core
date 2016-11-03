@@ -1,0 +1,119 @@
+<html>
+	<head>
+		<script src="damas.js"></script>
+		<script src="utils.js"></script>
+		<script type="text/javascript">
+			document.addEventListener('DOMContentLoaded', function() {
+
+				/* UI */
+				var signOut = document.getElementById('signOut');
+				signOut.addEventListener('click', function( e ){
+					damas.signOut( function(e){
+						localStorage.removeItem("token");
+						localStorage.removeItem("user");
+						document.location.reload();
+					});
+				});
+				var form = document.getElementById('signInForm');
+				form.addEventListener('submit', function( e ){
+					//e.stopPropagation();
+					e.preventDefault();
+					var res = damas.signIn(form.elements['username'].value, form.elements['password'].value, function( res ){
+						if (!res)
+						{
+							alert('signIn failed');
+							return;
+						}
+						if (localStorage)
+						{
+							localStorage.setItem("token", damas.token);
+							document.cookies = "token="+damas.token;
+							damas.user.token = undefined;
+							localStorage.setItem("user", JSON.stringify(damas.user));
+						}
+						if (window.location.href.indexOf('back')!==-1)
+							window.location = window.location.href.match(/^.*back=(.*)$/)[1]
+						else
+							window.history.back(-1);
+					});
+					return false;
+				});
+
+				/* START */
+				damas_connect('/api/', function(res){
+					if (res){
+						if (damas.user)
+						{
+							document.querySelector('.username').innerHTML = damas.user.username;
+							document.querySelector('#signOut').style.display = 'inline';
+							document.querySelector('#menubar1').style.display = 'block';
+						}
+						else {
+							document.querySelector('#connection').style.display = 'block';
+						}
+						document.querySelector('#menubar2').style.display = 'block';
+						//show_log();
+					}
+					else
+					{
+						document.querySelector('#connection').style.display = 'block';
+					}
+				});
+/*
+				damas.server = '/api/';
+				if (localStorage)
+				{
+					damas.token = localStorage.getItem("token");
+					damas.user = JSON.parse(localStorage.getItem("user"));
+				}
+				damas.verify( function( res ){
+				});
+*/
+			});
+		</script>
+		<style>
+			body {
+				text-align: center;
+				font-family: monospace;
+			}
+			#connection {
+				display: none;
+			}
+			#menubar1 {
+				display: none;
+			}
+			#signOut {
+				display: none;
+			}
+			#menubar2 {
+				display: none;
+			}
+			.menubar {
+				text-align: right;
+			}
+			#contents {
+				text-align: left;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="menubar1" class="menubar">
+			Connecté.e en tant que <span class="username"></span>
+		</div>
+		<div id="menubar2" class="menubar">
+			<button id="signOut">sign out</button>
+		</div>
+		<div id="connection">
+			<h1>Connexion</h1>
+			<form id="signInForm">
+				<input type="text" placeholder="login" required="required" name="username"/>
+				<br/>
+				<input type="password" placeholder="password" required="required" name="password"/>
+				<br/>
+				<input type="submit" value="SignIn"/>
+			</form>
+		</div>
+		<div id="contents">
+		</div>
+	</body>
+</html>

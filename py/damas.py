@@ -46,8 +46,9 @@ class http_connection( object ) :
 		'''
 		headers = {'content-type': 'application/json'}
 		headers.update(self.headers)
-		r = requests.post(self.serverURL+"/create/", data=json.dumps(keys), headers=headers, verify=False)
-		if r.status_code == 201:
+		r = requests.post(self.serverURL+"/create/", data=json.dumps(keys),
+			headers=headers, verify=False)
+		if r.status_code == 201 or r.status_code == 207:
 			return json.loads(r.text)
 		return None
 
@@ -59,26 +60,27 @@ class http_connection( object ) :
 		'''
 		headers = {'content-type': 'application/json'}
 		headers.update(self.headers)
-		r = requests.post(self.serverURL+"/read/", data=json.dumps(id_), headers=headers, verify=False)
-		if r.status_code == 200:
+		r = requests.post(self.serverURL+"/read/", data=json.dumps(id_),
+			headers=headers, verify=False)
+		if r.status_code == 200 or r.status_code == 207:
 			return json.loads(r.text)
 		return None
 
-	def update( self, id_, keys ) :
+	def update( self, id_, node ) :
 		'''
 		Modify a node(s). If an attribute with that name is already present in
 		the element, its value is changed to be that of the value parameter.
 		Specifying a None value for a key will remove the key from the node
 		@param {String} id_ Element index
-		@param {Hash} keys to add and remove
+		@param {Hash} node with keys to add and remove
 		@returns {Hash} updated node or false on failure
 		'''
-		if isinstance(id_, (tuple,list,set)):
-			id_ = ",".join(id_)
+		node['_id'] = id_;
 		headers = {'content-type': 'application/json'}
 		headers.update(self.headers)
-		r = requests.put(self.serverURL+'/update/'+id_, data=json.dumps(keys), headers=headers, verify=False)
-		if r.status_code == 200:
+		r = requests.put(self.serverURL+'/update/', data=json.dumps(node),
+			headers=headers, verify=False)
+		if r.status_code == 200 or r.status_code == 207:
 			return json.loads(r.text)
 		return None
 
@@ -88,10 +90,13 @@ class http_connection( object ) :
 		@param {String} id_ the internal node index to delete
 		@returns {Boolean} True on success, False otherwise
 		'''
-		if isinstance(id_, (tuple,list,set)):
-			id_ = ",".join(id_)
-		r = requests.delete(self.serverURL+'/delete/'+id_, headers=self.headers, verify=False)
-		return r.status_code == 200
+		headers = {'content-type': 'application/json'}
+		headers.update(self.headers)
+		r = requests.delete(self.serverURL+'/delete/', data=json.dumps(id_),
+			headers=headers, verify=False)
+		if r.status_code == 200 or r.status_code == 207:
+			return json.loads(r.text)
+		return None
 
 	def search( self, query ) :
 		'''
@@ -99,28 +104,30 @@ class http_connection( object ) :
 		@param {String} query string
 		@returns {Array} array of element indexes or None if no element found
 		'''
-		r = requests.get(self.serverURL+'/search/'+query, headers=self.headers, verify=False)
+		r = requests.get(self.serverURL+'/search/'+query,
+			headers=self.headers, verify=False)
 		if r.status_code == 200:
 			return json.loads(r.text)
 		return None
 
 	def search_one( self, query ) :
 		'''
-		Find nodes wearing the specified key(s) and return the first
-                occurence found
+		Find nodes wearing the specified key(s) and return the first occurence
 		@param {String} query string
 		@returns {Array} array of element indexes or None if no element found
 		'''
-		r = requests.get(self.serverURL+'/search_one/'+query, headers=self.headers, verify=False)
+		r = requests.get(self.serverURL+'/search_one/'+query,
+			headers=self.headers, verify=False)
 		if r.status_code == 200:
 			return json.loads(r.text)
 		return None
 
-	def search_mongo( self, query, sort=None, limit=None, skip=None):
+	def search_mongo( self, query, sort, limit, skip ) :
 		data = {"query":query, "sort":sort, "limit":limit, "skip":skip}
 		headers = {'content-type': 'application/json'}
 		headers.update(self.headers)
-		r = requests.post(self.serverURL+'/search_mongo', data=json.dumps(data), headers=headers, verify=False)
+		r = requests.post(self.serverURL+'/search_mongo',
+			data=json.dumps(data), headers=headers, verify=False)
 		if r.status_code == 200:
 			return json.loads(r.text)
 		return None
@@ -131,10 +138,11 @@ class http_connection( object ) :
 		@param {String} id_ the node index(es) to search
 		@returns {Hash} node or false on failure
 		'''
-		if isinstance(id_, (tuple,list,set)):
-			id_ = ",".join(id_)
-		r = requests.get(self.serverURL+'/graph/'+id_, headers=self.headers, verify=False)
-		if r.status_code == 200:
+		headers = {'content-type': 'application/json'}
+		headers.update(self.headers)
+		r = requests.post(self.serverURL+'/graph/0/', data=json.dumps(id_),
+			headers=headers, verify=False)
+		if r.status_code == 200 or r.status_code == 207:
 			return json.loads(r.text)
 		return None
 
@@ -144,7 +152,10 @@ class http_connection( object ) :
 		@param {String} id_ the internal node index
 		@returns {Boolean} True on success, False otherwise
 		'''
-		r = requests.put(self.serverURL+'/lock/'+id_, headers=self.headers, verify=False)
+		headers = {'content-type': 'application/json'}
+		headers.update(self.headers)
+		r = requests.put(self.serverURL+'/lock/', data=json.dumps(id_),
+			headers=headers, verify=False)
 		return r.status_code == 200
 
 	def unlock( self, id_ ) :
@@ -153,7 +164,10 @@ class http_connection( object ) :
 		@param {String} id_ the internal node index
 		@returns {Boolean} True on success, False otherwise
 		'''
-		r = requests.put(self.serverURL+'/unlock/'+id_, headers=self.headers, verify=False)
+		headers = {'content-type': 'application/json'}
+		headers.update(self.headers)
+		r = requests.put(self.serverURL+'/unlock/', data=json.dumps(id_),
+			headers=headers, verify=False)
 		return r.status_code == 200
 
 	def version( self, id_, keys ) :
@@ -164,18 +178,19 @@ class http_connection( object ) :
 		'''
 		headers = {'content-type': 'application/json'}
 		headers.update(self.headers)
-		r = requests.post('%s/version/%s' % (self.serverURL, id_), data=json.dumps(keys), headers=headers, verify=False)
+		r = requests.post('%s/version/%s' % (self.serverURL, id_),
+			data=json.dumps(keys), headers=headers, verify=False)
 		if r.status_code == 201:
 			return json.loads(r.text)
 		return None
 
 	""" commented until proper implementation
 	def link( self, target, sources, keys ) :
-		'''
+		''
 		Create a node edge from sources to target wearing the specified keys
 		@param {Hash} keys of the new node
 		@returns {Hash} Array of created edges ids on success, None otherwise
-		'''
+		''
 		data = {"target":target, "sources":sources, "keys":keys}
 		headers = {'content-type': 'application/json'}
 		headers.update(self.headers)
@@ -187,7 +202,7 @@ class http_connection( object ) :
 
 
 	# USERS AUTHENTICATION METHODS
- 
+
 	def signIn( self, username, password ) :
 		'''
 		@return {Boolean} True on success, False otherwise
@@ -203,14 +218,14 @@ class http_connection( object ) :
 		# try: a = urllib2.urlopen( self.serverURL + '/authentication.php?cmd=login&user=' + username + '&password=' + password )
 		# except: return False
 		# return json.loads( a.read() )
- 
+
 	def signOut( self ) :
 		'''
 		@return {Boolean} True on success, False otherwise
 		'''
 		self.token =  None
 		del self.headers['Authorization']
- 
+
 	def verify( self ) :
 		'''
 		@return {dict} a dictionary containing username and userclass on success, None otherwise

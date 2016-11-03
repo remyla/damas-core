@@ -3,11 +3,12 @@
  * Licensed under the GNU GPL v3
  */
 
-module.exports = function (app, express) {
+module.exports = function (app, routes) {
     var db = app.locals.db;
+    var conf = app.locals.conf;
     //methodOverride = require('method-override'),
     var fs = require('fs');
-    var multer = require('multer');
+    var events = require('../events');
 
 /*
     app.use(methodOverride(function (req, res) {
@@ -22,7 +23,7 @@ module.exports = function (app, express) {
     //Handle errors
     app.use(function (err, req, res, next) {
         if (err) {
-            console.log("An error has occurred: "+ err);
+            console.log('An error has occurred: '+ err);
         } else {
             next();
         }
@@ -43,45 +44,45 @@ module.exports = function (app, express) {
      * Insert new nodes
      *
      * HTTP status codes:
-     * - 201: OK (nodes created)
-     * - 400: Bad Request (not formatted correctly)
-     * ? 403: Forbidden (the user does not have the right permissions)
-     * - 409: Conflict (some nodes already exist with these identifiers)
+     * - 201: Created (nodes created)
+     * - 207: Multi-Status (some nodes already exist with these identifiers)
+     * - 400: Bad request (not formatted correctly)
+     * - 409: Conflict (all nodes already exist with these identifiers)
      */
     create = function (req, res) {
-        var nodes = req.body;
-        if (!Array.isArray(nodes)) {
-            nodes = [nodes];
-        }
+        var nodes = Array.isArray(req.body) ? req.body : [req.body];
 
-        // Control properties
-        var author = req.user.username || req.connection.remoteAddress;
-        var time = Date.now();
-        for (var n in nodes) {
-            if ('object' !== typeof nodes[n]) {
-                res.status(400);
-                res.send('create error: the specified elements must be objects');
-                return;
-            }
-            nodes[n].author = author;
-            nodes[n].time = time;
+        var controlProperties = {
+            author: req.user.username,
+            time: Date.now()
         }
+        for (var i = 0; i < nodes.length; ++i) {
+            if ('object' !== typeof nodes[i] || null === nodes[i]) {
+                return httpStatus(res, 400, 'Create');
+            }
+            nodes[i] = Object.assign({}, controlProperties, nodes[i]);
+        }
+        nodes = unfoldIds(nodes);
 
-        db.create(nodes, function (error, doc) {
-            if (error) {
-                res.status(409);
-                res.send('Create error, please change your values');
-                return;
+        events.fire('pre-create', nodes).then(function (data) {
+            if (data.status) {
+                return httpStatus(res, data.status, 'Create');
             }
-            // FIXME compatibility hack
-            // Output in the same data type as the input
-            if (Array.isArray(req.body)) {
-                res.status(201);
-                res.json(doc);
-            } else {
-                res.status(201);
-                res.json(doc[0]);
-            }
+            db.create(data.nodes || nodes, function (error, doc) {
+                if (error) {
+                    return httpStatus(res, 409, 'Create');
+                }
+                var response = getMultipleResponse(doc);
+                if (response.fail) {
+                    httpStatus(res, 409, 'Create');
+                } else if (response.partial) {
+                    httpStatus(res, 207, doc);
+                } else if (1 === doc.length && !isArray(req)) {
+                    httpStatus(res, 201, doc[0]);
+                } else {
+                    httpStatus(res, 201, doc);
+                }
+            });
         });
     }; // create()
 
@@ -96,41 +97,30 @@ module.exports = function (app, express) {
      *
      * HTTP status codes:
      * - 200: OK (nodes retrieved)
-     * - 400: Bad Request (not formatted correctly)
-     * - 404: Not Found (the nodes do not exist)
+     * - 207: Multi-Status (some nodes do not exist)
+     * - 400: Bad request (not formatted correctly)
+     * - 404: Not Found (all the nodes do not exist)
      */
     read = function (req, res) {
-        var id = req.params.id || req.body;
-        if (!id) {
-            res.status(400);
-            res.send('read error: the specified id is not valid');
-            return;
+        var ids = getRequestIds(req);
+        if (!ids) {
+            return httpStatus(res, 400, 'Read');
         }
-        if (!Array.isArray(id)) {
-            id = id.split(',');
-        }
-        db.read(id, function (error, doc) {
+
+        db.read(ids, function (error, doc) {
             if (error) {
-                res.status(409);
-                res.send('read error, please change your values');
-                return;
+                return httpStatus(res, 409, 'Read');
             }
-            /*FIXME always return a non empty array
-            if (0 === doc.length) {
-                res.status(404);
-                res.send('Id not found');
-                return;
-            }*/
-            res.setHeader('Content-Type', 'application/json; charset=utf-8');
-            res.status(200);
-            res.write('[' + JSON.stringify(doc.shift()));
-            var chunkSize = 100;
-            for (var i = 0; i < doc.length; i += chunkSize) {
-                res.write(',' +
-                    JSON.stringify(doc.slice(i, i + chunkSize))
-                    .slice(1, -1));
+            var response = getMultipleResponse(doc);
+            if (response.fail) {
+                httpStatus(res, 404, 'Read');
+            } else if (response.partial) {
+                httpStatus(res, 207, doc);
+            } else if (1 === doc.length && !isArray(req)) {
+                httpStatus(res, 200, doc[0]);
+            } else {
+                httpStatus(res, 200, doc);
             }
-            res.end(']');
         });
     }; // read()
 
@@ -145,31 +135,41 @@ module.exports = function (app, express) {
      *
      * HTTP status codes:
      * - 200: OK (nodes updated)
-     * - 400: Bad Request (not formatted correctly)
-     * ? 403: Forbidden (the user does not have the right permissions)
-     * - 404: Not Found (the nodes do not exist)
+     * - 207: Multi-Status (some nodes do not exist)
+     * - 400: Bad request (not formatted correctly)
+     * - 404: Not Found (all the nodes do not exist)
      */
     update = function (req, res) {
-/*
-        if (!ObjectId.isValid(req.params.id)) {
-            res.status(400);
-            res.send('update error: the specified id is not valid');
-            return;
+        function checkObject(obj) {
+            // Needs at least 2 keys, _id + a key to update
+            return 'object' === typeof obj && 1 < Object.keys(obj).length;
         }
-*/        if (Object.keys(req.body).length === 0) {
-            res.status(400);
-            res.send('update error: the body of the request is empty');
-            return;
-        }
-
-        db.update(req.params.id.split(","), req.body, function (error, doc) {
-            if (error) {
-                res.status(409);
-                res.send('update error, please change your values');
-                return;
+        var nodes = Array.isArray(req.body) ? req.body : [req.body];
+        for (var i = 0; i < nodes.length; ++i) {
+            if (!checkObject(nodes[i]) || !nodes[i]._id) {
+                return httpStatus(res, 400, 'Update');
             }
-            res.status(200);
-            res.json(doc);
+        }
+        nodes = unfoldIds(nodes);
+        events.fire('pre-update', nodes).then(function (data) {
+            if (data.status) {
+                return httpStatus(res, data.status, 'Update');
+            }
+            db.update(data.nodes || nodes, function (error, doc) {
+                if (error) {
+                    return httpStatus(res, 409, 'Update');
+                }
+                var response = getMultipleResponse(doc);
+                if (response.fail) {
+                    httpStatus(res, 404, 'Update');
+                } else if (response.partial) {
+                    httpStatus(res, 207, doc);
+                } else if (1 === doc.length && !isArray(req)) {
+                    httpStatus(res, 200, doc[0]);
+                } else {
+                    httpStatus(res, 200, doc);
+                }
+            });
         });
     }; // update()
 
@@ -184,25 +184,32 @@ module.exports = function (app, express) {
      *
      * HTTP status codes:
      * - 200: OK (nodes deleted (or not found))
-     * - 400: Bad Request (not formatted correctly)
-     * ? 403: Forbidden (the user does not have the right permissions)
+     * - 207: Multi-Status (some nodes do not exist)
+     * - 400: Bad request (not formatted correctly)
+     * - 404: Not Found (all the nodes do not exist)
      */
     deleteNode = function (req, res) {
-        /* this check should not be based on ObjectId - disabled
-        if (!ObjectId.isValid(req.params.id)) {
-            res.status(400);
-            res.send('error: the specified id is not valid');
-            return;
+        var ids = getBodyIds(req);
+        if (!ids) {
+            return httpStatus(res, 400, 'Remove');
         }
-        */
-        db.remove(req.params.id.split(","), function (error, doc) {
-            if (error) {
-                res.status(409);
-                res.send('delete error, please change your values');
-                return;
+
+        events.fire('pre-remove', ids).then(function (data) {
+            if (data.status) {
+                return httpStatus(res, data.status, 'Remove');
             }
-            res.status(200);
-            res.send(doc.result.n + " documents deleted.");
+            db.remove(data.ids || ids, function (error, doc) {
+                var response = getMultipleResponse(doc);
+                if (response.fail) {
+                    httpStatus(res, 404, 'Remove');
+                } else if (response.partial) {
+                    httpStatus(res, 207, doc);
+                } else if (1 === doc.length && !isArray(req)) {
+                    httpStatus(res, 200, doc[0]);
+                } else {
+                    httpStatus(res, 200, doc);
+                }
+            });
         });
     }; // deleteNode()
 
@@ -217,29 +224,28 @@ module.exports = function (app, express) {
      *
      * HTTP status codes:
      * - 200: OK (graph retrieved)
-     * - 400: Bad Request (not formatted correctly)
-     * - 404: Not Found (the nodes do not exist)
+     * - 207: Multi-Status (some nodes do not exist)
+     * - 400: Bad request (not formatted correctly)
+     * - 404: Not Found (all the nodes do not exist)
      */
     graph = function (req, res) {
-        var id = req.params.id || req.body.id;
-        if (!id || id == "undefined") {
-            res.status(400);
-            res.send('Bad command');
-            return;
+        var depth = req.params.depth || 0;
+        var ids = getRequestIds(req);
+        if (!ids) {
+            return httpStatus(res, 400, 'Remove');
         }
-        //obsolete
-        db.graph(id.split(","), function (error, nodes) {
+
+        db.graph(ids, depth, function (error, nodes) {
             if (error) {
-                res.status(409);
-                res.send('graph error, please change your values');
-                return;
+                return httpStatus(res, 409, 'Graph');
             }
-            if (nodes) {
-                res.status(200);
-                res.json(nodes);
+            var response = getMultipleResponse(nodes);
+            if (response.fail) {
+                httpStatus(res, 404, 'Graph');
+            } else if (response.partial) {
+                httpStatus(res, 207, nodes);
             } else {
-                res.status(404);
-                res.send('Id not found');
+                httpStatus(res, 200, nodes); // Always send an array for graph
             }
         });
     }; // graph()
@@ -259,21 +265,17 @@ module.exports = function (app, express) {
      */
     search = function (req, res) {
         var q = req.params.query || req.body.query;
-        if (!q || q == "undefined") {
-            res.status(400);
-            res.send('Bad command');
-            return;
+        if (!q || q == 'undefined') {
+            return httpStatus(res, 400, 'Search');
         }
         q = decodeURIComponent(q);
         q = q.replace(/\s+/g, ' ').trim();
         db.searchFromText(q, function (error, doc) {
             if (error) {
-                res.status(409);
-                res.send('search error, please change your values');
-                return;
+                httpStatus(res, 409, 'Search');
+            } else {
+                httpStatus(res, 200, doc); // Always send an array for search
             }
-            res.status(200);
-            res.json(doc);
         });
     }; // search()
 
@@ -284,8 +286,7 @@ module.exports = function (app, express) {
      * Method: GET
      * URI: /api/search_one/
      *
-     * Search for nodes in the database, returning the first matching occurrence
-     * as a node object.
+     * Search for nodes in the database, returning the first matching object.
      *
      * HTTP status codes:
      * - 200: OK (search successful, even without results)
@@ -293,33 +294,22 @@ module.exports = function (app, express) {
      */
     search_one = function (req, res) {
         var q = req.params.query || req.body.query;
-        if (!q || q == "undefined") {
-            res.status(400);
-            res.send('Bad command');
-            return;
+        if (!q || q == 'undefined') {
+            return httpStatus(res, 400, 'Search_one');
         }
         q = decodeURIComponent(q);
         q = q.replace(/\s+/g, ' ').trim();
         db.searchFromText(q, function (error, doc) {
             if (error) {
-                res.status(409);
-                res.send('search_one error, please change your values');
-                return;
+                return httpStatus(res, 409, 'Search_one');
             }
-            res.status(200);
-            if (doc.length === 0) {
-                res.json(null);
-            } else {
-                db.read([doc[0]], function(error, node) {
-                    if (error) {
-                        res.status(409);
-                        res.send('read error, please change your values');
-                        return;
-                    }
-                    res.status(200);
-                    res.json(node[0]);
-                });
-            }
+            db.read([doc[0]], function (error, nodes) {
+                if (error) {
+                    httpStatus(res, 409, 'Search_one');
+                } else {
+                    httpStatus(res, 200, nodes[0]);
+                }
+            });
         });
     }; // search_one()
 
@@ -338,10 +328,8 @@ module.exports = function (app, express) {
      * - 501: Not Implemented (MongoDB not in use)
      */
     search_mongo = function (req, res) {
-        if (typeof db.mongo_search !== "function") {
-            res.status(409);
-            res.send('MongoDB not in use');
-            return;
+        if (typeof db.mongo_search !== 'function') {
+            return httpStatus(res, 501, 'Mongo');
         }
         var query, sort, limit, skip;
         if (req.body.queryobj) {
@@ -363,7 +351,7 @@ module.exports = function (app, express) {
                     continue;
                 }
                 if ('string' === typeof obj[key]) {
-                    if (obj[key].indexOf('REGEX_') === 0) {
+                    if (0 === obj[key].indexOf('REGEX_')) {
                         obj[key] = new RegExp(obj[key].replace('REGEX_', ''));
                     }
                 }
@@ -372,11 +360,9 @@ module.exports = function (app, express) {
         prepare_regexes(query);
         db.mongo_search(query, sort, skip, limit, function (err, ids) {
             if (err) {
-                res.status(409);
-                res.send('mongodb find error');
+                httpStatus(res, 409, 'Search_mongo');
             } else {
-                res.status(200);
-                res.json(ids);
+                httpStatus(res, 200, ids);
             }
         });
     }; // search_mongo()
@@ -393,11 +379,10 @@ module.exports = function (app, express) {
             keys.mysqlid = node.id;
             db.search({mysqlid:keys.mysqlid}, function (err, res) {
                 if (err) {
-                    console.log('ERROR');
-                    return;
+                    return console.log('ERROR');
                 }
-                if (res.length === 0) {
-                    db.create(keys, function (err, n) {
+                if (0 === res.length) {
+                    db.create([keys], function (err, n) {
                         if (err) console.log('ERROR create')
                     });
                 } else {
@@ -418,7 +403,7 @@ module.exports = function (app, express) {
                                     console.log('LINK ERR');
                                     return;
                                 }
-                                db.create({src_id: res1[0], tgt_id: res2[0]},
+                                db.create([{src_id: res1[0], tgt_id: res2[0]}],
                                         function () {});
                             });
                         });
@@ -446,13 +431,11 @@ module.exports = function (app, express) {
      * - 404: Not Found (the file does not exist)
      */
     getFile = function (req, res) {
-        var path = fileSystem + decodeURIComponent(req.params.path);
-        path = path.replace(/:/g, "").replace(/\/+/g, "/");
+        var path = conf.fileSystem + decodeURIComponent(req.params.path);
+        path = path.replace(/:/g, '').replace(/\/+/g, '/');
         fs.exists(path, function (exists) {
             if (!exists) {
-                res.status(404);
-                res.send('File not found');
-                return;
+                return httpStatus(res, 404, 'File');
             }
             var stream = fs.createReadStream(path, {bufferSize: 64 * 1024});
             res.writeHead(200);
@@ -465,31 +448,37 @@ module.exports = function (app, express) {
      * Register the operations
      */
 
-    // CRUD operations
+    // CRUD operations using nodes
     app.post('/api/create/', create);
-    app.get('/api/read/:id', read);
+    app.put('/api/update/', update);
+
+    // CRUD operations using ids
+    app.get('/api/read/:id(*)', read);
     app.post('/api/read/', read);
-    app.put('/api/update/:id', update);
-    app.delete('/api/delete/:id', deleteNode);
+    app.delete('/api/delete/', deleteNode);
+    app.get('/api/graph/:depth/:id(*)', graph);
+    app.post('/api/graph/:depth', graph);
 
     // Search operations
     app.get('/api/search/:query(*)', search);
     app.get('/api/search_one/:query(*)', search_one);
-    app.post('/api/search_mongo', search_mongo);
-    app.get('/api/graph/', graph);
-
-    // CRUD operations (deprecated)
-    app.post('/api/', create);
-    app.get('/api/:id', read);
-    app.put('/api/:id', update);
-    app.delete('/api/:id', deleteNode);
+    app.post('/api/search_mongo/', search_mongo);
 
     // Extra operations
-    app.get('/api/graph/:id', graph);
     app.get('/api/file/:path(*)', getFile); // untested
-    app.post('/api/import', importJSON); // untested
+    app.post('/api/import/', importJSON); // untested
     //app.get('/subdirs/:path', getSubdirs);
     //app.get('/subdirs', getSubdirs);
+
+    routes = Object.assign(routes, {
+        create: create,
+        read: read,
+        update: update,
+        deleteNode: deleteNode,
+        graph: graph,
+        search: search,
+        search_one: search_one,
+    });
 }
 
 

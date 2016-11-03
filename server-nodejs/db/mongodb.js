@@ -77,12 +77,17 @@ module.exports = function (conf) {
      */
     self.create = function (nodes, callback) {
         self.getCollection(callback, function (coll) {
-            coll.insert(nodes, {'safe': true}, function (err, result) {
-                if (err) {
-                    callback(true);
-                    return;
+            function createNode(node, next) {
+                if (node._id) {
+                    node = Object.assign(node, self.exportId(node._id));
                 }
-                callback(false, result.ops);
+                coll.insert(node, {safe: true}, function (err, result) {
+                    next(null, err ? null : result.ops[0]);
+                });
+            }
+            async.mapLimit(nodes, 100, createNode, function (err, array) {
+                callback(false, array);
+                fireEvent('create', array);
             });
         });
     }; // create()
@@ -124,34 +129,34 @@ module.exports = function (conf) {
      * @param {object} keys - New keys to define on the nodes
      * @param {function} callback - Callback function to routes.js
      */
-    self.update = function (ids, keys, callback) {
+    self.update = function (nodes, callback) {
         self.getCollection(callback, function (coll) {
-            var keysToUnset = {};
-            var keysToSet = {};
-            var toUpdate = {};
+            function updateNode(node, next) {
+                var query = self.exportId(node._id);
 
-            for (var k in keys) {
-                console.log(keys[k] + ' is type : ' + typeof keys[k]);
-                if (keys[k] === null) {
-                    keysToUnset[k] = '';
-                } else {
-                    keysToSet[k] = keys[k];
+                // Separate operations
+                var up = {$set: {}, $unset: {}};
+                for (var k in node) {
+                    if (k !== '_id') {
+                        var op = (node[k] === null) ? '$unset' : '$set';
+                        up[op][k] = node[k];
+                    }
                 }
-            }
-            if (Object.keys(keysToSet).length > 0) {
-                toUpdate.$set = keysToSet;
-            }
-            if (Object.keys(keysToUnset).length > 0) {
-                toUpdate.$unset = keysToUnset;
-            }
-            coll.update(self.querify(ids), toUpdate, {multi: true},
-                        function (err, status) {
-                if (err) {
-                    callback(true);
+                if (0 === Object.keys(up.$set).length) {
+                    delete up.$set;
                 }
-                self.debug('Update status: ' + status);
-                self.read(ids, function (err, nodes) {
-                    callback(err, err ? null : nodes);
+                if (0 === Object.keys(up.$unset).length) {
+                    delete up.$unset;
+                }
+                coll.update(query, up, function (err, stat) {
+                    var id = query[Object.keys(query)[0]];
+                    next(null, err ? '' : id);
+                });
+            }
+            async.mapLimit(nodes, 100, updateNode, function (err, ids) {
+                self.read(ids, function (err, doc) {
+                    callback(false, doc);
+                    fireEvent('update', doc);
                 });
             });
         });
@@ -164,12 +169,19 @@ module.exports = function (conf) {
      */
     self.remove = function (ids, callback) {
         self.getCollection(callback, function (coll) {
-            coll.remove(self.querify(ids), function (err, result) {
-                if (err || result.result.n === 0) {
-                    callback(true);
-                    return;
-                }
-                callback(false, result);
+            function deleteNode(id, next) {
+                coll.remove(id, function (err, result) {
+                    if (err || 0 === result.result.n) {
+                        next(null, null);
+                    } else {
+                        next(null, id[Object.keys(id)[0]]);
+                    }
+                });
+            }
+            async.mapLimit(ids.map(self.exportId), 100, deleteNode,
+                    function (err, array) {
+                callback(false, array);
+                fireEvent('remove', array);
             });
         });
     }; // remove()
@@ -203,12 +215,9 @@ module.exports = function (conf) {
      * Higher-level functions
      */
 
-    self.links_r = function (ids, links, callback) {
+    self.links_r = function (ids, depth, links, callback) {
         var newIds = [];
         var self = this;
-        if (links==null) {
-            links=[];
-        }
         self.getCollection(callback, function (coll) {
             coll.find({tgt_id: {$in: ids}}).toArray(function (err, results) {
                 if (err) {
@@ -225,10 +234,10 @@ module.exports = function (conf) {
                         links[results[r]._id] = results[r];
                     }
                 }
-                if (newIds.length < 1) {
+                if (--depth === 0 || newIds.length < 1) {
                     callback(false, links);
                 } else {
-                    self.links_r(newIds, links, callback);
+                    self.links_r(newIds, depth, links, callback);
                 }
             });
         });
@@ -240,8 +249,8 @@ module.exports = function (conf) {
      * @param {Array} ids - Array of node indexes
      * @param {Function} callback - function (err, result) to call
      */
-    this.graph = function (ids, callback){
-        self.links_r(ids, null, function (err, links) {
+    this.graph = function (ids, depth, callback){
+        self.links_r(ids, depth, [], function (err, links) {
             if (err || !links) {
                 callback(true);
                 return;
@@ -298,19 +307,19 @@ module.exports = function (conf) {
         });
     }; // mongo_search()
 
-    // Compatibility
-    // As deleteNode() can actually delete multiple nodes
-    self.deleteNode = function (ids, callback) {
-        self.remove(ids, callback);
-    }; // deleteNode()
-
     /**
      * Transform the ids into a Mongo query object
      * @param {array} ids - ids to process
      * @return {object} - Mongo query object
      */
     self.querify = function (ids) {
-        return {_id: {$in: ids.map(self.exportId)}};
+        var ids_o = ids.map(self.exportId);
+        var query = {_id: {$in: []}};
+
+        for (var i = 0; i < ids_o.length; ++i) {
+            query._id.$in.push(ids_o[i]._id);
+        }
+        return query;
     }
 
     /**
@@ -320,9 +329,9 @@ module.exports = function (conf) {
      */
     self.exportId = function (id) {
         if (ObjectID.isValid(id)) {
-            return new ObjectID(id);
+            return {_id: new ObjectID(id)};
         } else if ('string' === typeof id) {
-            return id;
+            return {_id: id};
         }
         return null;
     }

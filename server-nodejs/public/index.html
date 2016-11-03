@@ -1,0 +1,64 @@
+<html>
+	<head>
+		<script type="text/javascript">//<![CDATA[
+			document.addEventListener('DOMContentLoaded', function() {
+				document.querySelector('#title').innerHTML = window.location.host;
+				document.querySelector('#srv_py').innerHTML = window.location+'api/';
+				document.querySelector('#srv_js').innerHTML = window.location+'damas.js';
+			});
+		</script>
+		<style>
+			body {
+				font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+				max-width: 800px;
+				margin: 0 auto;
+			}
+			h1, .subtitle {
+				text-align: center;
+			}
+			h2, hr {
+				border: none;
+				border-bottom: 1px solid #808080;
+			}
+			pre {
+				background-color: #f7f7f7;
+				padding: 1em;
+				font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace
+			}
+			.dyn {
+				color: blue;
+			}
+			.footer {
+				text-align: center;
+			}
+			
+		</style>
+	</head>
+	<body>
+		<h1 id="title" class="dyn">Welcome</h1>
+		<div class="subtitle">
+			Digital Asset Management Server
+		</div>
+		<a href="https://github.com/remyla/damas-core"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>
+		<h2>Web User Interfaces</h2>
+		<a href="console">&gt; console</a>
+		<h2>Programming Interfaces</h2>
+		<h3>Python API</h3>
+		Using the <a href="damas.py">damas.py</a> Python module:
+		<pre>import damas
+project = damas.http_connection('<span id="srv_py" class="dyn">ee</span>')</pre>
+		<h3>Javascript API</h3>
+		Using the <a href="damas.js">damas.js</a> Javascript module:
+		<pre>&lt;script type="text/javascript" src="<span id="srv_js" class="dyn"></span>"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+// your code here
+&lt;/script&gt;</pre>
+		<h3>Command line</h3>
+		Using the <a href="/damas.sh">damas.sh</a> command in a damas repository:
+		<pre>$ damas --help</pre>
+		<hr/>
+		<div class="footer">
+			<a href="http://damas-software.org">http://damas-software.org</a>
+		</div>
+	</body>
+</html>
