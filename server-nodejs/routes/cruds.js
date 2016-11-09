@@ -362,6 +362,7 @@ module.exports = function (app, routes) {
             if (err) {
                 httpStatus(res, 409, 'Search_mongo');
             } else {
+                //res.setHeader('total', ids.total);
                 httpStatus(res, 200, ids);
             }
         });

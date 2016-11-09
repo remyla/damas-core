@@ -287,21 +287,24 @@ module.exports = function (conf) {
      * @param {string} sort - Key used to sort the results
      * @param {integer} skip - Pagination: number of results to skip
      * @param {integer} limit - Pagination: max number of results to return
-     * @param {function} callback - Callback function to routes.js
+     * @param {function} callback - error bool and result object as parameter
      */
     self.mongo_search = function (query, sort, skip, limit, callback) {
         self.getCollection(callback, function (coll) {
-            var find = coll.find(query).sort(sort).skip(skip).limit(limit);
-            find.toArray(function (err, results) {
-                if (err) {
-                    callback(true);
-                    return;
-                }
-                var ids = [];
-                for (r in results) {
-                    ids.push(results[r]._id.toString());
-                }
-                callback(false, ids);
+            var cur = coll.find(query);
+            var total = cur.count(function(err,count){
+                var find = cur.sort(sort).skip(skip).limit(limit);
+                find.toArray(function (err, results) {
+                    if (err) {
+                        callback(true);
+                        return;
+                    }
+                    var ids = [];
+                    for (r in results) {
+                        ids.push(results[r]._id.toString());
+                    }
+                    callback(false, { count: count, ids: ids } );
+                });
             });
         });
     }; // mongo_search()
