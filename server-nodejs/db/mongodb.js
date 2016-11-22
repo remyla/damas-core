@@ -14,6 +14,7 @@ module.exports = function (conf) {
 
     var mongo = require('mongodb');
     var ObjectID = mongo.ObjectID;
+    require('./utils');
 
     /*
      * Initialize the connection.
