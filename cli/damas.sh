@@ -56,6 +56,14 @@ damas_update() {
   fi
 }
 
+damas_stats() {
+  local bytes=`stat -c%s $1`
+  local mtime=`stat -c%Y $1`000
+  RES=$(curl -ks -X PUT -H "$AUTH" -H "$JSON" \
+    -d '{"_id":"/'$1'","file_size":'$bytes',"file_mtime":'$mtime'}' \
+	$URL'update/')
+}
+
 damas_remove() {
   get_ids $@
   RES=$(curl -ks -X DELETE -H "$AUTH" -H "$JSON" -d "$IDS" $URL'delete/')
@@ -258,6 +266,11 @@ case $ACTION in
       ;;
 
     --help)
+      echo "COMMANDS"
+      echo ""
+      echo "    create"
+      echo "        <json>"
+      echo "    	create node(s) giving a JSON string as input (see examples below)"
       echo "    add"
       echo "        [-h] [-j <json>] <file>"
       echo "        create a new node for the specified file"
@@ -301,6 +314,14 @@ case $ACTION in
       echo "        remove authorization token"
       echo "    init"
       echo "        make your directory and subdirectories available for damas"
+      echo "    stats"
+      echo "        <file>"
+      echo "        read stats and update file_mtime and file_size keys of file"
+      echo ""
+      echo "EXAMPLES"
+      echo ""
+      echo "    create an arbitrary node giving a JSON"
+      echo "        damas create '{\"#parent\":\"value\",\"comment\":\"created with cli\"}'"
       exit 0
       ;;
 
@@ -380,6 +401,11 @@ case $ACTION in
     update)
       auth
       damas_update $@
+      ;;
+
+    stats)
+      auth
+      damas_stats $@
       ;;
 
     remove)
