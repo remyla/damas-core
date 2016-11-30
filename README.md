@@ -2,7 +2,7 @@
 
 <img src="http://damas-software.org/bin/damas_software_logo.svg" alt="damas software logo"/>
 
-Servers and client libraries for nodal digital asset management
+Digital asset management server and client libraries
 
 # Overview
 
@@ -13,7 +13,7 @@ A Javascript implementation of the server for NodeJS which development started i
 A PHP server to run in a Apache environment. Generic key-value data model, simple graph structures, user authentication, file version control, using MySQL as database. It supports database replication among multiple sites. Used in production and maintained since 2007. The Php version is still used in production, very stable, and maintained. We intend to make it evolve to the new specifications some days. 
 
 ## py and js
-The Python and Javascript libraries to access the server remotely, interface its methods and process the JSON results using the language native objects.
+The Python and Javascript libraries to access the server remotely, to interface its methods and process the JSON results using the native language objects.
 * Setup a scripting environment using this [guide](https://github.com/remyla/damas-core/wiki/Scripting)
 * The documentation of the methods is available in the [API Reference](https://github.com/remyla/damas-core/wiki/API)
 
