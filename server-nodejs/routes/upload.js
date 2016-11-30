@@ -36,36 +36,40 @@ module.exports = function (app, routes) {
                     return httpStatus(res, 500, 'Upload');
                 }
                 //var sha1 = checksum.digest('hex');
-                var node = {
-                    '#parent': path,
-                    author: req.user.username,
-                    comment: req.body.comment,
-                    file_size: file.size,
-                    'origin': 'online',
-                    //sha1: sha1,
-                    time: Date.now()
-                };
-                db.create([node], function(err,nodes){
-                    db.read([path], function ( err, nodes){
-                        var node = {
-                            '_id': path,
-                            author: req.user.username,
-                            comment: req.body.comment,
-                            file_size: file.size,
-                            'origin': 'online',
-                            //sha1: sha1,
-                            time: Date.now()
-                        };
-                        if (nodes[0] === null) {
-                            db.create([node], function(err,nodes){
-                                return httpStatus(res, 201, nodes[0]);
-                            });
-                        }
-                        else {
-                            db.update([node], function(err,nodes){
-                                return httpStatus(res, 201, nodes[0]);
-                            });
-                        }
+                fs.stat(dest, function(err, stats){
+                    var node = {
+                        '#parent': path,
+                        author: req.user.username,
+                        comment: req.body.comment,
+                        file_mtime: stats.mtime.getTime(),
+                        file_size: file.size,
+                        'origin': 'online',
+                        //sha1: sha1,
+                        time: Date.now()
+                    };
+                    db.create([node], function(err,nodes){
+                        db.read([path], function ( err, nodes){
+                            var node = {
+                                '_id': path,
+                                author: req.user.username,
+                                comment: req.body.comment,
+                                file_mtime: stats.mtime.getTime(),
+                                file_size: file.size,
+                                'origin': 'online',
+                                //sha1: sha1,
+                                time: Date.now()
+                            };
+                            if (nodes[0] === null) {
+                                db.create([node], function(err,nodes){
+                                    return httpStatus(res, 201, nodes[0]);
+                                });
+                            }
+                            else {
+                                db.update([node], function(err,nodes){
+                                    return httpStatus(res, 201, nodes[0]);
+                                });
+                            }
+                        });
                     });
                 });
             });

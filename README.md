@@ -14,11 +14,9 @@ A PHP server to run in a Apache environment. Generic key-value data model, simpl
 
 ## py and js
 The Python and Javascript libraries to access the server remotely, to interface its methods and process the JSON results using the native language objects.
-* Setup a scripting environment using this [guide](https://github.com/remyla/damas-core/wiki/Scripting)
-* The documentation of the methods is available in the [API Reference](https://github.com/remyla/damas-core/wiki/API)
 
 # Usage
-Choose a server to run (either the Php or the NodeJS server). Refer to the README.md files in the servers folders for the installation instructions. Then use the Python or Javascript libraries to access it, of which instructions can be found in the wiki.
+Choose a server to run (either the Php or the NodeJS server). Refer to the README.md files in the servers folders for the installation instructions. Then use the Python or Javascript libraries to access it, of which instructions can be found in the [Wiki](https://github.com/remyla/damas-core/wiki) or install one of the interfaces available (see below). Your feedback is highly welcome.
 
 # Related Links
 
@@ -26,15 +24,16 @@ http://damas-software.org is a website which presents the projects related to da
 
 http://dabox.io is collaborative platform for architecture using damas-core as backend
 
-https://github.com/PRIMCODE/damas-flow is a flow graph interface based on the NodeJS server implementation which is being created since April 2015.
+https://github.com/PRIMCODE/damas-flow is a web flow graph interface based on the NodeJS server implementation which is being created since April 2015.
+
+https://github.com/PRIMCODE/damas-dashboard is a web control center based on the NodeJS server implementation being developped since summer 2016, usable but not well packaged and documented yet. Get in touch if interested.
 
 http://primcode.com PRIMCODE is the company behind the development, the distribution and the maintenance of damas-core
-
 
 # License
 GPL License(GPLV3)
 
-Copyright(c) 2015 Remy Lalanne remy@primcode.com
+Copyright(c) 2016 Remy Lalanne remy@primcode.com
 
 damas-core is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
