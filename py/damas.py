@@ -158,6 +158,21 @@ class http_connection( object ) :
 			headers=headers, verify=False)
 		return r.status_code == 200
 
+	def publish( self, keys ) :
+		'''
+		Publish an asset node wearing the specified keys. The keys _id, comment,
+		origin must be specified. _id must be a string starting with '/'
+		@param {Hash} keys of the new node
+		@returns {Hash} New node on success, false otherwise
+		'''
+		headers = {'content-type': 'application/json'}
+		headers.update(self.headers)
+		r = requests.post(self.serverURL+"/publish/", data=json.dumps(keys),
+			headers=headers, verify=False)
+		if r.status_code == 201 or r.status_code == 207:
+			return json.loads(r.text)
+		return None
+
 	def unlock( self, id_ ) :
 		'''
 		Unlock a locked asset
