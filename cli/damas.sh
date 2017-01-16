@@ -19,6 +19,7 @@
 
 # VARIABLES
 JSON="Content-Type: application/json"
+USER=`whoami`
 
 # FUNCTIONS
 damas_create() {

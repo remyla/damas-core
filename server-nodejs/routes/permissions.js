@@ -7,6 +7,7 @@ module.exports = function (app) {
         switch (req.params.route) {
         case 'lock':
         case 'unlock':
+        case 'publish':
         case 'upload':
         case 'version':
         case 'file':

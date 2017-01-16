@@ -7,6 +7,19 @@ module.exports = function (app, routes) {
     var db = app.locals.db;
     require('./utils');
 
+    var publish = function (req, res) {
+        var nodes = Array.isArray(req.body) ? req.body : [req.body];
+        nodes = unfoldIds(nodes);
+        for (var i = 0; i < nodes.length; ++i) {
+			if (undefined === nodes[i]._id || undefined === nodes[i].comment || undefined === nodes[i].origin) {
+				return httpStatus(res, 400, 'Publish');
+			}
+			if (nodes[i]._id[0] !== '/') {
+				return httpStatus(res, 400, 'Publish');
+			}
+        }
+		routes.create(req, res);
+    };
 
     /*
      * Method: PUT
@@ -201,11 +214,13 @@ module.exports = function (app, routes) {
     */
 
     app.put('/api/lock/', lock);
+    app.post('/api/publish/', publish);
     app.put('/api/unlock/', unlock);
     app.post('/api/version/:id(*)', version);
 
     routes = Object.assign(routes, {
         lock: lock,
+        publish: publish,
         unlock: unlock,
         version: version
     });

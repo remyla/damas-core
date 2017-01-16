@@ -344,6 +344,15 @@
         return res !== null;
     }
 
+    damas.publish = function (nodes, callback) {
+        return req({
+            method: 'POST',
+            url: 'publish/',
+            data: nodes,
+            callback: callback
+        });
+    }
+
     /**
      * Creates a node with the specified keys, asynchronously if a callback
      * function is specified or synchronously otherwise.
