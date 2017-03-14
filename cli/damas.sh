@@ -238,11 +238,11 @@ case $COMMAND in
       get_ids $@
       run "curl $CURL_ARGS $AUTH -d '$IDS' ${URL}read/"
       ;;
-    stats) ## WARNING: THIS STATS COMMAND WORKS FOR 1 FILE ONLY
+    stats)
       get_ids $@
       bytes=`stat -c%s "$1"`
       mtime=`stat -c%Y "$1"`000
-      run "curl $CURL_ARGS $AUTH -X PUT -d '{\"_id\":$IDS,\"file_size\":\"$bytes\",\"file_mtime\":\"$mtime\"}' ${URL}update/"
+      run "curl $CURL_ARGS $AUTH -X PUT -d '{\"_id\":$IDS,\"file_size\":$bytes,\"file_mtime\":$mtime}' ${URL}update/"
       ;;
     rm)
       get_ids $@
