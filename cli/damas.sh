@@ -77,6 +77,10 @@ damas_search_mongo() {
 }
 
 get_ids() {
+  if [ ! -t 0 ]; then
+    #add parameters from pipeline
+    set -- $@ $(xargs)
+  fi
   if [ $# -eq 0 ]; then
     echo "damas: missing file argument"
     show_help_msg
