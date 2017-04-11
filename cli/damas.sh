@@ -95,7 +95,10 @@ get_ids() {
 }
 
 get_real_path() {
-  FILEPATH="/"$(realpath -m --relative-base $DIRECTORY $1 | sed 's/\.$//')
+  FILEPATH=$(realpath -m --relative-base $DIRECTORY $1 | sed 's/\.$//')
+  if [[ $FILEPATH != /* ]]; then
+    FILEPATH="/"$FILEPATH
+  fi
   if [ -d "$1" ]
   then
     FILEPATH=$FILEPATH'/'
