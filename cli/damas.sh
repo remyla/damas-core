@@ -190,7 +190,7 @@ done
 COMMAND=$1
 shift
 
-if [ ! -n "$COMMAND" ]; then
+if [ -z "$COMMAND" ]; then
   echo "damas: missing command"
   show_help_msg
   exit 1
@@ -270,7 +270,16 @@ case $COMMAND in
       if [ $VERBOSE ]; then
         echo "$1"
       fi
-      RES=$(eval "curl -ks -w \"\n%{http_code}\" --fail -d 'username=$1&password=$2' ${URL}signIn")
+      USERN=$1
+      PASS=$2
+      if [ -z $USERN ]; then
+        read -p "login: " USERN
+      fi
+      if [ -z $PASS ]; then
+        read -sp "password: " PASS
+        printf "\n\n"
+      fi
+      RES=$(eval "curl -ks -w \"\n%{http_code}\" --fail -d 'username=$USERN&password=$PASS' ${URL}signIn")
       TOKEN=$(echo $RES| sed 's/^.*"token":"\([^"]*\)".*$/\1/')
       echo $TOKEN
       echo $TOKEN > "/tmp/damas-$USER"
