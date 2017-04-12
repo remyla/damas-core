@@ -77,6 +77,10 @@ damas_search_mongo() {
 }
 
 get_ids() {
+  if [ ! -t 0 ]; then
+    #add parameters from pipeline
+    set -- $@ $(xargs)
+  fi
   if [ $# -eq 0 ]; then
     echo "damas: missing file argument"
     show_help_msg
@@ -91,7 +95,10 @@ get_ids() {
 }
 
 get_real_path() {
-  FILEPATH="/"$(realpath --relative-base $DIRECTORY $1 | sed 's/\.$//')
+  FILEPATH=$(realpath -m --relative-base $DIRECTORY $1 | sed 's/\.$//')
+  if [[ $FILEPATH != /* ]]; then
+    FILEPATH="/"$FILEPATH
+  fi
   if [ -d "$1" ]
   then
     FILEPATH=$FILEPATH'/'
