@@ -20,6 +20,7 @@
 # VARIABLES
 USER=`whoami`
 CURL_ARGS='-ks -w "\n%{http_code}" -H "Content-Type: application/json"'
+BUFFER_SIZE=1000
 
 # map errors sent by the server
 map_server_errors() {
@@ -89,7 +90,7 @@ get_ids() {
   IDS='['
   for id in "$@"; do
     get_real_path $id
-     IDS=$IDS'"'$FILEPATH'", '
+     IDS=$IDS'"'$FILEPATH'",'
   done
   IDS=${IDS:0:-2}']'
 }
@@ -125,15 +126,16 @@ show_help_msg() {
   echo "usage: damas [--help] [-q|--quiet] [-v|--verbose] <command> [<args>]"
   echo ""
   echo "File commands: "
-  echo "   add     Add files to the index"
-  echo "   init    Prepare the current directory adding a .damas/ repo folder"
-  echo "   lock    Lock files (set key 'lock' = user name)"
-  echo "   rm      Remove files from the index"
-  echo "   show    Show files record"
-  echo "   signin  <username> <pass>"
-  echo "   signout Remove authorization token"
-  echo "   stats   Update file_mtime and file_size keys of files"
-  echo "   unlock  Unlock files"
+  echo "   add       Add files to the index"
+  echo "   init      Prepare the current directory adding a .damas/ repo folder"
+  echo "   lock      Lock files (set key 'lock' = user name)"
+  echo "   rm        Remove files from the index"
+  echo "   show      Show files record"
+  echo "   untracked List untracked files"
+  echo "   signin    <username> <pass>"
+  echo "   signout   Remove authorization token"
+  echo "   stats     Update file_mtime and file_size keys of files"
+  echo "   unlock    Unlock files"
   echo ""
   echo "CRUDS commands (send JSON to the server, see examples below):"
   echo "   create       <json>  create node(s)"
@@ -244,6 +246,22 @@ case $COMMAND in
     show)
       get_ids $@
       run "curl $CURL_ARGS $AUTH -d '$IDS' ${URL}read/"
+      ;;
+    untracked)
+      BASE="/tmp/damas-files_"
+      find $1 -type f > ${BASE}origin
+      echo -n '[' > ${BASE}request
+      while read file; do
+        get_real_path $file
+        echo -n '"'$FILEPATH'",' >> ${BASE}request
+      done < ${BASE}origin
+      echo -n '""]' >> ${BASE}request
+      eval "curl $CURL_ARGS $AUTH -d "@${BASE}request" ${URL}read/" | \
+        sed -e $'s/\([^"]\),/\\1\\n/g' | grep -n null | cut -f1 -d: > ${BASE}result
+      while read l; do
+        sed "${l}q;d" ${BASE}origin
+      done < ${BASE}result
+      rm ${BASE}*
       ;;
     stats)
       get_ids $@
