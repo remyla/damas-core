@@ -199,6 +199,21 @@ class http_connection( object ) :
 			return json.loads(r.text)
 		return None
 
+        def comment(self, keys) :
+            '''
+            Create a node with the specified keys (similar to create
+            but concerns child node with parent's id as key)
+            @param {Hash} keys of the new node
+            @returns {Hash} New node on success, false otherwise
+            '''
+            headers = {'content-type': 'application/json'}
+            headers.update(self.headers)
+            r = requests.post(self.serverURL+"/comment/", 
+                    data=json.dumps(keys), headers=headers, verify=False)
+            if r.status_code == 201:
+                return json.loads(r.text)
+            return None
+        
 	""" commented until proper implementation
 	def link( self, target, sources, keys ) :
 		''

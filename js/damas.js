@@ -352,6 +352,29 @@
             callback: callback
         });
     }
+    /**
+     * Creates a new node under an existing node, asynchronously if a callback
+     * function is specified or synchronously otherwise.
+     * @param {hash} keys - Hash of key:value pairs
+     * @param {function} [callback] - Function with the XHR object as an
+     *                                argument to call.
+     * @returns {object|boolean|undefined} New node on success, null otherwise
+     * (or nothing if async)
+     */
+    damas.comment = function (node, callback) {
+        var res =  req({
+            method: 'POST',
+            url: 'comment/',
+            data: node,
+            async: callback !== undefined,
+            callback: function (res) {
+                if('function' === typeof callback) {
+                    callback(res !== null);
+                }
+            }
+        });
+        return res !==null;
+    }
 
     /**
      * Creates a node with the specified keys, asynchronously if a callback

@@ -17,7 +17,7 @@ var url = conf.protocol + '://' + conf.host + ':' + conf[conf.protocol].port +
           '/' + conf.path;
 var idCustom = '/file/;.*?<>#%';
 var idCustomEncoded = encodeURIComponent(idCustom);
-var idNotFound = 100000001;
+var idNotFound = "123456789012";
 
 /*
  * Utility functions to ease test creation
@@ -40,6 +40,11 @@ function update(desc, data) {
 function remove(desc, data) {
     return frisby.create('DELETE REMOVE - ' + desc)
         .delete(url + 'delete/', data, {json: true});
+}
+
+function comment(desc, data) {
+    return frisby.create('POST COMMENT - ' + desc)
+        .post(url + 'comment/', data, {json: true});
 }
 
 function graph(desc, data) {
@@ -167,6 +172,53 @@ create('should create an object in the database', {key: 'value', num: 3})
 
     update('should update two nodes', {_id: [idFound, idCustom], c: 'd'})
         .expectStatus(200).expectJSONTypes('*', {c: 'd'}).toss();
+    // */
+
+    /*
+     * Comment tests
+     *
+     */
+    comment('should throw an error (comment empty)',
+            {'#parent': idFound, 'comment': ''})
+        .expectStatus(400).toss();
+    comment('should throw an error (no comment)', {'#parent': idFound})
+        .expectStatus(400).toss();
+    comment('should throw an error (no parent)', {'comment': 'a'})
+        .expectStatus(400).toss();
+    comment('should throw an error (parent not found)',
+            {'#parent': idNotFound, 'comment': 'a'})
+        .expectStatus(404).toss();
+    /*comment('should throw an error (no parent found)',
+            {"#parent": [idNotFound], 'comment': 'a'} )
+        .expectStatus(404).toss();
+    comment('should add half the comment',
+            [{'#parent': idFound, 'comment': 'a'},
+            {'#parent': idNotFound, 'comment': 'b'}])
+        .expectStatus(207)
+        .after(function (error, response, body) {
+            remove('', body[0]._id);
+        }).toss();
+    comment('should add half the comment',
+            {'#parent': [idFound, idNotFound], 'comment': 'a'})
+        .expectStatus(207)
+        .after(function (error, response, body) {
+            remove('', body[0]._id);
+        }).toss();*/
+    comment('should add a comment', {'#parent': idFound, 'comment': 'a'})
+        .expectStatus(201)
+        .after(function (error, response, body) {
+            remove('', body._id);
+        }).toss();
+    /*comment('should add a comment', [{'#parent': idFound, 'comment': 'a'}])
+        .expectStatus(201)
+        .after(function (error, response, body) {
+            remove('', body[0]._id);
+        }).toss();
+    comment('should add a comment', {'#parent': [idFound], 'comment': 'a'})
+        .expectStatus(201)
+        .after(function (error, response, body) {
+            remove('', body[0]._id);
+        }).toss();
     // */
 
     /*
