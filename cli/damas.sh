@@ -92,7 +92,7 @@ get_ids() {
     get_real_path $id
      IDS=$IDS'"'$FILEPATH'",'
   done
-  IDS=${IDS:0:-2}']'
+  IDS=${IDS:0:-1}']'
 }
 
 get_real_path() {
@@ -256,8 +256,14 @@ case $COMMAND in
         echo -n '"'$FILEPATH'",' >> ${BASE}request
       done < ${BASE}origin
       echo -n '""]' >> ${BASE}request
-      eval "curl $CURL_ARGS $AUTH -d "@${BASE}request" ${URL}read/" | \
-        sed -e $'s/\([^"]\),/\\1\\n/g' | grep -n null | cut -f1 -d: > ${BASE}result
+      eval "curl $CURL_ARGS $AUTH -d "@${BASE}request" ${URL}read/" > ${BASE}response
+      STATUS=$(sed '$!d' ${BASE}response);
+      if [ $STATUS  -gt 300 ]; then
+        head -n 1 ${BASE}response;
+        map_server_errors $STATUS;
+      fi
+      sed -e $'s/\([^"]\),/\\1\\n/g' ${BASE}response | grep -n null | \
+          cut -f1 -d: > ${BASE}result
       while read l; do
         sed "${l}q;d" ${BASE}origin
       done < ${BASE}result
