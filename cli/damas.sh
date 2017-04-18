@@ -261,7 +261,7 @@ case $COMMAND in
       run "curl $CURL_ARGS $AUTH -X PUT -d '$IDS' ${URL}unlock/"
       ;;
     comment)
-      run "curl $CURL_ARGS $AUTH -d '$*' ${URL}create/"
+      run "curl $CURL_ARGS $AUTH -d '$*' ${URL}comment/"
       ;;
     signin)
       if [ $VERBOSE ]; then
