@@ -152,6 +152,38 @@ module.exports = function (app, routes) {
         });
     };
 
+
+    /*
+     * comment()
+     *
+     * Method: POST
+     * URI: /api/comment/
+     *
+     * Add a comment to the specified node
+     *
+     * HTTP status codes:
+     * - 400: Bad request (not formatted correctly)
+     * - 404: Not Found (the node does not exist)
+     */
+    var comment = function (req, res) {
+        if (req.body['#parent'] === undefined || 
+            req.body.comment === undefined) {
+            return httpStatus(res, 400, 'Comment');
+        }
+        if (req.body.comment.length < 1 || 
+            typeof req.body.comment !== 'string') {
+            return httpStatus(res, 400, 'Comment');
+        }
+
+        db.read([req.body['#parent']], function (err, doc) {
+            if(doc[0] === null) {
+                return httpStatus(res, 404, 'Comment');
+            }
+        });
+        routes.create(req, res);
+    }; //comment()
+
+
     /* this is added as comment because we will implement this route
 
     /*
@@ -217,12 +249,14 @@ module.exports = function (app, routes) {
     app.post('/api/publish/', publish);
     app.put('/api/unlock/', unlock);
     app.post('/api/version/:id(*)', version);
+    app.post('/api/comment/', comment);
 
     routes = Object.assign(routes, {
         lock: lock,
         publish: publish,
         unlock: unlock,
-        version: version
+        version: version,
+        comment: comment
     });
 }
 
