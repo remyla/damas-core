@@ -195,7 +195,7 @@ if [ -z "$COMMAND" ]; then
 fi
 
 if [ ! -t 0 -a $# -eq 0 ]; then
-  echo "$0 $COMMAND"
+  #run this script for input stream
   xargs -n $BUFFER_SIZE $0 $COMMAND
   exit $?
 fi
