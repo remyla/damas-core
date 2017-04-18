@@ -78,10 +78,6 @@ damas_search_mongo() {
 }
 
 get_ids() {
-  if [ ! -t 0 ]; then
-    #add parameters from pipeline
-    set -- $@ $(xargs)
-  fi
   if [ $# -eq 0 ]; then
     echo "damas: missing file argument"
     show_help_msg
@@ -90,7 +86,7 @@ get_ids() {
   IDS='['
   for id in "$@"; do
     get_real_path $id
-     IDS=$IDS'"'$FILEPATH'",'
+    IDS=$IDS'"'$FILEPATH'",'
   done
   IDS=${IDS:0:-1}']'
 }
@@ -196,6 +192,12 @@ if [ -z "$COMMAND" ]; then
   echo "damas: missing command"
   show_help_msg
   exit 1
+fi
+
+if [ ! -t 0 -a $# -eq 0 ]; then
+  echo "$0 $COMMAND"
+  xargs -n $BUFFER_SIZE $0 $COMMAND
+  exit $?
 fi
 
 case $COMMAND in
