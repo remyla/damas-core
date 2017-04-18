@@ -362,18 +362,12 @@
      * (or nothing if async)
      */
     damas.comment = function (node, callback) {
-        var res =  req({
+        return req({
             method: 'POST',
             url: 'comment/',
             data: node,
-            async: callback !== undefined,
-            callback: function (res) {
-                if('function' === typeof callback) {
-                    callback(res !== null);
-                }
-            }
+            callback: callback
         });
-        return res !==null;
     }
 
     /**
