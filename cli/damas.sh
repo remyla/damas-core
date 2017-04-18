@@ -20,6 +20,7 @@
 # VARIABLES
 USER=`whoami`
 CURL_ARGS='-ks -w "\n%{http_code}" -H "Content-Type: application/json"'
+BUFFER_SIZE=1000
 
 # map errors sent by the server
 map_server_errors() {
@@ -77,10 +78,6 @@ damas_search_mongo() {
 }
 
 get_ids() {
-  if [ ! -t 0 ]; then
-    #add parameters from pipeline
-    set -- $@ $(xargs)
-  fi
   if [ $# -eq 0 ]; then
     echo "damas: missing file argument"
     show_help_msg
@@ -89,9 +86,9 @@ get_ids() {
   IDS='['
   for id in "$@"; do
     get_real_path $id
-     IDS=$IDS'"'$FILEPATH'", '
+    IDS=$IDS'"'$FILEPATH'",'
   done
-  IDS=${IDS:0:-2}']'
+  IDS=${IDS:0:-1}']'
 }
 
 get_real_path() {
@@ -125,15 +122,16 @@ show_help_msg() {
   echo "usage: damas [--help] [-q|--quiet] [-v|--verbose] <command> [<args>]"
   echo ""
   echo "File commands: "
-  echo "   add     Add files to the index"
-  echo "   init    Prepare the current directory adding a .damas/ repo folder"
-  echo "   lock    Lock files (set key 'lock' = user name)"
-  echo "   rm      Remove files from the index"
-  echo "   show    Show files record"
-  echo "   signin  <username> <pass>"
-  echo "   signout Remove authorization token"
-  echo "   stats   Update file_mtime and file_size keys of files"
-  echo "   unlock  Unlock files"
+  echo "   add       Add files to the index"
+  echo "   init      Prepare the current directory adding a .damas/ repo folder"
+  echo "   lock      Lock files (set key 'lock' = user name)"
+  echo "   rm        Remove files from the index"
+  echo "   show      Show files record"
+  echo "   untracked List untracked files"
+  echo "   signin    <username> <pass>"
+  echo "   signout   Remove authorization token"
+  echo "   stats     Update file_mtime and file_size keys of files"
+  echo "   unlock    Unlock files"
   echo ""
   echo "CRUDS commands (send JSON to the server, see examples below):"
   echo "   create       <json>  create node(s)"
@@ -191,10 +189,16 @@ done
 COMMAND=$1
 shift
 
-if [ ! -n "$COMMAND" ]; then
+if [ -z "$COMMAND" ]; then
   echo "damas: missing command"
   show_help_msg
   exit 1
+fi
+
+if [ ! -t 0 -a $# -eq 0 ]; then
+  #run this script for input stream
+  xargs -n $BUFFER_SIZE $0 $COMMAND
+  exit $?
 fi
 
 case $COMMAND in
@@ -246,6 +250,28 @@ case $COMMAND in
       get_ids $@
       run "curl $CURL_ARGS $AUTH -d '$IDS' ${URL}read/"
       ;;
+    untracked)
+      BASE="/tmp/damas-files_"
+      find $1 -type f > ${BASE}origin
+      echo -n '[' > ${BASE}request
+      while read file; do
+        get_real_path $file
+        echo -n '"'$FILEPATH'",' >> ${BASE}request
+      done < ${BASE}origin
+      echo -n '""]' >> ${BASE}request
+      eval "curl $CURL_ARGS $AUTH -d "@${BASE}request" ${URL}read/" > ${BASE}response
+      STATUS=$(sed '$!d' ${BASE}response);
+      if [ $STATUS  -gt 300 ]; then
+        head -n 1 ${BASE}response;
+        map_server_errors $STATUS;
+      fi
+      sed -e $'s/\([^"]\),/\\1\\n/g' ${BASE}response | grep -n null | \
+          cut -f1 -d: > ${BASE}result
+      while read l; do
+        sed "${l}q;d" ${BASE}origin
+      done < ${BASE}result
+      rm ${BASE}*
+      ;;
     stats)
       get_ids $@
       bytes=`stat -c%s "$1"`
@@ -274,7 +300,16 @@ case $COMMAND in
       if [ $VERBOSE ]; then
         echo "$1"
       fi
-      RES=$(eval "curl -ks -w \"\n%{http_code}\" --fail -d 'username=$1&password=$2' ${URL}signIn")
+      USERN=$1
+      PASS=$2
+      if [ -z $USERN ]; then
+        read -p "login: " USERN
+      fi
+      if [ -z $PASS ]; then
+        read -sp "password: " PASS
+        printf "\n\n"
+      fi
+      RES=$(eval "curl -ks -w \"\n%{http_code}\" --fail -d 'username=$USERN&password=$PASS' ${URL}signIn")
       TOKEN=$(echo $RES| sed 's/^.*"token":"\([^"]*\)".*$/\1/')
       echo $TOKEN
       echo $TOKEN > "/tmp/damas-$USER"
