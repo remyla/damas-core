@@ -11,6 +11,7 @@ module.exports = function (app) {
         case 'upload':
         case 'version':
         case 'file':
+        case 'comment':
             // User class must be at least 'user'
             if (['user', 'editor', 'admin'].indexOf(req.user.class) === -1) {
                 return httpStatus(res, 403, 'Access ' + req.params.route);

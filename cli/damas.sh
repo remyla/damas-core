@@ -142,6 +142,7 @@ show_help_msg() {
   echo "   delete       <json>  delete nodes"
   echo "   search       <query> search"
   echo "   search_mongo <query> <sort> <limit> <skip> MongoDB search - beta"
+  echo "   comment      <json>  create child node
   echo ""
   echo "EXAMPLES"
   echo ""
@@ -265,6 +266,9 @@ case $COMMAND in
     unlock)
       get_ids $@
       run "curl $CURL_ARGS $AUTH -X PUT -d '$IDS' ${URL}unlock/"
+      ;;
+    comment)
+      run "curl $CURL_ARGS $AUTH -d '$*' ${URL}comment/"
       ;;
     signin)
       if [ $VERBOSE ]; then
