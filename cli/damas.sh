@@ -135,7 +135,7 @@ show_help_msg() {
   echo "   delete       <json>  delete nodes"
   echo "   search       <query> search"
   echo "   search_mongo <query> <sort> <limit> <skip> MongoDB search - beta"
-  echo "   comment      <json>  create child node
+  echo "   comment      <json>  create child node"
   echo ""
   echo "EXAMPLES"
   echo ""
