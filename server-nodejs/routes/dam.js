@@ -179,8 +179,8 @@ module.exports = function (app, routes) {
             if(doc[0] === null) {
                 return httpStatus(res, 404, 'Comment');
             }
+            routes.create(req, res);
         });
-        routes.create(req, res);
     }; //comment()
 
 
