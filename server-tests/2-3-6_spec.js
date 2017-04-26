@@ -17,7 +17,7 @@ var url = conf.protocol + '://' + conf.host + ':' + conf[conf.protocol].port +
           '/' + conf.path;
 var idCustom = '/file/;.*?<>#%';
 var idCustomEncoded = encodeURIComponent(idCustom);
-var idNotFound = "123456789012";
+var idNotFound = '123456789012';
 
 /*
  * Utility functions to ease test creation
@@ -126,8 +126,8 @@ create('should create an object in the database', {key: 'value', num: 3})
 
     read_get('should throw an error (id not found)', idNotFound)
         .expectStatus(404).toss();
-    read('should throw an error (id not found)', idNotFound)
-        .expectStatus(404).toss();
+    /*read('should throw an error (id not found)', idNotFound)
+        .expectStatus(404).toss();*/
 
     read_get('should throw an error (id not found)', idCustom)
         .expectStatus(404).toss();
@@ -137,8 +137,8 @@ create('should create an object in the database', {key: 'value', num: 3})
 
     read_get('should get a valid node with custom id', idCustomEncoded)
         .expectStatus(200).toss();
-    read('should get a valid node with custom id', idCustom)
-        .expectStatus(200).toss();
+    /*read('should get a valid node with custom id', idCustom)
+        .expectStatus(200).toss();*/
 
     read_get('should get two nodes', [idFound, idCustomEncoded])
         .expectStatus(200)
@@ -188,32 +188,32 @@ create('should create an object in the database', {key: 'value', num: 3})
     comment('should throw an error (parent not found)',
             {'#parent': idNotFound, 'comment': 'a'})
         .expectStatus(404).toss();
-    /*comment('should throw an error (no parent found)',
-            {"#parent": [idNotFound], 'comment': 'a'} )
+    comment('should throw an error (no parent found)',
+            {'#parent': [idNotFound], 'comment': 'a'} )
         .expectStatus(404).toss();
-    comment('should add half the comment',
+    /*comment('should add half the comment',
             [{'#parent': idFound, 'comment': 'a'},
             {'#parent': idNotFound, 'comment': 'b'}])
         .expectStatus(207)
         .after(function (error, response, body) {
             remove('', body[0]._id);
-        }).toss();
+        }).toss();*/
     comment('should add half the comment',
             {'#parent': [idFound, idNotFound], 'comment': 'a'})
         .expectStatus(207)
         .after(function (error, response, body) {
             remove('', body[0]._id);
-        }).toss();*/
+        }).toss();
     comment('should add a comment', {'#parent': idFound, 'comment': 'a'})
         .expectStatus(201)
         .after(function (error, response, body) {
-            remove('', body._id);
+            remove('', body[0]._id);
         }).toss();
     /*comment('should add a comment', [{'#parent': idFound, 'comment': 'a'}])
         .expectStatus(201)
         .after(function (error, response, body) {
             remove('', body[0]._id);
-        }).toss();
+        }).toss();*/
     comment('should add a comment', {'#parent': [idFound], 'comment': 'a'})
         .expectStatus(201)
         .after(function (error, response, body) {
@@ -233,8 +233,8 @@ create('should create an object in the database', {key: 'value', num: 3})
 
     graph_get('should throw an error (id not found)', idNotFound)
         .expectStatus(404).toss();
-    graph('should throw an error (id not found)', idNotFound)
-        .expectStatus(404).toss();
+    /*graph('should throw an error (id not found)', idNotFound)
+        .expectStatus(404).toss();*/
 
     graph_get('should throw an error (id not found)', idCustom)
         .expectStatus(404).toss();
@@ -244,8 +244,8 @@ create('should create an object in the database', {key: 'value', num: 3})
 
     graph_get('should get a valid node with custom id', idCustomEncoded)
         .expectStatus(200).toss();
-    graph('should get a valid node with custom id', idCustom)
-        .expectStatus(200).toss();
+    /*graph('should get a valid node with custom id', idCustom)
+        .expectStatus(200).toss();*/
 
     graph_get('should get two nodes', [idFound, idCustomEncoded])
         .expectStatus(200)
@@ -266,13 +266,13 @@ create('should create an object in the database', {key: 'value', num: 3})
     lock('should throw an error (invalid id)', [{a: null}])
         .expectStatus(400).toss();
 
-    lock('should throw an error (id not found)', idNotFound)
+    /*lock('should throw an error (id not found)', idNotFound)
         .expectStatus(404).toss();
 
     lock('should lock a node', idFound)
         .expectStatus(200).toss();
     lock('should lock a custom-id node', idCustom)
-        .expectStatus(200).toss();
+        .expectStatus(200).toss();*/
 
     /*
     // To try with another username
@@ -288,13 +288,13 @@ create('should create an object in the database', {key: 'value', num: 3})
     unlock('should throw an error (invalid id)', [{a: null}])
         .expectStatus(400).toss();
 
-    unlock('should throw an error (id not found)', idNotFound)
+    /*unlock('should throw an error (id not found)', idNotFound)
         .expectStatus(404).toss();
 
     unlock('should unlock a node', idFound)
         .expectStatus(200).toss();
     unlock('should unlock a custom-id node', idCustom)
-        .expectStatus(200).toss();
+        .expectStatus(200).toss();*/
 
     // Multiple operations
     lock('should lock two nodes', [idFound, idCustom])
@@ -332,14 +332,15 @@ create('should create an object in the database', {key: 'value', num: 3})
     remove('should throw an error (empty id)', '')
         .expectStatus(400).toss();
 
-    remove('should throw an error (id not found)', idNotFound)
+    /*remove('should throw an error (id not found)', idNotFound)
         .expectStatus(404).toss();
 
-    remove('should delete a node', idFound2)
+    remove('should delete a node', idFound)
         .expectStatus(200).toss();
 
     remove('should delete a custom-id node', idCustom)
-        .expectStatus(200).toss();
+        .expectStatus(200).toss();*/
+    remove('', [idFound2, idCustom]).toss();
 
     /**
      * Tests for methods Create and Delete with multiple parameters
