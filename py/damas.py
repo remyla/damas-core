@@ -210,7 +210,7 @@ class http_connection( object ) :
             headers.update(self.headers)
             r = requests.post(self.serverURL+"/comment/", 
                     data=json.dumps(keys), headers=headers, verify=False)
-            if r.status_code == 201:
+            if r.status_code == 201 or r.status_code == 207:
                 return json.loads(r.text)
             return None
         
