@@ -11,8 +11,7 @@ module.exports = function (app, routes) {
         var nodes = Array.isArray(req.body) ? req.body : [req.body];
         nodes = unfoldIds(nodes);
         for (var i = 0; i < nodes.length; ++i) {
-            if (undefined === nodes[i]._id || undefined === nodes[i].comment ||
-                undefined === nodes[i].origin) {
+            if (undefined === nodes[i]._id || undefined === nodes[i].comment || undefined === nodes[i].origin) {
                 return httpStatus(res, 400, 'Publish');
             }
             if (nodes[i]._id[0] !== '/') {
