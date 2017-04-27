@@ -353,6 +353,20 @@ module.exports = function (app, routes) {
                 if ('string' === typeof obj[key]) {
                     if (0 === obj[key].indexOf('REGEX_')) {
                         obj[key] = new RegExp(obj[key].replace('REGEX_', ''));
+                        continue;
+                    }
+                    if (0 === obj[key].indexOf('RX_')) {
+                        var delimiter = obj[key].lastIndexOf('_RX');
+                        var exp, opt;
+                        if(-1 === delimiter) {
+                            exp = obj[key].substring(3);
+                            opt = '';
+                        }
+                        else {
+                            exp = obj[key].substring(3, delimiter);
+                            opt = obj[key].substring(delimiter + 3);
+                        }
+                        obj[key] = new RegExp(exp, opt);
                     }
                 }
             }
