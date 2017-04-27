@@ -34,7 +34,6 @@ if (module.parent) {
 debug('Working in %s mode', app.get('env'));
 var socket = require('./events/socket');
 
-
 /*
  * Create a HTTP server
  */
@@ -58,6 +57,24 @@ if (conf.connection && conf.connection.Key && conf.connection.Cert) {
     }, app).listen(https_port, function () {
         debug('HTTPS server listening on port %s', https_port);
         socket.attach(https);
+    });
+}
+
+/*
+ * Listen signals to gracefully close HTTP and HTTPS server
+ */
+process.on('SIGINT', stopall);
+process.on('SIGTERM', stopall);
+
+function stopall() {
+    debug('Closing HTTP server');
+    http.close(function () {
+        debug('HTTP server closed');
+        debug('Closing HTTPS server');
+        https.close(function () {
+            debug('HTTPS server closed');
+            process.exit(0);
+        });
     });
 }
 
