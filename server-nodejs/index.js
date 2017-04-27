@@ -22,6 +22,17 @@ app.locals.db = require('./db')(conf.db, conf[conf.db]);
 
 require('./routes')(app, express);
 
+/*
+ * Extensions
+ */
+debug('Loading extensions');
+for(ext in conf.extensions) {
+    debug('Extension: ' + ext);
+    if(conf.extensions[ext].conf) {
+        app.locals.conf[ext] = require(conf.extensions[ext].conf);
+    }
+    require(conf.extensions[ext].path)(app);
+}
 
 /*
  * Export the app if we are in a test environment
