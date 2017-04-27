@@ -4,9 +4,11 @@
 			document.addEventListener('DOMContentLoaded', function() {
 				document.querySelector('#title').innerHTML = window.location.host;
 				document.querySelector('#srv_py').innerHTML = window.location+'api';
-				document.querySelector('#srv_js').innerHTML = window.location+'damas.js';
+				//document.querySelector('#srv_js').innerHTML = window.location+'damas.js';
+				damas.server = "/api/";
 			});
 		</script>
+		<script type="text/javascript" src="damas.js"></script>
 		<style>
 			body {
 				font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
@@ -48,17 +50,22 @@
 		<h2>User Interfaces</h2>
 		<a href="console">&gt; web console</a>
 		<h2>Programming Interfaces</h2>
+		<h3>Javascript</h3>
+		In the web browser console (F12):
+		<pre>
+damas.signIn("username","password");
+		</pre>
+		Using the <a href="damas.js">damas-core Javascript API module</a> from an HTML document on the server
+		<pre>&lt;script type="text/javascript" src="<span id="srv_js" class="dyn">damas.js</span>"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+    damas.server="/api/";
+    // your code here
+&lt;/script&gt;</pre>
 		<h3>Python</h3>
 		Using the <a href="damas.py">damas-core Python API module</a>:
 		<pre>import damas
 project = damas.http_connection('<span id="srv_py" class="dyn">ee</span>')</pre>
-		<h3>Javascript</h3>
-		Using the <a href="damas.js">damas-core Javascript API module</a>:
-		<pre>&lt;script type="text/javascript" src="<span id="srv_js" class="dyn"></span>"&gt;&lt;/script&gt;
-&lt;script type="text/javascript"&gt;
-// your code here
-&lt;/script&gt;</pre>
-		<h2>Command Line Interfaces</h2>
+		<h2>Command line</h2>
 		<h3>Shell</h3>
 		Using the <a href="/damas.sh">damas-core CLI</a>:
 		<pre># in a damas repository
