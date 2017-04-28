@@ -217,6 +217,7 @@ esac
 
 # Verify if in a .damas directory
 upsearch '.damas'
+DIRECTORY=$(realpath $DIRECTORY)
 CONFIG=$DIRECTORY'/.damas/config'
 if [ ! -f $CONFIG ]; then
     echo "config file does not exist. Creating one.."
@@ -252,18 +253,18 @@ case $COMMAND in
       ;;
     untracked)
       BASE="/tmp/damas-files_"
-      find $1 -type f > ${BASE}origin
+      find $PWD$1 -type f > ${BASE}origin
       echo -n '[' > ${BASE}request
       while read file; do
-        get_real_path $file
+        FILEPATH=${file#"$DIRECTORY"}
         echo -n '"'$FILEPATH'",' >> ${BASE}request
       done < ${BASE}origin
       echo -n '""]' >> ${BASE}request
       eval "curl $CURL_ARGS $AUTH -d "@${BASE}request" ${URL}read/" > ${BASE}response
       STATUS=$(sed '$!d' ${BASE}response);
       if [ $STATUS  -gt 300 ]; then
-        head -n 1 ${BASE}response;
-        map_server_errors $STATUS;
+        head -n 1 ${BASE}response
+        map_server_errors $STATUS
       fi
       sed -e $'s/\([^"]\),/\\1\\n/g' ${BASE}response | grep -n null | \
           cut -f1 -d: > ${BASE}result
