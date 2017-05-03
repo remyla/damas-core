@@ -72,11 +72,6 @@ run() {
   map_server_errors "${RES##*$'\n'}"
 }
 
-damas_search_mongo() {
-  RES=$(curl $CURL_ARGS $AUTH ${URL}search_mongo/ \
-    -d '{"query": "'$1'", "sort": "'$2'", "limit": "'$3'", "skip": "'$4'"}')
-}
-
 get_ids() {
   if [ $# -eq 0 ]; then
     echo "damas: missing file argument"
@@ -284,7 +279,8 @@ case $COMMAND in
       run "curl $CURL_ARGS $AUTH -X DELETE -d '$IDS' ${URL}delete/"
       ;;
     search_mongo)
-      damas_search_mongo $@
+      QUERY='{"query": '$1', "sort": '$2', "limit": '$3', "skip": '$4'}'
+      run "curl $CURL_ARGS $AUTH -X POST ${URL}search_mongo/ -d '$QUERY'"
       ;;
     lock)
       get_ids $@
