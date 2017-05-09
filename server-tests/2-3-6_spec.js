@@ -37,6 +37,11 @@ function update(desc, data) {
         .put(url + 'update/', data, {json: true});
 }
 
+function upsert(desc,data) {
+    return frisby.create('POST UPSERT - ' + desc)
+        .post(url + 'upsert/', data, {json: true});
+}
+
 function remove(desc, data) {
     return frisby.create('DELETE REMOVE - ' + desc)
         .delete(url + 'delete/', data, {json: true});
@@ -172,6 +177,27 @@ create('should create an object in the database', {key: 'value', num: 3})
 
     update('should update two nodes', {_id: [idFound, idCustom], c: 'd'})
         .expectStatus(200).expectJSONTypes('*', {c: 'd'}).toss();
+    // */
+
+    /*
+     * Upsert tests
+     */
+    upsert('should throw an error ([{}] | {} expected)', [null])
+        .expectStatus(400).toss();
+    upsert('should throw an error (objects expected)', ['abc'])
+        .expectStatus(400).toss();
+    upsert('should throw an error (objects expected)', [{}, 'abc'])
+        .expectStatus(400).toss();
+    upsert('should update a node with an integer', {_id: idFound, b: 2})
+        .expectStatus(200).expectJSON({b: 2}).toss();
+    upsert('should create a node with custom id', {_id: 'null'})
+        .expectStatus(200).toss();
+    upsert('should create nodes with custom id', {_id: ['null', 'null'], c: 'd'})
+        .expectStatus(200).expectJSONTypes('*', {c: 'd'}).toss();
+    upsert('should create a node and update a node', {_id: [idFound, 'null'], b: 'a'})
+        .expectStatus(200).expectJSONTypes('*', {b: 'a'}).toss();
+    upsert('should create a node and update a node', {_id: [idFound, idCustom], b: 'a'})
+        .expectStatus(200).expectJSONTypes('*', {b: 'a'}).toss();
     // */
 
     /*

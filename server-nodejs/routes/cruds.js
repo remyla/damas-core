@@ -173,6 +173,78 @@ module.exports = function (app, routes) {
         });
     }; // update()
 
+    /*
+     * upsert()
+     *
+     * Method: POST 
+     * URI: /api/upsert/
+     *
+     * Insert new nodes or update already existing nodes
+     *
+     * HTTP status codes:
+     * - 200: OK (nodes inserted and/or updated)
+     * - 400: Bad request (not formated correctly)
+     */
+    upsert = function (req, res) {
+        var nodes = Array.isArray(req.body) ? req.body : [req.body];
+        var controlProperties = {
+            author: req.user.username,
+            time: Date.now()
+        }
+        for (var i = 0; i < nodes.length; ++i) {
+            if ('object' !== typeof nodes[i] || null === nodes[i]) {
+                return httpStatus(res, 400, 'Upsert');
+            }
+            nodes[i] = Object.assign({}, controlProperties, nodes[i]);
+        }
+        nodes = unfoldIds(nodes);
+        for(var i in nodes) {
+            if(nodes[i]._id === 'null') {
+                delete nodes[i]._id;
+            }
+        }
+
+        db.create(nodes, function(err, result) {
+            if(err) {
+                return httpStatus(res, 409, 'Upsert');
+            }
+            var toUpdate = [];
+            var created = [];
+            for(var i in nodes) {
+                if(result[i] === null) {
+                    toUpdate.push(nodes[i]);
+                }
+                else {
+                    created.push(nodes[i]);
+                }
+            }
+            var response = getMultipleResponse(result);
+            if (response.fail) {
+                db.update(nodes, function(err, updates) {
+                    if(err) {
+                        return httpStatus(res, 409, 'Upsert');
+                    }
+                    httpStatus(res, 200, (updates.length > 1) ? updates : updates[0]);
+                });
+                return;
+            }
+            if (response.partial) {
+                db.update(toUpdate, function(err, updates) {
+                    if (err) {
+                        return httpStatus(res, 409, 'Upsert');
+                    }
+                    var output = created.concat(updates);
+                    httpStatus(res, 200, output);
+                });
+                return;
+            }
+            if (toUpdate.length === 0) {
+                httpStatus(res, 200, (created.length > 1) ? result : result[0]);
+                return;
+            }
+        });
+    }; // upsert()
+
 
     /*
      * deleteNode()
@@ -466,6 +538,7 @@ module.exports = function (app, routes) {
     // CRUD operations using nodes
     app.post('/api/create/', create);
     app.put('/api/update/', update);
+    app.post('/api/upsert/', upsert);
 
     // CRUD operations using ids
     app.get('/api/read/:id(*)', read);
@@ -489,6 +562,7 @@ module.exports = function (app, routes) {
         create: create,
         read: read,
         update: update,
+        upsert: upsert,
         deleteNode: deleteNode,
         graph: graph,
         search: search,
