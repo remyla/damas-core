@@ -66,19 +66,16 @@ class http_connection( object ) :
             return json.loads(r.text)
         return None
 
-    def update( self, id_, node ) :
+    def update( self, keys ) :
         '''
-        Modify a node(s). If an attribute with that name is already present in
-        the element, its value is changed to be that of the value parameter.
-        Specifying a None value for a key will remove the key from the node
-        @param {String} id_ Element index
-        @param {Hash} node with keys to add and remove
+        Modify a node(s). Specifying a None value for a key will 
+        remove the key from the node.
+        @param {Hash} keys of the node to update
         @returns {Hash} updated node or false on failure
         '''
-        node['_id'] = id_;
         headers = {'content-type': 'application/json'}
         headers.update(self.headers)
-        r = requests.put(self.serverURL+'/update/', data=json.dumps(node),
+        r = requests.put(self.serverURL+'/update/', data=json.dumps(keys),
             headers=headers, verify=False)
         if r.status_code == 200 or r.status_code == 207:
             return json.loads(r.text)
