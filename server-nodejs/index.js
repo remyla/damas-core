@@ -30,7 +30,10 @@ app.locals.extensions = [];
 for(ext in conf.extensions) {
     debug('Extension: ' + ext);
     if(conf.extensions[ext].conf) {
-        app.locals.conf[ext] = require(conf.extensions[ext].conf);
+        if ('string' === typeof conf.extensions[ext].conf)
+            app.locals.conf[ext] = require(conf.extensions[ext].conf);
+        if ('object' === typeof conf.extensions[ext].conf)
+            app.locals.conf[ext] = conf.extensions[ext].conf;
     }
     app.locals.extensions[ext] = require(conf.extensions[ext].path)(app);
 }
