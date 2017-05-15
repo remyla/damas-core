@@ -132,6 +132,7 @@ show_help_msg() {
   echo "   create       <json>  create node(s)"
   echo "   read         <json>  show the keys of the file"
   echo "   update       <json>  update nodes"
+  echo "   upsert       <json>  create or update nodes"
   echo "   delete       <json>  delete nodes"
   echo "   search       <query> search"
   echo "   search_mongo <query> <sort> <limit> <skip> MongoDB search - beta"
@@ -231,6 +232,9 @@ case $COMMAND in
       ;;
     update)
       run "curl $CURL_ARGS $AUTH -X PUT -d '$*' ${URL}update/"
+      ;;
+    upsert)
+      run "curl $CURL_ARGS $AUTH -d '$*' ${URL}upsert/"
       ;;
     delete)
       run "curl $CURL_ARGS $AUTH -X DELETE -d '$*' ${URL}delete/"

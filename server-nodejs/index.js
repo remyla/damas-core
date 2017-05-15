@@ -26,12 +26,13 @@ require('./routes')(app, express);
  * Extensions
  */
 debug('Loading extensions');
+app.locals.extensions = [];
 for(ext in conf.extensions) {
     debug('Extension: ' + ext);
     if(conf.extensions[ext].conf) {
         app.locals.conf[ext] = require(conf.extensions[ext].conf);
     }
-    require(conf.extensions[ext].path)(app);
+    app.locals.extensions[ext] = require(conf.extensions[ext].path)(app);
 }
 
 /*

@@ -19,6 +19,7 @@ module.exports = function (app) {
             break;
         case 'create':
         case 'update':
+        case 'upsert':
         case 'delete':
             // User class must be at least 'editor'
             if (['editor', 'admin'].indexOf(req.user.class) === -1) {

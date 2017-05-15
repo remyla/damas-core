@@ -193,6 +193,22 @@
     }
 
     /**
+     * Create new node(s) or updates already existing node(s) if id is specified
+     * and found.
+     * @param {object|array} node - Node or array of nodes
+     * @returns {object|array|undefined} Node or array of nodes, nothing if 
+     * asynchronous call
+     */
+    damas.upsert = function (nodes, callback) {
+        return req({
+            method: 'POST',
+            url: 'upsert/',
+            data: nodes,
+            callback: callback
+        });
+    }
+
+    /**
      * Delete the specified node
      * @param {string} id - Node internal index to delete
      * @param {function} callback - Function to call, boolean argument
@@ -420,6 +436,7 @@
             url: 'signIn',
             form: 'username='  + encodeURIComponent(username) +
                   '&password=' + encodeURIComponent(password),
+            async: callback !== undefined,
             callback: function (result) {
                 if ('function' === typeof callback) {
                     callback(req_callback(result));
