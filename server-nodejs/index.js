@@ -35,7 +35,7 @@ for(ext in conf.extensions) {
         if ('object' === typeof conf.extensions[ext].conf)
             app.locals.conf[ext] = conf.extensions[ext].conf;
     }
-    app.locals.extensions[ext] = require(conf.extensions[ext].path)(app);
+    app.locals.extensions[ext] = require(conf.extensions[ext].path)(app, express);
 }
 
 /*

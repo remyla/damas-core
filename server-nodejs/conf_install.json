@@ -17,14 +17,24 @@
         "secret" : "webtokensecret",
         "exp" : 1440
     },
-    "staticRoutes": {
-        "/console": "public/console.html",
-        "/signIn": "public/signIn.html",
-        "/damas.py": "../py/damas.py",
-        "/damas.sh": "../cli/damas.sh"
+    "extensions": {
+        "prefer_https": {
+            "path": "./extensions/prefer_https.js"
+        },
+        "static_routes": {
+            "path": "./extensions/static_routes.js",
+            "conf": {
+                "staticRoutes": {
+                    "/console": "public/console.html",
+                    "/signIn": "public/signIn.html",
+                    "/damas.py": "../py/damas.py",
+                    "/damas.sh": "../cli/damas.sh"
+                },
+                "publiclyServedFolders" : [
+                    "public", "../js"
+                ]
+            }
+        }
     },
-    "publiclyServedFolders" : [
-        "public", "../js"
-    ],
     "fileSystem": "/PRODUCTIONS/"
 }
