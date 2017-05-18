@@ -49,7 +49,7 @@ self.read = function (ids, callback) {
  * @return {array} - the new array
  */
 self.exportId = function (id) {
-    if (ObjectID.isValid(id)) {
+    if (/^[a-fA-F0-9]{24}$/.test(id) && ObjectID.isValid(id)) {
         return {_id: new ObjectID(id)};
     } else if ('string' !== typeof id) {
         return null;

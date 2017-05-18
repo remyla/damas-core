@@ -7,18 +7,69 @@ module.exports = function (app, routes) {
     var db = app.locals.db;
     require('./utils');
 
+    /*
+     * publish()
+     *
+     * Method: POST
+     * URI: /api/publish/
+     *
+     * Insert new nodes with duplicates (child node) conserving the original node state
+     *
+     * HTTP status codes:
+     * - 201: Created (nodes created)
+     * - 207: Multi-Status (some ids are already in use)
+     * - 400: Bad request (not formatted correctly)
+     * - 404: Not Found (the node does not exist)
+     * - 409: Conflict (all ids are already in use)
+     */
     var publish = function (req, res) {
         var nodes = Array.isArray(req.body) ? req.body : [req.body];
         nodes = unfoldIds(nodes);
+        var ids = [];
         for (var i = 0; i < nodes.length; ++i) {
-			if (undefined === nodes[i]._id || undefined === nodes[i].comment || undefined === nodes[i].origin) {
-				return httpStatus(res, 400, 'Publish');
-			}
-			if (nodes[i]._id[0] !== '/') {
-				return httpStatus(res, 400, 'Publish');
-			}
+            if (undefined === nodes[i]._id || undefined === nodes[i].comment || undefined === nodes[i].origin) {
+                return httpStatus(res, 400, 'Publish');
+            }
+            if (nodes[i]._id[0] !== '/') {
+                return httpStatus(res, 400, 'Publish');
+            }
         }
-		routes.create(req, res);
+        db.create(nodes, function(error, parents) {
+            if(error) {
+                return httpStatus(res, 409, 'Publish');
+            }
+            for(var i in parents) {
+                if(parents[i] === null) {
+                    continue;
+                }
+                ids.push(parents[i]._id);
+            }
+            var response = getMultipleResponse(parents);
+            if(response.fail) {
+                httpStatus(res, 409, 'Publish');
+                return;
+            }
+            db.read(ids, function(err, result) {
+                if(err) {
+                    return httpStatus(res, 404, 'Publish');
+                }
+                var copies = [];
+                for (var i in result) {
+                    copy = Object.assign({}, result[i]);
+                    delete copy._id;
+                    child = Object.assign({'#parent' : result[i]._id}, copy);
+                    copies.push(child);
+                }
+                db.create(copies, function(err, children) {
+                    if(err) {
+                        return httpStatus(res, 409, 'Publish');
+                    }
+                    parents = parents.concat(children);
+                    httpStatus(res, (response.partial) ? 207 : 201, parents);
+                });
+            });
+        });
+
     };
 
     /*
@@ -152,6 +203,74 @@ module.exports = function (app, routes) {
         });
     };
 
+
+    /*
+     * comment()
+     *
+     * Method: POST
+     * URI: /api/comment/
+     *
+     * Add a comment to the specified nodes
+     *
+     * HTTP status codes:
+     * - 400: Bad request (not formatted correctly)
+     * - 404: Not Found (the node does not exist)
+     */
+    var comment = function (req, res) {
+        if (req.body['#parent'] === undefined || 
+            req.body.comment === undefined) {
+            return httpStatus(res, 400, 'Comment');
+        }
+        if (req.body.comment.length < 1 || 
+            typeof req.body.comment !== 'string') {
+            return httpStatus(res, 400, 'Comment');
+        }
+
+        var multipleIds;
+        var children = [];
+        var ids;
+        multipleIds = Array.isArray(req.body['#parent']);
+        var copy = Object.assign({}, req.body);
+        delete copy['#parent'];
+
+        if(!multipleIds) {
+            ids = [req.body['#parent']];
+            children[0] = Object.assign({}, req.body);
+        } else {
+            ids = req.body['#parent'];
+        }
+        db.read(ids, function (err, nodes) {
+            if(err) {
+                return httpStatus(res, 404, 'Comment');
+            }
+            var response = getMultipleResponse(nodes);
+            if (response.fail) {
+                httpStatus(res, 404, 'Comment');
+                return;
+            }
+            if(multipleIds) {
+                for(var i in nodes) {
+                    if(nodes[i] === null) {
+                        continue;
+                    }
+                    children.push(Object.assign({'#parent': nodes[i]._id}, copy));
+                }
+            }
+            db.create(children, function(err, doc) {
+                if(err) {
+                    return httpStatus(res, 404, 'Comment');
+                }
+                for(var i in nodes) {
+                    if(nodes[i] === null) {
+                        doc.splice(i, 0, null);
+                    }
+                }
+                httpStatus(res, (response.partial) ? 207 : 201, doc);
+            });
+        });
+    }; //comment()
+
+
     /* this is added as comment because we will implement this route
 
     /*
@@ -217,12 +336,14 @@ module.exports = function (app, routes) {
     app.post('/api/publish/', publish);
     app.put('/api/unlock/', unlock);
     app.post('/api/version/:id(*)', version);
+    app.post('/api/comment/', comment);
 
     routes = Object.assign(routes, {
         lock: lock,
         publish: publish,
         unlock: unlock,
-        version: version
+        version: version,
+        comment: comment
     });
 }
 

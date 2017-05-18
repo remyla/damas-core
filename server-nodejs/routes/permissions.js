@@ -11,6 +11,7 @@ module.exports = function (app) {
         case 'upload':
         case 'version':
         case 'file':
+        case 'comment':
             // User class must be at least 'user'
             if (['user', 'editor', 'admin'].indexOf(req.user.class) === -1) {
                 return httpStatus(res, 403, 'Access ' + req.params.route);
@@ -18,6 +19,7 @@ module.exports = function (app) {
             break;
         case 'create':
         case 'update':
+        case 'upsert':
         case 'delete':
             // User class must be at least 'editor'
             if (['editor', 'admin'].indexOf(req.user.class) === -1) {

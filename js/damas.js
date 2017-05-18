@@ -193,6 +193,22 @@
     }
 
     /**
+     * Create new node(s) or updates already existing node(s) if id is specified
+     * and found.
+     * @param {object|array} node - Node or array of nodes
+     * @returns {object|array|undefined} Node or array of nodes, nothing if 
+     * asynchronous call
+     */
+    damas.upsert = function (nodes, callback) {
+        return req({
+            method: 'POST',
+            url: 'upsert/',
+            data: nodes,
+            callback: callback
+        });
+    }
+
+    /**
      * Delete the specified node
      * @param {string} id - Node internal index to delete
      * @param {function} callback - Function to call, boolean argument
@@ -352,6 +368,23 @@
             callback: callback
         });
     }
+    /**
+     * Creates a new node under an existing node, asynchronously if a callback
+     * function is specified or synchronously otherwise.
+     * @param {hash} keys - Hash of key:value pairs
+     * @param {function} [callback] - Function with the XHR object as an
+     *                                argument to call.
+     * @returns {object|boolean|undefined} New node on success, null otherwise
+     * (or nothing if async)
+     */
+    damas.comment = function (node, callback) {
+        return req({
+            method: 'POST',
+            url: 'comment/',
+            data: node,
+            callback: callback
+        });
+    }
 
     /**
      * Creates a node with the specified keys, asynchronously if a callback
@@ -403,6 +436,7 @@
             url: 'signIn',
             form: 'username='  + encodeURIComponent(username) +
                   '&password=' + encodeURIComponent(password),
+            async: callback !== undefined,
             callback: function (result) {
                 if ('function' === typeof callback) {
                     callback(req_callback(result));

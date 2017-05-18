@@ -318,7 +318,6 @@ module.exports = function (conf) {
     self.querify = function (ids) {
         var ids_o = ids.map(self.exportId);
         var query = {_id: {$in: []}};
-
         for (var i = 0; i < ids_o.length; ++i) {
             query._id.$in.push(ids_o[i]._id);
         }
@@ -331,7 +330,7 @@ module.exports = function (conf) {
      * @return {array} - the new array
      */
     self.exportId = function (id) {
-        if (ObjectID.isValid(id)) {
+        if (/^[a-fA-F0-9]{24}$/.test(id) && ObjectID.isValid(id)) {
             return {_id: new ObjectID(id)};
         } else if ('string' === typeof id) {
             return {_id: id};
