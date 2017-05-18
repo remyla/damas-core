@@ -134,6 +134,7 @@ show_help_msg() {
   echo "   update       <json>  update nodes"
   echo "   upsert       <json>  create or update nodes"
   echo "   delete       <json>  delete nodes"
+  echo "   graph        <json>  read all related nodes"
   echo "   search       <query> search"
   echo "   search_mongo <query> <sort> <limit> <skip> MongoDB search - beta"
   echo "   comment      <json>  create child node"
@@ -238,6 +239,9 @@ case $COMMAND in
       ;;
     delete)
       run "curl $CURL_ARGS $AUTH -X DELETE -d '$*' ${URL}delete/"
+      ;;
+    graph)
+      run "curl $CURL_ARGS $AUTH -d '$*' ${URL}graph/0/"
       ;;
     search)
       run "curl $CURL_ARGS $AUTH ${URL}search/$1"
