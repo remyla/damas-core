@@ -146,16 +146,31 @@ module.exports = function (app, routes) {
         }
         var nodes = Array.isArray(req.body) ? req.body : [req.body];
         for (var i = 0; i < nodes.length; ++i) {
+            if(nodes[i] === 'null') {
+                continue;
+            }
             if (!checkObject(nodes[i]) || !nodes[i]._id) {
                 return httpStatus(res, 400, 'Update');
             }
         }
         nodes = unfoldIds(nodes);
+
+        //workaround solution for cases where the array of nodes contains 'null'
+        var copy = Array.from(nodes);
+        while(nodes.indexOf('null') !== -1) {
+            nodes.splice(nodes.indexOf('null'), 1);
+        }
         events.fire('pre-update', nodes).then(function (data) {
             if (data.status) {
                 return httpStatus(res, data.status, 'Update');
             }
             db.update(data.nodes || nodes, function (error, doc) {
+                //workaround to insert the values 'null' into the response
+                for(var i in copy) {
+                    if(copy[i] === 'null') {
+                        doc.splice(i, 0, 'null');
+                    }
+                }
                 if (error) {
                     return httpStatus(res, 409, 'Update');
                 }
@@ -164,10 +179,8 @@ module.exports = function (app, routes) {
                     httpStatus(res, 404, 'Update');
                 } else if (response.partial) {
                     httpStatus(res, 207, doc);
-                } else if (1 === doc.length && !isArray(req)) {
-                    httpStatus(res, 200, doc[0]);
                 } else {
-                    httpStatus(res, 200, doc);
+                    httpStatus(res, 200, (doc.length > 1) ? doc : doc[0]);
                 }
             });
         });

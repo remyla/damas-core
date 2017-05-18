@@ -3,32 +3,46 @@
  */
 
 module.exports = function (app) {
+    var tools = require('./perms-tools.js')(app);
+    var conf = app.locals.conf;
+
     app.use('/api/:route', function (req, res, next) {
-        switch (req.params.route) {
-        case 'lock':
-        case 'unlock':
-        case 'publish':
-        case 'upload':
-        case 'version':
-        case 'file':
-        case 'comment':
-            // User class must be at least 'user'
-            if (['user', 'editor', 'admin'].indexOf(req.user.class) === -1) {
+        var copyReq = Array.from(Array.isArray(req.body) ? req.body : [req.body]);
+
+        var isFromClass = tools.isFromClass(req);
+        if(['read', 'update'].indexOf(req.params.route) === -1) {
+            if(!isFromClass) {
                 return httpStatus(res, 403, 'Access ' + req.params.route);
             }
-            break;
-        case 'create':
-        case 'update':
-        case 'upsert':
-        case 'delete':
-            // User class must be at least 'editor'
-            if (['editor', 'admin'].indexOf(req.user.class) === -1) {
-                return httpStatus(res, 403, 'Edition');
-            }
-            break;
+            next();
+            return;
         }
-        next();
-    });
+
+        var ids = copyReq;
+        if(['update'].indexOf(req.params.route) > -1) {
+            ids = tools.extractIds(copyReq);
+        }
+        tools.filterByAuthor(ids, req.user.username, function(response) {
+            if(conf.authorMode) {
+                if(req.user.class === 'admin') {
+                    next();
+                    return;
+                }
+                var nodes = unfoldIds(copyReq);
+                var result = tools.filterRequest(nodes, response);
+                if(!isFromClass || req.params.route === 'read') {
+                    req.body = result;
+                }
+                next();
+            }
+            else {
+                if(!isFromClass) {
+                    return httpStatus(res, 403, 'Access ' + req.params.route);
+                }
+                next();
+            }
+        });
+    }); //app.use()
 };
 
 
