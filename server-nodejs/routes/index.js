@@ -23,22 +23,6 @@ module.exports = function (app, express){
         next();
     });
 
-    //Static routes
-    var path = require('path');
-    for (var route in conf.staticRoutes) {
-        if (!conf.staticRoutes.hasOwnProperty(route)) {
-            continue;
-        }
-        debug('Registered static route: ' + route + " -> " + conf.staticRoutes[route]);
-        app.get(route, function( req, res ){
-            res.sendFile(path.resolve(conf.staticRoutes[req.path]));
-        });
-    }
-    for (var route in conf.publiclyServedFolders) {
-        debug('Registered publicly served folder: ' + conf.publiclyServedFolders[route]);
-        app.use(express.static(conf.publiclyServedFolders[route]));
-    }
-
     // Authentication
     if (conf.auth === 'jwt') {
         require('./auth-jwt-node.js')(app);

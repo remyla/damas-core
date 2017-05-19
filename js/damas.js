@@ -436,6 +436,7 @@
             url: 'signIn',
             form: 'username='  + encodeURIComponent(username) +
                   '&password=' + encodeURIComponent(password),
+            async: callback !== undefined,
             callback: function (result) {
                 if ('function' === typeof callback) {
                     callback(req_callback(result));
