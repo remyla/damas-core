@@ -11,7 +11,7 @@ module.exports = function (app) {
 
         var isOperationAllowed = tools.isOperationAllowed(req.params.route, req.user.class);
         if(['read', 'update'].indexOf(req.params.route) === -1) {
-            if(!isFromClass) {
+            if(!isOperationAllowed) {
                 return httpStatus(res, 403, 'Access ' + req.params.route);
             }
             next();
