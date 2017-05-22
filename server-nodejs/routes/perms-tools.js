@@ -40,8 +40,8 @@ module.exports = function(app) {
             return table;
         };
 
-        module.isFromClass = function(req) {
-            switch (req.params.route) {
+        module.isOperationAllowed = function(operationName, userClass) {
+            switch (operationName) {
             case 'lock':
             case 'unlock':
             case 'publish':
@@ -50,7 +50,7 @@ module.exports = function(app) {
             case 'file':
             case 'comment':
                 // User class must be at least 'user'
-                if (['user', 'editor', 'admin'].indexOf(req.user.class) === -1) {
+                if (['user', 'editor', 'admin'].indexOf(userClass) === -1) {
                     return false;
                 }
                 break;
@@ -59,7 +59,7 @@ module.exports = function(app) {
             case 'upsert':
             case 'delete':
                 // User class must be at least 'editor'
-                if (['editor', 'admin'].indexOf(req.user.class) === -1) {
+                if (['editor', 'admin'].indexOf(userClass) === -1) {
                     return false;
                 }
                 break;

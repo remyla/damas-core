@@ -9,7 +9,7 @@ module.exports = function (app) {
     app.use('/api/:route', function (req, res, next) {
         var copyReq = Array.from(Array.isArray(req.body) ? req.body : [req.body]);
 
-        var isFromClass = tools.isFromClass(req);
+        var isOperationAllowed = tools.isOperationAllowed(req.params.route, req.user.class);
         if(['read', 'update'].indexOf(req.params.route) === -1) {
             if(!isFromClass) {
                 return httpStatus(res, 403, 'Access ' + req.params.route);
@@ -22,25 +22,28 @@ module.exports = function (app) {
         if(['update'].indexOf(req.params.route) > -1) {
             ids = tools.extractIds(copyReq);
         }
+
+        if(!conf.authorMode) {
+            if(!isOperationAllowed) {
+                return httpStatus(res, 403, 'Access ' + req.params.route);
+            }
+            next();
+            return;
+        }
+
         tools.filterByAuthor(ids, req.user.username, function(response) {
-            if(conf.authorMode) {
-                if(req.user.class === 'admin') {
-                    next();
-                    return;
-                }
-                var nodes = unfoldIds(copyReq);
-                var result = tools.filterRequest(nodes, response);
-                if(!isFromClass || req.params.route === 'read') {
-                    req.body = result;
-                }
+            if(req.user.class === 'admin') {
                 next();
+                return;
             }
-            else {
-                if(!isFromClass) {
-                    return httpStatus(res, 403, 'Access ' + req.params.route);
-                }
+            if(req.params.route !== 'read' && isOperationAllowed) {
                 next();
+                return;
             }
+            var nodes = unfoldIds(copyReq);
+            var result = tools.filterRequest(nodes, response);
+            req.body = result;
+            next();
         });
     }); //app.use()
 };
