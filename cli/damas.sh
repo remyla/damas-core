@@ -72,11 +72,6 @@ run() {
   map_server_errors "${RES##*$'\n'}"
 }
 
-damas_search_mongo() {
-  RES=$(curl $CURL_ARGS $AUTH ${URL}search_mongo/ \
-    -d '{"query": "'$1'", "sort": "'$2'", "limit": "'$3'", "skip": "'$4'"}')
-}
-
 get_ids() {
   if [ $# -eq 0 ]; then
     echo "damas: missing file argument"
@@ -139,6 +134,7 @@ show_help_msg() {
   echo "   update       <json>  update nodes"
   echo "   upsert       <json>  create or update nodes"
   echo "   delete       <json>  delete nodes"
+  echo "   graph        <json>  read all related nodes"
   echo "   search       <query> search"
   echo "   search_mongo <query> <sort> <limit> <skip> MongoDB search - beta"
   echo "   comment      <json>  create child node"
@@ -244,6 +240,9 @@ case $COMMAND in
     delete)
       run "curl $CURL_ARGS $AUTH -X DELETE -d '$*' ${URL}delete/"
       ;;
+    graph)
+      run "curl $CURL_ARGS $AUTH -d '$*' ${URL}graph/0/"
+      ;;
     search)
       run "curl $CURL_ARGS $AUTH ${URL}search/$1"
       ;;
@@ -288,7 +287,8 @@ case $COMMAND in
       run "curl $CURL_ARGS $AUTH -X DELETE -d '$IDS' ${URL}delete/"
       ;;
     search_mongo)
-      damas_search_mongo $@
+      QUERY='{"query": '$1', "sort": '$2', "limit": '$3', "skip": '$4'}'
+      run "curl $CURL_ARGS $AUTH -X POST ${URL}search_mongo/ -d '$QUERY'"
       ;;
     lock)
       get_ids $@

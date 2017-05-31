@@ -1,6 +1,7 @@
 {
-    "auth": "no",
-    "connection": {
+    "auth" : "no",
+    "authorMode" : true,
+    "connection" : {
         "Cert": "cert.pem",
         "Key": "key.pem"
     },
