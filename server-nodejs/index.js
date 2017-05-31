@@ -20,7 +20,9 @@ debug('Loading configuration');
 var conf = app.locals.conf = require('./conf');
 app.locals.db = require('./db')(conf.db, conf[conf.db]);
 
-require('./routes')(app, express);
+var bodyParser = require( 'body-parser' );
+app.use( bodyParser.urlencoded( { limit: '50mb', extended : true } ) );
+app.use( bodyParser.json({limit: '50mb', strict: false}));
 
 /*
  * Extensions
@@ -28,6 +30,9 @@ require('./routes')(app, express);
 debug('Loading extensions');
 app.locals.extensions = [];
 for(ext in conf.extensions) {
+    if (false === conf.extensions[ext].enable){
+        continue;
+    }
     debug('Extension: ' + ext);
     if(conf.extensions[ext].conf) {
         if ('string' === typeof conf.extensions[ext].conf)
@@ -37,6 +42,8 @@ for(ext in conf.extensions) {
     }
     app.locals.extensions[ext] = require(conf.extensions[ext].path)(app, express);
 }
+
+require('./routes')(app, express);
 
 /*
  * Export the app if we are in a test environment

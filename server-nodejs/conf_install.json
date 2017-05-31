@@ -1,23 +1,31 @@
 {
-    "auth" : "no",
-    "connection" : {
+    "auth": "no",
+    "connection": {
         "Cert": "cert.pem",
         "Key": "key.pem"
     },
     "db" : "mongodb",
-    "mongodb" : {
-        "host" : "localhost",
-        "collection" : "node",
-        "port" : 27017,
-        "options" : { "auto_reconnect" : true }
-    },
-    "jwt" : {
-        "required": false,
-        "passwordHashAlgorithm" : "sha1",
-        "secret" : "webtokensecret",
-        "exp" : 1440
+    "mongodb": {
+        "host": "localhost",
+        "collection": "node",
+        "port": 27017,
+        "options": { "auto_reconnect": true }
     },
     "extensions": {
+        "jwt": {
+			"enable": false,
+            "path": "./extensions/auth-jwt-node.js",
+            "conf": {
+                "required": false,
+                "passwordHashAlgorithm": "sha1",
+                "secret": "webtokensecret",
+                "exp": 1440
+            }
+        },
+        "noauth": {
+			"enable": true,
+            "path": "./extensions/auth-none.js"
+        },
         "prefer_https": {
             "path": "./extensions/prefer_https.js"
         },
@@ -30,7 +38,7 @@
                     "/damas.py": "../py/damas.py",
                     "/damas.sh": "../cli/damas.sh"
                 },
-                "publiclyServedFolders" : [
+                "publiclyServedFolders": [
                     "public", "../js"
                 ]
             }

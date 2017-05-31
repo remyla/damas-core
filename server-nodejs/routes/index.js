@@ -7,9 +7,9 @@ module.exports = function (app, express){
     var debug = require('debug')('app:init');
     require('./utils');
 
-    var bodyParser = require( 'body-parser' );
-    app.use( bodyParser.urlencoded( { limit: '50mb', extended : true } ) );
-    app.use( bodyParser.json({limit: '50mb', strict: false}));
+    //var bodyParser = require( 'body-parser' );
+    //app.use( bodyParser.urlencoded( { limit: '50mb', extended : true } ) );
+    //app.use( bodyParser.json({limit: '50mb', strict: false}));
 
     var morgan = require('morgan');
     app.use(morgan('dev'));
@@ -23,15 +23,6 @@ module.exports = function (app, express){
         next();
     });
 
-    // Authentication
-    if (conf.auth === 'jwt') {
-        require('./auth-jwt-node.js')(app);
-        debug("Authentification is JWT");
-    } else {
-        require('./auth-none.js')(app);
-        debug('Warning: No authentication.');
-        debug('Edit conf.json and set auth=jwt to enable json web tokens');
-    }
     require('./permissions')(app);
 
     // Routes
