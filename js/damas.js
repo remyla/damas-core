@@ -60,7 +60,7 @@
      * @param {object} args - All the given arguments
      * @return {} - The result of the request
      */
-    function req(args) {
+    req = damas.req = function (args) {
         if (undefined === args.async) {
             args.async = ('function' === typeof args.callback);
         }
