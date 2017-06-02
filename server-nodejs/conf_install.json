@@ -1,5 +1,4 @@
 {
-    "auth" : "no",
     "authorMode" : true,
     "connection" : {
         "Cert": "cert.pem",
@@ -13,6 +12,9 @@
         "options": { "auto_reconnect": true }
     },
     "extensions": {
+        "es6_polyfills": {
+            "path": "./extensions/es6_polyfills.js"
+        },
         "jwt": {
 			"enable": false,
             "path": "./extensions/auth-jwt-node.js",

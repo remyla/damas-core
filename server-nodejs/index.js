@@ -24,23 +24,29 @@ var bodyParser = require( 'body-parser' );
 app.use( bodyParser.urlencoded( { limit: '50mb', extended : true } ) );
 app.use( bodyParser.json({limit: '50mb', strict: false}));
 
+var morgan = require('morgan');
+app.use(morgan('dev'));
+
 /*
  * Extensions
  */
 debug('Loading extensions');
 app.locals.extensions = [];
-for(ext in conf.extensions) {
-    if (false === conf.extensions[ext].enable){
+for(extname in conf.extensions) {
+    if (false === conf.extensions[extname].enable){
         continue;
     }
-    debug('Extension: ' + ext);
-    if(conf.extensions[ext].conf) {
-        if ('string' === typeof conf.extensions[ext].conf)
-            app.locals.conf[ext] = require(conf.extensions[ext].conf);
-        if ('object' === typeof conf.extensions[ext].conf)
-            app.locals.conf[ext] = conf.extensions[ext].conf;
+    debug('Extension: ' + extname);
+    if(conf.extensions[extname].conf) {
+        if ('string' === typeof conf.extensions[extname].conf)
+            app.locals.conf[extname] = require(conf.extensions[extname].conf);
+        if ('object' === typeof conf.extensions[extname].conf)
+            app.locals.conf[extname] = conf.extensions[extname].conf;
     }
-    app.locals.extensions[ext] = require(conf.extensions[ext].path)(app, express);
+    var extobj = require(conf.extensions[extname].path);
+    if(typeof extobj === 'function') {
+        app.locals.extensions[extname] = extobj(app, express);
+    }
 }
 
 require('./routes')(app, express);
