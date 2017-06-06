@@ -4,7 +4,7 @@
 
 module.exports = function (app, express){
     var conf = app.locals.conf.static_routes;
-	var debug = require('debug')('app:staticRoutes');
+    var debug = require('debug')('app:staticRoutes');
     var path = require('path');
     for (var route in conf.staticRoutes) {
         if (!conf.staticRoutes.hasOwnProperty(route)) {

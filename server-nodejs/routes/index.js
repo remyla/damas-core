@@ -7,10 +7,6 @@ module.exports = function (app, express){
     var debug = require('debug')('app:init');
     require('./utils');
 
-    //var bodyParser = require( 'body-parser' );
-    //app.use( bodyParser.urlencoded( { limit: '50mb', extended : true } ) );
-    //app.use( bodyParser.json({limit: '50mb', strict: false}));
-
     app.use(function (req, res, next) {
         if (req.body) {
             console.log(req.body);

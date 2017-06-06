@@ -1,0 +1,93 @@
+<html>
+	<head>
+		<script src="damas.js"></script>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta name="mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<script type="text/javascript">
+			document.addEventListener('DOMContentLoaded', function() {
+				var form = document.getElementById('signInForm');
+				var signOut = document.getElementById('signOut');
+				form.addEventListener('submit', function( e ){
+					e.preventDefault();
+					damas.signIn(form.elements['username'].value, form.elements['password'].value, function( res ){
+						if (!res) {
+							return alert('signIn failed');
+						}
+						document.querySelector('#token').innerHTML = damas.token;
+						document.querySelector('#contents').style.display = 'block';
+						damas_auth_store();
+						if (window.location.href.indexOf('back')!==-1) {
+							window.location = window.location.href.match(/^.*back=(.*)$/)[1];
+						}
+						else {
+							window.history.back(-1);
+						}
+					});
+					return false;
+				});
+				signOut.addEventListener('click', function( e ){
+					damas.signOut( function(e){
+						localStorage.removeItem("token");
+						localStorage.removeItem("user");
+						document.location.reload();
+					});
+				});
+				damas_auth_store = function() {
+					if (localStorage) {
+						localStorage.setItem("token", damas.token);
+						document.cookies = "token="+damas.token;
+						localStorage.setItem("user", JSON.stringify(damas.user));
+					}
+				}
+				damas_auth_retrieve = function() {
+					if (localStorage){
+						damas.token = localStorage.getItem("token");
+						document.cookie = "token="+damas.token;
+						damas.user = JSON.parse(localStorage.getItem("user"));
+					}
+				}
+				damas_connect = function (server_url, callback)
+				{
+					damas.server = server_url;
+					damas_auth_retrieve();
+					damas.verify(callback);
+				}
+				damas_connect('/api/', function(res){
+					if (res){
+						if (damas.user){
+							document.querySelector('#token').innerHTML = damas.token;
+							document.querySelector('#username').innerHTML = damas.user.username;
+							document.querySelector('#contents').style.display = 'block';
+						}
+					}
+				});
+			});
+		</script>
+		<style>
+			body {
+				text-align: center;
+				font-family: monospace;
+			}
+			#contents {
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+		<form id="signInForm" onsubmit="signin()">
+			<input type="text" placeholder="username" required="required" name="username"/>
+			<br/>
+			<input type="password" placeholder="password" required="required" name="password"/>
+			<br/>
+			<input type="submit" value="Sign In"/>
+		</form>
+		<div id="contents">
+			<h2>Token</h2>
+			<textarea id="token"></textarea>
+			<div id="username"></div>
+			<button id="signOut">Sign Out</button>
+		</div>
+	</body>
+</html>

@@ -468,55 +468,6 @@ module.exports = function (app, routes) {
     }; // search_mongo()
 
 
-    /**
-     * Import a JSON graph commit from our current Php Server
-     *
-     */
-    importJSON = function (req, res) {
-        var json = JSON.parse(req.body.text);
-        json.nodes.forEach(function (node, i, nodes) {
-            var keys = node.keys;
-            keys.mysqlid = node.id;
-            db.search({mysqlid:keys.mysqlid}, function (err, res) {
-                if (err) {
-                    return console.log('ERROR');
-                }
-                if (0 === res.length) {
-                    db.create([keys], function (err, n) {
-                        if (err) console.log('ERROR create')
-                    });
-                } else {
-                    console.log('found mysqlid:' + keys.mysqlid);
-                }
-                if (i === nodes.length - 1) { // we finished inserting nodes
-                    json.links.forEach(function (link) {
-                        console.log(link);
-                        db.search({mysqlid:link.src_id.toString()},
-                                function (err, res1) {
-                            if (err) {
-                                console.log('LINK ERR');
-                                return;
-                            }
-                            db.search({mysqlid:link.tgt_id.toString()},
-                                    function (err, res2) {
-                                if (err) {
-                                    console.log('LINK ERR');
-                                    return;
-                                }
-                                db.create([{src_id: res1[0], tgt_id: res2[0]}],
-                                        function () {});
-                            });
-                        });
-                    });
-
-                }
-            })
-        }, json);
-        res.status(200);
-        res.send();
-    }; // importJSON()
-
-
     /*
      * getFile()
      *
@@ -567,9 +518,6 @@ module.exports = function (app, routes) {
 
     // Extra operations
     app.get('/api/file/:path(*)', getFile); // untested
-    app.post('/api/import/', importJSON); // untested
-    //app.get('/subdirs/:path', getSubdirs);
-    //app.get('/subdirs', getSubdirs);
 
     routes = Object.assign(routes, {
         create: create,

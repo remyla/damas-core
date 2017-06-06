@@ -36,6 +36,7 @@
             "path": "./extensions/static_routes.js",
             "conf": {
                 "staticRoutes": {
+                    "/api": "public/index.html",
                     "/console": "public/console.html",
                     "/signIn": "public/signIn.html",
                     "/damas.py": "../py/damas.py",
