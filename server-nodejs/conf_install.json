@@ -29,17 +29,21 @@
             }
         },
         "jwt": {
-			"enable": false,
+            "enable": false,
             "path": "./extensions/auth-jwt-node.js",
             "conf": {
                 "required": false,
                 "passwordHashAlgorithm": "sha1",
                 "secret": "webtokensecret",
-                "exp": 1440
+                "exp": 1440,
+                "expressUse": "/api",
+                "expressUnless": {
+                    "path": "/api/signIn"
+                }
             }
         },
         "noauth": {
-			"enable": true,
+            "enable": true,
             "path": "./extensions/auth-none.js"
         },
         "prefer_https": {
