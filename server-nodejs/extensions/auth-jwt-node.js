@@ -91,7 +91,10 @@ module.exports = function (app) {
             var part = authorization.split(' ');
             if (part.length === 2) {
                 var token = part[1];
-                return part[1];
+                if ('null' === token) {
+                    token = null;
+                }
+                return token;
             } else {
                 return null;
             }
