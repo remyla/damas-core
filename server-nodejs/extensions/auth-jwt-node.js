@@ -45,13 +45,6 @@ module.exports = function (app) {
         return func;
     };
 
-    app.use(cookieParser())
-    app.use('/api', middleware().unless({path:['/api/signIn']}));
-
-    //var jwtMiddleware = expressJwt({secret:conf.secret});
-    //jwtMiddleware.unless = unless;
-    //app.use('/api', jwtMiddleware.unless({path:['/api/signIn']}));
-
     var authenticate = function (req, res, next) {
         debug('Processing authenticate middleware');
         if (!req.body.username || !req.body.password) {
@@ -149,6 +142,9 @@ module.exports = function (app) {
     app.route('/api/signIn').post(authenticate, function (req, res, next) {
         return res.status(200).json(req.user);
     });
+
+    app.use(cookieParser());
+    app.use(conf.expressUse, middleware().unless(conf.expressUnless));
 }
 
 
