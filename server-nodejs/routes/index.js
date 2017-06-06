@@ -4,14 +4,14 @@
 
 module.exports = function (app, express){
     var conf = app.locals.conf;
-    var debug = require('debug')('app:init');
+    var debug = require('debug')('app:body');
     require('./utils');
 
     app.use(function (req, res, next) {
         if (req.body) {
-            console.log(req.body);
+            debug(req.body);
         } else {
-            console.log('undefined req.body');
+            debug('undefined req.body');
         }
         next();
     });

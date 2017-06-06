@@ -16,16 +16,14 @@
             "path": "./extensions/es6_polyfills.js"
         },
         "user_setup" : {
-            "path" : "/home/julie/work/r5-base/server/user_setup.js",
+            "path" : "./extensions/user_setup.js",
             "conf": {
                 "nodemailer_transporter": {
                     "sendmail": true,
                     "newline": "unix",
                     "path": "/usr/sbin/sendmail"
                 },
-                "nodemailer_email": {
-                    "from": "\"Sender\" <noreply@example.com>"
-                }
+                "nodemailer_from": "\"Sender\" <noreply@example.com>"
             }
         },
         "jwt": {

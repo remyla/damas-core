@@ -7,6 +7,10 @@ module.exports = function (app, routes){
     var conf = app.locals.conf;
     var crypto = require('crypto');
     var nodemailer = require('nodemailer');
+    var debug = require('debug')('app:user_setup');
+
+    debug( conf.user_setup.nodemailer_transporter );
+    debug( conf.user_setup.nodemailer_from);
     var transporter = nodemailer.createTransport(conf.user_setup.nodemailer_transporter);
 
     /*
@@ -57,9 +61,8 @@ module.exports = function (app, routes){
             var url = req.protocol + '://' + req.get('host') + req.url;
             var params = userNode.username + '/' + userNode.token;
             var link = url + params;
-
             transporter.sendMail({
-                from: '"Primcode" <contact@primcode.com>',
+                from: conf.user_setup.nodemailer_from,
                 to: userEmail,
                 subject: 'Validate your account',
                 text: 'Valider votre inscription: ' + link,
@@ -150,10 +153,9 @@ module.exports = function (app, routes){
                 }
                 var url = req.protocol + '://' + req.get('host');
                 var link = url + '/api/resetPassword/' + token;
-
                 transporter.sendMail({
-                    from: '"Primcode" <contact@primcode.com>',
-                    to: result.email,
+                    from: conf.user_setup.nodemailer_from,
+                    to: result[0].email,
                     subject: 'Lost password',
                     text: 'Suivez le lien pour regénérer votre mdp: ' + link,
                     html: '<a href=' + link + '>Regénérer votre mdp</a>'

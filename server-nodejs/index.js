@@ -37,17 +37,18 @@ for(extname in conf.extensions) {
         continue;
     }
     debug('Extension: ' + extname);
-    if(conf.extensions[extname].conf) {
+    if (conf.extensions[extname].conf) {
         if ('string' === typeof conf.extensions[extname].conf)
             app.locals.conf[extname] = require(conf.extensions[extname].conf);
         if ('object' === typeof conf.extensions[extname].conf)
             app.locals.conf[extname] = conf.extensions[extname].conf;
     }
     var extobj = require(conf.extensions[extname].path);
-    if(typeof extobj === 'function') {
+    if ('function' === typeof extobj) {
         app.locals.extensions[extname] = extobj(app, express);
     }
 }
+debug('Extensions loaded');
 
 require('./routes')(app, express);
 
