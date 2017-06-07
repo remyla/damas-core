@@ -109,7 +109,12 @@ upsearch() {
 }
 
 load_token() {
-  local TOKEN=$(cat /tmp/damas-$USER 2> /dev/null)
+  if [ $DAMAS_TOKEN ]; then
+    local TOKEN=$DAMAS_TOKEN
+  else
+    local TOKEN=$(cat /tmp/damas-$USER 2> /dev/null)
+  fi
+
   AUTH='-H "Authorization: Bearer '$TOKEN'"'
 }
 
@@ -200,27 +205,38 @@ fi
 
 case $COMMAND in
     init)
-      read -p "remote URL (default = localhost:8090): " URL
-      if [  -z $URL ]; then
-        URL='localhost:8090'
+      read -p "remote URL (default = http://localhost:8090): " URL
+      if [ -z $URL ]; then
+        URL='http://localhost:8090'
       fi
       mkdir '.damas'
-      echo 'URL="http://'$URL'/api/"' > '.damas/config'
+      echo 'URL="'$URL'/api/"' > '.damas/config'
       echo 'Initialized empty Damas repository in '$(realpath .) \
-        '/.damas/ with remote http://'$URL'/api/'
+        '/.damas/ with remote '$URL'/api/'
       exit 0
       ;;
 esac
 
 # Verify if in a .damas directory
-upsearch '.damas'
+
+if [ $DAMAS_DIR ]; then
+  DIRECTORY=$DAMAS_DIR
+else
+  upsearch '.damas'
+fi
+
 DIRECTORY=$(realpath $DIRECTORY)
+
 CONFIG=$DIRECTORY'/.damas/config'
 if [ ! -f $CONFIG ]; then
-    echo "config file does not exist. Creating one.."
-    echo 'URL="http://localhost:8090/api/"' > $CONFIG
+  echo "config file does not exist. Creating one.."
+  echo 'URL="http://localhost:8090/api/"' > $CONFIG
 fi
 source $CONFIG
+
+if [ $DAMAS_SERVER ]; then
+  URL=$DAMAS_SERVER
+fi
 
 load_token
 
