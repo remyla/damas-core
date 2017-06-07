@@ -41,40 +41,47 @@ module.exports = function (app, routes){
             _id: 'usr_' + req.body.username
         };
 
-        var userNode = Object.assign({}, req.body, addedProperties);
-
-        var pwd = userNode.password;
-        var checksum = crypto.createHash(conf.jwt.passwordHashAlgorithm);
-        checksum.update(pwd);
-        var crypted = checksum.digest('hex');
-        var token = crypto.randomBytes(16).toString('hex');
-
-        userNode.password = crypted;
-        userNode.token = token;
-
-        db.create([userNode], function(err, node) {
+        db.search({'email':req.body.email}, function(err, id) {
             if(err) {
-                res.status(409).send('Erreur');
+                return res.sendStatus(409);
             }
-            var userEmail = node[0].email;
+            if(id.length > 0) {
+                return res.status(409).send('Email is already in use');
+            }
+            var userNode = Object.assign({}, req.body, addedProperties);
 
-            var url = req.protocol + '://' + req.get('host') + req.url;
-            var params = userNode.username + '/' + userNode.token;
-            var link = url + params;
-            transporter.sendMail({
-                from: conf.user_setup.nodemailer_from,
-                to: userEmail,
-                subject: 'Validate your account',
-                text: 'Valider votre inscription: ' + link,
-                html: '<a href=' + link + '>Valider votre inscription</a>'
-            }, function(error, info) {
-                if(error) {
-                    return console.log(error);
+            var pwd = userNode.password;
+            var checksum = crypto.createHash(conf.jwt.passwordHashAlgorithm);
+            checksum.update(pwd);
+            var crypted = checksum.digest('hex');
+            var token = crypto.randomBytes(16).toString('hex');
+
+            userNode.password = crypted;
+            userNode.token = token;
+
+            db.create([userNode], function(err, node) {
+                if(err) {
+                    res.status(409).send('Erreur');
                 }
-                console.log(info);
+                var userEmail = node[0].email;
+
+                var url = req.protocol + '://' + req.get('host') + req.url;
+                var params = userNode.username + '/' + userNode.token;
+                var link = url + params;
+                transporter.sendMail({
+                    from: conf.user_setup.nodemailer_from,
+                    to: userEmail,
+                    subject: 'Validate your account',
+                    text: 'Valider votre inscription: ' + link,
+                    html: '<a href=' + link + '>Valider votre inscription</a>'
+                }, function(error, info) {
+                    if(error) {
+                        return console.log(error);
+                    }
+                    console.log(info);
+                });
             });
         });
-
     };
 
     /*
