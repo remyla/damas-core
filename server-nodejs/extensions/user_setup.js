@@ -153,12 +153,14 @@ module.exports = function (app, routes){
                 }
                 var url = req.protocol + '://' + req.get('host');
                 var link = url + '/api/resetPassword/' + token;
+				debug(link);
                 transporter.sendMail({
                     from: conf.user_setup.nodemailer_from,
                     to: result[0].email,
                     subject: 'Lost password',
                     text: 'Suivez le lien pour regénérer votre mdp: ' + link,
-                    html: '<a href=' + link + '>Regénérer votre mdp</a>'
+                    html: '<b>'+link+'</b>'
+                    //html: '<a href="' + link + '">Regénérer votre mdp</a>'
                 }, function(error, info) {
                     if(error) {
                         return console.log(error);

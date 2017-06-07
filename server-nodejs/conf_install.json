@@ -18,10 +18,10 @@
         "user_setup" : {
             "path" : "./extensions/user_setup.js",
             "conf": {
-                "nodemailer_transporter": {
-                    "sendmail": true,
-                    "newline": "unix",
-                    "path": "/usr/sbin/sendmail"
+                "nodemailer_transporter":{
+                    "host": "localhost",
+                    "port": 25,
+                    "secure": false
                 },
                 "nodemailer_from": "\"Sender\" <noreply@example.com>"
             }
@@ -53,7 +53,8 @@
                 "staticRoutes": {
                     "/api": "public/index.html",
                     "/console": "public/console.html",
-                    "/signIn": "public/signIn.html",
+                    "/signIn": "extensions/auth_signIn.html",
+                    "/lostPassword": "extensions/user_lostPassword.html",
                     "/damas.py": "../py/damas.py",
                     "/damas.sh": "../cli/damas.sh"
                 },
