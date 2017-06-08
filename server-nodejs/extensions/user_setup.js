@@ -72,8 +72,8 @@ module.exports = function (app, routes){
                     from: conf.user_setup.nodemailer_from,
                     to: userEmail,
                     subject: 'Validate your account',
-                    text: 'Valider votre inscription: ' + link,
-                    html: '<a href=' + link + '>Valider votre inscription</a>'
+                    text: 'Validate your registration: ' + link,
+                    html: '<a href=' + link + '>Validate your registration</a>'
                 }, function(error, info) {
                     if(error) {
                         return console.log(error);
@@ -145,12 +145,11 @@ module.exports = function (app, routes){
                 return res.sendStatus(409);
             }
             if(id.length < 1) {
-                return res.status(404).send('No user with this email');
+                return res.status(200).send('"email sent"');
             }
-            var username = id[0].substring(id[0].indexOf('_') + 1);
             var random = crypto.randomBytes(16).toString('hex');
             var checksum = crypto.createHash(conf.jwt.passwordHashAlgorithm);
-            checksum.update(username + random);
+            checksum.update(id[0] + random);
             var token = checksum.digest('hex');
 
             var node = {'_id': id[0], 'token':token};
@@ -166,7 +165,7 @@ module.exports = function (app, routes){
                     to: result[0].email,
                     subject: 'Lost password',
                     text: 'Follow this link to reset your password: ' + link,
-					html: html
+                    html: html
                 }, function(error, info) {
                     if(error) {
                         return console.log(error);
@@ -210,7 +209,7 @@ module.exports = function (app, routes){
                 if(err) {
                     return res.sendStatus(409);
                 }
-                return res.status(200).send(result);
+                return res.sendStatus(200);
             });
 
         });
