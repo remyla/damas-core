@@ -159,25 +159,23 @@ module.exports = function (app, routes){
                     return res.sendStatus(409);
                 }
                 var url = req.protocol + '://' + req.get('host');
-                var link = url + '/api/resetPassword/' + token;
-				debug(link);
+                var link = url + '/resetPassword?token=' + token;
+                var html = 'Follow this link to <a href="' + link + '">reset your password</a>';
                 transporter.sendMail({
                     from: conf.user_setup.nodemailer_from,
                     to: result[0].email,
                     subject: 'Lost password',
-                    text: 'Suivez le lien pour regénérer votre mdp: ' + link,
-                    html: '<b>'+link+'</b>'
-                    //html: '<a href="' + link + '">Regénérer votre mdp</a>'
+                    text: 'Follow this link to reset your password: ' + link,
+					html: html
                 }, function(error, info) {
                     if(error) {
                         return console.log(error);
                     }
                     console.log(info);
                 });
-                return res.sendStatus(200);
+                return res.status(200).send('"email sent"');
             });
          });
-
     };
 
     /*
@@ -216,9 +214,6 @@ module.exports = function (app, routes){
             });
 
         });
-
-
-
     };
 
     app.post('/api/signUp/', signUp);

@@ -55,6 +55,7 @@
                     "/console": "public/console.html",
                     "/signIn": "extensions/auth_signIn.html",
                     "/lostPassword": "extensions/user_lostPassword.html",
+                    "/resetPassword": "extensions/user_resetPassword.html",
                     "/damas.py": "../py/damas.py",
                     "/damas.sh": "../cli/damas.sh"
                 },
