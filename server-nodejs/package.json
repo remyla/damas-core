@@ -19,6 +19,7 @@
     "body-parser": "^1.13.2",
     "cookie-parser": "^1.4.3",
     "debug": "^2.2.0",
+    "ejs": "^2.5.6",
     "express": "^4.13.1",
     "express-jwt": "^3.0.1",
     "express-unless": "^0.3.0",
