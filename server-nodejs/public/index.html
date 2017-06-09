@@ -9,7 +9,7 @@
 				console.log("Welcome to damas-core API");
 			});
 		</script>
-		<script type="text/javascript" src="damas.js"></script>
+		<script type="text/javascript" src="/js/damas.js"></script>
 		<style>
 			body {
 				font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
@@ -49,7 +49,7 @@
 		</div>
 		<a href="https://github.com/remyla/damas-core"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>
 		<h2>User Interfaces</h2>
-		<a href="console">&gt; web console</a>
+		<a href="/console">&gt; web console</a>
 		<h2>Programming Interfaces</h2>
 		<h3>Javascript console</h3>
 		Press &lt;F12&gt; to open the console:
@@ -59,7 +59,7 @@ damas.signIn("username","password");
 // create an empty node
 damas.create({});</pre>
 <!--
-		Using the <a href="damas.js">damas-core Javascript API module</a> from an HTML document on the server
+		Using the <a href="/js/damas.js">damas-core Javascript API module</a> from an HTML document on the server
 		<pre>&lt;script type="text/javascript" src="<span id="srv_js" class="dyn">damas.js</span>"&gt;&lt;/script&gt;
 &lt;script type="text/javascript"&gt;
     damas.server="/api/";
@@ -67,7 +67,7 @@ damas.create({});</pre>
 &lt;/script&gt;</pre>
 -->
 		<h3>Python</h3>
-		Install the <a href="damas.py">damas-core Python API module</a>:
+		Install the <a href="/py/damas.py">damas-core Python API module</a>:
 		<pre>import damas
 project = damas.http_connection('<span id="srv_py" class="dyn">ee</span>')
 
@@ -75,7 +75,7 @@ project = damas.http_connection('<span id="srv_py" class="dyn">ee</span>')
 project.create({})</pre>
 		<h2>Command line</h2>
 		<h3>Shell</h3>
-		Using the <a href="/damas.sh">damas-core CLI</a>:
+		Using the <a href="/cli/damas.sh">damas-core CLI</a>:
 		<pre># in a damas repository
 $ damas --help</pre>
 		<hr/>
