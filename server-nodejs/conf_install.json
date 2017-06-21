@@ -50,19 +50,14 @@
         "static_routes": {
             "path": "./extensions/static_routes.js",
             "conf": {
-                "staticRoutes": {
-                    "/api": "public/index.html",
-                    "/console": "public/console.html",
-                    "/signIn": "extensions/auth_signIn.html",
-                    "/lostPassword": "extensions/user_lostPassword.html",
-                    "/resetPassword": "extensions/user_resetPassword.html",
-                    "/damas.py": "../py/damas.py",
-                    "/damas.sh": "../cli/damas.sh"
-                },
-                "publiclyServedFolders": [
-                    "public", "../js"
-                ]
-            }
+                "routes": {
+                    "/": "public",
+                    "/js": "../js",
+                    "/cli": "../cli",
+                    "/py": "../py",
+                    "/api": "public/index.html"
+                }
+             }
         }
     },
     "fileSystem": "/PRODUCTIONS/"

@@ -7,6 +7,7 @@ module.exports = function (app, routes){
     var conf = app.locals.conf;
     var crypto = require('crypto');
     var nodemailer = require('nodemailer');
+    var ejs = require('ejs');
     var debug = require('debug')('app:user_setup');
 
     debug( conf.user_setup.nodemailer_transporter );
@@ -68,17 +69,23 @@ module.exports = function (app, routes){
                 var url = req.protocol + '://' + req.get('host') + req.url;
                 var params = userNode.username + '/' + userNode.token;
                 var link = url + params;
-                transporter.sendMail({
+                var mail = {
                     from: conf.user_setup.nodemailer_from,
                     to: userEmail,
                     subject: 'Validate your account',
-                    text: 'Validate your registration: ' + link,
-                    html: '<a href=' + link + '>Validate your registration</a>'
-                }, function(error, info) {
-                    if(error) {
-                        return console.log(error);
+                    text: 'Validate your registration: ' + link
+                }
+                ejs.renderFile('views/mail_signIn.ejs', {link: link},
+                        function (err, html) {
+                    if (!err) {
+                        mail.html = html;
                     }
-                    console.log(info);
+                    transporter.sendMail(mail, function (err, info) {
+                        if (err) {
+                            return debug(err);
+                        }
+                        debug(info);
+                    });
                 });
             });
         });
@@ -159,18 +166,25 @@ module.exports = function (app, routes){
                 }
                 var url = req.protocol + '://' + req.get('host');
                 var link = url + '/resetPassword?token=' + token;
-                var html = 'Follow this link to <a href="' + link + '">reset your password</a>';
-                transporter.sendMail({
+                var mail = {
                     from: conf.user_setup.nodemailer_from,
                     to: result[0].email,
                     subject: 'Lost password',
                     text: 'Follow this link to reset your password: ' + link,
-                    html: html
-                }, function(error, info) {
-                    if(error) {
-                        return console.log(error);
+                }
+                ejs.renderFile('views/mail_lostPassword.ejs', {link: link},
+                        function (err, html) {
+                    if (!err) {
+                        mail.html = html;
                     }
-                    console.log(info);
+                    transporter.sendMail(mail, function (err, info) {
+                        if (err) {
+                            return debug(err);
+                        }
+                        debug(info);
+                    });
+                    debug(err);
+                    res.send(html);
                 });
                 return res.status(200).send('"email sent"');
             });
