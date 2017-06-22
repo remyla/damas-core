@@ -100,10 +100,12 @@ function stopall() {
     http.close(function () {
         debug('HTTP server closed');
         debug('Closing HTTPS server');
-        https.close(function () {
-            debug('HTTPS server closed');
-            process.exit(0);
-        });
+        if (conf.connection && conf.connection.Key && conf.connection.Cert) {
+            https.close(function () {
+                debug('HTTPS server closed');
+                process.exit(0);
+            });
+        }
     });
 }
 
