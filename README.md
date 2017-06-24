@@ -1,13 +1,12 @@
-[![Stories in Ready](https://badge.waffle.io/remyla/damas-core.png?label=ready&title=Ready)](https://waffle.io/remyla/damas-core)
-[![Licence](https://img.shields.io/github/license/remyla/damas-core.svg)]
-[![Tag](https://img.shields.io/github/tag/remyla/damas-core.svg)]
-[![Docker Pulls](https://img.shields.io/docker/pulls/zankia/damas-node.svg)]
-[![Docker Image](https://images.microbadger.com/badges/image/zankia/damas-node.svg)]
-
 <img src="http://damas-software.org/bin/damas_software_logo.svg" alt="damas software logo"/>
 
 Digital Asset Management Server
 
+[![Stories in Ready](https://badge.waffle.io/remyla/damas-core.png?label=ready&title=Ready)](https://waffle.io/remyla/damas-core)
+![Licence](https://img.shields.io/github/license/remyla/damas-core.svg)
+![Tag](https://img.shields.io/github/tag/remyla/damas-core.svg)
+![Docker Pulls](https://img.shields.io/docker/pulls/zankia/damas-node.svg)
+![Docker Image](https://images.microbadger.com/badges/image/zankia/damas-node.svg)
 # Overview
 
 ## server-nodejs
@@ -35,17 +34,17 @@ https://github.com/PRIMCODE/damas-dashboard is a web control center based on the
 http://primcode.com PRIMCODE is the company behind the development, the distribution and the maintenance of damas-core
 
 # Contributors
-Remy Lalanne - Project lead
-Thibault Allard
-Julie Aresu
-Sebastien Courtois
-Ghislain Dugat
-Joaquin Galvan Angeles
-Stephane Hoarau
-Matthieu Humeau
-Mathieu Lalanne
-Axel Prat
-Mathieu Valero
+Remy Lalanne - Project lead  
+Thibault Allard  
+Julie Aresu  
+Sebastien Courtois  
+Ghislain Dugat  
+Joaquin Galvan Angeles  
+Stephane Hoarau  
+Matthieu Humeau  
+Mathieu Lalanne  
+Axel Prat  
+Mathieu Valero  
 Quentin Villecroze
 
 # License
