@@ -11,11 +11,14 @@
         "port": 27017,
         "options": { "auto_reconnect": true }
     },
+    "fileSystem": "/PRODUCTIONS/",
     "extensions": {
         "es6_polyfills": {
+            "enable": true,
             "path": "./extensions/es6_polyfills.js"
         },
         "user_setup" : {
+            "enable": true,
             "path" : "./extensions/user_setup.js",
             "conf": {
                 "nodemailer_transporter":{
@@ -45,9 +48,11 @@
             "path": "./extensions/auth-none.js"
         },
         "prefer_https": {
+            "enable": false,
             "path": "./extensions/prefer_https.js"
         },
         "static_routes": {
+            "enable": true,
             "path": "./extensions/static_routes.js",
             "conf": {
                 "routes": {
@@ -59,6 +64,5 @@
                 }
              }
         }
-    },
-    "fileSystem": "/PRODUCTIONS/"
+    }
 }
