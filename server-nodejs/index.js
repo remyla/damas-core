@@ -99,12 +99,14 @@ function stopall() {
     debug('Closing HTTP server');
     http.close(function () {
         debug('HTTP server closed');
-        debug('Closing HTTPS server');
         if (conf.connection && conf.connection.Key && conf.connection.Cert) {
+            debug('Closing HTTPS server');
             https.close(function () {
                 debug('HTTPS server closed');
                 process.exit(0);
             });
+        } else {
+            process.exit(0);
         }
     });
 }
