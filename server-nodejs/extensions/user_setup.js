@@ -47,7 +47,7 @@ module.exports = function (app, routes){
             var userNode = Object.assign({}, req.body, addedProperties);
 
             var pwd = userNode.password;
-            var checksum = crypto.createHash(conf.jwt.passwordHashAlgorithm);
+            var checksum = crypto.createHash('sha1');
             checksum.update(pwd);
             var crypted = checksum.digest('hex');
             var token = crypto.randomBytes(16).toString('hex');
@@ -68,7 +68,7 @@ module.exports = function (app, routes){
                     from: conf.nodemailer.from,
                     to: userEmail,
                     subject: 'Validate your account',
-                    text: 'Valider votre inscription: ' + link
+                    text: 'Validate your registration: ' + link
                 }
                 ejs.renderFile('views/mail_signIn.ejs', {link: link},
                         function (err, html) {
@@ -148,12 +148,11 @@ module.exports = function (app, routes){
                 return res.sendStatus(409);
             }
             if(id.length < 1) {
-                return res.status(404).send('No user with this email');
+                return res.status(200).send('"email sent"');
             }
-            var username = id[0].substring(id[0].indexOf('_') + 1);
             var random = crypto.randomBytes(16).toString('hex');
-            var checksum = crypto.createHash(conf.jwt.passwordHashAlgorithm);
-            checksum.update(username + random);
+            var checksum = crypto.createHash('sha1');
+            checksum.update(id[0] + random);
             var token = checksum.digest('hex');
 
             var node = {'_id': id[0], 'token':token};
@@ -188,10 +187,48 @@ module.exports = function (app, routes){
          });
     };
 
+    updateNodePassword = function(id, password, callback) {
+        var checksum = crypto.createHash('sha1');
+        checksum.update(password);
+        var crypted = checksum.digest('hex');
+
+        var node = {'_id':id, 'password':crypted};
+        db.update([node], function(err, result) {
+            return callback(result[0]);
+        });
+    };
+
+    /*
+     * changePassword()
+     *
+     * Method: POST
+     * URI: /api/changePassword
+     *
+     * Change the user's password in the database
+     *
+     * HTTP status codes:
+     * - 200: OK
+     * - 400: Bad Request (Passwords not identical)
+     * - 409: Conflict
+     */
+    changePassword = function(req, res) {
+        db.search({'username':req.user.username}, function(err, id) {
+            if(err) {
+                return res.sendStatus(409);
+            }
+            if(id.length < 1) {
+                return res.sendStatus(404);
+            }
+            updateNodePassword(id[0], req.body.password, function(response) {
+                return res.sendStatus(200);
+            });
+        });
+    };
+
     /*
      * resetPassword()
      *
-     * Method:
+     * Method: POST
      * URI: /api/resetPassword/
      *
      * Change the user's password in the database
@@ -203,38 +240,36 @@ module.exports = function (app, routes){
      * - 409: Conflict
      */
     resetPassword = function(req, res) {
-        var token = req.params.token;
-        var pwd = req.body.password;
-        var checksum = crypto.createHash(conf.jwt.passwordHashAlgorithm);
-        checksum.update(pwd);
-        var crypted = checksum.digest('hex');
-        db.search({'token':token}, function(err, id) {
+        db.search({'token':req.params.token}, function(err, id) {
             if(err) {
                 return res.sendStatus(409);
             }
             if(id.length < 1) {
                 return res.sendStatus(404);
             }
-            var node = {'_id':id[0], 'password':crypted, 'token':null};
-            db.update([node], function(err, result) {
-                if(err) {
-                    return res.sendStatus(409);
-                }
-                return res.status(200).send(result);
+            updateNodePassword(id[0], req.body.password, function(node) {
+                node.token = null;
+                db.update([node], function(err, result) {
+                    if(err) {
+                        return res.sendStatus(409);
+                    }
+                    return res.sendStatus(200);
+                });
             });
-
         });
     };
 
     app.post('/api/signUp/', signUp);
     app.get('/api/userActivate/:user/:token', userActivate);
     app.get('/api/lostPassword/:email', lostPassword);
+    app.post('/api/changePassword/', changePassword);
     app.post('/api/resetPassword/:token', resetPassword);
 
     routes = Object.assign(routes, {
         signUp: signUp,
         userActivate: userActivate,
         lostPassword: lostPassword,
+        changePassword: changePassword,
         resetPassword: resetPassword
     });
 };
