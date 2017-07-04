@@ -13,18 +13,24 @@
     },
     "extensions": {
         "es6_polyfills": {
+            "enable": true,
             "path": "./extensions/es6_polyfills.js"
         },
-        "user_setup" : {
-            "path" : "./extensions/user_setup.js",
+        "nodemailer": {
+            "enable": true,
+            "path": "./extensions/nodemailer.js",
             "conf": {
-                "nodemailer_transporter":{
+                "transporter":{
                     "host": "localhost",
                     "port": 25,
                     "secure": false
                 },
-                "nodemailer_from": "\"Sender\" <noreply@example.com>"
+                "from": "\"Sender\" <noreply@example.com>"
             }
+        },
+        "user_setup" : {
+            "enable": true,
+            "path" : "./extensions/user_setup.js"
         },
         "jwt": {
             "enable": false,
@@ -45,9 +51,11 @@
             "path": "./extensions/auth-none.js"
         },
         "prefer_https": {
+            "enable": true,
             "path": "./extensions/prefer_https.js"
         },
         "static_routes": {
+            "enable": true,
             "path": "./extensions/static_routes.js",
             "conf": {
                 "routes": {

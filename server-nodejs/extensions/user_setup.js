@@ -6,13 +6,8 @@ module.exports = function (app, routes){
     var db = app.locals.db;
     var conf = app.locals.conf;
     var crypto = require('crypto');
-    var nodemailer = require('nodemailer');
     var ejs = require('ejs');
     var debug = require('debug')('app:user_setup');
-
-    debug( conf.user_setup.nodemailer_transporter );
-    debug( conf.user_setup.nodemailer_from);
-    var transporter = nodemailer.createTransport(conf.user_setup.nodemailer_transporter);
 
     /*
      * signUp()
@@ -70,7 +65,7 @@ module.exports = function (app, routes){
                 var params = userNode.username + '/' + userNode.token;
                 var link = url + params;
                 var mail = {
-                    from: conf.user_setup.nodemailer_from,
+                    from: conf.nodemailer.from,
                     to: userEmail,
                     subject: 'Validate your account',
                     text: 'Valider votre inscription: ' + link
@@ -80,7 +75,8 @@ module.exports = function (app, routes){
                     if (!err) {
                         mail.html = html;
                     }
-                    transporter.sendMail(mail, function (err, info) {
+                    app.locals.extensions.nodemailer.sendMail(mail,
+                            function (err, info) {
                         if (err) {
                             return debug(err);
                         }
@@ -168,7 +164,7 @@ module.exports = function (app, routes){
                 var url = req.protocol + '://' + req.get('host');
                 var link = url + '/resetPassword?token=' + token;
                 var mail = {
-                    from: conf.user_setup.nodemailer_from,
+                    from: conf.nodemailer.from,
                     to: result[0].email,
                     subject: 'Lost password',
                     text: 'Follow this link to reset your password: ' + link,
@@ -178,14 +174,14 @@ module.exports = function (app, routes){
                     if (!err) {
                         mail.html = html;
                     }
-                    transporter.sendMail(mail, function (err, info) {
+                    app.locals.extensions.nodemailer.sendMail(mail,
+                            function (err, info) {
                         if (err) {
                             return debug(err);
                         }
                         debug(info);
                     });
                     debug(err);
-                    res.send(html);
                 });
                 return res.status(200).send('"email sent"');
             });
