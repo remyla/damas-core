@@ -70,7 +70,7 @@ module.exports = function (app, routes){
                     subject: 'Validate your account',
                     text: 'Validate your registration: ' + link
                 }
-                ejs.renderFile('views/mail_signIn.ejs', {link: link},
+                ejs.renderFile(__dirname + '/user_mail_signUp.ejs', {link: link},
                         function (err, html) {
                     if (!err) {
                         mail.html = html;
@@ -168,7 +168,7 @@ module.exports = function (app, routes){
                     subject: 'Lost password',
                     text: 'Follow this link to reset your password: ' + link,
                 }
-                ejs.renderFile('views/mail_lostPassword.ejs', {link: link},
+                ejs.renderFile(__dirname + '/user_mail_lostPassword.ejs', {link: link},
                         function (err, html) {
                     if (!err) {
                         mail.html = html;
