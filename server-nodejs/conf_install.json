@@ -11,6 +11,7 @@
         "port": 27017,
         "options": { "auto_reconnect": true }
     },
+    "fileSystem": "/PRODUCTIONS/",
     "extensions": {
         "es6_polyfills": {
             "enable": true,
@@ -51,7 +52,7 @@
             "path": "./extensions/auth-none.js"
         },
         "prefer_https": {
-            "enable": true,
+            "enable": false,
             "path": "./extensions/prefer_https.js"
         },
         "static_routes": {
@@ -67,6 +68,5 @@
                 }
              }
         }
-    },
-    "fileSystem": "/PRODUCTIONS/"
+    }
 }
