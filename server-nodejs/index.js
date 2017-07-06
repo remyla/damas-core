@@ -76,13 +76,13 @@ var http = require('http').createServer(app).listen(http_port, function () {
 /*
  * Create a HTTPS server if there are certificates
  */
-if (conf.connection && conf.connection.Key && conf.connection.Cert) {
+if (conf.https.enable) {
     var fs = require('fs');
     var https_port = process.env.HTTPS_PORT || 8443;
     debug('Creating HTTPS server on port %s', https_port);
     var https = require('https').createServer({
-        key: fs.readFileSync(conf.connection.Key).toString(),
-        cert: fs.readFileSync(conf.connection.Cert).toString()
+        key: fs.readFileSync(conf.https.key).toString(),
+        cert: fs.readFileSync(conf.https.cert).toString()
     }, app).listen(https_port, function () {
         debug('HTTPS server listening on port %s', https_port);
         socket.attach(https);
@@ -99,7 +99,7 @@ function stopall() {
     debug('Closing HTTP server');
     http.close(function () {
         debug('HTTP server closed');
-        if (conf.connection && conf.connection.Key && conf.connection.Cert) {
+        if (conf.https.enable) {
             debug('Closing HTTPS server');
             https.close(function () {
                 debug('HTTPS server closed');

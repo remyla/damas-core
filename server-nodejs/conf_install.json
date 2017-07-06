@@ -1,8 +1,9 @@
 {
     "authorMode" : true,
-    "connection" : {
-        "Cert": "cert.pem",
-        "Key": "key.pem"
+    "https" : {
+        "enable": false,
+        "cert": "cert.pem",
+        "key": "key.pem"
     },
     "db": "mongodb",
     "mongodb": {
