@@ -20,23 +20,37 @@ debug('Loading configuration');
 var conf = app.locals.conf = require('./conf');
 app.locals.db = require('./db')(conf.db, conf[conf.db]);
 
-require('./routes')(app, express);
+var bodyParser = require( 'body-parser' );
+app.use( bodyParser.urlencoded( { limit: '50mb', extended : true } ) );
+app.use( bodyParser.json({limit: '50mb', strict: false}));
+
+var morgan = require('morgan');
+app.use(morgan('dev'));
 
 /*
  * Extensions
  */
 debug('Loading extensions');
 app.locals.extensions = [];
-for(ext in conf.extensions) {
-    debug('Extension: ' + ext);
-    if(conf.extensions[ext].conf) {
-        if ('string' === typeof conf.extensions[ext].conf)
-            app.locals.conf[ext] = require(conf.extensions[ext].conf);
-        if ('object' === typeof conf.extensions[ext].conf)
-            app.locals.conf[ext] = conf.extensions[ext].conf;
+for(extname in conf.extensions) {
+    if (false === conf.extensions[extname].enable){
+        continue;
     }
-    app.locals.extensions[ext] = require(conf.extensions[ext].path)(app, express);
+    debug('Extension: ' + extname);
+    if (conf.extensions[extname].conf) {
+        if ('string' === typeof conf.extensions[extname].conf)
+            app.locals.conf[extname] = require(conf.extensions[extname].conf);
+        if ('object' === typeof conf.extensions[extname].conf)
+            app.locals.conf[extname] = conf.extensions[extname].conf;
+    }
+    var extobj = require(conf.extensions[extname].path);
+    if ('function' === typeof extobj) {
+        app.locals.extensions[extname] = extobj(app, express);
+    }
 }
+debug('Extensions loaded');
+
+require('./routes')(app, express);
 
 /*
  * Export the app if we are in a test environment
@@ -62,13 +76,13 @@ var http = require('http').createServer(app).listen(http_port, function () {
 /*
  * Create a HTTPS server if there are certificates
  */
-if (conf.connection && conf.connection.Key && conf.connection.Cert) {
+if (conf.https.enable) {
     var fs = require('fs');
     var https_port = process.env.HTTPS_PORT || 8443;
     debug('Creating HTTPS server on port %s', https_port);
     var https = require('https').createServer({
-        key: fs.readFileSync(conf.connection.Key).toString(),
-        cert: fs.readFileSync(conf.connection.Cert).toString()
+        key: fs.readFileSync(conf.https.key).toString(),
+        cert: fs.readFileSync(conf.https.cert).toString()
     }, app).listen(https_port, function () {
         debug('HTTPS server listening on port %s', https_port);
         socket.attach(https);
@@ -85,11 +99,15 @@ function stopall() {
     debug('Closing HTTP server');
     http.close(function () {
         debug('HTTP server closed');
-        debug('Closing HTTPS server');
-        https.close(function () {
-            debug('HTTPS server closed');
+        if (conf.https.enable) {
+            debug('Closing HTTPS server');
+            https.close(function () {
+                debug('HTTPS server closed');
+                process.exit(0);
+            });
+        } else {
             process.exit(0);
-        });
+        }
     });
 }
 

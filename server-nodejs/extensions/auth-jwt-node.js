@@ -4,28 +4,27 @@
 
 module.exports = function (app) {
     var db  = app.locals.db;
-    var conf = app.locals.conf;
+    var conf = app.locals.conf.jwt;
 
     var expressJwt = require('express-jwt');
     var jwt = require('jsonwebtoken');
     var unless = require('express-unless');
     var crypto = require('crypto');
-    var debug = require('debug')('app:routes:auth:' + process.pid);
+    var debug = require('debug')('app:auth:' + process.pid);
     var cookieParser = require('cookie-parser')
-    //var bodyParser = require('body-parser');
-    //app.use(bodyParser.urlencoded());
+    debug("Authentification is JWT");
 
     var middleware = function () {
         var func = function (req, res, next) {
             var token = fetch(req.headers) || req.cookies.token;
-            if (token === null && conf.jwt.required === false) {
+            if (token === null && conf.required === false) {
                 req.user = {};
                 next();
                 return;
             }
-            jwt.verify(token, conf.jwt.secret, function (err, decode) {
+            jwt.verify(token, conf.secret, function (err, decode) {
                 if (err) {
-                    if (conf.jwt.required === false ) {
+                    if (conf.required === false ) {
                         req.user = {};
                         next();
                         return;
@@ -44,13 +43,6 @@ module.exports = function (app) {
         return func;
     };
 
-    app.use(cookieParser())
-    app.use('/api', middleware().unless({path:['/api/signIn']}));
-
-    //var jwtMiddleware = expressJwt({secret:conf.jwt.secret});
-    //jwtMiddleware.unless = unless;
-    //app.use('/api', jwtMiddleware.unless({path:['/api/signIn']}));
-
     var authenticate = function (req, res, next) {
         debug('Processing authenticate middleware');
         if (!req.body.username || !req.body.password) {
@@ -63,13 +55,13 @@ module.exports = function (app) {
             }
             db.read([doc[0]], function (err, user) {
                 user = user[0];
-                if (crypto.createHash(conf.jwt.passwordHashAlgorithm).update(req.body.password).digest('hex') !== user.password) {
+                if (crypto.createHash(conf.passwordHashAlgorithm).update(req.body.password).digest('hex') !== user.password) {
                     return res.status(401).json('Invalid username or password');
                 }
                 debug('User authenticated, generating token');
                 user.lastlogin = Date.now();
                 db.update([user], function(err, nodes){
-                    user.token = jwt.sign({ _id: user._id, username: user.username }, conf.jwt.secret, { expiresIn: conf.jwt.exp*60 });
+                    user.token = jwt.sign({ _id: user._id, username: user.username }, conf.secret, { expiresIn: conf.exp*60 });
                     var decoded = jwt.decode(user.token);
                     user.token_exp = decoded.exp;
                     user.token_iat = decoded.iat;
@@ -90,7 +82,10 @@ module.exports = function (app) {
             var part = authorization.split(' ');
             if (part.length === 2) {
                 var token = part[1];
-                return part[1];
+                if ('null' === token) {
+                    token = null;
+                }
+                return token;
             } else {
                 return null;
             }
@@ -99,50 +94,17 @@ module.exports = function (app) {
         }
     };
 
-    // error handler for all the applications
-/*
-    app.use(function (err, req, res, next) {
-        var errorType = typeof err,
-            code = 500,
-            msg = { message: 'Internal Server Error' };
-
-        switch (err.name) {
-            case 'UnauthorizedError':
-                code = err.status;
-                msg = undefined;
-                break;
-            case 'BadRequestError':
-            case 'UnauthorizedAccessError':
-            case 'NotFoundError':
-                code = err.status;
-                msg = err.inner;
-                break;
-            default:
-                break;
-        }
-        console.log(err.name);
-        return res.status(code).json(msg);
-    });
-*/
-
-    app.get('/api/verify', function (req, res) {
+    var verify = function (req, res, next) {
         return res.status(200).json(req.user);
-/* This is useless ! processed by the middleware - double check before removing it
-        var token = fetch(req.headers);
-        if (conf.jwt.required === false ) {
-            return res.status(200).json(req.user);
-        }
-        jwt.verify(token, conf.jwt.secret, function (err, decode) {
-            if (err) {
-                req.user = undefined;
-                return res.status(401).send('invalid token');
-            }
-            return res.status(200).json(req.user);
-        });
-*/
-    });
+    }
 
+    app.use(cookieParser());
+    app.use(conf.expressUse, middleware().unless(conf.expressUnless));
+    app.get('/api/verify', verify );
     app.route('/api/signIn').post(authenticate, function (req, res, next) {
-        return res.status(200).json(req.user);
+        res.status(200).json(req.user);
     });
+
 }
+
+

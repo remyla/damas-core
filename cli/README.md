@@ -10,7 +10,7 @@ DESCRIPTION
   curl-based command to expose the operations of a damas-core service and manage a local repository filesystem
 
 COMMANDS
-  File commands: 
+  File commands:
      add     Add files to the index
      init    Prepare the current directory adding a .damas/ repo folder
      lock    Lock files (set key 'lock' = user name)
@@ -20,7 +20,7 @@ COMMANDS
      signout Remove authorization token
      stats   Update file_mtime and file_size keys of files
      unlock  Unlock files
-  
+
   CRUDS commands (send JSON to the server, see examples below):
      create       <json>  create node(s)
      read         <json>  show the keys of the file
@@ -28,6 +28,14 @@ COMMANDS
      delete       <json>  delete nodes
      search       <query> search
      search_mongo <query> <sort> <limit> <skip> MongoDB search - beta
+
+ENVIRONMENT VARIABLES
+  DAMAS_DIR
+    Path to the repository. It can be an absolute path or relative path to current working directory.
+  DAMAS_SERVER
+    URL of the server hosting damas-core. It can specify `https://` or `http://` protocols.
+  DAMAS_TOKEN
+    Token used for authentication.
 
 EXAMPLES
   start tracking every files in current directory
@@ -58,7 +66,7 @@ FILES
 
 CREDITS
     damas.sh part of damas-core and is distributed under the GNU General Public License.
-	See the file LICENSE for details.
+    See the file LICENSE for details.
 
 AUTHOR
     damas.sh was originally written by Thibault Allard and is maintained by Remy Lalanne.
