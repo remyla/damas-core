@@ -1,10 +1,11 @@
 {
     "authorMode" : true,
-    "connection" : {
-        "Cert": "cert.pem",
-        "Key": "key.pem"
+    "https" : {
+        "enable": false,
+        "cert": "cert.pem",
+        "key": "key.pem"
     },
-    "db" : "mongodb",
+    "db": "mongodb",
     "mongodb": {
         "host": "localhost",
         "collection": "node",
@@ -17,17 +18,21 @@
             "enable": true,
             "path": "./extensions/es6_polyfills.js"
         },
-        "user_setup" : {
+        "nodemailer": {
             "enable": true,
-            "path" : "./extensions/user_setup.js",
+            "path": "./extensions/nodemailer.js",
             "conf": {
-                "nodemailer_transporter":{
+                "transporter":{
                     "host": "localhost",
                     "port": 25,
                     "secure": false
                 },
-                "nodemailer_from": "\"Sender\" <noreply@example.com>"
+                "from": "\"Sender\" <noreply@example.com>"
             }
+        },
+        "user_setup" : {
+            "enable": true,
+            "path" : "./extensions/user_setup.js"
         },
         "jwt": {
             "enable": false,
