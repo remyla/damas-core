@@ -10,125 +10,6 @@ module.exports = function (app, routes){
     var debug = require('debug')('app:user_setup');
 
     /*
-     * signUp()
-     *
-     * Method:
-     * URI: /api/signUp/
-     *
-     * Create a new user
-     *
-     * HTTP status codes:
-     * - 201: Created (user node created)
-     * - 400: Bad request (not formatted correctly)
-     * - 409: Conflict (a node already exist with this identifier)
-     *
-     */
-    signUp = function(req, res) {
-        if(typeof req.body !== 'object') {
-            return res.status(400).send('Bad Request (not formatted correctly)');
-        }
-        if(!req.body.username || !req.body.email || !req.body.password) {
-            return res.status(400).send('Bad Request (not formatted correctly)');
-        }
-
-        var addedProperties = {
-            class: 'user',
-            active: false,
-            _id: 'usr_' + req.body.username
-        };
-
-        db.search({'email':req.body.email}, function(err, id) {
-            if(err) {
-                return res.sendStatus(409);
-            }
-            if(id.length > 0) {
-                return res.status(409).send('Email is already in use');
-            }
-            var userNode = Object.assign({}, req.body, addedProperties);
-
-            var pwd = userNode.password;
-            var checksum = crypto.createHash('sha1');
-            checksum.update(pwd);
-            var crypted = checksum.digest('hex');
-            var token = crypto.randomBytes(16).toString('hex');
-
-            userNode.password = crypted;
-            userNode.token = token;
-
-            db.create([userNode], function(err, node) {
-                if(err) {
-                    res.status(409).send('Erreur');
-                }
-                var userEmail = node[0].email;
-
-                var url = req.protocol + '://' + req.get('host') + req.url;
-                var params = userNode.username + '/' + userNode.token;
-                var link = url + params;
-                var mail = {
-                    from: conf.nodemailer.from,
-                    to: userEmail,
-                    subject: 'Validate your account',
-                    text: 'Validate your registration: ' + link
-                }
-                ejs.renderFile(__dirname + '/user_mail_signUp.ejs', {link: link},
-                        function (err, html) {
-                    if (!err) {
-                        mail.html = html;
-                    }
-                    app.locals.extensions.nodemailer.sendMail(mail,
-                            function (err, info) {
-                        if (err) {
-                            return debug(err);
-                        }
-                        debug(info);
-                    });
-                });
-            });
-        });
-    };
-
-    /*
-     * userActivate()
-     *
-     * Method:
-     * URI: /api/userActivate/
-     *
-     * Activate user account
-     *
-     * HTTP status codes:
-     * - 302: Found (OK and redirected)
-     * - 403: Forbidden (invalid token)
-     * - 404: Not Found
-     * - 409: Conflict
-     */
-    userActivate = function(req, res) {
-        var username = req.params.user || req.body.user;
-        var token = req.params.token || req.body.token;
-        db.search({'username':username}, function(err, id) {
-            if(err) {
-                return res.sendStatus(409);
-            }
-            if(id.length < 1) {
-                return res.status(404).send('Username not found');
-            }
-            db.read(id, function(err, node) {
-                if(node[0].token !== token) {
-                    return res.status(403).send('Token does not correspond to user');
-                }
-                node[0].active = true;
-                node[0].token = null;
-                db.update(node, function(err, result) {
-                    if(err) {
-                        return res.sendStatus(409);
-                    }
-                    res.redirect('/signIn');
-                    return;
-                });
-            });
-        });
-    };
-
-    /*
      * lostPassword()
      *
      * Method:
@@ -259,15 +140,11 @@ module.exports = function (app, routes){
         });
     };
 
-    app.post('/api/signUp/', signUp);
-    app.get('/api/userActivate/:user/:token', userActivate);
     app.get('/api/lostPassword/:email', lostPassword);
     app.post('/api/changePassword/', changePassword);
     app.post('/api/resetPassword/:token', resetPassword);
 
     routes = Object.assign(routes, {
-        signUp: signUp,
-        userActivate: userActivate,
         lostPassword: lostPassword,
         changePassword: changePassword,
         resetPassword: resetPassword
