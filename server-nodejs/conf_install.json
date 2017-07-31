@@ -1,41 +1,77 @@
 {
-    "auth" : "no",
     "authorMode" : true,
-    "connection" : {
-        "Cert": "cert.pem",
-        "Key": "key.pem"
+    "https" : {
+        "enable": false,
+        "cert": "cert.pem",
+        "key": "key.pem"
     },
-    "db" : "mongodb",
-    "mongodb" : {
-        "host" : "localhost",
-        "collection" : "node",
-        "port" : 27017,
-        "options" : { "auto_reconnect" : true }
+    "db": "mongodb",
+    "mongodb": {
+        "host": "localhost",
+        "collection": "node",
+        "port": 27017,
+        "options": { "auto_reconnect": true }
     },
-    "jwt" : {
-        "required": false,
-        "passwordHashAlgorithm" : "sha1",
-        "secret" : "webtokensecret",
-        "exp" : 1440
-    },
+    "fileSystem": "/PRODUCTIONS/",
     "extensions": {
+        "es6_polyfills": {
+            "enable": true,
+            "path": "./extensions/es6_polyfills.js"
+        },
+        "nodemailer": {
+            "enable": true,
+            "path": "./extensions/nodemailer.js",
+            "conf": {
+                "transporter":{
+                    "host": "localhost",
+                    "port": 25,
+                    "secure": false
+                },
+                "from": "\"Sender\" <noreply@example.com>"
+            }
+        },
+        "user_setup" : {
+            "enable": true,
+            "path" : "./extensions/user_setup.js"
+        },
+        "jwt": {
+            "enable": false,
+            "path": "./extensions/auth-jwt-node.js",
+            "conf": {
+                "required": false,
+                "passwordHashAlgorithm": "sha1",
+                "secret": "webtokensecret",
+                "exp": 1440,
+                "expressUse": "/api",
+                "expressUnless": {
+                    "path": "/api/signIn"
+                }
+            }
+        },
+        "noauth": {
+            "enable": true,
+            "path": "./extensions/auth-none.js"
+        },
         "prefer_https": {
+            "enable": false,
             "path": "./extensions/prefer_https.js"
         },
         "static_routes": {
+            "enable": true,
             "path": "./extensions/static_routes.js",
             "conf": {
-                "staticRoutes": {
-                    "/console": "public/console.html",
-                    "/signIn": "public/signIn.html",
-                    "/damas.py": "../py/damas.py",
-                    "/damas.sh": "../cli/damas.sh"
-                },
-                "publiclyServedFolders" : [
-                    "public", "../js"
-                ]
-            }
+                "routes": {
+                    "/": "public",
+                    "/js": "../js",
+                    "/cli": "../cli",
+                    "/py": "../py",
+                    "/api": "public/index.html",
+                    "/signIn": "extensions/auth_signIn.html",
+                    "/lostPassword": "extensions/user_lostPassword.html",
+                    "/resetPassword": "extensions/user_resetPassword.html"
+
+                }
+             }
         }
-    },
-    "fileSystem": "/PRODUCTIONS/"
+    }
 }

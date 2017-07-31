@@ -4,20 +4,21 @@
 
 module.exports = function (app, express){
     var conf = app.locals.conf.static_routes;
-	var debug = require('debug')('app:staticRoutes');
-    var path = require('path');
-    for (var route in conf.staticRoutes) {
-        if (!conf.staticRoutes.hasOwnProperty(route)) {
-            continue;
-        }
-        debug('Registered static route: ' + route + " -> " + conf.staticRoutes[route]);
-        app.get(route, function( req, res ){
-            res.sendFile(path.resolve(conf.staticRoutes[req.path]));
-        });
+    var debug = require('debug')('app:staticRoutes');
+    function mkStaticRoute(route, localPath){
+        debug('Registered static route: ' + route + ' -> ' + localPath);
+        app.use(route, express.static(localPath, {
+            'extensions': 'html'
+        }));
     }
-    for (var route in conf.publiclyServedFolders) {
-        debug('Registered publicly served folder: ' + conf.publiclyServedFolders[route]);
-        app.use(express.static(conf.publiclyServedFolders[route]));
+    for (var route in conf.routes) {
+        if (Object.prototype.toString.call(conf.routes[route]) === '[object Array]') {
+            conf.routes[route].forEach(function(r){
+                mkStaticRoute(route, r);
+            });
+        } else {
+            mkStaticRoute(route, conf.routes[route]);
+        }
     }
 }
 
