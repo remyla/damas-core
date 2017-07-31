@@ -24,20 +24,28 @@ module.exports = function (app, routes) {
      */
     var publish = function (req, res) {
         var nodes = Array.isArray(req.body) ? req.body : [req.body];
-        nodes = unfoldIds(nodes);
-        var ids = [];
+        var controlProperties = {
+            author: req.user.username,
+            time: Date.now()
+        }
         for (var i = 0; i < nodes.length; ++i) {
+            if ('object' !== typeof nodes[i] || null === nodes[i]) {
+                return httpStatus(res, 400, 'Publish');
+            }
             if (undefined === nodes[i]._id || undefined === nodes[i].comment || undefined === nodes[i].origin) {
                 return httpStatus(res, 400, 'Publish');
             }
             if (nodes[i]._id[0] !== '/') {
                 return httpStatus(res, 400, 'Publish');
             }
+            nodes[i] = Object.assign({}, controlProperties, nodes[i]);
         }
+        nodes = unfoldIds(nodes);
         db.create(nodes, function(error, parents) {
             if(error) {
                 return httpStatus(res, 409, 'Publish');
             }
+            var ids = [];
             for(var i in parents) {
                 if(parents[i] === null) {
                     continue;
