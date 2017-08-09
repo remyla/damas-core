@@ -67,7 +67,11 @@ run() {
   fi
   RES=$(eval "$1")
   if [ ! $QUIET ]; then
-    echo $(echo "$RES" | sed '$d')
+    if [ $LINESOUT ]; then
+      printf "$(echo "$RES" | sed '$d' | sed 's/.*\["\(.*\)"\].*/\1/g' | sed 's/\",\"/\n/g')\n"
+    else
+      echo $(echo "$RES" | sed '$d')
+    fi
   fi
   map_server_errors "${RES##*$'\n'}"
 }
@@ -119,7 +123,7 @@ load_token() {
 }
 
 show_help_msg() {
-  echo "usage: damas [--help] [-q|--quiet] [-v|--verbose] <command> [<args>]"
+  echo "usage: damas [--help] [-q|--quiet] [-v|--verbose] [-l|--lines] <command> [<args>]"
   echo ""
   echo "File commands: "
   echo "   add       Add files to the index"
@@ -157,6 +161,9 @@ show_help_msg() {
   echo ""
   echo "    search keys matching a regular expression"
   echo "        damas search _id:/.*mov/"
+  echo ""
+  echo "    search deleted:true key, sort by _id key, show result as lines of ids"
+  echo "        damas-experimental -l search_mongo '{\"deleted\":true}' '{\"_id\":1}' 0 0"
   exit 0
 }
 
@@ -176,6 +183,10 @@ while true; do
       ;;
     -q | --quiet)
       QUIET=true
+      shift 1
+      ;;
+    -l | --lines)
+      LINESOUT=true
       shift 1
       ;;
     -*)

@@ -4,7 +4,7 @@ NAME
 
 SYNOPSIS
   damas [OPTION...] <command> [<args>]
-  damas [--help] [-q|--quiet] [-v|--verbose] <command> [<args>]
+  damas [--help] [-q|--quiet] [-v|--verbose] [-l|--lines] <command> [<args>]
 
 DESCRIPTION
   curl-based command to expose the operations of a damas-core service and manage a local repository filesystem
@@ -46,6 +46,9 @@ EXAMPLES
       damas show *
   search keys matching a regular expression
       damas search _id:/.*mov/
+  search deleted:true key, sort by _id key, show result as lines of ids
+      damas-experimental -l search_mongo '{"deleted":true}' '{"_id":1}' 0 0
+
 
 EXIT VALUES
   0  Success
