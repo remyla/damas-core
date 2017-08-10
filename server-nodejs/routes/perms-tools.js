@@ -42,6 +42,7 @@ module.exports = function(app) {
 
         module.isOperationAllowed = function(operationName, userClass) {
             switch (operationName) {
+            case 'create':
             case 'lock':
             case 'unlock':
             case 'publish':
@@ -55,7 +56,6 @@ module.exports = function(app) {
                 }
                 break;
             case 'update':
-            case 'create':
             case 'upsert':
             case 'delete':
                 // User class must be at least 'editor'
