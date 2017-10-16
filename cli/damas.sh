@@ -305,7 +305,11 @@ case $COMMAND in
     ;;
   stats)
     get_ids $@
-    bytes=`stat -c%s "$1"`
+    if [ -d "$1" ]; then
+        bytes=`du -sb "$1" | cut -f1`
+    else
+        bytes=`stat -c%s "$1"`
+    fi
     mtime=`stat -c%Y "$1"`000
     run "curl $CURL_ARGS $AUTH -X PUT -d '{\"_id\":$IDS,\"file_size\":$bytes,\"file_mtime\":$mtime}' ${URL}update/"
     ;;
