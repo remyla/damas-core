@@ -1,6 +1,6 @@
-<img src="http://damas-software.org/bin/damas_software_logo.svg" alt="damas software logo"/>
+<img src="http://damas-software.org/bin/damas-core_logo.svg" alt="damas-core logo"/>
 
-Digital Asset Management Server
+JSON documents in a RESTful server with CRUD operations
 
 [![Stories in Ready](https://badge.waffle.io/remyla/damas-core.png?label=ready&title=Ready)](https://waffle.io/remyla/damas-core)
 ![Licence](https://img.shields.io/github/license/remyla/damas-core.svg)
@@ -13,10 +13,16 @@ Digital Asset Management Server
 A Javascript implementation of the server for NodeJS which development started in April 2015. Specifications redesign, enhanced graph structures, web token authentication, integration of long-time requested features. MongoDB backend. This version is used in production and stable and is the one we recommend.
 
 ## server-php
-A PHP server to run in a Apache environment. Generic key-value data model, simple graph structures, user authentication, file version control, using MySQL as database. It supports database replication among multiple sites. Used in production and maintained since 2007. The Php version is still used in production, very stable, but based on older specifications. We intend to make it evolve to the new specifications some days. 
+A PHP server to run in a Apache environment. Generic key-value data model, simple graph structures, user authentication, file version control, using MySQL as database. It supports database replication among multiple sites. Used in production and maintained since 2007. The Php version is still used in production, very stable, but based on older specifications. We intend to make it evolve to the new specifications some days.
 
 ## cli, js and py
-A command line interface, a Python module and a Javascript module, to access the server remotely, to interface its methods and process the JSON results using the native language objects.
+Interfaces to access the server and its methods remotely:
+
+* SHELL command line interface,
+* Javascript module,
+* Python module
+
+The libraries use the native language objects to expose the JSON results. Older specs of the libraries can be found in the folders. The CLI is for the newer NodeJS version only.
 
 # Usage
 Choose a server to run (either the recommended NodeJS server or the Php server based on older specs). Please refer to the [Wiki](https://github.com/remyla/damas-core/wiki) for the installation instructions. Then use the Python, Javascript, or CLI to access it or install one of the interfaces available (see below). Your feedback is highly welcome.
@@ -50,7 +56,7 @@ Quentin Villecroze
 # License
 GPL License(GPLV3)
 
-Copyright(c) 2017 Remy Lalanne remy@primcode.com
+Copyright(c) 2018 Remy Lalanne remy@primcode.com
 
 damas-core is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
