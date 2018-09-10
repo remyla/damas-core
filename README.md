@@ -1,6 +1,6 @@
 <img src="http://damas-software.org/bin/damas-core_logo.svg?t=1" alt="damas-core logo"/>
 
-JSON documents in a RESTful server with CRUD operations
+JSON storage service. RESTful, CRUD, multi-user.
 
 [![Stories in Ready](https://badge.waffle.io/remyla/damas-core.png?label=ready&title=Ready)](https://waffle.io/remyla/damas-core)
 ![Licence](https://img.shields.io/github/license/remyla/damas-core.svg)
@@ -10,13 +10,13 @@ JSON documents in a RESTful server with CRUD operations
 # Overview
 
 ## server-nodejs
-A Javascript implementation of the server for NodeJS which development started in April 2015. Specifications redesign, enhanced graph structures, web token authentication, integration of long-time requested features. MongoDB backend. This version is used in production and stable and is the one we recommend.
+A NodeJS implementation of the server which development started in April 2015. Specifications redesign, enhanced graph structures, web token authentication, integration of long-time requested features. MongoDB backend. This version is used in production and stable and is the one we recommend.
 
 ## server-php
 A PHP server to run in a Apache environment. Generic key-value data model, simple graph structures, user authentication, file version control, using MySQL as database. It supports database replication among multiple sites. Used in production and maintained since 2007. The Php version is still used in production, very stable, but based on older specifications. We intend to make it evolve to the new specifications some days.
 
 ## cli, js and py
-Interfaces to access the server and its methods remotely:
+Client API, Interfaces to access the server and its methods remotely:
 
 * SHELL command line interface,
 * Javascript module,
