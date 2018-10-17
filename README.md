@@ -31,6 +31,8 @@ Choose a server to run (either the recommended NodeJS server or the Php server b
 
 http://damas-software.org is a website which presents the projects related to damas-core
 
+https://syncplanet.io is a Saas using damas-core as backend
+
 http://dabox.io is collaborative platform for architecture using damas-core as backend
 
 https://github.com/PRIMCODE/damas-flow is a web flow graph interface based on the NodeJS server implementation which is being created since April 2015.
