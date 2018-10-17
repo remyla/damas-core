@@ -1,4 +1,4 @@
-<img src="http://damas-software.org/bin/damas-core_logo.svg" alt="damas-core logo"/>
+<img src="http://damas-software.org/bin/damas-core_logo.svg?t=1" alt="damas-core logo"/>
 
 JSON documents in a RESTful server with CRUD operations
 
