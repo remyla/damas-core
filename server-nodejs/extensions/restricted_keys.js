@@ -2,7 +2,7 @@ module.exports = function (app) {
     var conf = app.locals.conf.restricted_keys;
 
     /**
-     * Replace keys by default ones if the user is not in the whitelist
+     * Replace keys by default ones if the user class is not in the whitelist
      * If the new value is defined as null, delete the key from the request
      */
     app.use('/api/', function (req, res, next) {
