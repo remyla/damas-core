@@ -11,22 +11,28 @@ DESCRIPTION
 
 COMMANDS
   File commands:
-     add     Add files to the index
-     init    Prepare the current directory adding a .damas/ repo folder
-     lock    Lock files (set key 'lock' = user name)
-     rm      Remove files from the index
-     show    Show files record
-     signin  <username> <pass>
-     signout Remove authorization token
-     stats   Update file_mtime and file_size keys of files
-     unlock  Unlock files
-
+     add       Add files to the index
+     init      Prepare the current directory adding a .damas/ repo folder
+     lock      Lock files (set key 'lock' = user name)
+     rm        Remove files from the index
+     show      Show files records
+     signin    <username> <pass>
+     signout   Remove authorization token
+     stats     Update file_mtime and file_size keys of files
+     unlock    Unlock files
+     untracked List untracked files"
+     
   CRUDS commands (send JSON to the server, see examples below):
      create       <json>  create node(s)
      read         <json>  show the keys of the file
      update       <json>  update nodes
+     upsert       <json>  create or update nodes
      delete       <json>  delete nodes
      search       <query> search
+
+  MORE commands
+     comment      <json>  create child node
+     graph        <json>  read all related nodes     
      search_mongo <query> <sort> <limit> <skip> MongoDB search - beta
 
 ENVIRONMENT VARIABLES
@@ -47,8 +53,7 @@ EXAMPLES
   search keys matching a regular expression
       damas search _id:/.*mov/
   search deleted:true key, sort by _id key, show result as lines of ids
-      damas-experimental -l search_mongo '{"deleted":true}' '{"_id":1}' 0 0
-
+      damas -l search_mongo '{"deleted":true}' '{"_id":1}' 0 0
 
 EXIT VALUES
   0  Success
