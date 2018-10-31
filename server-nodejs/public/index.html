@@ -3,7 +3,7 @@
 		<script type="text/javascript">//<![CDATA[
 			document.addEventListener('DOMContentLoaded', function() {
 				document.querySelector('#title').innerHTML = window.location.host;
-				document.querySelector('#srv_py').innerHTML = window.location+'api';
+				document.querySelector('#srv_py').innerHTML = window.location;
 				//document.querySelector('#srv_js').innerHTML = window.location+'damas.js';
 				damas.server = "/api/";
 				console.log("Welcome to damas-core API");
@@ -14,7 +14,7 @@
 			body {
 				font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 				max-width: 800px;
-				margin: 0 auto;
+				margin: 1em auto;
 				color: #364e64;
 			}
 			h1, .subtitle {
@@ -28,13 +28,11 @@
 			}
 			pre {
 				color: white;
-				background-color: black;
+				background-color: #364e64;
 				padding: 1em;
 				font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace
 			}
 			.dyn {
-				color: #6a8698;
-				color: blue;
 			}
 			.footer {
 				text-align: center;
@@ -45,18 +43,12 @@
 	<body>
 		<h1 id="title" class="dyn">Welcome</h1>
 		<div class="subtitle">
-			Digital Asset Management Server<br/>damas-core
+			damas-core
 		</div>
-		<a href="https://github.com/remyla/damas-core"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>
-		<h2>User Interfaces</h2>
-		<a href="/console">&gt; web console</a>
 		<h2>Programming Interfaces</h2>
-		<h3>Javascript console</h3>
+		<h3>Javascript</h3>
 		Press &lt;F12&gt; to open the console:
-		<pre>// if authentication is required
-damas.signIn("username","password");
-
-// create an empty node
+		<pre>// create an empty node
 damas.create({});</pre>
 <!--
 		Using the <a href="/js/damas.js">damas-core Javascript API module</a> from an HTML document on the server
@@ -80,7 +72,8 @@ project.create({})</pre>
 $ damas --help</pre>
 		<hr/>
 		<div class="footer">
-			<a href="http://damas-software.org">http://damas-software.org</a>
+			<a href="https://github.com/remyla/damas-core">damas-core</a>
 		</div>
+		<a href="https://github.com/remyla/damas-core"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"></a>
 	</body>
 </html>

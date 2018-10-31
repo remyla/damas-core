@@ -163,7 +163,7 @@ show_help_msg() {
   echo "        damas search _id:/.*mov/"
   echo ""
   echo "    search deleted:true key, sort by _id key, show result as lines of ids"
-  echo "        damas-experimental -l search_mongo '{\"deleted\":true}' '{\"_id\":1}' 0 0"
+  echo "        damas -l search_mongo '{\"deleted\":true}' '{\"_id\":1}' 0 0"
   exit 0
 }
 

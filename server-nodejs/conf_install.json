@@ -52,6 +52,20 @@
             "enable": true,
             "path": "./extensions/auth-none.js"
         },
+        "restricted_keys": {
+            "enable": true,
+            "path": "./extensions/restricted_keys.js",
+            "conf": {
+                "whitelist": ["admin"],
+                "override": {
+                    "active": false,
+                    "author": null,
+                    "class": null,
+                    "time": null,
+                    "username": null
+                }
+            }
+        },
         "prefer_https": {
             "enable": false,
             "path": "./extensions/prefer_https.js"
