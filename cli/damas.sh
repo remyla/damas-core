@@ -143,10 +143,12 @@ show_help_msg() {
   echo "   update       <json>  update nodes"
   echo "   upsert       <json>  create or update nodes"
   echo "   delete       <json>  delete nodes"
-  echo "   graph        <json>  read all related nodes"
   echo "   search       <query> search"
-  echo "   search_mongo <query> <sort> <limit> <skip> MongoDB search - beta"
+  echo ""
+  echo "MORE commands"
   echo "   comment      <json>  create child node"
+  echo "   graph        <json>  read all related nodes"
+  echo "   search_mongo <query> <sort> <limit> <skip> MongoDB search - beta"
   echo ""
   echo "EXAMPLES"
   echo ""
@@ -179,6 +181,7 @@ while true; do
       ;;
     -v | --verbose)
       VERBOSE=true
+      CURL_VERBOSE="-v"
       shift 1
       ;;
     -q | --quiet)
@@ -253,33 +256,33 @@ load_token
 
 case $COMMAND in
   create)
-    run "curl $CURL_ARGS $AUTH -d '$*' ${URL}create/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$*' ${URL}create/"
     ;;
   read)
-    run "curl $CURL_ARGS $AUTH -d '$*' ${URL}read/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$*' ${URL}read/"
     ;;
   update)
-    run "curl $CURL_ARGS $AUTH -X PUT -d '$*' ${URL}update/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X PUT -d '$*' ${URL}update/"
     ;;
   upsert)
-    run "curl $CURL_ARGS $AUTH -d '$*' ${URL}upsert/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$*' ${URL}upsert/"
     ;;
   delete)
-    run "curl $CURL_ARGS $AUTH -X DELETE -d '$*' ${URL}delete/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X DELETE -d '$*' ${URL}delete/"
     ;;
   graph)
-    run "curl $CURL_ARGS $AUTH -d '$*' ${URL}graph/0/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$*' ${URL}graph/0/"
     ;;
   search)
-    run "curl $CURL_ARGS $AUTH ${URL}search/$1"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH ${URL}search/$1"
     ;;
   add)
     get_ids $@
-    run "curl $CURL_ARGS $AUTH -d '{\"_id\":$IDS}' ${URL}create/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '{\"_id\":$IDS}' ${URL}create/"
     ;;
   show)
     get_ids $@
-    run "curl $CURL_ARGS $AUTH -d '$IDS' ${URL}read/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$IDS' ${URL}read/"
     ;;
   untracked)
     BASE="/tmp/damas-files_"
@@ -311,26 +314,26 @@ case $COMMAND in
         bytes=`stat -c%s "$1"`
     fi
     mtime=`stat -c%Y "$1"`000
-    run "curl $CURL_ARGS $AUTH -X PUT -d '{\"_id\":$IDS,\"file_size\":$bytes,\"file_mtime\":$mtime}' ${URL}update/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X PUT -d '{\"_id\":$IDS,\"file_size\":$bytes,\"file_mtime\":$mtime}' ${URL}update/"
     ;;
   rm)
     get_ids $@
-    run "curl $CURL_ARGS $AUTH -X DELETE -d '$IDS' ${URL}delete/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X DELETE -d '$IDS' ${URL}delete/"
     ;;
   search_mongo)
     QUERY='{"query": '$1', "sort": '$2', "limit": '$3', "skip": '$4'}'
-    run "curl $CURL_ARGS $AUTH -X POST ${URL}search_mongo/ -d '$QUERY'"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X POST ${URL}search_mongo/ -d '$QUERY'"
     ;;
   lock)
     get_ids $@
-    run "curl $CURL_ARGS $AUTH -X PUT -d '$IDS' ${URL}lock/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X PUT -d '$IDS' ${URL}lock/"
     ;;
   unlock)
     get_ids $@
-    run "curl $CURL_ARGS $AUTH -X PUT -d '$IDS' ${URL}unlock/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X PUT -d '$IDS' ${URL}unlock/"
     ;;
   comment)
-    run "curl $CURL_ARGS $AUTH -d '$*' ${URL}comment/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$*' ${URL}comment/"
     ;;
   signin)
     if [ $VERBOSE ]; then
@@ -345,7 +348,7 @@ case $COMMAND in
       read -sp "password: " PASS
       printf "\n\n"
     fi
-    RES=$(eval "curl -ks -w \"\n%{http_code}\" --fail -d 'username=$USERN&password=$PASS' ${URL}signIn")
+    RES=$(eval "curl $CURL_VERBOSE -ks -w \"\n%{http_code}\" --fail -d 'username=$USERN&password=$PASS' ${URL}signIn")
     TOKEN=$(echo $RES| sed 's/^.*"token":"\([^"]*\)".*$/\1/')
     echo $TOKEN
     echo $TOKEN > "/tmp/damas-$USER"
