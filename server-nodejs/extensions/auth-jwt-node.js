@@ -15,24 +15,6 @@ module.exports = function (app) {
     debug("Authentication is JWT / " + conf.passwordHashAlgorithm +
         " / required=" + conf.required);
 
-    app.use(function (req, res, next){
-        var token = fetch(req.headers) || req.cookies.token;
-        if (null === token) {
-            req.user = {};
-            return next();
-        }
-        jwt.verify(token, conf.secret, function (err, decode) {
-            if (err) {
-                req.user = {};
-                return next();
-            }
-            db.read([decode._id], function (err, user) {
-                req.user = user[0];
-                next();
-            });
-        });
-    });
-
     var middleware = function () {
         var func = function (req, res, next) {
             if (!req.user.username && conf.required) {
@@ -100,6 +82,25 @@ module.exports = function (app) {
     }
 
     app.use(cookieParser());
+
+    app.use(function (req, res, next){
+        var token = fetch(req.headers) || req.cookies.token;
+        if (null === token) {
+            req.user = {};
+            return next();
+        }
+        jwt.verify(token, conf.secret, function (err, decode) {
+            if (err) {
+                req.user = {};
+                return next();
+            }
+            db.read([decode._id], function (err, user) {
+                req.user = user[0];
+                next();
+            });
+        });
+    });
+
     app.use(conf.expressUse, middleware().unless(conf.expressUnless));
     app.get('/api/verify', verify );
     app.route('/api/signIn').post(authenticate, function (req, res, next) {
