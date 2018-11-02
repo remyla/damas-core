@@ -30,7 +30,7 @@ module.exports = function (app) {
                 req.user = user[0];
                 next();
             });
-        }
+        });
     });
 
     var middleware = function () {
