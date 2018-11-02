@@ -2,8 +2,8 @@
     "authorMode" : true,
     "https" : {
         "enable": false,
-        "cert": "cert.pem",
-        "key": "key.pem"
+        "cert": "fullchain.pem",
+        "key": "privkey.pem"
     },
     "db": "mongodb",
     "mongodb": {
@@ -39,7 +39,7 @@
             "path": "./extensions/auth-jwt-node.js",
             "conf": {
                 "required": false,
-                "passwordHashAlgorithm": "sha1",
+                "passwordHashAlgorithm": "md5",
                 "secret": "webtokensecret",
                 "exp": 1440,
                 "expressUse": "/api",
