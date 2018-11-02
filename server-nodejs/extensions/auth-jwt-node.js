@@ -12,32 +12,33 @@ module.exports = function (app) {
     var crypto = require('crypto');
     var debug = require('debug')('app:auth:' + process.pid);
     var cookieParser = require('cookie-parser')
-    debug("Authentification is JWT");
+    debug("Authentication is JWT / " + conf.passwordHashAlgorithm +
+        " / required=" + conf.required);
+
+    app.use(function (req, res, next){
+        var token = fetch(req.headers) || req.cookies.token;
+        if (null === token) {
+            req.user = {};
+            return next();
+        }
+        jwt.verify(token, conf.secret, function (err, decode) {
+            if (err) {
+                req.user = {};
+                return next();
+            }
+            db.read([decode._id], function (err, user) {
+                req.user = user[0];
+                next();
+            });
+        }
+    });
 
     var middleware = function () {
         var func = function (req, res, next) {
-            var token = fetch(req.headers) || req.cookies.token;
-            if (token === null && conf.required === false) {
-                req.user = {};
-                next();
-                return;
+            if (!req.user.username && conf.required) {
+                return res.status(401).json('401 Unauthorized (invalid token and authentication is required)');
             }
-            jwt.verify(token, conf.secret, function (err, decode) {
-                if (err) {
-                    if (conf.required === false ) {
-                        req.user = {};
-                        next();
-                        return;
-                    }
-                    req.user = undefined;
-                    return res.status(401).json('401 Unauthorized (invalid token and authentication is required)');
-                }
-                db.read([decode._id], function (err, user) {
-                    // we could add decode properties to the user object here
-                    req.user = user[0];
-                    next();
-                });
-            });
+            return next();
         };
         func.unless = require('express-unless');
         return func;
