@@ -1,0 +1,53 @@
+<html>
+	<head>
+		<title>damas-core</title>
+		<link rel="shortcut icon" href="favicon.ico"/>
+		<link href="/style.css" rel="stylesheet" type="text/css"/>
+		<script type="text/javascript">//<![CDATA[
+			document.addEventListener('DOMContentLoaded', function() {
+				document.querySelector('#title').innerHTML = window.location.host+'/api';
+				document.querySelector('#srv_py').innerHTML = window.location.protocol+'://'+window.location.host+'/api';
+			});
+		</script>
+	</head>
+	<body>
+		<h1 id="title" class="dyn">Welcome</h1>
+		<div class="subtitle">
+			damas-core API
+		</div>
+		<nav>
+			<a href="/js"/>▼ Javascript</a>&nbsp;
+			🐍 Python&nbsp;
+			<a href="/cli"/>⌘ CLI</a>&nbsp;
+		</nav>
+		<h2>Programming Interface</h2>
+		<h3>Python</h3>
+		Import the <a href="/py/damas.py">damas Python module</a> then connect to this server:
+
+		<pre>
+Python 2.7.13 (default, Sep 26 2018, 18:42:22) 
+[GCC 6.3.0 20170516] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+
+
+&gt;&gt;&gt; import damas
+&gt;&gt;&gt; project = damas.http_connection('<span id="srv_py" class="dyn">https://serveripaddr/api</span>')
+
+
+# list every node ids
+&gt;&gt;&gt; project.search("*")
+
+
+# read every nodes
+&gt;&gt;&gt; project.read(project.search("*"))
+
+
+# create an empty node
+&gt;&gt;&gt; project.create({})</pre>
+		<hr/>
+		<footer>
+			<a href="https://github.com/remyla/damas-core">🖹 Sources</a>
+			<a href="https://github.com/remyla/damas-core/wiki">🖹 Wiki</a>
+		</footer>
+	</body>
+</html>
