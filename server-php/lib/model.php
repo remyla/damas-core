@@ -103,7 +103,7 @@ class model
 	 * @param {String} limit Limit and offset for result (MySQL Syntax)
 	 * @returns {Array} array of matching node indexes
 	 */
-	static function search ( $keys, $sortby = 'label', $order = 'DESC', $limit = NULL )
+	static function search ( $keys, $sortby = 'label', $order = 'DESC', $limit = null )
 	{
 		if( $keys === null )
 		{
