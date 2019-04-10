@@ -36,7 +36,7 @@ switch( arg("cmd") )
 	case "sha1":
 		checkfilefound( $assetsLCL . arg("path") );
 		$sha1 = sha1_file( $assetsLCL . arg("path") );
-		if( $sha1 === FALSE )
+		if( $sha1 === false )
 		{
 			header("HTTP/1.1: 409 Conflict");
 			echo "sha1_file( ". $assetsLCL . arg("path") . " ) returned FALSE";
