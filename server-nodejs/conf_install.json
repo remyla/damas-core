@@ -66,6 +66,10 @@
                 }
             }
         },
+	"last_activity": {
+            "enable": true,
+            "path": "./extensions/last_activity.js"
+	},
         "prefer_https": {
             "enable": false,
             "path": "./extensions/prefer_https.js"
