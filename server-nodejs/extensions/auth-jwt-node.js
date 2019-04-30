@@ -38,7 +38,11 @@ module.exports = function (app) {
             }
             db.read([doc[0]], function (err, user) {
                 user = user[0];
-                if (crypto.createHash(conf.passwordHashAlgorithm).update(req.body.password).digest('hex') !== user.password) {
+                if (32 === (user.password).length)
+                   var hashMethod = 'md5';
+                else
+                   var hashMethod = 'sha1';
+                if (crypto.createHash(hashMethod).update(req.body.password).digest('hex') !== user.password) {
                     return res.status(401).json('Invalid username or password');
                 }
                 debug('User authenticated, generating token');
@@ -108,5 +112,4 @@ module.exports = function (app) {
     });
 
 }
-
 
