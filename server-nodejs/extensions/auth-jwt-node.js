@@ -25,23 +25,31 @@ module.exports = function (app) {
         func.unless = require('express-unless');
         return func;
     };
-
     var authenticate = function (req, res, next) {
         debug('Processing authenticate middleware');
         if (!req.body.username || !req.body.password) {
             debug('no username or password');
             return res.status(401).json('Invalid username or password');
         }
-        db.search({'username': req.body.username}, function (err, doc) {
+        let nameRegex = RegExp('^[a-z][-a-z0-9_]*\$');
+        let obj;
+        if (nameRegex.test(req.body.username)) {
+            let obj = {'username' : req.body.username}; 
+        } else {
+            let obj = {'email' : req.body.username};
+        }
+        db.search(obj, function (err, doc) {
             if (err || doc.length === 0) {
                 return res.status(401).json('Invalid username or password');
             }
             db.read([doc[0]], function (err, user) {
                 user = user[0];
-                if (32 === (user.password).length)
+                if (32 === (user.password).length) {
                    var hashMethod = 'md5';
-                else
+                }
+                else {
                    var hashMethod = 'sha1';
+                }
                 if (crypto.createHash(hashMethod).update(req.body.password).digest('hex') !== user.password) {
                     return res.status(401).json('Invalid username or password');
                 }
