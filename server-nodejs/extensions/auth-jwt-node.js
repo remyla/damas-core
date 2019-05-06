@@ -39,7 +39,6 @@ module.exports = function (app) {
         } else {
            obj = {'email' : req.body.username};
         }
-        console.log(obj);
         db.search(obj, function (err, doc) {
             if (err || doc.length === 0) {
                 return res.status(401).json('Invalid username or password');
