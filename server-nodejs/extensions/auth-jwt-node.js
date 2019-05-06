@@ -25,6 +25,7 @@ module.exports = function (app) {
         func.unless = require('express-unless');
         return func;
     };
+
     var authenticate = function (req, res, next) {
         debug('Processing authenticate middleware');
         if (!req.body.username || !req.body.password) {
@@ -32,11 +33,13 @@ module.exports = function (app) {
             return res.status(401).json('Invalid username or password');
         }
         let nameRegex = RegExp('^[a-z][-a-z0-9_]*\$');
+        let obj;
         if (nameRegex.test(req.body.username)) {
-            let obj = {'username' : req.body.username};
+           obj = {'username' : req.body.username};
         } else {
-            let obj = {'email' : req.body.username};
+           obj = {'email' : req.body.username};
         }
+        console.log(obj);
         db.search(obj, function (err, doc) {
             if (err || doc.length === 0) {
                 return res.status(401).json('Invalid username or password');
