@@ -32,9 +32,8 @@ module.exports = function (app) {
             return res.status(401).json('Invalid username or password');
         }
         let nameRegex = RegExp('^[a-z][-a-z0-9_]*\$');
-        let obj;
         if (nameRegex.test(req.body.username)) {
-            let obj = {'username' : req.body.username}; 
+            let obj = {'username' : req.body.username};
         } else {
             let obj = {'email' : req.body.username};
         }
