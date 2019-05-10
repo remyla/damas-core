@@ -45,11 +45,11 @@ module.exports = function (app) {
             }
             db.read([doc[0]], function (err, user) {
                 user = user[0];
+                let hashMethod;
                 if (32 === (user.password).length) {
-                   var hashMethod = 'md5';
-                }
-                else {
-                   var hashMethod = 'sha1';
+                   hashMethod = 'md5';
+                } else {
+                   hashMethod = 'sha1';
                 }
                 if (crypto.createHash(hashMethod).update(req.body.password).digest('hex') !== user.password) {
                     return res.status(401).json('Invalid username or password');
@@ -96,22 +96,27 @@ module.exports = function (app) {
 
     app.use(cookieParser());
 
-    app.use(function (req, res, next){
+    app.use( function (req, res, next) {
         var token = fetch(req.headers) || req.cookies.token;
         if (null === token) {
             req.user = {};
             return next();
         }
-        jwt.verify(token, conf.secret, function (err, decode) {
-            if (err) {
-                req.user = {};
-                return next();
-            }
-            db.read([decode._id], function (err, user) {
-                req.user = user[0];
-                next();
+        if (undefined != req.headers.authorization && 'Bearer null' != req.headers.authorization) {
+            jwt.verify(token, conf.secret, function (err, decode) {
+                if (err) {
+                    req.user = {};
+                    return res.status(401).json('Expired or otherwise invalid token (authentication is required)');
+                }
+                db.read([decode._id], function (err, user) {
+                    req.user = user[0];
+                    next();
+                });
             });
-        });
+        } else {
+            req.user = {};
+            return next();
+        };
     });
 
     app.use(conf.expressUse, middleware().unless(conf.expressUnless));
