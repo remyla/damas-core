@@ -148,7 +148,7 @@ show_help_msg() {
   echo "MORE commands"
   echo "   comment      <json>  create child node"
   echo "   graph        <json>  read all related nodes"
-  echo "   search_mongo <query> <sort> <limit> <skip> MongoDB search - beta"
+  echo "   search_mongo <query> <sort> <limit> <skip> MongoDB search"
   echo ""
   echo "EXAMPLES"
   echo ""

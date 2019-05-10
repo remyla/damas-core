@@ -7,3 +7,7 @@ A Javascript RESTful implementation of DAMAS server for NodeJS and MongoDB. Some
 * Javascript and Python modules (see /js/damas.js /py/damas.py in this repository)
 
 Please read the [installation instructions](https://github.com/remyla/damas-core/wiki/1-Installation) to proceed to installation.
+
+Run using this command:
+
+DEBUG=app:* node .

@@ -10,7 +10,7 @@ module.exports = function (app) {
     var jwt = require('jsonwebtoken');
     var unless = require('express-unless');
     var crypto = require('crypto');
-    var debug = require('debug')('app:auth:' + process.pid);
+    var debug = require('debug')('damas:extensions:authentication');
     var cookieParser = require('cookie-parser')
     debug("Authentication is JWT / " + conf.passwordHashAlgorithm +
         " / required=" + conf.required);

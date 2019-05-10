@@ -6,7 +6,8 @@
 /*
  * Initialize Express
  */
-var debug = require('debug')('app:' + process.pid);
+//var debug = require('debug')('app:' + process.pid);
+var debug = require('debug')('damas');
 
 debug('Initializing express');
 var express = require('express');
@@ -31,12 +32,13 @@ app.use(morgan('dev'));
  * Extensions
  */
 debug('Loading extensions');
+var debug = require('debug')('damas:extensions');
 app.locals.extensions = [];
 for(extname in conf.extensions) {
     if (false === conf.extensions[extname].enable){
         continue;
     }
-    debug('Extension: ' + extname);
+    debug('loading ' + extname);
     if (conf.extensions[extname].conf) {
         if ('string' === typeof conf.extensions[extname].conf)
             app.locals.conf[extname] = require(conf.extensions[extname].conf);
@@ -48,6 +50,7 @@ for(extname in conf.extensions) {
         app.locals.extensions[extname] = extobj(app, express);
     }
 }
+var debug = require('debug')('damas');
 debug('Extensions loaded');
 
 require('./routes')(app, express);
