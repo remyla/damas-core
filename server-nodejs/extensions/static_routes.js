@@ -4,7 +4,7 @@
 
 module.exports = function (app, express){
     var conf = app.locals.conf.static_routes;
-    var debug = require('debug')('app:staticRoutes');
+    var debug = require('debug')('damas:extensions:staticRoutes');
     function mkStaticRoute(route, localPath){
         debug('Registered static route: ' + route + ' -> ' + localPath);
         app.use(route, express.static(localPath, {

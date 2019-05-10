@@ -46,8 +46,9 @@ module.exports = function (app, routes) {
      * HTTP status codes:
      * - 201: Created (nodes created)
      * - 207: Multi-Status (some nodes already exist with these identifiers)
-     * - 400: Bad request (not formatted correctly)
+     * - 400: Bad Request (not formatted correctly)
      * - 409: Conflict (all nodes already exist with these identifiers)
+     * - 500: Internal Server Error (could not access the database)
      */
     create = function (req, res) {
         var nodes = Array.isArray(req.body) ? req.body : [req.body];
@@ -70,7 +71,7 @@ module.exports = function (app, routes) {
             }
             db.create(data.nodes || nodes, function (error, doc) {
                 if (error) {
-                    return httpStatus(res, 409, 'Create');
+                    return httpStatus(res, 500, 'Create');
                 }
                 var response = getMultipleResponse(doc);
                 if (response.fail) {
@@ -98,8 +99,9 @@ module.exports = function (app, routes) {
      * HTTP status codes:
      * - 200: OK (nodes retrieved)
      * - 207: Multi-Status (some nodes do not exist)
-     * - 400: Bad request (not formatted correctly)
+     * - 400: Bad Request (not formatted correctly)
      * - 404: Not Found (all the nodes do not exist)
+     * - 500: Internal Server Error (could not access the database)
      */
     read = function (req, res) {
         var ids = getRequestIds(req);
@@ -109,7 +111,7 @@ module.exports = function (app, routes) {
 
         db.read(ids, function (error, doc) {
             if (error) {
-                return httpStatus(res, 409, 'Read');
+                return httpStatus(res, 500, 'Read');
             }
             var response = getMultipleResponse(doc);
             if (response.fail) {
@@ -136,8 +138,9 @@ module.exports = function (app, routes) {
      * HTTP status codes:
      * - 200: OK (nodes updated)
      * - 207: Multi-Status (some nodes do not exist)
-     * - 400: Bad request (not formatted correctly)
+     * - 400: Bad Request (not formatted correctly)
      * - 404: Not Found (all the nodes do not exist)
+     * - 500: Internal Server Error (could not access the database)
      */
     update = function (req, res) {
         function checkObject(obj) {
@@ -172,7 +175,7 @@ module.exports = function (app, routes) {
                     }
                 }
                 if (error) {
-                    return httpStatus(res, 409, 'Update');
+                    return httpStatus(res, 500, 'Update');
                 }
                 var response = getMultipleResponse(doc);
                 if (response.fail) {
@@ -196,7 +199,8 @@ module.exports = function (app, routes) {
      *
      * HTTP status codes:
      * - 200: OK (nodes inserted and/or updated)
-     * - 400: Bad request (not formated correctly)
+     * - 400: Bad Request (not formated correctly)
+     * - 500: Internal Server Error (could not access the database)
      */
     upsert = function (req, res) {
         var nodes = Array.isArray(req.body) ? req.body : [req.body];
@@ -219,7 +223,7 @@ module.exports = function (app, routes) {
 
         db.create(nodes, function(err, result) {
             if(err) {
-                return httpStatus(res, 409, 'Upsert');
+                return httpStatus(res, 500, 'Upsert');
             }
             var toUpdate = [];
             var created = [];
@@ -235,7 +239,7 @@ module.exports = function (app, routes) {
             if (response.fail) {
                 db.update(nodes, function(err, updates) {
                     if(err) {
-                        return httpStatus(res, 409, 'Upsert');
+                        return httpStatus(res, 500, 'Upsert');
                     }
                     httpStatus(res, 200, (updates.length > 1) ? updates : updates[0]);
                 });
@@ -244,7 +248,7 @@ module.exports = function (app, routes) {
             if (response.partial) {
                 db.update(toUpdate, function(err, updates) {
                     if (err) {
-                        return httpStatus(res, 409, 'Upsert');
+                        return httpStatus(res, 500, 'Upsert');
                     }
                     var output = created.concat(updates);
                     httpStatus(res, 200, output);
@@ -270,8 +274,9 @@ module.exports = function (app, routes) {
      * HTTP status codes:
      * - 200: OK (nodes deleted (or not found))
      * - 207: Multi-Status (some nodes do not exist)
-     * - 400: Bad request (not formatted correctly)
+     * - 400: Bad Request (not formatted correctly)
      * - 404: Not Found (all the nodes do not exist)
+     * - 500: Internal Server Error (could not access the database)
      */
     deleteNode = function (req, res) {
         var ids = getBodyIds(req);
@@ -284,6 +289,9 @@ module.exports = function (app, routes) {
                 return httpStatus(res, data.status, 'Remove');
             }
             db.remove(data.ids || ids, function (error, doc) {
+                if (error) {
+                    return httpStatus(res, 500, 'Remove');
+                }
                 var response = getMultipleResponse(doc);
                 if (response.fail) {
                     httpStatus(res, 404, 'Remove');
@@ -312,17 +320,18 @@ module.exports = function (app, routes) {
      * - 207: Multi-Status (some nodes do not exist)
      * - 400: Bad request (not formatted correctly)
      * - 404: Not Found (all the nodes do not exist)
+     * - 500: Internal Server Error (could not access the database)
      */
     graph = function (req, res) {
         var depth = req.params.depth || 0;
         var ids = getRequestIds(req);
         if (!ids) {
-            return httpStatus(res, 400, 'Remove');
+            return httpStatus(res, 400, 'Graph');
         }
 
         db.graph(ids, depth, function (error, nodes) {
             if (error) {
-                return httpStatus(res, 409, 'Graph');
+                return httpStatus(res, 500, 'Graph');
             }
             var response = getMultipleResponse(nodes);
             if (response.fail) {
@@ -347,6 +356,7 @@ module.exports = function (app, routes) {
      * HTTP status codes:
      * - 200: OK (search successful, even without results)
      * - 400: Bad Request (not formatted correctly)
+     * - 500: Internal Server Error (could not access the database)
      */
     search = function (req, res) {
         var q = req.params.query || req.body.query;
@@ -357,7 +367,7 @@ module.exports = function (app, routes) {
         q = q.replace(/\s+/g, ' ').trim();
         db.searchFromText(q, function (error, doc) {
             if (error) {
-                httpStatus(res, 409, 'Search');
+                httpStatus(res, 500, 'Search');
             } else {
                 httpStatus(res, 200, doc); // Always send an array for search
             }
@@ -376,6 +386,7 @@ module.exports = function (app, routes) {
      * HTTP status codes:
      * - 200: OK (search successful, even without results)
      * - 400: Bad Request (not formatted correctly)
+     * - 500: Internal Server Error (could not access the database)
      */
     search_one = function (req, res) {
         var q = req.params.query || req.body.query;
@@ -386,11 +397,11 @@ module.exports = function (app, routes) {
         q = q.replace(/\s+/g, ' ').trim();
         db.searchFromText(q, function (error, doc) {
             if (error) {
-                return httpStatus(res, 409, 'Search_one');
+                return httpStatus(res, 500, 'Search_one');
             }
             db.read([doc[0]], function (error, nodes) {
                 if (error) {
-                    httpStatus(res, 409, 'Search_one');
+                    httpStatus(res, 500, 'Search_one');
                 } else {
                     httpStatus(res, 200, nodes[0]);
                 }
@@ -459,7 +470,7 @@ module.exports = function (app, routes) {
         prepare_regexes(query);
         db.mongo_search(query, sort, skip, limit, function (err, ids) {
             if (err) {
-                httpStatus(res, 409, 'Search_mongo');
+                httpStatus(res, 500, 'Search_mongo');
             } else {
                 //res.setHeader('total', ids.total);
                 httpStatus(res, 200, ids);

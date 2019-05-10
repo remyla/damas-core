@@ -1,5 +1,5 @@
 module.exports = function(app){
-    var debug = require('debug')('app:auth:' + process.pid);
+    var debug = require('debug')('damas:extensions:authentication');
     debug('Warning: No authentication.');
     debug('Edit conf.json and enable jwt extension to use json web tokens');
     app.use(function(req, res, next ){
