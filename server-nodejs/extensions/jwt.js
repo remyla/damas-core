@@ -10,21 +10,10 @@ module.exports = function (app) {
     var jwt = require('jsonwebtoken');
     var unless = require('express-unless');
     var crypto = require('crypto');
-    var debug = require('debug')('damas:extensions:authentication');
+    var debug = require('debug')('app:auth:' + process.pid);
     var cookieParser = require('cookie-parser')
     debug("Authentication is JWT / " + conf.passwordHashAlgorithm +
         " / required=" + conf.required);
-
-    var middleware = function () {
-        var func = function (req, res, next) {
-            if (!req.user.username && conf.required) {
-                return res.status(401).json('401 Unauthorized (invalid token and authentication is required)');
-            }
-            return next();
-        };
-        func.unless = require('express-unless');
-        return func;
-    };
 
     var authenticate = function (req, res, next) {
         debug('Processing authenticate middleware');
@@ -78,8 +67,8 @@ module.exports = function (app) {
             var part = authorization.split(' ');
             if (part.length === 2) {
                 var token = part[1];
-                if ('null' === token) {
-                    token = null;
+                if ('undefined' === token) {
+                    token = undefined;
                 }
                 return token;
             } else {
@@ -98,7 +87,7 @@ module.exports = function (app) {
 
     app.use( function (req, res, next) {
         var token = fetch(req.headers) || req.cookies.token;
-        if (null === token) {
+        if ((undefined === token) || (null === token)) {
             req.user = {};
             return next();
         }
@@ -118,6 +107,17 @@ module.exports = function (app) {
             return next();
         };
     });
+
+    var middleware = function () {
+        var func = function (req, res, next) {
+            if (!req.user.username && conf.required) {
+                return res.status(401).json('401 Unauthorized (invalid token and authentication is required)');
+            }
+            return next();
+        };
+        func.unless = require('express-unless');
+        return func;
+    };
 
     app.use(conf.expressUse, middleware().unless(conf.expressUnless));
     app.get('/api/verify', verify );

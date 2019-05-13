@@ -51,7 +51,7 @@
      */
     var damas = {};
     damas.server = '';
-    damas.token = null;
+    damas.token = undefined;
     damas.user = null;
 
 
@@ -452,7 +452,7 @@
      * Sign out using the server embeded authentication system
      */
     damas.signOut = function (callback) {
-        damas.token = null;
+        damas.token = undefined;
         damas.user = null;
         if (callback) {
             callback();
