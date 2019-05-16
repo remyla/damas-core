@@ -88,8 +88,9 @@
             }
         }
         xhr.open(args.method, damas.server + args.url, args.async);
-        xhr.setRequestHeader('Authorization', 'Bearer ' + damas.token);
-
+        if(damas.token) {
+            xhr.setRequestHeader('Authorization', 'Bearer ' + damas.token);
+        }
         if (undefined !== args.data) {
             xhr.setRequestHeader('Content-Type', 'application/json');
             xhr.send(JSON.stringify(args.data));
