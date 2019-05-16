@@ -90,9 +90,9 @@ module.exports = function (app) {
             return next();
         }
         db.read([obj['_id']], function (err, user) {
-            if (err){
-                req.user = {};
-                return next();
+               if (err || null === user[0]) {
+                    req.user = {};
+                    return next();
             }
             jwt.verify(token, conf.secret + user[0]['password'], function (err, decode) {
                 if (err) {
