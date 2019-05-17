@@ -43,8 +43,12 @@ module.exports = function (app) {
                 if (crypto.createHash(hashMethod).update(req.body.password).digest('hex') !== user.password) {
                     return res.status(401).json('Invalid username or password');
                 }
+                if (user["disable"]) {
+                    return res.status(401).json('Unauthorized connection');
+                }
                 debug('User authenticated, generating token');
                 user.lastlogin = Date.now();
+                user.disable = false;
                 db.update([user], function(err, nodes){
                     user.token = jwt.sign({ _id: user._id, username: user.username }, conf.secret + user.password, { expiresIn: conf.exp*60 });
                     var decoded = jwt.decode(user.token);
@@ -93,6 +97,10 @@ module.exports = function (app) {
                if (err || null === user[0]) {
                     req.user = {};
                     return next();
+            }
+            if (user["disable"]) {
+                req.user = {};
+                return next();
             }
             jwt.verify(token, conf.secret + user[0]['password'], function (err, decode) {
                 if (err) {
