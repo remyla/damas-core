@@ -84,14 +84,14 @@ get_ids() {
   fi
   IDS='['
   for id in "$@"; do
-    get_real_path $id
+    get_real_path "$id"
     IDS=$IDS'"'$FILEPATH'",'
   done
   IDS=${IDS:0:-1}']'
 }
 
 get_real_path() {
-  FILEPATH=$(realpath -m --relative-base $DIRECTORY $1 | sed 's/\.$//')
+  FILEPATH=$(realpath -m --relative-base $DIRECTORY "$1" | sed 's/\.$//')
   if [[ $FILEPATH != /* ]]; then
     FILEPATH="/"$FILEPATH
   fi
@@ -277,11 +277,11 @@ case $COMMAND in
     run "curl $CURL_VERBOSE $CURL_ARGS $AUTH ${URL}search/$1"
     ;;
   add)
-    get_ids $@
+    get_ids "$@"
     run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '{\"_id\":$IDS}' ${URL}create/"
     ;;
   show)
-    get_ids $@
+    get_ids "$@"
     run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$IDS' ${URL}read/"
     ;;
   untracked)
@@ -307,7 +307,7 @@ case $COMMAND in
     rm ${BASE}*
     ;;
   stats)
-    get_ids $@
+    get_ids "$@"
     if [ -d "$1" ]; then
         bytes=`du -sb "$1" | cut -f1`
     else
@@ -317,7 +317,7 @@ case $COMMAND in
     run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X PUT -d '{\"_id\":$IDS,\"file_size\":$bytes,\"file_mtime\":$mtime}' ${URL}update/"
     ;;
   rm)
-    get_ids $@
+    get_ids "$@"
     run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X DELETE -d '$IDS' ${URL}delete/"
     ;;
   search_mongo)
@@ -325,11 +325,11 @@ case $COMMAND in
     run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X POST ${URL}search_mongo/ -d '$QUERY'"
     ;;
   lock)
-    get_ids $@
+    get_ids "$@"
     run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X PUT -d '$IDS' ${URL}lock/"
     ;;
   unlock)
-    get_ids $@
+    get_ids "$@"
     run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X PUT -d '$IDS' ${URL}unlock/"
     ;;
   comment)
