@@ -25,7 +25,7 @@ Client API, Interfaces to access the server and its methods remotely:
 The libraries use the native language objects to expose the JSON results. Older specs of the libraries can be found in the folders. The CLI is for the newer NodeJS version only.
 
 # Usage
-Choose a server to run (either the recommended NodeJS server or the Php server based on older specs). Please refer to the [Wiki](https://github.com/remyla/damas-core/wiki) for the installation instructions. Then use the Python, Javascript, or CLI to access it or install one of the interfaces available (see below). Your feedback is highly welcome.
+Choose a server to run (either the recommended NodeJS server or the Php server based on older specs). Please refer to the [Wiki](https://github.com/remyla/damas-core/wiki) for the installation instructions. Then use the Python, Javascript or CLI to access the server or install one of the interfaces available (see below). Your feedback is highly welcome.
 
 # Related Links
 
@@ -51,6 +51,7 @@ Joaquin Galvan Angeles
 Stephane Hoarau  
 Matthieu Humeau  
 Mathieu Lalanne  
+Axel Pisani
 Axel Prat  
 Mathieu Valero  
 Quentin Villecroze
@@ -58,7 +59,7 @@ Quentin Villecroze
 # License
 GPL License(GPLV3)
 
-Copyright(c) 2018 Remy Lalanne remy@primcode.com
+Copyright(c) 2019 Remy Lalanne remy@primcode.com
 
 damas-core is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
