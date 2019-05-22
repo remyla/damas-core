@@ -54,7 +54,6 @@
     damas.token = null;
     damas.user = null;
 
-
     /**
      * Send a request according to the given arguments
      * @param {object} args - All the given arguments
@@ -424,7 +423,7 @@
      * @param {String} password the user secret password
      * @return true on success, false otherwise
      */
-    damas.signIn = function (username, password, callback) {
+    damas.signIn = function (username, password, expiresIn, callback) {
         function req_callback(result) {
             if (result !== null) {
                 damas.user = result;
@@ -432,11 +431,20 @@
             }
             return result;
         }
+        let form = 'username='  + encodeURIComponent(username) +
+                   '&password=' + encodeURIComponent(password);
+        if (undefined != expiresIn && 'function' != typeof expiresIn) {
+            console.log("no function");
+            form = 'username='  + encodeURIComponent(username) +
+                   '&password=' + encodeURIComponent(password) +
+                   '&expiresIn=' + encodeURIComponent(expiresIn);
+        } else {
+            callback = expiresIn;
+        }
         var res = req({
             method: 'POST',
             url: 'signIn',
-            form: 'username='  + encodeURIComponent(username) +
-                  '&password=' + encodeURIComponent(password),
+            form: form,
             async: callback !== undefined,
             callback: function (result) {
                 if ('function' === typeof callback) {
