@@ -8,6 +8,7 @@ module.exports = function (app) {
 
     var expressJwt = require('express-jwt');
     var jwt = require('jsonwebtoken');
+    var ms = require('ms');
     var unless = require('express-unless');
     var crypto = require('crypto');
     var debug = require('debug')('damas:extensions:authentication');
@@ -22,13 +23,23 @@ module.exports = function (app) {
             return res.status(401).json('Invalid username or password');
         }
         let nameRegex = RegExp('^[a-z][-a-z0-9_]*\$');
-        let obj;
+        let logIn;
         if (nameRegex.test(req.body.username)) {
-           obj = {'username' : req.body.username};
+           logIn = { 'username' : req.body.username };
         } else {
-           obj = {'email' : req.body.username};
+           logIn = { 'email' : req.body.username };
         }
-        db.search(obj, function (err, doc) {
+        let expiresIn = { expiresIn: conf.exp*60 };
+        let ignoreExpiration = false;
+        if (undefined != req.body.expiresIn && undefined === ms(req.body.expiresIn)) {     
+            return res.status(401).json('Value : \'' + req.body.expiresIn + '\' is invalid expiration token');
+        }
+        if ('0' != req.body.expiresIn) {
+            expiresIn = { expiresIn: req.body.expiresIn };
+        } else {
+            ignoreExpiration = true;
+        }
+        db.search(logIn, function (err, doc) {
             if (err || doc.length === 0) {
                 return res.status(401).json('Invalid username or password');
             }
@@ -43,14 +54,13 @@ module.exports = function (app) {
                 if (crypto.createHash(hashMethod).update(req.body.password).digest('hex') !== user.password) {
                     return res.status(401).json('Invalid username or password');
                 }
-                if (user["disable"]) {
+                if (user.disable) {
                     return res.status(401).json('Unauthorized connection');
                 }
                 debug('User authenticated, generating token');
                 user.lastlogin = Date.now();
-                user.disable = false;
                 db.update([user], function(err, nodes){
-                    user.token = jwt.sign({ _id: user._id, username: user.username }, conf.secret + user.password, { expiresIn: conf.exp*60 });
+                    user.token = jwt.sign({ _id: user._id, username: user.username, ignoreExpiration: ignoreExpiration }, conf.secret + user.password, expiresIn);
                     var decoded = jwt.decode(user.token);
                     user.token_exp = decoded.exp;
                     user.token_iat = decoded.iat;
@@ -88,21 +98,17 @@ module.exports = function (app) {
 
     app.use( function (req, res, next) {
         let token = fetch(req.headers) || req.cookies.token;
-        let obj = jwt.decode(token);
-        if ((undefined === token) || (null === token) || (null === obj)) {
+        let payload = jwt.decode(token);
+        if ((undefined === token) || (null === token) || (null === payload)) {
             req.user = {};
             return next();
         }
-        db.read([obj['_id']], function (err, user) {
-               if (err || null === user[0]) {
-                    req.user = {};
-                    return next();
-            }
-            if (user["disable"]) {
+        db.read([payload._id], function (err, user) {
+           if (err || null === user[0] || user.disable) {
                 req.user = {};
                 return next();
             }
-            jwt.verify(token, conf.secret + user[0]['password'], function (err, decode) {
+            jwt.verify(token, conf.secret + user[0]['password'], { ignoreExpiration: payload.ignoreExpiration }, function (err, decode) {
                 if (err) {
                     req.user = {};
                     return next();
