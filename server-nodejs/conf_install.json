@@ -41,7 +41,7 @@
                 "required": true,
                 "passwordHashAlgorithm": "md5",
                 "secret": "webtokensecret",
-                "exp": 1440,
+                "exp": "1d",
                 "expressUse": "/api",
                 "expressUnless": {
                     "path": "/api/signIn"

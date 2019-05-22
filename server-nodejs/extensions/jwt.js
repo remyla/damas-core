@@ -29,15 +29,13 @@ module.exports = function (app) {
         } else {
            logIn = { 'email' : req.body.username };
         }
-        let expiresIn = { expiresIn: conf.exp*60 };
-        let ignoreExpiration = false;
-        if (undefined != req.body.expiresIn && undefined === ms(req.body.expiresIn)) {     
-            return res.status(401).json('Value : \'' + req.body.expiresIn + '\' is invalid expiration token');
+        let payload = {};
+        let options = { expiresIn: req.body.expiresIn || conf.exp };
+        if (undefined === ms(options.expiresIn)) { 
+            return res.status(401).json('Value : \'' + options.expiresIn + '\' is invalid expiration token');
         }
-        if ('0' != req.body.expiresIn) {
-            expiresIn = { expiresIn: req.body.expiresIn };
-        } else {
-            ignoreExpiration = true;
+        if ('0' === options.expiresIn) {
+            payload.ignoreExpiration = true;
         }
         db.search(logIn, function (err, doc) {
             if (err || doc.length === 0) {
@@ -45,6 +43,9 @@ module.exports = function (app) {
             }
             db.read([doc[0]], function (err, user) {
                 user = user[0];
+                if (user.disable) {
+                    return res.status(401).json('Unauthorized connection');
+                }
                 let hashMethod;
                 if (32 === user.password.length) {
                    hashMethod = 'md5';
@@ -54,23 +55,21 @@ module.exports = function (app) {
                 if (crypto.createHash(hashMethod).update(req.body.password).digest('hex') !== user.password) {
                     return res.status(401).json('Invalid username or password');
                 }
-                if (user.disable) {
-                    return res.status(401).json('Unauthorized connection');
-                }
-                debug('User authenticated, generating token');
+                payload._id = user._id;
+                payload.username = user.username;
                 user.lastlogin = Date.now();
-                db.update([user], function(err, nodes){
-                    user.token = jwt.sign({ _id: user._id, username: user.username, ignoreExpiration: ignoreExpiration }, conf.secret + user.password, expiresIn);
-                    var decoded = jwt.decode(user.token);
-                    user.token_exp = decoded.exp;
-                    user.token_iat = decoded.iat;
-                    delete user.password;
-                    debug('Token generated for user: %s, token: %s', user.username, user.token);
-                    req.user = user;
-                    req.user.address = req.connection.remoteAddress;
-                    req.user.class = req.user.class || 'guest';
-                    return res.status(200).json(req.user);
-                });
+                db.update([user], function(err, nodes) {});
+                debug('User authenticated, generating token');
+                user.token = jwt.sign(payload, conf.secret + user.password, options);
+                var decoded = jwt.decode(user.token);
+                user.token_exp = decoded.exp;
+                user.token_iat = decoded.iat;
+                delete user.password;
+                debug('Token generated for user: %s, token: %s', user.username, user.token);
+                req.user = user;
+                req.user.address = req.connection.remoteAddress;
+                req.user.class = req.user.class || 'guest';
+                return res.status(200).json(req.user);
             });
         });
     };
