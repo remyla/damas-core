@@ -224,9 +224,9 @@ case $COMMAND in
       URL='http://localhost:8090'
     fi
     mkdir '.damas'
-    echo 'URL="'$URL'/api/"' > '.damas/config'
+    echo 'URL="'$URL'"' > '.damas/config'
     echo 'Initialized empty Damas repository in '$(realpath .) \
-        '/.damas/ with remote '$URL'/api/'
+        '/.damas/ with remote '$URL
     exit 0
     ;;
 esac
@@ -244,7 +244,7 @@ DIRECTORY=$(realpath $DIRECTORY)
 CONFIG=$DIRECTORY'/.damas/config'
 if [ ! -f $CONFIG ]; then
   echo "config file does not exist. Creating one.."
-  echo 'URL="http://localhost:8090/api/"' > $CONFIG
+  echo 'URL="http://localhost:8090"' > $CONFIG
 fi
 source $CONFIG
 
@@ -256,33 +256,33 @@ load_token
 
 case $COMMAND in
   create)
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$*' ${URL}create/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$*' ${URL}/api/create/"
     ;;
   read)
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$*' ${URL}read/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$*' ${URL}/api/read/"
     ;;
   update)
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X PUT -d '$*' ${URL}update/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X PUT -d '$*' ${URL}/api/update/"
     ;;
   upsert)
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$*' ${URL}upsert/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$*' ${URL}/api/upsert/"
     ;;
   delete)
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X DELETE -d '$*' ${URL}delete/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X DELETE -d '$*' ${URL}/api/delete/"
     ;;
   graph)
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$*' ${URL}graph/0/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$*' ${URL}/api/graph/0/"
     ;;
   search)
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH ${URL}search/$1"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH ${URL}/api/search/$1"
     ;;
   add)
     get_ids "$@"
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '{\"_id\":$IDS}' ${URL}create/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '{\"_id\":$IDS}' ${URL}/api/create/"
     ;;
   show)
     get_ids "$@"
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$IDS' ${URL}read/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$IDS' ${URL}/api/read/"
     ;;
   untracked)
     BASE="/tmp/damas-files_"
@@ -293,7 +293,7 @@ case $COMMAND in
       echo -n '"'$FILEPATH'",' >> ${BASE}request
     done < ${BASE}origin
     echo -n '""]' >> ${BASE}request
-    eval "curl $CURL_ARGS $AUTH -d "@${BASE}request" ${URL}read/" > ${BASE}response
+    eval "curl $CURL_ARGS $AUTH -d "@${BASE}request" ${URL}/api/read/" > ${BASE}response
     STATUS=$(sed '$!d' ${BASE}response);
     if [ $STATUS  -gt 300 ]; then
       head -n 1 ${BASE}response
@@ -314,26 +314,26 @@ case $COMMAND in
         bytes=`stat -c%s "$1"`
     fi
     mtime=`stat -c%Y "$1"`000
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X PUT -d '{\"_id\":$IDS,\"file_size\":$bytes,\"file_mtime\":$mtime}' ${URL}update/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X PUT -d '{\"_id\":$IDS,\"file_size\":$bytes,\"file_mtime\":$mtime}' ${URL}/api/update/"
     ;;
   rm)
     get_ids "$@"
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X DELETE -d '$IDS' ${URL}delete/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X DELETE -d '$IDS' ${URL}/api/delete/"
     ;;
   search_mongo)
     QUERY='{"query": '$1', "sort": '$2', "limit": '$3', "skip": '$4'}'
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X POST ${URL}search_mongo/ -d '$QUERY'"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X POST ${URL}/api/search_mongo/ -d '$QUERY'"
     ;;
   lock)
     get_ids "$@"
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X PUT -d '$IDS' ${URL}lock/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X PUT -d '$IDS' ${URL}/api/lock/"
     ;;
   unlock)
     get_ids "$@"
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X PUT -d '$IDS' ${URL}unlock/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X PUT -d '$IDS' ${URL}/api/unlock/"
     ;;
   comment)
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$*' ${URL}comment/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$*' ${URL}/api/comment/"
     ;;
   signin)
     if [ $VERBOSE ]; then
@@ -341,6 +341,11 @@ case $COMMAND in
     fi
     USERN=$1
     PASS=$2
+	if [ $3 ]; then
+	  expiresIn="&expiresIn=$3"
+	else
+	  expiresIn=""
+	fi
     if [ -z $USERN ]; then
       read -p "login: " USERN
     fi
@@ -348,7 +353,7 @@ case $COMMAND in
       read -sp "password: " PASS
       printf "\n\n"
     fi
-    RES=$(eval "curl $CURL_VERBOSE -ks -w \"\n%{http_code}\" --fail -d 'username=$USERN&password=$PASS' ${URL}signIn")
+    RES=$(eval "curl $CURL_VERBOSE -ks -w \"\n%{http_code}\" --fail -d 'username=$USERN&password=${PASS}${expiresIn}' ${URL}/api/signIn")
     TOKEN=$(echo $RES| sed 's/^.*"token":"\([^"]*\)".*$/\1/')
     echo $TOKEN
     echo $TOKEN > "/tmp/damas-$USER"
