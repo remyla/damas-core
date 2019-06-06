@@ -3,26 +3,40 @@
 		<title>damas-core</title>
 		<link rel="shortcut icon" href="/favicon.ico"/>
 		<link href="/style.css" rel="stylesheet" type="text/css"/>
-		<script type="text/javascript">//<![CDATA[
+		<script type="text/javascript">
 			document.addEventListener('DOMContentLoaded', function() {
-				document.querySelector('#title').innerHTML = window.location.host+'/api';
-				document.querySelector('#srv_py').innerHTML = window.location.protocol+'://'+window.location.host+'/api';
+				document.querySelector('#server').innerHTML = window.location.host;
+				document.querySelector('#srv_py').innerHTML = window.location.protocol+'://'+window.location.host;
 			});
 		</script>
 	</head>
 	<body>
-		<h1 id="title" class="dyn">Welcome</h1>
+		<h1>damas-core API</h1>
 		<div class="subtitle">
-			damas-core API
+			<a id="server" href="/">
+				damas-core API
+			</a>
 		</div>
 		<nav>
-			<a href="/js"/>▼ Javascript</a>&nbsp;
-			🐍 Python&nbsp;
-			<a href="/cli"/>⌘ CLI</a>&nbsp;
+			<a href="/js" title="JavaScript"/><img class="logo" src="/logo_javascript.svg"/></a>
+			<img class="logo" src="/logo_python.svg"/>
+			<a href="/cli" title="Terminal"/><img class="logo" src="/logo_terminal.svg"/></a>
 		</nav>
-		<h2>Programming Interface</h2>
-		<h3>Python</h3>
-		Import the <a href="/py/damas.py">damas Python module</a> then connect to this server:
+		<h2>Python</h2>
+		Install the <em>requests</em> module:
+		<br/>
+		&gt; with pip:<br/>
+		<code>
+		pipenv install requests
+		</code>
+		<br/>
+		&gt; or with Debian:<br/>
+		<code>
+		apt install python-requests
+		</code>
+		<br/>
+
+		Then import the <a href="/py/damas.py">damas-core client module for Python</a> and connect to this server:
 
 		<pre>
 Python 2.7.13 (default, Sep 26 2018, 18:42:22) 
@@ -31,10 +45,10 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 
 &gt;&gt;&gt; import damas
-&gt;&gt;&gt; project = damas.http_connection('<span id="srv_py" class="dyn">https://serveripaddr/api</span>')
+&gt;&gt;&gt; project = damas.http_connection('<span id="srv_py" class="dyn">https://serveripaddr</span>')
 
 
-# list every node ids
+# list every node identifiers
 &gt;&gt;&gt; project.search("*")
 
 
@@ -44,10 +58,8 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 # create an empty node
 &gt;&gt;&gt; project.create({})</pre>
-		<hr/>
 		<footer>
-			<a href="https://github.com/remyla/damas-core">🖹 Sources</a>
-			<a href="https://github.com/remyla/damas-core/wiki">🖹 Wiki</a>
+			<a href="https://github.com/remyla/damas-core/wiki/3-API-reference">🖹 API Reference</a>
 		</footer>
 	</body>
 </html>

@@ -5,28 +5,26 @@
 		<link href="/style.css" rel="stylesheet" type="text/css"/>
 		<script type="text/javascript">//<![CDATA[
 			document.addEventListener('DOMContentLoaded', function() {
-				document.querySelector('#title').innerHTML = window.location.host+'/api';
-				damas.server = "/api/";
-				console.log("Welcome to damas-core API");
+				document.querySelector('#server').innerHTML = window.location.host;
 			});
 		</script>
-		<script type="text/javascript" src="/js/damas.js"></script>
 	</head>
 	<body>
-		<h1 id="title" class="dyn">Welcome</h1>
+		<h1>damas-core API</h1>
 		<div class="subtitle">
-			damas-core API
+			<a id="server" href="/">
+				damas-core API
+			</a>
 		</div>
 		<nav>
-			<a href="/js"/>▼ Javascript</a>&nbsp;
-			<a href="/py"/>🐍 Python</a>&nbsp;
-			⌘ CLI&nbsp;
+			<a href="/js" title="JavaScript"/><img class="logo" src="/logo_javascript.svg"/></a>
+			<a href="/py" title="Python"/><img class="logo" src="/logo_python.svg"/></a>
+			<img class="logo" src="/logo_terminal.svg"/>
 		</nav>
 		<h2>Command Line Interface</h2>
-		<h3>Shell</h3>
-		Install the <a href="/cli/damas.sh">damas Bash command</a> and read the <a href="https://github.com/remyla/damas-core/tree/master/cli">damas man page</a>:
+		Install the <a href="/cli/damas.sh">damas Bash command</a>, visit the cli chapter in the <a href="https://github.com/remyla/damas-core/wiki/2-Getting-Started">getting started page</a> and read the manual page:
 		<pre>NAME
-  damas.sh - a command line interface for digital asset management
+  damas - a command line interface for digital asset management
 
 SYNOPSIS
   damas [OPTION...] &lt;command&gt; [&lt;args&gt;]
@@ -53,7 +51,7 @@ COMMANDS
      update       &lt;json&gt;  update nodes 
      delete       &lt;json&gt;  delete nodes
      search       &lt;query&gt; search
-     search_mongo &lt;query&gt; &lt;sort&gt; &lt;limit&gt; &lt;skip&gt; MongoDB search - beta
+     search_mongo &lt;query&gt; &lt;sort&gt; &lt;limit&gt; &lt;skip&gt; MongoDB search
 
 ENVIRONMENT VARIABLES
   DAMAS_DIR
@@ -98,10 +96,8 @@ CREDITS
 
 AUTHOR
     damas.sh was originally written by Thibault Allard and is maintained by Remy Lalanne.</pre>
-		<hr/>
 		<footer>
-			<a href="https://github.com/remyla/damas-core">🖹 Sources</a>
-			<a href="https://github.com/remyla/damas-core/wiki">🖹 Wiki</a>
+			<a href="https://github.com/remyla/damas-core/wiki/3-API-reference">🖹 API Reference</a>
 		</footer>
 	</body>
 </html>

@@ -1,4 +1,4 @@
-<img src="http://damas-software.org/bin/damas-core_logo.svg?t=1" alt="damas-core logo"/>
+<img src="http://damas-software.org/bin/damas-core_logo.svg?t=2" alt="damas-core logo"/>
 
 JSON storage service. RESTful, CRUD, multi-user.
 
@@ -10,10 +10,10 @@ JSON storage service. RESTful, CRUD, multi-user.
 # Overview
 
 ## server-nodejs
-A NodeJS implementation of the server which development started in April 2015. Specifications redesign, enhanced graph structures, web token authentication, integration of long-time requested features. MongoDB backend. This version is used in production and stable and is the one we recommend.
+damas-core server in NodeJS which development started in April 2015. Specifications redesign, enhanced graph structures, json web tokens, integration of long-time requested features. MongoDB backend. This version is used in production and stable and is the one we recommend.
 
 ## server-php
-A PHP server to run in a Apache environment. Generic key-value data model, simple graph structures, user authentication, file version control, using MySQL as database. It supports database replication among multiple sites. Used in production and maintained since 2007. The Php version is still used in production, very stable, but based on older specifications. We intend to make it evolve to the new specifications some days.
+Older damas-core server written in PHP to run in a Apache environment. Generic key-value data model, simple graph structures, user authentication, file version control, using MySQL as database. It supports database replication among multiple sites. Used in production and maintained since 2007. The Php version is still used in production, very stable, but based on older specifications. We intend to make it evolve to the new specifications some days.
 
 ## cli, js and py
 Client API, Interfaces to access the server and its methods remotely:
@@ -51,7 +51,7 @@ Joaquin Galvan Angeles
 Stephane Hoarau  
 Matthieu Humeau  
 Mathieu Lalanne  
-Axel Pisani
+Axel Pisani  
 Axel Prat  
 Mathieu Valero  
 Quentin Villecroze

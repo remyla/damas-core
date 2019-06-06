@@ -18,7 +18,7 @@
 
   Usage:
     import damas
-    project = damas.http_connection( "https://localhost/api" )
+    project = damas.http_connection( "https://localhost" )
     elem = project.search('id:element_id')
     print elem
 """
@@ -46,7 +46,7 @@ class http_connection( object ) :
         '''
         headers = {'content-type': 'application/json'}
         headers.update(self.headers)
-        r = requests.post(self.serverURL+"/create/", data=json.dumps(keys),
+        r = requests.post(self.serverURL+"/api/create/", data=json.dumps(keys),
             headers=headers, verify=False)
         if r.status_code == 201 or r.status_code == 207:
             return json.loads(r.text)
@@ -60,7 +60,7 @@ class http_connection( object ) :
         '''
         headers = {'content-type': 'application/json'}
         headers.update(self.headers)
-        r = requests.post(self.serverURL+"/read/", data=json.dumps(id_),
+        r = requests.post(self.serverURL+"/api/read/", data=json.dumps(id_),
             headers=headers, verify=False)
         if r.status_code == 200 or r.status_code == 207:
             return json.loads(r.text)
@@ -68,14 +68,14 @@ class http_connection( object ) :
 
     def update( self, keys ) :
         '''
-        Modify a node(s). Specifying a None value for a key will 
+        Modify a node(s). Specifying a None value for a key will
         remove the key from the node.
         @param {Hash} keys of the node to update
         @returns {Hash} updated node or false on failure
         '''
         headers = {'content-type': 'application/json'}
         headers.update(self.headers)
-        r = requests.put(self.serverURL+'/update/', data=json.dumps(keys),
+        r = requests.put(self.serverURL+'/api/update/', data=json.dumps(keys),
             headers=headers, verify=False)
         if r.status_code == 200 or r.status_code == 207:
             return json.loads(r.text)
@@ -83,14 +83,14 @@ class http_connection( object ) :
 
     def upsert( self, keys ) :
         '''
-        Create a node wearing the specified keys or update an already 
+        Create a node wearing the specified keys or update an already
         existing node if id is specified and found
         @param {Hash} keys of the new node or updated node
         @returns {Hash} New nodes and updated nodes on success, false otherwise
         '''
         headers = {'content-type': 'application/json'}
         headers.update(self.headers)
-        r = requests.post(self.serverURL+'/upsert/', data=json.dumps(keys),
+        r = requests.post(self.serverURL+'/api/upsert/', data=json.dumps(keys),
                 headers=headers, verify=False)
         if r.status_code == 200 or r.status_code == 201:
             return json.loads(r.text)
@@ -104,7 +104,7 @@ class http_connection( object ) :
         '''
         headers = {'content-type': 'application/json'}
         headers.update(self.headers)
-        r = requests.delete(self.serverURL+'/delete/', data=json.dumps(id_),
+        r = requests.delete(self.serverURL+'/api/delete/', data=json.dumps(id_),
             headers=headers, verify=False)
         if r.status_code == 200 or r.status_code == 207:
             return json.loads(r.text)
@@ -116,7 +116,7 @@ class http_connection( object ) :
         @param {String} query string
         @returns {Array} array of element indexes or None if no element found
         '''
-        r = requests.get(self.serverURL+'/search/'+query,
+        r = requests.get(self.serverURL+'/api/search/'+query,
             headers=self.headers, verify=False)
         if r.status_code == 200:
             return json.loads(r.text)
@@ -128,7 +128,7 @@ class http_connection( object ) :
         @param {String} query string
         @returns {Array} array of element indexes or None if no element found
         '''
-        r = requests.get(self.serverURL+'/search_one/'+query,
+        r = requests.get(self.serverURL+'/api/search_one/'+query,
         headers=self.headers, verify=False)
         if r.status_code == 200:
             return json.loads(r.text)
@@ -138,7 +138,7 @@ class http_connection( object ) :
         data = {"query":query, "sort":sort, "limit":limit, "skip":skip}
         headers = {'content-type': 'application/json'}
         headers.update(self.headers)
-        r = requests.post(self.serverURL+'/search_mongo',
+        r = requests.post(self.serverURL+'/api/search_mongo',
             data=json.dumps(data), headers=headers, verify=False)
         if r.status_code == 200:
             return json.loads(r.text)
@@ -152,7 +152,7 @@ class http_connection( object ) :
         '''
         headers = {'content-type': 'application/json'}
         headers.update(self.headers)
-        r = requests.post(self.serverURL+'/graph/0/', data=json.dumps(id_),
+        r = requests.post(self.serverURL+'/api/graph/0/', data=json.dumps(id_),
             headers=headers, verify=False)
         if r.status_code == 200 or r.status_code == 207:
             return json.loads(r.text)
@@ -166,7 +166,7 @@ class http_connection( object ) :
         '''
         headers = {'content-type': 'application/json'}
         headers.update(self.headers)
-        r = requests.put(self.serverURL+'/lock/', data=json.dumps(id_),
+        r = requests.put(self.serverURL+'/api/lock/', data=json.dumps(id_),
             headers=headers, verify=False)
         return r.status_code == 200
 
@@ -179,7 +179,7 @@ class http_connection( object ) :
         '''
         headers = {'content-type': 'application/json'}
         headers.update(self.headers)
-        r = requests.post(self.serverURL+"/publish/", data=json.dumps(keys),
+        r = requests.post(self.serverURL+'/api/publish/', data=json.dumps(keys),
         headers=headers, verify=False)
         if r.status_code == 201 or r.status_code == 207:
             return json.loads(r.text)
@@ -193,7 +193,7 @@ class http_connection( object ) :
         '''
         headers = {'content-type': 'application/json'}
         headers.update(self.headers)
-        r = requests.put(self.serverURL+'/unlock/', data=json.dumps(id_),
+        r = requests.put(self.serverURL+'/api/unlock/', data=json.dumps(id_),
             headers=headers, verify=False)
         return r.status_code == 200
 
@@ -205,7 +205,7 @@ class http_connection( object ) :
         '''
         headers = {'content-type': 'application/json'}
         headers.update(self.headers)
-        r = requests.post('%s/version/%s' % (self.serverURL, id_),
+        r = requests.post('%s/api/version/%s' % (self.serverURL, id_),
             data=json.dumps(keys), headers=headers, verify=False)
         if r.status_code == 201:
             return json.loads(r.text)
@@ -220,7 +220,7 @@ class http_connection( object ) :
         '''
         headers = {'content-type': 'application/json'}
         headers.update(self.headers)
-        r = requests.post(self.serverURL+"/comment/", 
+        r = requests.post(self.serverURL+"/api/comment/",
                 data=json.dumps(keys), headers=headers, verify=False)
         if r.status_code == 201 or r.status_code == 207:
             return json.loads(r.text)
@@ -249,7 +249,7 @@ class http_connection( object ) :
         '''
         @return {Boolean} True on success, False otherwise
         '''
-        r = requests.post(self.serverURL+'/signIn', data={"username":username, "password":password}, verify=False)
+        r = requests.post(self.serverURL+'/api/signIn', data={"username":username, "password":password}, verify=False)
         if r.status_code == 200:
             self.token = json.loads(r.text)
             self.headers['Authorization'] = 'Bearer ' + self.token['token']
@@ -272,7 +272,7 @@ class http_connection( object ) :
         '''
         @return {dict} a dictionary containing username and userclass on success, None otherwise
         '''
-        r = requests.get(self.serverURL+'/verify', headers=self.headers, verify=False )
+        r = requests.get(self.serverURL+'/api/verify', headers=self.headers, verify=False )
         if r.status_code == 200:
             return True
         return False

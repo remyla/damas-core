@@ -3,63 +3,51 @@
 		<title>damas-core</title>
 		<link rel="shortcut icon" href="/favicon.ico"/>
 		<link href="/style.css" rel="stylesheet" type="text/css"/>
-		<script type="text/javascript">//<![CDATA[
+		<script src="/js/damas.js"></script>
+		<script>
 			document.addEventListener('DOMContentLoaded', function() {
-				document.querySelector('#title').innerHTML = window.location.host+'/api';
-				//document.querySelector('#srv_js').innerHTML = window.location+'damas.js';
-				damas.server = "/api/";
-				console.log("Welcome to damas-core API");
+				document.querySelector('#server').innerHTML = window.location.host;
+				damas.server = ''; // empty-string if served by damas-core server
 			});
 		</script>
-		<script type="text/javascript" src="/js/damas.js"></script>
 	</head>
 	<body>
-		<h1 id="title" class="dyn">Welcome</h1>
+		<h1>damas-core API</h1>
 		<div class="subtitle">
-			damas-core API
+			<a id="server" href="/">
+				damas-core API
+			</a>
 		</div>
 		<nav>
-			▼ Javascript&nbsp;
-			<a href="/py"/>🐍 Python</a>&nbsp;
-			<a href="/cli"/>⌘ CLI</a>&nbsp;
+			<img class="logo" src="/logo_javascript.svg"/>
+			<a href="/py" title="Python"/><img class="logo" src="/logo_python.svg"/></a>
+			<a href="/cli" title="Terminal"/><img class="logo" src="/logo_terminal.svg"/></a>
 		</nav>
-		<h2>Programming Interface</h2>
-		<h3>Javascript</h3>
+		<h2>Javascript</h2>
 		<noscript>
 			Javascript must be enabled.
 		</noscript>
-		Press &lt;F12&gt; to open your web console:
-		<pre>// Welcome to damas-core API
-		</pre>
-List every node ids:
+		Open a web console (press &lt;F12&gt;)
 <pre>
+damas-core API loaded
+</pre>
 
-&gt; damas.search('*');</pre>
-
+List every node identifiers:
+<pre>
+damas.search('*');
+</pre>
 
 Read every nodes:
 <pre>
-
-&gt; damas.read(damas.search('*'));
+damas.read(damas.search('*'));
 </pre>
 
-
-Create an empty node</pre>
-<pre>&gt; damas.create({});
-
+Create an empty node
+<pre>
+damas.create({});
 </pre>
-<!--
-		Using the <a href="/js/damas.js">damas-core Javascript API module</a> from an HTML document on the server
-		<pre>&lt;script type="text/javascript" src="<span id="srv_js" class="dyn">damas.js</span>"&gt;&lt;/script&gt;
-&lt;script type="text/javascript"&gt;
-    damas.server="/api/";
-    // your code here
-&lt;/script&gt;</pre>
--->
-		<hr/>
 		<footer>
-			<a href="https://github.com/remyla/damas-core">🖹 Sources</a>
-			<a href="https://github.com/remyla/damas-core/wiki">🖹 Wiki</a>
+			<a href="https://github.com/remyla/damas-core/wiki/3-API-reference">🖹 API Reference</a>
 		</footer>
 	</body>
 </html>

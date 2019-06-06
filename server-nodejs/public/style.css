@@ -4,6 +4,13 @@ body {
 	margin: 1em auto;
 	color: #364e64;
 }
+a {
+	color: #364e64;
+	/*
+	text-decoration: none;
+	font-weight: bold;
+	*/
+}
 h1, .subtitle {
 	text-align: center;
 }
@@ -33,12 +40,20 @@ hr {
 	margin-top: 3em;
 }
 nav {
-	text-align: right;
+	text-align: center;
 }
+/*
 nav a {
 	color: white;
 	background-color: #364e64;
 	padding: 1ex;
 	border-radius: 3px;
 	text-decoration: none;
+}
+*/
+.logo {
+	width: 10ex;
+}
+a .logo {
+	width: 10ex;
 }

@@ -17,7 +17,7 @@
      * DAMAS HTTP client module for Javascript.
      * @exports damas
      * @author The damas-core team
-     * @copyright 2005-2015 Remy Lalanne
+     * @copyright 2005-2019 Remy Lalanne
      * @license
      * This file is part of damas-core.
      *
@@ -36,13 +36,13 @@
      *
      * @example
      * // set the server URL
-     * damas.server = "https://localhost:8443/api";
+     * damas.server = "https://localhost:8443";
      *
-     * // retrieve the node unique index of a file using its path in the project
-     * var res = damas.search({"file":"/project/dir/file.png"});
+     * // list every node identifiers
+     * var res = damas.search("*"});
      *
-     * // retrieve the node using its index
-     * damas.read(res[0])
+     * // retrieve a file node
+     * damas.read("/project/dir/file.png")
      *
      * @property {string} server - damas server URL
      * @property {string} token - json web token for authentication
@@ -138,7 +138,7 @@
     damas.create = function (nodes, callback) {
         return req({
             method: 'POST',
-            url: 'create/',
+            url: '/api/create/',
             data: nodes,
             callback: callback
         });
@@ -165,7 +165,7 @@
         }
         return req({
             method: 'POST',
-            url: 'read/',
+            url: '/api/read/',
             data: id,
             callback: callback
         });
@@ -187,7 +187,7 @@
     damas.update = function (node, callback) {
         return req({
             method: 'PUT',
-            url: 'update/',
+            url: '/api/update/',
             data: node,
             callback: callback
         });
@@ -203,7 +203,7 @@
     damas.upsert = function (nodes, callback) {
         return req({
             method: 'POST',
-            url: 'upsert/',
+            url: '/api/upsert/',
             data: nodes,
             callback: callback
         });
@@ -221,7 +221,7 @@
     damas.delete = function (id, callback) {
         return req({
             method: 'DELETE',
-            url: 'delete/',
+            url: '/api/delete/',
             data: id,
             callback: callback
         });
@@ -238,7 +238,7 @@
     damas.search = function (query, callback) {
         return req({
             method: 'GET',
-            url: 'search/' + encodeURIComponent(query),
+            url: '/api/search/' + encodeURIComponent(query),
             callback: callback
         });
     }
@@ -246,7 +246,7 @@
     damas.search_one = function (query, callback) {
         return req({
             method: 'GET',
-            url: 'search_one/' + encodeURIComponent(query),
+            url: '/api/search_one/' + encodeURIComponent(query),
             callback: callback
         });
     }
@@ -276,7 +276,7 @@
         }
         return req({
             method: 'POST',
-            url: 'search_mongo',
+            url: '/api/search_mongo',
             data: obj,
             callback: callback
         });
@@ -316,7 +316,7 @@
     damas.graph = function (ids, callback) {
         return req({
             method: 'POST',
-            url: 'graph/0/',
+            url: '/api/graph/0/',
             data: ids,
             callback: callback
         });
@@ -334,7 +334,7 @@
     damas.lock = function (id, callback) {
         var res = req({
             method: 'PUT',
-            url: 'lock/',
+            url: '/api/lock/',
             data: id,
             async: callback !== undefined,
             callback: function (res) {
@@ -349,7 +349,7 @@
     damas.unlock = function (id, callback) {
         var res = req({
             method: 'PUT',
-            url: 'unlock/',
+            url: '/api/unlock/',
             data: id,
             async: callback !== undefined,
             callback: function (res) {
@@ -364,7 +364,7 @@
     damas.publish = function (nodes, callback) {
         return req({
             method: 'POST',
-            url: 'publish/',
+            url: '/api/publish/',
             data: nodes,
             callback: callback
         });
@@ -381,7 +381,7 @@
     damas.comment = function (node, callback) {
         return req({
             method: 'POST',
-            url: 'comment/',
+            url: '/api/comment/',
             data: node,
             callback: callback
         });
@@ -404,7 +404,7 @@
     damas.version = function (id, keys, callback) {
         return req({
             method: 'POST',
-            url: 'version/' + id,
+            url: '/api/version/' + id,
             data: keys,
             callback: callback
         });
@@ -434,7 +434,7 @@
         }
         var res = req({
             method: 'POST',
-            url: 'signIn',
+            url: '/api/signIn',
             form: 'username='  + encodeURIComponent(username) +
                   '&password=' + encodeURIComponent(password),
             async: callback !== undefined,
@@ -467,7 +467,7 @@
     damas.verify = function (callback) {
         var res = req({
             method: 'GET',
-            url: 'verify',
+            url: '/api/verify',
             async: callback !== undefined,
             callback: function (res) {
                 if ('function' === typeof callback) {
@@ -485,6 +485,8 @@
     damas.delete_rest = damas.delete;
     damas.search_rest = damas.search;
     damas.graph_rest = damas.graph;
+
+	console.log('damas-core API loaded')
 
     return damas;
 
