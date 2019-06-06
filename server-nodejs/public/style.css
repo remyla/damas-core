@@ -31,8 +31,6 @@ pre {
 	font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;
 	margin: 2ex;
 }
-.dyn {
-}
 footer {
 	text-align: center;
 }
@@ -56,4 +54,11 @@ nav a {
 }
 a .logo {
 	width: 10ex;
+}
+span.comment {
+	font-style: italic;
+	color: #aaa;
+}
+span.arg {
+	color: #ffaa00;
 }

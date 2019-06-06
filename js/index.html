@@ -7,12 +7,13 @@
 		<script>
 			document.addEventListener('DOMContentLoaded', function() {
 				document.querySelector('#server').innerHTML = window.location.host;
+				document.querySelector('#srv').innerHTML = window.location.protocol+'://'+window.location.host;
 				damas.server = ''; // empty-string if served by damas-core server
 			});
 		</script>
 	</head>
 	<body>
-		<h1>damas-core API</h1>
+		<h1>damas-core</h1>
 		<div class="subtitle">
 			<a id="server" href="/">
 				damas-core API
@@ -24,28 +25,39 @@
 			<a href="/cli" title="Terminal"/><img class="logo" src="/logo_terminal.svg"/></a>
 		</nav>
 		<h2>Javascript</h2>
+		Open a web console (press F12)
 		<noscript>
 			Javascript must be enabled.
 		</noscript>
-		Open a web console (press &lt;F12&gt;)
 <pre>
 damas-core API loaded
+
+
+<span class="comment">// list every node identifiers</span>
+damas.search(<span class="arg">'*'</span>);
+
+
+<span class="comment">// read every nodes</span>
+damas.read(damas.search(<span class="arg">'*'</span>));
+
+
+<span class="comment">// create an empty node</span>
+damas.create(<span class="arg">{}</span>);
+</pre>
+Or install the module using NPM
+<pre>
+npm install damas-core-client
+</pre>
+Then edit your Javascript
+<pre>
+<span class="comment"> // load the module</span>
+const damas = require(<span class="arg">'damas-core-client'</span>);
+
+
+<span class="comment">// connect to this server</span>
+damas.server = <span class="arg">'<span id="srv">https://serveripaddr</span>'</span>;
 </pre>
 
-List every node identifiers:
-<pre>
-damas.search('*');
-</pre>
-
-Read every nodes:
-<pre>
-damas.read(damas.search('*'));
-</pre>
-
-Create an empty node
-<pre>
-damas.create({});
-</pre>
 		<footer>
 			<a href="https://github.com/remyla/damas-core/wiki/3-API-reference">🖹 API Reference</a>
 		</footer>

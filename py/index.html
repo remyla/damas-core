@@ -11,7 +11,7 @@
 		</script>
 	</head>
 	<body>
-		<h1>damas-core API</h1>
+		<h1>damas-core</h1>
 		<div class="subtitle">
 			<a id="server" href="/">
 				damas-core API
@@ -44,20 +44,23 @@ Python 2.7.13 (default, Sep 26 2018, 18:42:22)
 Type "help", "copyright", "credits" or "license" for more information.
 
 
-&gt;&gt;&gt; import damas
-&gt;&gt;&gt; project = damas.http_connection('<span id="srv_py" class="dyn">https://serveripaddr</span>')
+<span class="comment"># load the module</span>
+import damas
+
+<span class="comment"># connect to this server</span>
+project = damas.http_connection(<span class="arg">"<span id="srv_py">https://serveripaddr</span>"</span>)
 
 
-# list every node identifiers
-&gt;&gt;&gt; project.search("*")
+<span class="comment"># list every node identifiers</span>
+project.search(<span class="arg">"*"</span>)
 
 
-# read every nodes
-&gt;&gt;&gt; project.read(project.search("*"))
+<span class="comment"># read every nodes</span>
+project.read(project.search(<span class="arg">"*"</span>))
 
 
-# create an empty node
-&gt;&gt;&gt; project.create({})</pre>
+<span class="comment"># create an empty node</span>
+project.create(<span class="arg">{}</span>)</pre>
 		<footer>
 			<a href="https://github.com/remyla/damas-core/wiki/3-API-reference">🖹 API Reference</a>
 		</footer>
