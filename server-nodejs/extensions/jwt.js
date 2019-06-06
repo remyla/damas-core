@@ -8,6 +8,7 @@ module.exports = function (app) {
 
     var expressJwt = require('express-jwt');
     var jwt = require('jsonwebtoken');
+    var ms = require('ms');
     var unless = require('express-unless');
     var crypto = require('crypto');
     var debug = require('debug')('damas:extensions:authentication');
@@ -22,18 +23,29 @@ module.exports = function (app) {
             return res.status(401).json('Invalid username or password');
         }
         let nameRegex = RegExp('^[a-z][-a-z0-9_]*\$');
-        let obj;
+        let logIn;
         if (nameRegex.test(req.body.username)) {
-           obj = {'username' : req.body.username};
+           logIn = { 'username' : req.body.username };
         } else {
-           obj = {'email' : req.body.username};
+           logIn = { 'email' : req.body.username };
         }
-        db.search(obj, function (err, doc) {
+        let payload = {};
+        let options = { expiresIn: req.body.expiresIn || conf.exp };
+        if (undefined === ms(options.expiresIn)) { 
+            return res.status(401).json('Value : \'' + options.expiresIn + '\' is invalid expiration token');
+        }
+        if ('0' === options.expiresIn) {
+            payload.ignoreExpiration = true;
+        }
+        db.search(logIn, function (err, doc) {
             if (err || doc.length === 0) {
                 return res.status(401).json('Invalid username or password');
             }
             db.read([doc[0]], function (err, user) {
                 user = user[0];
+                if (user.disable) {
+                    return res.status(401).json('Unauthorized connection');
+                }
                 let hashMethod;
                 if (32 === user.password.length) {
                    hashMethod = 'md5';
@@ -43,20 +55,21 @@ module.exports = function (app) {
                 if (crypto.createHash(hashMethod).update(req.body.password).digest('hex') !== user.password) {
                     return res.status(401).json('Invalid username or password');
                 }
-                debug('User authenticated, generating token');
+                payload._id = user._id;
+                payload.username = user.username;
                 user.lastlogin = Date.now();
-                db.update([user], function(err, nodes){
-                    user.token = jwt.sign({ _id: user._id, username: user.username }, conf.secret + user.password, { expiresIn: conf.exp*60 });
-                    var decoded = jwt.decode(user.token);
-                    user.token_exp = decoded.exp;
-                    user.token_iat = decoded.iat;
-                    delete user.password;
-                    debug('Token generated for user: %s, token: %s', user.username, user.token);
-                    req.user = user;
-                    req.user.address = req.connection.remoteAddress;
-                    req.user.class = req.user.class || 'guest';
-                    return res.status(200).json(req.user);
-                });
+                db.update([user], function(err, nodes) {});
+                debug('User authenticated, generating token');
+                user.token = jwt.sign(payload, conf.secret + user.password, options);
+                var decoded = jwt.decode(user.token);
+                user.token_exp = decoded.exp;
+                user.token_iat = decoded.iat;
+                delete user.password;
+                debug('Token generated for user: %s, token: %s', user.username, user.token);
+                req.user = user;
+                req.user.address = req.connection.remoteAddress;
+                req.user.class = req.user.class || 'guest';
+                return res.status(200).json(req.user);
             });
         });
     };
@@ -84,17 +97,17 @@ module.exports = function (app) {
 
     app.use( function (req, res, next) {
         let token = fetch(req.headers) || req.cookies.token;
-        let obj = jwt.decode(token);
-        if ((undefined === token) || (null === token) || (null === obj)) {
+        let payload = jwt.decode(token);
+        if ((undefined === token) || (null === token) || (null === payload)) {
             req.user = {};
             return next();
         }
-        db.read([obj['_id']], function (err, user) {
-               if (err || null === user[0]) {
-                    req.user = {};
-                    return next();
+        db.read([payload._id], function (err, user) {
+           if (err || null === user[0] || user.disable) {
+                req.user = {};
+                return next();
             }
-            jwt.verify(token, conf.secret + user[0]['password'], function (err, decode) {
+            jwt.verify(token, conf.secret + user[0]['password'], { ignoreExpiration: payload.ignoreExpiration }, function (err, decode) {
                 if (err) {
                     req.user = {};
                     return next();
