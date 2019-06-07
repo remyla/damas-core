@@ -275,7 +275,7 @@
         }
         return req({
             method: 'POST',
-            url: '/api/search_mongo',
+            url: '/api/search_mongo/',
             data: obj,
             callback: callback
         });
@@ -440,7 +440,7 @@
         }
         var res = req({
             method: 'POST',
-            url: 'signIn',
+            url: '/api/signIn/',
             form: form,
             async: callback !== undefined,
             callback: function (result) {
@@ -472,7 +472,7 @@
     damas.verify = function (callback) {
         var res = req({
             method: 'GET',
-            url: '/api/verify',
+            url: '/api/verify/',
             async: callback !== undefined,
             callback: function (res) {
                 if ('function' === typeof callback) {
