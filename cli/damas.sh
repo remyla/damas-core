@@ -353,7 +353,7 @@ case $COMMAND in
       read -sp "password: " PASS
       printf "\n\n"
     fi
-    RES=$(eval "curl $CURL_VERBOSE -ks -w \"\n%{http_code}\" --fail -d 'username=$USERN&password=${PASS}${expiresIn}' ${URL}/api/signIn")
+    RES=$(eval "curl $CURL_VERBOSE -ks -w \"\n%{http_code}\" --fail -d 'username=$USERN&password=${PASS}${expiresIn}' ${URL}/api/signIn/")
     TOKEN=$(echo $RES| sed 's/^.*"token":"\([^"]*\)".*$/\1/')
     echo $TOKEN
     echo $TOKEN > "/tmp/damas-$USER"
