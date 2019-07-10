@@ -138,7 +138,7 @@ class http_connection( object ) :
         data = {"query":query, "sort":sort, "limit":limit, "skip":skip}
         headers = {'content-type': 'application/json'}
         headers.update(self.headers)
-        r = requests.post(self.serverURL+'/api/search_mongo',
+        r = requests.post(self.serverURL+'/api/search_mongo/',
             data=json.dumps(data), headers=headers, verify=False)
         if r.status_code == 200:
             return json.loads(r.text)
@@ -249,7 +249,7 @@ class http_connection( object ) :
         '''
         @return {Boolean} True on success, False otherwise
         '''
-        r = requests.post(self.serverURL+'/api/signIn', data={"username":username, "password":password}, verify=False)
+        r = requests.post(self.serverURL+'/api/signIn/', data={"username":username, "password":password}, verify=False)
         if r.status_code == 200:
             self.token = json.loads(r.text)
             self.headers['Authorization'] = 'Bearer ' + self.token['token']
@@ -272,7 +272,7 @@ class http_connection( object ) :
         '''
         @return {dict} a dictionary containing username and userclass on success, None otherwise
         '''
-        r = requests.get(self.serverURL+'/api/verify', headers=self.headers, verify=False )
+        r = requests.get(self.serverURL+'/api/verify/', headers=self.headers, verify=False )
         if r.status_code == 200:
             return True
         return False
