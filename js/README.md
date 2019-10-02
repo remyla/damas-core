@@ -7,6 +7,7 @@ npm install damas-core-client
 ```
 
 See https://demo.damas.io/js/ for usage and testing.
+
 See https://github.com/remyla/damas-core/wiki for API reference.
 
 `damas-socket.js` is a module to use damas-core websockets. 

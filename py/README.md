@@ -23,4 +23,5 @@ project = damas.http_connection("https://demo.damas.io")
 ```
 
 See https://demo.damas.io/py/ for usage and testing.
+
 See https://github.com/remyla/damas-core/wiki for API reference.
