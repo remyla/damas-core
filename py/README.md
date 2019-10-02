@@ -4,7 +4,7 @@ Install the `requests` module:
 
 > with pip:
 ```sh
-pipeenv install requests
+pipenv install requests
 ```
 
 > or with Debian:
