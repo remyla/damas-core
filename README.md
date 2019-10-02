@@ -16,18 +16,17 @@ damas-core server in NodeJS which development started in April 2015. Specificati
 Older damas-core server written in PHP to run in a Apache environment. Generic key-value data model, simple graph structures, user authentication, file version control, using MySQL as database. It supports database replication among multiple sites. Used in production and maintained since 2007. The Php version is still used in production, very stable, but based on older specifications. We intend to make it evolve to the new specifications some days.
 
 ## cli, js and py
-Client API, Interfaces to access the server and its methods remotely:
+Client interfaces to access the server and its API:
 
-* SHELL command line interface,
-* Javascript module,
 * Python module
-
-The libraries use the native language objects to expose the JSON results. Older specs of the libraries can be found in the folders. The CLI is for the newer NodeJS version only.
+* Javascript module
+* Shell command line interface
 
 # Usage
-Choose a server to run (either the recommended NodeJS server or the Php server based on older specs). Please refer to the [Wiki](https://github.com/remyla/damas-core/wiki) for the installation instructions. Then use the Python, Javascript or CLI to access the server or install one of the interfaces available (see below). Your feedback is highly welcome.
+Try the demo server and the API at https://demo.damas.io. Install the server and get started with the API [here](https://github.com/remyla/damas-core/wiki).
 
 # Related Links
+https://demo.damas.io a public demo server running damas-core server NodeJS in docker
 
 http://damas-software.org is a website which presents the projects related to damas-core
 
