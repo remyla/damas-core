@@ -44,7 +44,7 @@
                 "exp": "1d",
                 "expressUse": "/api",
                 "expressUnless": {
-                    "path": "/api/signIn"
+                    "path": "/api/signIn/"
                 }
             }
         },
