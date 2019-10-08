@@ -178,7 +178,7 @@ fi
 
 load_token
 
-if [ $1 == "-" ]; then
+if [ "$1" == "-" ]; then
   DATA=@/dev/stdin 
 else
   DATA=$*
