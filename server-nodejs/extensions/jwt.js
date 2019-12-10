@@ -60,15 +60,10 @@ module.exports = function (app) {
                 user.lastlogin = Date.now();
                 db.update([user], function(err, nodes) {});
                 debug('User authenticated, generating token');
-                user.token = jwt.sign(payload, conf.secret + user.password, options);
-                var decoded = jwt.decode(user.token);
-                user.token_exp = decoded.exp;
-                user.token_iat = decoded.iat;
-                delete user.password;
+                user.address = req.connection.remoteAddress;
+                user.class = user.class || 'guest';
+                req.user = {_id: user._id, user: user, token: jwt.sign(payload, conf.secret + user.password, options)};
                 debug('Token generated for user: %s, token: %s', user.username, user.token);
-                req.user = user;
-                req.user.address = req.connection.remoteAddress;
-                req.user.class = req.user.class || 'guest';
                 return res.status(200).json(req.user);
             });
         });
