@@ -87,7 +87,7 @@ load_token() {
 }
 
 show_help_msg() {
-  echo "usage: damas [--help] [-q|--quiet] [-v|--verbose] [-l|--lines] <command> [<args>]"
+  echo "usage: damas [--help] -s|--server <server_url> [-q|--quiet] [-v|--verbose] [-l|--lines] <command> [<args>]"
   echo ""
   echo "Authentication commands: "
   echo "   signin    <username> <pass>"
@@ -102,25 +102,41 @@ show_help_msg() {
   echo "   search       <query> search"
   echo ""
   echo "MORE commands"
-  echo "   lock      Lock files (set key 'lock' = user name)"
-  echo "   unlock    Unlock files"
-  echo "   comment      <json>  create child node"
   echo "   graph        <json>  read all related nodes"
+  echo "   search       <string> search by query string"
   echo "   search_mongo <query> <sort> <limit> <skip> MongoDB search"
   echo ""
+  echo "ENVIRONMENT VARIABLES"
+  echo "  DAMAS_SERVER"
+  echo "    URL of the server hosting damas-core. It can specify https:// or http:// protocols."
+  echo "  DAMAS_TOKEN"
+  echo "    Token used for authentication."
+  echo ""
   echo "EXAMPLES"
-  echo ""
   echo "    create an arbitrary node giving a JSON"
-  echo "        damas create '{\"#parent\":\"value\",\"comment\":\"created with cli\"}'"
-  echo ""
-  echo "    read keys of a node which _id is 'element_id'"
-  echo "        damas read 'element_id'"
-  echo ""
+  echo "        damas -s yourserver create '{\"key\":\"value\",\"comment\":\"created with cli\"}'"
+  echo "    list every nodes"
+  echo "        damas -s yourserver search *"
   echo "    search keys matching a regular expression"
-  echo "        damas search _id:/.*mov/"
-  echo ""
+  echo "        damas -s yourserver search _id:/.*mov/"
+  echo "    read nodes from a search result using a pipe"
+  echo "        damas search * | damas read -"
   echo "    search deleted:true key, sort by _id key, show result as lines of ids"
-  echo "        damas -l search_mongo '{\"deleted\":true}' '{\"_id\":1}' 0 0"
+  echo "        damas -s yourserver -l search_mongo '{\"deleted\":true}' '{\"_id\":1}' 0 0"
+  echo ""
+  echo "EXIT VALUES"
+  echo "  0  Success"
+  echo "  1  Syntax or usage error"
+  echo "  2  Not a damas repository (or any parent)"
+  echo "  3  Server is unreachable"
+  echo "  7  (Server 207) Multi-Status (some nodes do not exist)"
+  echo "  40 (Server 400) Bad request (not formatted correctly)"
+  echo "  41 (Server 401) Unauthorized"
+  echo "  43 (Server 403) Forbidden (the user does not have the right permission)"
+  echo "  44 (Server 404) Not found (all the nodes do not exist)"
+  echo "  49 (Server 409) Conflict (all nodes already exist with these identifiers)"
+  echo "  50 (Server 500) Internal server error"
+  echo "  60 (Server xxx) Unknown server error"
   exit 0
 }
 
@@ -147,7 +163,7 @@ while true; do
       LINESOUT=true
       shift 1
       ;;
-    -s)
+    -s | --server)
       DAMAS_SERVER=$2
       shift 2
       ;;
@@ -209,17 +225,6 @@ case $COMMAND in
   search_mongo)
     QUERY='{"query": '$1', "sort": '$2', "limit": '$3', "skip": '$4'}'
     run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X POST ${DAMAS_SERVER}/api/search_mongo/ -d '$QUERY'"
-    ;;
-  lock)
-    get_ids "$@"
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X PUT -d '$IDS' ${DAMAS_SERVER}/api/lock/"
-    ;;
-  unlock)
-    get_ids "$@"
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X PUT -d '$IDS' ${DAMAS_SERVER}/api/unlock/"
-    ;;
-  comment)
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$DATA' ${DAMAS_SERVER}/api/comment/"
     ;;
   signin)
     if [ $VERBOSE ]; then
