@@ -158,6 +158,42 @@ class http_connection( object ) :
             return json.loads(r.text)
         return None
 
+    # USERS AUTHENTICATION METHODS
+
+    def signIn( self, username, password ) :
+        '''
+        @return {Boolean} True on success, False otherwise
+        '''
+        r = requests.post(self.serverURL+'/api/signIn/', data={"username":username, "password":password}, verify=False)
+        if r.status_code == 200:
+            self.token = json.loads(r.text)
+            self.headers['Authorization'] = 'Bearer ' + self.token['token']
+            return True
+        return False
+        # opener = urllib2.build_opener( urllib2.HTTPCookieProcessor( self.cj ) )
+        # urllib2.install_opener( opener )
+        # try: a = urllib2.urlopen( self.serverURL + '/authentication.php?cmd=login&user=' + username + '&password=' + password )
+        # except: return False
+        # return json.loads( a.read() )
+
+    def signOut( self ) :
+        '''
+        @return {Boolean} True on success, False otherwise
+        '''
+        self.token =  None
+        del self.headers['Authorization']
+
+    def verify( self ) :
+        '''
+        @return {dict} a dictionary containing username and userclass on success, None otherwise
+        '''
+        r = requests.get(self.serverURL+'/api/verify/', headers=self.headers, verify=False )
+        if r.status_code == 200:
+            return True
+        return False
+
+    # DIGITAL ASSET MANAGEMENT EXTENSION
+
     def lock( self, id_ ) :
         '''
         Lock an asset for edition
@@ -243,36 +279,3 @@ class http_connection( object ) :
     """
 
 
-    # USERS AUTHENTICATION METHODS
-
-    def signIn( self, username, password ) :
-        '''
-        @return {Boolean} True on success, False otherwise
-        '''
-        r = requests.post(self.serverURL+'/api/signIn/', data={"username":username, "password":password}, verify=False)
-        if r.status_code == 200:
-            self.token = json.loads(r.text)
-            self.headers['Authorization'] = 'Bearer ' + self.token['token']
-            return True
-        return False
-        # opener = urllib2.build_opener( urllib2.HTTPCookieProcessor( self.cj ) )
-        # urllib2.install_opener( opener )
-        # try: a = urllib2.urlopen( self.serverURL + '/authentication.php?cmd=login&user=' + username + '&password=' + password )
-        # except: return False
-        # return json.loads( a.read() )
-
-    def signOut( self ) :
-        '''
-        @return {Boolean} True on success, False otherwise
-        '''
-        self.token =  None
-        del self.headers['Authorization']
-
-    def verify( self ) :
-        '''
-        @return {dict} a dictionary containing username and userclass on success, None otherwise
-        '''
-        r = requests.get(self.serverURL+'/api/verify/', headers=self.headers, verify=False )
-        if r.status_code == 200:
-            return True
-        return False
