@@ -478,34 +478,6 @@ module.exports = function (app, routes) {
         });
     }; // search_mongo()
 
-
-    /*
-     * getFile()
-     *
-     * Method: GET
-     * URI: /api/file/
-     *
-     * Get a file from the filesystem
-     *
-     * HTTP status codes:
-     * - 200: OK (file retrieved)
-     * - 400: Bad Request (not formatted correctly)
-     * - 404: Not Found (the file does not exist)
-     */
-    getFile = function (req, res) {
-        var path = conf.fileSystem + decodeURIComponent(req.params.path);
-        path = path.replace(/:/g, '').replace(/\/+/g, '/');
-        fs.exists(path, function (exists) {
-            if (!exists) {
-                return httpStatus(res, 404, 'File');
-            }
-            var stream = fs.createReadStream(path, {bufferSize: 64 * 1024});
-            res.writeHead(200);
-            stream.pipe(res);
-        });
-    }; // getFile()
-
-
     /*
      * Register the operations
      */
@@ -526,9 +498,6 @@ module.exports = function (app, routes) {
     app.get('/api/search/:query(*)', search);
     app.get('/api/search_one/:query(*)', search_one);
     app.post('/api/search_mongo/', search_mongo);
-
-    // Extra operations
-    app.get('/api/file/:path(*)', getFile); // untested
 
     routes = Object.assign(routes, {
         create: create,
