@@ -82,7 +82,8 @@ load_token() {
   if [ $DAMAS_TOKEN ]; then
     local TOKEN=$DAMAS_TOKEN
   else
-    local TOKEN=$(cat /tmp/damas-$USER 2> /dev/null)
+    local TOKEN_FILE="/tmp/damas-$USER-$(echo -n $DAMAS_SERVER | cksum | head -c 10)"
+    local TOKEN=$(cat $TOKEN_FILE 2> /dev/null)
   fi
 
   AUTH='-H "Authorization: Bearer '$TOKEN'"'
@@ -249,13 +250,15 @@ case $COMMAND in
     fi
     RES=$(eval "curl $CURL_VERBOSE -ks -w \"\n%{http_code}\" --fail -d 'username=$USERN&password=${PASS}${expiresIn}' ${DAMAS_SERVER}/api/signIn/")
     TOKEN=$(echo $RES| sed 's/^.*"token":"\([^"]*\)".*$/\1/')
+    TOKEN_FILE="/tmp/damas-$USER-$(echo -n $DAMAS_SERVER | cksum | head -c 10)"
     echo $TOKEN
-    echo $TOKEN > "/tmp/damas-$USER"
-    chmod go-rw "/tmp/damas-$USER"
+    echo $TOKEN > $TOKEN_FILE
+    chmod go-rw "$TOKEN_FILE"
     map_server_errors "${RES##*$'\n'}"
     ;;
   signout)
-    rm "/tmp/damas-$USER"
+    TOKEN_FILE="/tmp/damas-$USER-$(echo -n $DAMAS_SERVER | cksum | head -c 10)"
+    rm "$TOKEN_FILE"
     exit 0
     ;;
   *)
