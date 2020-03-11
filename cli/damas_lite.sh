@@ -68,7 +68,9 @@ run() {
   RES=$(eval "$1")
   if [ ! $QUIET ]; then
     if [ $LINESOUT ]; then
-      printf "$(echo "$RES" | sed '$d' | sed 's/.*\["\(.*\)"\].*/\1/g' | sed 's/\",\"/\n/g')\n"
+      #printf "$(echo "$RES" | sed '$d' | sed 's/.*\["\(.*\)"\].*/\1/g' | sed 's/\",\"/\n/g')\n"
+	  printf "$(echo "$RES" | sed '$d' | sed 's/^\[//g' | sed 's/\]$//g' | sed 's/},{/}\n{/g')\n"
+	  # fixed lines
     else
       echo $(echo "$RES" | sed '$d')
     fi
@@ -87,23 +89,24 @@ load_token() {
 }
 
 show_help_msg() {
-  echo "usage: damas [--help] -s|--server <server_url> [-q|--quiet] [-v|--verbose] [-l|--lines] <command> [<args>]"
+  echo "usage: damas [--help] [-s|--server <server_url>] [-q|--quiet] [-v|--verbose] [-l|--lines] <COMMAND> [<ARGS>]"
+  echo ""
+  echo "When ARGS is -, read standard input."
   echo ""
   echo "Authentication commands: "
-  echo "   signin    <username> <pass>"
+  echo "   signin    <username> <pass> or without arguments for interactive sign in"
   echo "   signout   Remove authorization token"
   echo ""
   echo "CRUDS commands (send JSON to the server, see examples below):"
   echo "   create       <json>  create node(s)"
-  echo "   read         <json>  show the keys of the file"
-  echo "   update       <json>  update nodes"
-  echo "   upsert       <json>  create or update nodes"
-  echo "   delete       <json>  delete nodes"
-  echo "   search       <query> search"
+  echo "   read         <json>  retrieve keys of node(s)"
+  echo "   update       <json>  update node(s)"
+  echo "   upsert       <json>  create or update node(s)"
+  echo "   delete       <json>  delete node(s)"
   echo ""
   echo "MORE commands"
-  echo "   graph        <json>  read all related nodes"
-  echo "   search       <string> search by query string"
+  echo "   graph        <json>  retrieve related nodes and edges"
+  echo "   search       <query> search by query string"
   echo "   search_mongo <query> <sort> <limit> <skip> MongoDB search"
   echo ""
   echo "ENVIRONMENT VARIABLES"
