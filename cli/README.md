@@ -3,15 +3,17 @@ NAME
   damas.sh - a command line interface to access a remote json metadata storage
 
 SYNOPSIS
-  damas [OPTION...] <command> [<args>]
-  damas [--help] -s | --server <server_url> [-q|--quiet] [-v|--verbose] [-l|--lines] <command> [<args>]
+  damas [OPTION...] <COMMAND> [ARGS]
+  damas [--help] [-s|--server <server_url>] [-q|--quiet] [-v|--verbose] [-l|--lines] <COMMAND> [ARGS]
 
 DESCRIPTION
-  curl-based command to expose the operations of a damas-core service
+  Curl-based command to expose the operations of a damas-core service.
+
+  When ARGS is -, read standard input.
 
 COMMANDS
   Authentication commands:
-     signin    <username> <pass>
+     signin    <username> <pass> or without arguments for interactive sign in
      signout   Remove authorization token
 
   CRUDS commands (send JSON to the server, see examples below):
@@ -20,12 +22,11 @@ COMMANDS
      update       <json>  update nodes
      upsert       <json>  create or update nodes
      delete       <json>  delete nodes
-     search       <query> search
 
   MORE commands
      graph        <json>  read all related nodes
-     search       <string> search by query string
-     search_mongo <query> <sort> <limit> <skip> MongoDB search
+     search       <query> search by query string
+     search_mongo <mongo_query> <sort> <limit> <skip> MongoDB search
 
 ENVIRONMENT VARIABLES
   DAMAS_SERVER

@@ -51,6 +51,13 @@ nav a {
 */
 .logo {
 	width: 10ex;
+	padding: 1ex;
+	border-radius: 1ex;
+	background-color: #eee;
+}
+.logo.selected {
+	background-color: #bbf;
+
 }
 a .logo {
 	width: 10ex;

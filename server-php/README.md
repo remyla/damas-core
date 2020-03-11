@@ -1,10 +1,10 @@
-<img src="http://damas-software.com/bin/damas_logo.png" alt="damas-core"/>
+<img src="http://damas-software.org/bin/damas-core_logo.svg?t=2" alt="damas-core logo"/>
 
-http://damas-software.org
+JSON storage service built for reliability, efficiency and extensibility.
 
-# damas-core/server-php
+Legacy PHP damas-core server to run in a Apache environment. Generic key-value data model, simple graph structures, user authentication, file version control, using MySQL as database. It supports database replication among multiple sites. Used in production and maintained since 2007. The Php version is still used in production, very stable, but based on older specifications. We could make it evolve to the newer specifications some days.
 
-* RESTful HTTP stateless server written in Php
+* HTTP service written in Php
 * Key-value data model and directed graph for MySQL
 
 ## Installation
