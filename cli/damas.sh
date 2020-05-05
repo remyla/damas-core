@@ -69,7 +69,8 @@ run() {
   if [ ! $QUIET ]; then
     if [ $LINESOUT ]; then
       #printf "$(echo "$RES" | sed '$d' | sed 's/.*\["\(.*\)"\].*/\1/g' | sed 's/\",\"/\n/g')\n"
-	  printf "$(echo "$RES" | sed '$d' | sed 's/^\[//g' | sed 's/\]$//g' | sed 's/},{/}\n{/g')\n"
+	  # attempt that introduced a regression
+	  printf "$(echo "$RES" | sed '$d' | sed 's/^\[//g' | sed 's/\]$//g' | sed 's/},{/}\n{/g' | sed 's/\",\"/\"\n\"/g')\n"
 	  # fixed lines
     else
       echo $(echo "$RES" | sed '$d')
