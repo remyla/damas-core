@@ -5,7 +5,7 @@
 
 module.exports = function (app, routes) {
     var db = app.locals.db;
-    require('./utils');
+    require('../routes/utils');
 
     /*
      * publish()
