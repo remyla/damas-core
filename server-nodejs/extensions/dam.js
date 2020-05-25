@@ -5,7 +5,7 @@
 
 module.exports = function (app, routes) {
     var db = app.locals.db;
-    require('./utils');
+    require('../routes/utils');
 
     /*
      * publish()
@@ -278,6 +278,32 @@ module.exports = function (app, routes) {
         });
     }; //comment()
 
+    /*
+     * getFile()
+     *
+     * Method: GET
+     * URI: /api/file/
+     *
+     * Get a file from the filesystem
+     *
+     * HTTP status codes:
+     * - 200: OK (file retrieved)
+     * - 400: Bad Request (not formatted correctly)
+     * - 404: Not Found (the file does not exist)
+     */
+    getFile = function (req, res) {
+        var path = conf.fileSystem + decodeURIComponent(req.params.path);
+        path = path.replace(/:/g, '').replace(/\/+/g, '/');
+        fs.exists(path, function (exists) {
+            if (!exists) {
+                return httpStatus(res, 404, 'File');
+            }
+            var stream = fs.createReadStream(path, {bufferSize: 64 * 1024});
+            res.writeHead(200);
+            stream.pipe(res);
+        });
+    }; // getFile()
+
 
     /* this is added as comment because we will implement this route
 
@@ -345,6 +371,7 @@ module.exports = function (app, routes) {
     app.put('/api/unlock/', unlock);
     app.post('/api/version/:id(*)', version);
     app.post('/api/comment/', comment);
+    app.get('/api/file/:path(*)', getFile); // untested
 
     routes = Object.assign(routes, {
         lock: lock,

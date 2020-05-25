@@ -22,8 +22,18 @@ var conf = app.locals.conf = require('./conf');
 app.locals.db = require('./db')(conf.db, conf[conf.db]);
 
 var bodyParser = require( 'body-parser' );
+var methodOverride = require('method-override');
 app.use( bodyParser.urlencoded( { limit: '50mb', extended : true } ) );
-app.use( bodyParser.json({limit: '50mb', strict: false}));
+function verify(req, res, buf, encoding) {
+    // we store body as text in case we get an error while parsing it as json
+    req.buf = buf.toString(encoding);
+}
+app.use( bodyParser.json({limit: '50mb', strict: false, verify: verify }));
+app.use(methodOverride());
+app.use(function(err, req, res, next) {
+    debug(req.url + " Error: invalid JSON request: " + req.buf);
+    res.status(400).send('Error: invalid JSON request: ' + req.buf);
+});
 
 var morgan = require('morgan');
 app.use(morgan('dev'));

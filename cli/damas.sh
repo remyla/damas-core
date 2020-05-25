@@ -68,7 +68,10 @@ run() {
   RES=$(eval "$1")
   if [ ! $QUIET ]; then
     if [ $LINESOUT ]; then
-      printf "$(echo "$RES" | sed '$d' | sed 's/.*\["\(.*\)"\].*/\1/g' | sed 's/\",\"/\n/g')\n"
+      #printf "$(echo "$RES" | sed '$d' | sed 's/.*\["\(.*\)"\].*/\1/g' | sed 's/\",\"/\n/g')\n"
+	  # attempt that introduced a regression
+	  printf "$(echo "$RES" | sed '$d' | sed 's/^\[//g' | sed 's/\]$//g' | sed 's/},{/}\n{/g' | sed 's/\",\"/\"\n\"/g')\n"
+	  # fixed lines
     else
       echo $(echo "$RES" | sed '$d')
     fi
@@ -76,96 +79,69 @@ run() {
   map_server_errors "${RES##*$'\n'}"
 }
 
-get_ids() {
-  if [ $# -eq 0 ]; then
-    echo "damas: missing file argument"
-    show_help_msg
-    exit 1
-  fi
-  IDS='['
-  for id in "$@"; do
-    get_real_path "$id"
-    IDS=$IDS'"'$FILEPATH'",'
-  done
-  IDS=${IDS:0:-1}']'
-}
-
-get_real_path() {
-  FILEPATH=$(realpath -m --relative-base $DIRECTORY "$1" | sed 's/\.$//')
-  if [[ $FILEPATH != /* ]]; then
-    FILEPATH="/"$FILEPATH
-  fi
-  if [ -d "$1" ]
-  then
-    FILEPATH=$FILEPATH'/'
-  fi
-}
-
-upsearch() {
-  local SLASHES=${PWD//[^\/]/}
-  DIRECTORY="$PWD"
-  for (( n=${#SLASHES}; n>0; --n )); do
-    test -e "$DIRECTORY/$1" && return
-    DIRECTORY="$DIRECTORY/.."
-  done
-  echo "Error: Not a damas repository (or any parent)" >&2
-  exit 2
-}
-
 load_token() {
   if [ $DAMAS_TOKEN ]; then
     local TOKEN=$DAMAS_TOKEN
   else
-    local TOKEN=$(cat /tmp/damas-$USER 2> /dev/null)
+    local TOKEN_FILE="/tmp/damas-$USER-$(echo -n $DAMAS_SERVER | cksum | head -c 10)"
+    local TOKEN=$(cat $TOKEN_FILE 2> /dev/null)
   fi
 
   AUTH='-H "Authorization: Bearer '$TOKEN'"'
 }
 
 show_help_msg() {
-  echo "usage: damas [--help] [-q|--quiet] [-v|--verbose] [-l|--lines] <command> [<args>]"
+  echo "usage: damas [--help] [-s|--server <server_url>] [-q|--quiet] [-v|--verbose] [-l|--lines] <COMMAND> [<ARGS>]"
   echo ""
-  echo "File commands: "
-  echo "   add       Add files to the index"
-  echo "   init      Prepare the current directory adding a .damas/ repo folder"
-  echo "   lock      Lock files (set key 'lock' = user name)"
-  echo "   rm        Remove files from the index"
-  echo "   show      Show files record"
-  echo "   untracked List untracked files"
-  echo "   signin    <username> <pass>"
+  echo "When ARGS is -, read standard input."
+  echo ""
+  echo "Authentication commands: "
+  echo "   signin    <username> <pass> or without arguments for interactive sign in"
   echo "   signout   Remove authorization token"
-  echo "   stats     Update file_mtime and file_size keys of files"
-  echo "   unlock    Unlock files"
   echo ""
   echo "CRUDS commands (send JSON to the server, see examples below):"
   echo "   create       <json>  create node(s)"
-  echo "   read         <json>  show the keys of the file"
-  echo "   update       <json>  update nodes"
-  echo "   upsert       <json>  create or update nodes"
-  echo "   delete       <json>  delete nodes"
-  echo "   search       <query> search"
+  echo "   read         <json>  retrieve keys of node(s)"
+  echo "   update       <json>  update node(s)"
+  echo "   upsert       <json>  create or update node(s)"
+  echo "   delete       <json>  delete node(s)"
   echo ""
   echo "MORE commands"
-  echo "   comment      <json>  create child node"
-  echo "   graph        <json>  read all related nodes"
+  echo "   graph        <json>  retrieve related nodes and edges"
+  echo "   search       <query> search by query string"
   echo "   search_mongo <query> <sort> <limit> <skip> MongoDB search"
   echo ""
+  echo "ENVIRONMENT VARIABLES"
+  echo "  DAMAS_SERVER"
+  echo "    URL of the server hosting damas-core. It can specify https:// or http:// protocols."
+  echo "  DAMAS_TOKEN"
+  echo "    Token used for authentication."
+  echo ""
   echo "EXAMPLES"
-  echo ""
-  echo "    start tracking every files in current directory"
-  echo "        damas add *"
-  echo ""
   echo "    create an arbitrary node giving a JSON"
-  echo "        damas create '{\"#parent\":\"value\",\"comment\":\"created with cli\"}'"
-  echo ""
-  echo "    read nodes for every file in the current directory"
-  echo "        damas show *"
-  echo ""
+  echo "        damas -s yourserver create '{\"key\":\"value\",\"comment\":\"created with cli\"}'"
+  echo "    list every nodes"
+  echo "        damas -s yourserver search *"
   echo "    search keys matching a regular expression"
-  echo "        damas search _id:/.*mov/"
-  echo ""
+  echo "        damas -s yourserver search _id:/.*mov/"
+  echo "    read nodes from a search result using a pipe"
+  echo "        damas search * | damas read -"
   echo "    search deleted:true key, sort by _id key, show result as lines of ids"
-  echo "        damas -l search_mongo '{\"deleted\":true}' '{\"_id\":1}' 0 0"
+  echo "        damas -s yourserver -l search_mongo '{\"deleted\":true}' '{\"_id\":1}' 0 0"
+  echo ""
+  echo "EXIT VALUES"
+  echo "  0  Success"
+  echo "  1  Syntax or usage error"
+  echo "  2  Not a damas repository (or any parent)"
+  echo "  3  Server is unreachable"
+  echo "  7  (Server 207) Multi-Status (some nodes do not exist)"
+  echo "  40 (Server 400) Bad request (not formatted correctly)"
+  echo "  41 (Server 401) Unauthorized"
+  echo "  43 (Server 403) Forbidden (the user does not have the right permission)"
+  echo "  44 (Server 404) Not found (all the nodes do not exist)"
+  echo "  49 (Server 409) Conflict (all nodes already exist with these identifiers)"
+  echo "  50 (Server 500) Internal server error"
+  echo "  60 (Server xxx) Unknown server error"
   exit 0
 }
 
@@ -192,6 +168,10 @@ while true; do
       LINESOUT=true
       shift 1
       ;;
+    -s | --server)
+      DAMAS_SERVER=$2
+      shift 2
+      ;;
     -*)
       echo "Unknown option: $1"
       exit 1
@@ -217,123 +197,39 @@ if [ ! -t 0 -a $# -eq 0 ]; then
   exit $?
 fi
 
-case $COMMAND in
-  init)
-    read -p "remote URL (default = http://localhost:8090): " URL
-    if [ -z $URL ]; then
-      URL='http://localhost:8090'
-    fi
-    mkdir '.damas'
-    echo 'URL="'$URL'"' > '.damas/config'
-    echo 'Initialized empty Damas repository in '$(realpath .) \
-        '/.damas/ with remote '$URL
-    exit 0
-    ;;
-esac
-
-# Verify if in a .damas directory
-
-if [ $DAMAS_DIR ]; then
-  DIRECTORY=$DAMAS_DIR
-else
-  upsearch '.damas'
-fi
-
-DIRECTORY=$(realpath $DIRECTORY)
-
-CONFIG=$DIRECTORY'/.damas/config'
-if [ ! -f $CONFIG ]; then
-  echo "config file does not exist. Creating one.."
-  echo 'URL="http://localhost:8090"' > $CONFIG
-fi
-source $CONFIG
-
-if [ $DAMAS_SERVER ]; then
-  URL=$DAMAS_SERVER
-fi
-
 load_token
+
+if [ "$1" == "-" ]; then
+  DATA=@/dev/stdin 
+else
+  DATA=$*
+fi
 
 case $COMMAND in
   create)
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$*' ${URL}/api/create/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$DATA' ${DAMAS_SERVER}/api/create/"
     ;;
   read)
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$*' ${URL}/api/read/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$DATA' ${DAMAS_SERVER}/api/read/"
     ;;
   update)
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X PUT -d '$*' ${URL}/api/update/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X PUT -d '$DATA' ${DAMAS_SERVER}/api/update/"
     ;;
   upsert)
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$*' ${URL}/api/upsert/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$DATA' ${DAMAS_SERVER}/api/upsert/"
     ;;
   delete)
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X DELETE -d '$*' ${URL}/api/delete/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X DELETE -d '$DATA' ${DAMAS_SERVER}/api/delete/"
     ;;
   graph)
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$*' ${URL}/api/graph/0/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$DATA' ${DAMAS_SERVER}/api/graph/0/"
     ;;
   search)
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH ${URL}/api/search/$1"
-    ;;
-  add)
-    get_ids "$@"
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '{\"_id\":$IDS}' ${URL}/api/create/"
-    ;;
-  show)
-    get_ids "$@"
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$IDS' ${URL}/api/read/"
-    ;;
-  untracked)
-    BASE="/tmp/damas-files_"
-    find $PWD$1 -type f > ${BASE}origin
-    echo -n '[' > ${BASE}request
-    while read file; do
-      FILEPATH=${file#"$DIRECTORY"}
-      echo -n '"'$FILEPATH'",' >> ${BASE}request
-    done < ${BASE}origin
-    echo -n '""]' >> ${BASE}request
-    eval "curl $CURL_ARGS $AUTH -d "@${BASE}request" ${URL}/api/read/" > ${BASE}response
-    STATUS=$(sed '$!d' ${BASE}response);
-    if [ $STATUS  -gt 300 ]; then
-      head -n 1 ${BASE}response
-      map_server_errors $STATUS
-    fi
-    sed -e $'s/\([^"]\),/\\1\\n/g' ${BASE}response | grep -n null | \
-        cut -f1 -d: > ${BASE}result
-    while read l; do
-      sed "${l}q;d" ${BASE}origin
-    done < ${BASE}result
-    rm ${BASE}*
-    ;;
-  stats)
-    get_ids "$@"
-    if [ -d "$1" ]; then
-        bytes=`du -sb "$1" | cut -f1`
-    else
-        bytes=`stat -c%s "$1"`
-    fi
-    mtime=`stat -c%Y "$1"`000
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X PUT -d '{\"_id\":$IDS,\"file_size\":$bytes,\"file_mtime\":$mtime}' ${URL}/api/update/"
-    ;;
-  rm)
-    get_ids "$@"
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X DELETE -d '$IDS' ${URL}/api/delete/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH ${DAMAS_SERVER}/api/search/$1"
     ;;
   search_mongo)
     QUERY='{"query": '$1', "sort": '$2', "limit": '$3', "skip": '$4'}'
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X POST ${URL}/api/search_mongo/ -d '$QUERY'"
-    ;;
-  lock)
-    get_ids "$@"
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X PUT -d '$IDS' ${URL}/api/lock/"
-    ;;
-  unlock)
-    get_ids "$@"
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X PUT -d '$IDS' ${URL}/api/unlock/"
-    ;;
-  comment)
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$*' ${URL}/api/comment/"
+    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X POST ${DAMAS_SERVER}/api/search_mongo/ -d '$QUERY'"
     ;;
   signin)
     if [ $VERBOSE ]; then
@@ -353,15 +249,17 @@ case $COMMAND in
       read -sp "password: " PASS
       printf "\n\n"
     fi
-    RES=$(eval "curl $CURL_VERBOSE -ks -w \"\n%{http_code}\" --fail -d 'username=$USERN&password=${PASS}${expiresIn}' ${URL}/api/signIn/")
+    RES=$(eval "curl $CURL_VERBOSE -ks -w \"\n%{http_code}\" --fail -d 'username=$USERN&password=${PASS}${expiresIn}' ${DAMAS_SERVER}/api/signIn/")
     TOKEN=$(echo $RES| sed 's/^.*"token":"\([^"]*\)".*$/\1/')
+    TOKEN_FILE="/tmp/damas-$USER-$(echo -n $DAMAS_SERVER | cksum | head -c 10)"
     echo $TOKEN
-    echo $TOKEN > "/tmp/damas-$USER"
-    chmod go-rw "/tmp/damas-$USER"
+    echo $TOKEN > $TOKEN_FILE
+    chmod go-rw "$TOKEN_FILE"
     map_server_errors "${RES##*$'\n'}"
     ;;
   signout)
-    rm "/tmp/damas-$USER"
+    TOKEN_FILE="/tmp/damas-$USER-$(echo -n $DAMAS_SERVER | cksum | head -c 10)"
+    rm "$TOKEN_FILE"
     exit 0
     ;;
   *)

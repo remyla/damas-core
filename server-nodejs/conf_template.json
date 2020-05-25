@@ -66,10 +66,10 @@
                 }
             }
         },
-	"last_activity": {
+        "last_activity": {
             "enable": true,
             "path": "./extensions/last_activity.js"
-	},
+        },
         "prefer_https": {
             "enable": false,
             "path": "./extensions/prefer_https.js"
@@ -89,7 +89,11 @@
                     "/resetPassword": "extensions/user_resetPassword.html"
 
                 }
-             }
+            }
+        },
+        "dam": {
+            "enable": true,
+            "path": "./extensions/dam.js"
         }
     }
 }

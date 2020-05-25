@@ -4,7 +4,7 @@
 
 module.exports = function (app, express){
     var conf = app.locals.conf;
-    var debug = require('debug')('app:body');
+    var debug = require('debug')('damas:body');
     require('./utils');
 
     app.use(function (req, res, next) {
@@ -21,8 +21,6 @@ module.exports = function (app, express){
     // Routes
     var routes = {};
     require('./cruds')(app, routes);
-    require('./dam')(app, routes);
-    require('./upload')(app, routes);
 }
 
 
