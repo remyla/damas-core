@@ -10,7 +10,7 @@ module.exports = function (app) {
         var copyReq = Array.from(Array.isArray(req.body) ? req.body : [req.body]);
 
         var isOperationAllowed = tools.isOperationAllowed(req.params.route, req.user.class);
-        if(['read', 'update'].indexOf(req.params.route) === -1) {
+        if(['read', 'update', 'upsert', 'delete'].indexOf(req.params.route) === -1) {
             if(!isOperationAllowed) {
                 return httpStatus(res, 403, 'Access ' + req.params.route);
             }
