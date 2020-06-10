@@ -19,7 +19,7 @@
 
 # VARIABLES
 USER=`whoami`
-CURL_ARGS='-ks -w "\n%{http_code}" -H "Content-Type: application/json"'
+CURL_ARGS='-ksL -w "\n%{http_code}" -H "Content-Type: application/json"'
 BUFFER_SIZE=1000
 
 # map errors sent by the server
@@ -82,7 +82,7 @@ run() {
       printf "$(echo "$RES" | sed '$d' | sed 's/^\[//g' | sed 's/\]$//g' | sed 's/},{/}\n{/g' | sed 's/\",\"/\"\n\"/g')\n"
       # fixed lines
     else
-      echo $RES | tail -n +2
+      echo "$RES" | sed '$d' | grep -v "^$"
     fi
   fi
   map_server_errors "${RES##*$'\n'}"
