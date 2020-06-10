@@ -32,30 +32,39 @@ map_server_errors() {
       exit 0
       ;;
     000) # Server unreachable
+      echo "Server '$DAMAS_SERVER' is unreachable" >&2
       exit 3
       ;;
     207) # Multi-Status (some nodes do not exist)
+      echo "Multi-Status (some nodes do not exist) (server error 207)" >&2
       exit 7
       ;;
     400) # Bad request (not formatted correctly)
+      echo "Bad request (not formatted correctly) (server error 400)" >&2
       exit 40
       ;;
     401) # Unauthorized
+      echo "Unauthorized (server error 401)" >&2
       exit 41
       ;;
     403) # Forbidden (the user does not have the right permission)
+      echo "Forbidden (the user does not have the right permission) (server error 403)" >&2
       exit 43
       ;;
     404) # Not found (all the nodes do not exist)
+      echo "Not found (all the nodes do not exist) (server error 404)" >&2
       exit 44
       ;;
     409) # Conflict (all nodes already exist with these identifiers)
+      echo "Conflict (all nodes already exist with these identifiers) (server error 409)" >&2
       exit 49
       ;;
     500) # Internal server error
+      echo "Internal server error (server error 500)" >&2
       exit 50
       ;;
     *)   # Unknown server error
+      echo "Unknown server error" >&2
       exit 60
       ;;
   esac
@@ -69,11 +78,11 @@ run() {
   if [ ! $QUIET ]; then
     if [ $LINESOUT ]; then
       #printf "$(echo "$RES" | sed '$d' | sed 's/.*\["\(.*\)"\].*/\1/g' | sed 's/\",\"/\n/g')\n"
-	  # attempt that introduced a regression
-	  printf "$(echo "$RES" | sed '$d' | sed 's/^\[//g' | sed 's/\]$//g' | sed 's/},{/}\n{/g' | sed 's/\",\"/\"\n\"/g')\n"
-	  # fixed lines
+      # attempt that introduced a regression
+      printf "$(echo "$RES" | sed '$d' | sed 's/^\[//g' | sed 's/\]$//g' | sed 's/},{/}\n{/g' | sed 's/\",\"/\"\n\"/g')\n"
+      # fixed lines
     else
-      echo $(echo "$RES" | sed '$d')
+      echo $RES | tail -n +2
     fi
   fi
   map_server_errors "${RES##*$'\n'}"
