@@ -18,7 +18,7 @@
             "path": "./extensions/es6_polyfills.js"
         },
         "nodemailer": {
-            "enable": true,
+            "enable": false,
             "path": "./extensions/nodemailer.js",
             "conf": {
                 "transporter":{
@@ -26,7 +26,7 @@
                     "port": 25,
                     "secure": false
                 },
-                "from": "\"Sender\" <noreply@example.com>"
+                "from": "\"Sender\" <noreply@example.org>"
             }
         },
         "user_setup" : {
@@ -78,7 +78,7 @@
             "path": "./extensions/static_routes.js",
             "conf": {
                 "routes": {
-                    "/": "public",
+                    "/": [ "/app/www", "public"],
                     "/js": "../js",
                     "/cli": "../cli",
                     "/py": "../py",
@@ -86,13 +86,8 @@
                     "/signIn": "extensions/auth_signIn.html",
                     "/lostPassword": "extensions/user_lostPassword.html",
                     "/resetPassword": "extensions/user_resetPassword.html"
-
                 }
             }
-        },
-        "dam": {
-            "enable": true,
-            "path": "./extensions/dam.js"
         }
     }
 }

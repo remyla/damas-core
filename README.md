@@ -1,31 +1,33 @@
 <img src="http://damas-software.org/bin/damas-core_logo.svg?t=2" alt="damas-core logo"/>
 
-JSON metadata storage service focused on reliability, efficiency and extensibility.
+Simple JSON storage service in NodeJS-express, focused on reliability, efficiency and extensibility.
 
-Some of its features are:
-* RESTful: Stateless server using API tokens
-* CRUD: Multi-targeted operations, upsert, errors returned using HTTP response status codes
-* multi-user: JWT, embeded user and permission rights management
+Its main features are:
+* [RESTful HTTP web service](https://github.com/remyla/damas-core/wiki/4-Specifications) with CRUD functions
+* [Python and Javascript API](https://github.com/remyla/damas-core/wiki/3-API-reference)
+* [Command line interface](https://github.com/remyla/damas-core/blob/master/cli/README.md)
+* [Extensions](https://github.com/remyla/damas-core/wiki/Extensions)
+* [Authentication, users management and permissions](https://github.com/remyla/damas-core/wiki/Authentication)
 
 [![Stories in Ready](https://badge.waffle.io/remyla/damas-core.png?label=ready&title=Ready)](https://waffle.io/remyla/damas-core)
 ![Licence](https://img.shields.io/github/license/remyla/damas-core.svg)
 ![Tag](https://img.shields.io/github/tag/remyla/damas-core.svg)
 ![Docker Pulls](https://img.shields.io/docker/pulls/zankia/damas-node.svg)
 ![Docker Image](https://images.microbadger.com/badges/image/zankia/damas-node.svg)
-# Overview
-
-## server-nodejs
-damas-core server in NodeJS which development started in April 2015. Specifications redesign, enhanced graph structures, json web tokens, integration of long-time requested features. MongoDB backend.
-
-## py, js and cli clients
-Interfaces to expose the remote service using the language's native objects and environment:
-
-* Python module
-* Javascript module
-* Shell command line interface
 
 # Usage
-Visit the demo server at https://demo.damas.io or read the [Wiki](https://github.com/remyla/damas-core/wiki) to install your own server.
+Clone this repository and run:
+```
+docker-compose up
+```
+Open a web browser:
+```
+http://localhost
+```
+Then read the [damas-core Wiki](https://github.com/remyla/damas-core/wiki) to configure and customize your server.
+
+# Demo
+Visit the demo server at https://demo.damas.io
 
 # Related Links
 

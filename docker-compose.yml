@@ -1,0 +1,34 @@
+version: "2"
+services:
+    damas-experimental:
+        image: primcode/damas-server:latest
+        environment:
+            DEBUG: "damas:*"
+        ports:
+            - 80:8090
+            - 443:8443
+        volumes:
+            - ./conf.json:/data/conf.json
+            - /etc/letsencrypt/live/yourdomain/privkey.pem:/data/privkey.pem
+            - /etc/letenscrypt/live/yourdomain/fullchain.pem:/data/fullchain.pem
+            - ./www:/app/www
+        networks:
+            - damas
+        depends_on:
+            - mongo
+        restart: always
+        stdin_open: true
+        tty: true
+        container_name: damas-server
+    mongo:
+        image: mvertes/alpine-mongo:latest
+        volumes:
+            - ./db:/data/db
+        networks:
+            - damas
+        restart: always
+        stdin_open: true
+        tty: true
+        container_name: damas-mongo
+networks:
+    damas:
