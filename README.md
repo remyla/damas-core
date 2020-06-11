@@ -1,4 +1,5 @@
-# damas-core
+# damas-core ![Licence](https://img.shields.io/github/license/remyla/damas-core.svg) ![Tag](https://img.shields.io/github/tag/remyla/damas-core.svg) ![Docker Pulls](https://img.shields.io/docker/pulls/zankia/damas-node.svg) ![Docker Image](https://images.microbadger.com/badges/image/zankia/damas-node.svg)
+
 <img src="http://damas-software.org/bin/damas-core_logo.svg?t=2" alt="damas-core logo"/>
 
 Simple JSON storage service in NodeJS and Express, focused on reliability, efficiency and extensibility.
@@ -9,11 +10,6 @@ Its main features are:
 * [Command line interface](https://github.com/remyla/damas-core/blob/master/cli/README.md)
 * [Extensions](https://github.com/remyla/damas-core/wiki/Extensions)
 * [Authentication, users and permissions management](https://github.com/remyla/damas-core/wiki/Authentication)
-
-![Licence](https://img.shields.io/github/license/remyla/damas-core.svg)
-![Tag](https://img.shields.io/github/tag/remyla/damas-core.svg)
-![Docker Pulls](https://img.shields.io/docker/pulls/zankia/damas-node.svg)
-![Docker Image](https://images.microbadger.com/badges/image/zankia/damas-node.svg)
 
 ## Usage
 Clone this repository and run:
