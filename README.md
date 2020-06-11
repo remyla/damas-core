@@ -30,18 +30,11 @@ Read the [wiki](https://github.com/remyla/damas-core/wiki) to configure your ser
 Visit the demo server at https://demo.damas.io
 
 ## Related Links
-https://demo.damas.io a public demo server running damas-core server NodeJS in docker
-
-http://damas-software.org is a website which presents the projects related to damas-core
-
-https://syncplanet.io is a Saas using damas-core as backend
-
-http://dabox.io is collaborative platform for architecture using damas-core as backend
-
-https://github.com/PRIMCODE/damas-flow is a flow graph interface
-
-https://github.com/PRIMCODE/damas-dashboard is a web control center and admin intreface, usable but not well packaged and documented yet. Get in touch if interested
-
+http://damas-software.org is a website which presents the projects related to damas-core  
+https://syncplanet.io is a Saas using damas-core as backend  
+http://dabox.io is collaborative platform for architecture using damas-core as backend  
+https://github.com/PRIMCODE/damas-flow is a flow graph interface  
+https://github.com/PRIMCODE/damas-dashboard is a web control center and admin intreface, usable but not well packaged and documented yet. Get in touch if interested  
 http://primcode.com PRIMCODE is the company behind the development, the distribution and the maintenance of damas-core
 
 ## Contributors
