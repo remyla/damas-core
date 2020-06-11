@@ -6,7 +6,7 @@
 		<script type="text/javascript">
 			document.addEventListener('DOMContentLoaded', function() {
 				document.querySelector('#server').innerHTML = window.location.host;
-				document.querySelector('#srv_py').innerHTML = window.location.protocol+'://'+window.location.host;
+				document.querySelector('#server_url').innerHTML = window.location.protocol+'//'+window.location.host;
 			});
 		</script>
 	</head>
@@ -48,7 +48,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 import damas
 
 <span class="comment"># connect to this server</span>
-project = damas.http_connection(<span class="arg">"<span id="srv_py">https://serveripaddr</span>"</span>)
+project = damas.http_connection(<span class="arg">"<span id="server_url">https://serveripaddr</span>"</span>)
 
 
 <span class="comment"># list every node identifiers</span>

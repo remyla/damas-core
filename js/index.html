@@ -7,7 +7,7 @@
 		<script>
 			document.addEventListener('DOMContentLoaded', function() {
 				document.querySelector('#server').innerHTML = window.location.host;
-				document.querySelector('#srv').innerHTML = window.location.protocol+'://'+window.location.host;
+				document.querySelector('#server_url').innerHTML = window.location.protocol+'//'+window.location.host;
 				damas.server = ''; // empty-string if served by damas-core server
 			});
 		</script>
@@ -55,7 +55,7 @@ const damas = require(<span class="arg">'damas-core-client'</span>);
 
 
 <span class="comment">// connect to this server</span>
-damas.server = <span class="arg">'<span id="srv">https://serveripaddr</span>'</span>;
+damas.server = <span class="arg">'<span id="server_url">https://serveripaddr</span>'</span>;
 </pre>
 
 		<footer>

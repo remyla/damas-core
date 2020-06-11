@@ -1,3 +1,4 @@
+# damas-core
 <img src="http://damas-software.org/bin/damas-core_logo.svg?t=2" alt="damas-core logo"/>
 
 Simple JSON storage service in NodeJS and Express, focused on reliability, efficiency and extensibility.
@@ -14,7 +15,7 @@ Its main features are:
 ![Docker Pulls](https://img.shields.io/docker/pulls/zankia/damas-node.svg)
 ![Docker Image](https://images.microbadger.com/badges/image/zankia/damas-node.svg)
 
-# Usage
+## Usage
 Clone this repository and run:
 ```
 docker-compose up
@@ -25,10 +26,11 @@ http://localhost
 ```
 Read the [wiki](https://github.com/remyla/damas-core/wiki) to configure your server for your needs.
 
-# Demo
+## Demo
 Visit the demo server at https://demo.damas.io
 
-# Related Links
+## Related Links
+https://demo.damas.io a public demo server running damas-core server NodeJS in docker
 
 http://damas-software.org is a website which presents the projects related to damas-core
 
@@ -42,7 +44,7 @@ https://github.com/PRIMCODE/damas-dashboard is a web control center and admin in
 
 http://primcode.com PRIMCODE is the company behind the development, the distribution and the maintenance of damas-core
 
-# Contributors
+## Contributors
 Remy Lalanne - Project lead  
 Thibault Allard  
 Julie Aresu  
@@ -57,7 +59,7 @@ Axel Prat
 Mathieu Valero  
 Quentin Villecroze
 
-# License
+## License
 GPL License(GPLV3)
 
 Copyright(c) 2020 Remy Lalanne remy@primcode.com
