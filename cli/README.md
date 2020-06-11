@@ -1,10 +1,10 @@
 ```
 NAME
-  damas.sh - a command line interface to access a remote json metadata storage
+  damas.sh - a command line interface to access a remote damas-core json storage
 
 SYNOPSIS
-  damas [OPTION...] <COMMAND> [ARGS]
-  damas [--help] [-s|--server <server_url>] [-q|--quiet] [-v|--verbose] [-l|--lines] <COMMAND> [ARGS]
+  damas [OPTION...] <COMMAND> [<ARGS>]
+  damas [--help] [-s|--server <server_url>] [-q|--quiet] [-v|--verbose] [-l|--lines] <COMMAND> [<ARGS>]
 
 DESCRIPTION
   Curl-based command to expose the operations of a damas-core service.

@@ -24,14 +24,16 @@
 		<h2>Command Line Interface</h2>
 		Install the <a href="/cli/damas.sh">damas Bash command</a>, visit the cli chapter in the <a href="https://github.com/remyla/damas-core/wiki/2-Getting-Started">getting started page</a> and read the manual page:
 		<pre>NAME
-  damas - a command line interface for digital asset management
+  damas.sh - a command line interface to access a remote damas-core json storage
 
 SYNOPSIS
-  damas [OPTION...] &lt;command&gt; [&lt;args&gt;]
-  damas [--help] [-q|--quiet] [-v|--verbose] [-l|--lines] &lt;command&gt; [&lt;args&gt;]
+  damas [OPTION...] &lt;COMMAND&gt; [&lt;ARGS&gt;]
+  damas [--help] [-q|--quiet] [-v|--verbose] [-l|--lines] &lt;COMMAND&gt; [&lt;ARGS&gt;]
 
 DESCRIPTION
-  curl-based command to expose the operations of a damas-core service and manage a local repository filesystem
+  Curl-based command to expose the operations of a damas-core service.
+
+  When ARGS is -, read standard input.
 
 COMMANDS
   File commands:

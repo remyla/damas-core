@@ -151,6 +151,9 @@ show_help_msg() {
   echo "  49 (Server 409) Conflict (all nodes already exist with these identifiers)"
   echo "  50 (Server 500) Internal server error"
   echo "  60 (Server xxx) Unknown server error"
+  echo ""
+  echo "FILES"
+  echo "  /tmp/damas-<username>-<signature> tokens issued by users at signin"
   exit 0
 }
 

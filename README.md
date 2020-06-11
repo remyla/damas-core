@@ -1,15 +1,14 @@
 <img src="http://damas-software.org/bin/damas-core_logo.svg?t=2" alt="damas-core logo"/>
 
-Simple JSON storage service in NodeJS-express, focused on reliability, efficiency and extensibility.
+Simple JSON storage service in NodeJS and Express, focused on reliability, efficiency and extensibility.
 
 Its main features are:
 * [RESTful HTTP web service](https://github.com/remyla/damas-core/wiki/4-Specifications) with CRUD functions
 * [Python and Javascript API](https://github.com/remyla/damas-core/wiki/3-API-reference)
 * [Command line interface](https://github.com/remyla/damas-core/blob/master/cli/README.md)
 * [Extensions](https://github.com/remyla/damas-core/wiki/Extensions)
-* [Authentication, users management and permissions](https://github.com/remyla/damas-core/wiki/Authentication)
+* [Authentication, users and permissions management](https://github.com/remyla/damas-core/wiki/Authentication)
 
-[![Stories in Ready](https://badge.waffle.io/remyla/damas-core.png?label=ready&title=Ready)](https://waffle.io/remyla/damas-core)
 ![Licence](https://img.shields.io/github/license/remyla/damas-core.svg)
 ![Tag](https://img.shields.io/github/tag/remyla/damas-core.svg)
 ![Docker Pulls](https://img.shields.io/docker/pulls/zankia/damas-node.svg)
@@ -20,11 +19,11 @@ Clone this repository and run:
 ```
 docker-compose up
 ```
-Open a web browser:
+In a web browser, open:
 ```
 http://localhost
 ```
-Then read the [damas-core Wiki](https://github.com/remyla/damas-core/wiki) to configure and customize your server.
+Read the [wiki](https://github.com/remyla/damas-core/wiki) to configure your server for your needs.
 
 # Demo
 Visit the demo server at https://demo.damas.io
@@ -61,7 +60,7 @@ Quentin Villecroze
 # License
 GPL License(GPLV3)
 
-Copyright(c) 2019 Remy Lalanne remy@primcode.com
+Copyright(c) 2020 Remy Lalanne remy@primcode.com
 
 damas-core is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
