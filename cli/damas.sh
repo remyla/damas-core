@@ -28,15 +28,15 @@ map_server_errors() {
     200) # OK
       exit 0
       ;;
-    201) # OK (node(s) created)
+    201) # OK (object(s) created)
       exit 0
       ;;
     000) # Server unreachable
       echo "Server '$DAMAS_SERVER' is unreachable" >&2
       exit 3
       ;;
-    207) # Multi-Status (some nodes do not exist)
-      echo "Multi-Status (some nodes do not exist) (server error 207)" >&2
+    207) # Multi-Status (some objects do not exist)
+      echo "Multi-Status (some objects do not exist) (server error 207)" >&2
       exit 7
       ;;
     400) # Bad request (not formatted correctly)
@@ -51,12 +51,12 @@ map_server_errors() {
       echo "Forbidden (the user does not have the right permission) (server error 403)" >&2
       exit 43
       ;;
-    404) # Not found (all the nodes do not exist)
-      echo "Not found (all the nodes do not exist) (server error 404)" >&2
+    404) # Not found (all the objects do not exist)
+      echo "Not found (all the objects do not exist) (server error 404)" >&2
       exit 44
       ;;
-    409) # Conflict (all nodes already exist with these identifiers)
-      echo "Conflict (all nodes already exist with these identifiers) (server error 409)" >&2
+    409) # Conflict (all objects already exist with these identifiers)
+      echo "Conflict (all objects already exist with these identifiers) (server error 409)" >&2
       exit 49
       ;;
     500) # Internal server error
@@ -109,11 +109,11 @@ show_help_msg() {
   echo "   signout   Remove authorization token"
   echo ""
   echo "CRUDS commands (send JSON to the server, see examples below):"
-  echo "   create       <json>  create node(s)"
-  echo "   read         <json>  retrieve keys of node(s)"
-  echo "   update       <json>  update node(s)"
-  echo "   upsert       <json>  create or update node(s)"
-  echo "   delete       <json>  delete node(s)"
+  echo "   create       <json>  insert object(s)"
+  echo "   read         <json>  retrieve object(s) keys"
+  echo "   update       <json>  modify object(s) keys"
+  echo "   upsert       <json>  insert and modify object(s)"
+  echo "   delete       <json>  remove object(s)"
   echo ""
   echo "MORE commands"
   echo "   graph        <json>  retrieve related nodes and edges"
@@ -127,14 +127,18 @@ show_help_msg() {
   echo "    Token used for authentication."
   echo ""
   echo "EXAMPLES"
-  echo "    create an arbitrary node giving a JSON"
+  echo "    insert an arbitrary object giving a JSON"
   echo "        damas -s yourserver create '{\"key\":\"value\",\"comment\":\"created with cli\"}'"
-  echo "    list every nodes"
+  echo "    list every objects"
   echo "        damas -s yourserver search *"
+  echo "    retrieve an object"
+  echo "        damas -s yourserver read '\"object_id\"'"
+  echo "    retrieve multiple objects"
+  echo "        damas -s yourserver read '[\"object_id1\",\"object_id2\"]'"
   echo "    search keys matching a regular expression"
   echo "        damas -s yourserver search _id:/.*mov/"
-  echo "    read nodes from a search result using a pipe"
-  echo "        damas search * | damas read -"
+  echo "    read objects from a search result using a pipe"
+  echo "        damas -s yourserver search * | damas read -"
   echo "    search deleted:true key, sort by _id key, show result as lines of ids"
   echo "        damas -s yourserver -l search_mongo '{\"deleted\":true}' '{\"_id\":1}' 0 0"
   echo ""
@@ -143,17 +147,17 @@ show_help_msg() {
   echo "  1  Syntax or usage error"
   echo "  2  Not a damas repository (or any parent)"
   echo "  3  Server is unreachable"
-  echo "  7  (Server 207) Multi-Status (some nodes do not exist)"
+  echo "  7  (Server 207) Multi-Status (some objects do not exist)"
   echo "  40 (Server 400) Bad request (not formatted correctly)"
   echo "  41 (Server 401) Unauthorized"
   echo "  43 (Server 403) Forbidden (the user does not have the right permission)"
-  echo "  44 (Server 404) Not found (all the nodes do not exist)"
-  echo "  49 (Server 409) Conflict (all nodes already exist with these identifiers)"
+  echo "  44 (Server 404) Not found (all objects do not exist)"
+  echo "  49 (Server 409) Conflict (all objects already exist with these identifiers)"
   echo "  50 (Server 500) Internal server error"
   echo "  60 (Server xxx) Unknown server error"
   echo ""
   echo "FILES"
-  echo "  /tmp/damas-<username>-<signature> tokens issued by users at signin"
+  echo "  /tmp/damas-<username>-<signature> tokens issued at signin"
   exit 0
 }
 
@@ -249,11 +253,11 @@ case $COMMAND in
     fi
     USERN=$1
     PASS=$2
-	if [ $3 ]; then
-	  expiresIn="&expiresIn=$3"
-	else
-	  expiresIn=""
-	fi
+    if [ $3 ]; then
+      expiresIn="&expiresIn=$3"
+    else
+      expiresIn=""
+    fi
     if [ -z $USERN ]; then
       read -p "login: " USERN
     fi

@@ -1,6 +1,6 @@
 ```
 NAME
-  damas.sh - a command line interface to access a remote damas-core json storage
+  damas.sh - a command line interface to access a remote damas-core storage
 
 SYNOPSIS
   damas [OPTION...] <COMMAND> [<ARGS>]
@@ -17,14 +17,14 @@ COMMANDS
      signout   Remove authorization token
 
   CRUDS commands (send JSON to the server, see examples below):
-     create       <json>  create node(s)
-     read         <json>  show the keys of the file
-     update       <json>  update nodes
-     upsert       <json>  create or update nodes
-     delete       <json>  delete nodes
+     create       <json>  insert object(s)
+     read         <json>  retrieve object(s) keys
+     update       <json>  modify object(s) keys
+     upsert       <json>  insert and modify object(s)
+     delete       <json>  delete object(s)
 
   MORE commands
-     graph        <json>  read all related nodes
+     graph        <json>  retrieve related nodes and edges
      search       <query> search by query string
      search_mongo <mongo_query> <sort> <limit> <skip> MongoDB search
 
@@ -35,13 +35,17 @@ ENVIRONMENT VARIABLES
     Token used for authentication.
 
 EXAMPLES
-  create an arbitrary node giving a JSON"
+  insert an arbitrary object giving a JSON"
       damas -s yourserver create '{\"key\":\"value\",\"comment\":\"created with cli\"}'"
-  list every nodes"
+  list every objects"
       damas -s yourserver search *"
+  retrieve an object
+      damas -s yourserver read '"object_id"'
+  retrieve multiple objects
+      damas -s yourserver read '["object_id1","object_id2"]'
   search keys matching a regular expression"
       damas -s yourserver search _id:/.*mov/"
-  read nodes from a search result using a pipe"
+  read objects from a search result using a pipe"
       damas search * | damas read -"
   search deleted:true key, sort by _id key, show result as lines of ids"
       damas -s yourserver -l search_mongo '{\"deleted\":true}' '{\"_id\":1}' 0 0"
@@ -51,17 +55,17 @@ EXIT VALUES
   1  Syntax or usage error
   2  Not a damas repository (or any parent)
   3  Server is unreachable
-  7  (Server 207) Multi-Status (some nodes do not exist)
+  7  (Server 207) Multi-Status (some objects do not exist)
   40 (Server 400) Bad request (not formatted correctly)
   41 (Server 401) Unauthorized
   43 (Server 403) Forbidden (the user does not have the right permission)
-  44 (Server 404) Not found (all the nodes do not exist)
-  49 (Server 409) Conflict (all nodes already exist with these identifiers)
+  44 (Server 404) Not found (all objects do not exist)
+  49 (Server 409) Conflict (all objects already exist with these identifiers)
   50 (Server 500) Internal server error
   60 (Server xxx) Unknown server error
 
 FILES
-  .damas/config in repository root
+  /tmp/damas-<username>-<signature> tokens issued at signin
 
 CREDITS
     damas.sh part of damas-core and is distributed under the GNU General Public License.
