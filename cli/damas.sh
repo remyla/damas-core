@@ -275,7 +275,7 @@ case $COMMAND in
     echo $TOKEN
     echo $TOKEN > $TOKEN_FILE
     chmod go-rw "$TOKEN_FILE"
-    return map_server_errors "${RES##*$'\n'}"
+    return $(map_server_errors "${RES##*$'\n'}")
     ;;
   signout)
     TOKEN_FILE="/tmp/damas-$USER-$(echo -n $DAMAS_SERVER | cksum | head -c 10)"
