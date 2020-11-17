@@ -26,46 +26,46 @@ BUFFER_SIZE=1000
 map_server_errors() {
   case $1 in
     200) # OK
-      exit 0
+      return 0
       ;;
     201) # OK (object(s) created)
-      exit 0
+      return 0
       ;;
     000) # Server unreachable
       echo "Server '$DAMAS_SERVER' is unreachable" >&2
-      exit 3
+      return 3
       ;;
     207) # Multi-Status (some objects do not exist)
       echo "Multi-Status (some objects do not exist) (server error 207)" >&2
-      exit 7
+      return 7
       ;;
     400) # Bad request (not formatted correctly)
       echo "Bad request (not formatted correctly) (server error 400)" >&2
-      exit 40
+      return 40
       ;;
     401) # Unauthorized
       echo "Unauthorized (server error 401)" >&2
-      exit 41
+      return 41
       ;;
     403) # Forbidden (the user does not have the right permission)
       echo "Forbidden (the user does not have the right permission) (server error 403)" >&2
-      exit 43
+      return 43
       ;;
     404) # Not found (all the objects do not exist)
       echo "Not found (all the objects do not exist) (server error 404)" >&2
-      exit 44
+      return 44
       ;;
     409) # Conflict (all objects already exist with these identifiers)
       echo "Conflict (all objects already exist with these identifiers) (server error 409)" >&2
-      exit 49
+      return 49
       ;;
     500) # Internal server error
       echo "Internal server error (server error 500)" >&2
-      exit 50
+      return 50
       ;;
     *)   # Unknown server error
       echo "Unknown server error" >&2
-      exit 60
+      return 60
       ;;
   esac
 }
@@ -75,6 +75,11 @@ run() {
     echo "$1"
   fi
   RES=$(eval "$1")
+  err=$(map_server_errors "${RES##*$'\n'}")
+  if [ "0" != "$err" ]; then
+      echo "$RES" | sed '$d' | grep -v "^$" >&2
+	  return $err
+  fi
   if [ ! $QUIET ]; then
     if [ $LINESOUT ]; then
       #printf "$(echo "$RES" | sed '$d' | sed 's/.*\["\(.*\)"\].*/\1/g' | sed 's/\",\"/\n/g')\n"
@@ -85,7 +90,6 @@ run() {
       echo "$RES" | sed '$d' | grep -v "^$"
     fi
   fi
-  map_server_errors "${RES##*$'\n'}"
 }
 
 load_token() {
@@ -271,7 +275,7 @@ case $COMMAND in
     echo $TOKEN
     echo $TOKEN > $TOKEN_FILE
     chmod go-rw "$TOKEN_FILE"
-    map_server_errors "${RES##*$'\n'}"
+    return map_server_errors "${RES##*$'\n'}"
     ;;
   signout)
     TOKEN_FILE="/tmp/damas-$USER-$(echo -n $DAMAS_SERVER | cksum | head -c 10)"
