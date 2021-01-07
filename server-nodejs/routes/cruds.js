@@ -204,15 +204,10 @@ module.exports = function (app, routes) {
      */
     upsert = function (req, res) {
         var nodes = Array.isArray(req.body) ? req.body : [req.body];
-        var controlProperties = {
-            author: req.user.username,
-            time: Date.now()
-        }
         for (var i = 0; i < nodes.length; ++i) {
             if ('object' !== typeof nodes[i] || null === nodes[i]) {
                 return httpStatus(res, 400, 'Upsert');
             }
-            nodes[i] = Object.assign({}, controlProperties, nodes[i]);
         }
         nodes = unfoldIds(nodes);
         for(var i in nodes) {
@@ -220,8 +215,15 @@ module.exports = function (app, routes) {
                 delete nodes[i]._id;
             }
         }
-
-        db.create(nodes, function(err, result) {
+        var array = [];
+        var controlProperties = {
+            author: req.user.username,
+            time: Date.now()
+        }
+        for (var i = 0; i < nodes.length; ++i) {
+            array.push(Object.assign({}, controlProperties, nodes[i]));
+        }
+        db.create(array, function(err, result) {
             if(err) {
                 return httpStatus(res, 500, 'Upsert');
             }
@@ -232,7 +234,7 @@ module.exports = function (app, routes) {
                     toUpdate.push(nodes[i]);
                 }
                 else {
-                    created.push(nodes[i]);
+                    created.push(array[i]);
                 }
             }
             var response = getMultipleResponse(result);
