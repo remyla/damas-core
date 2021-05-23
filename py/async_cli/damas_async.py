@@ -1,4 +1,5 @@
 import aiohttp as aiohttp
+import requests as req
 
 
 class http_async_connection(object):
@@ -23,6 +24,9 @@ class http_async_connection(object):
                 print("-------------------------------- HTTP ",
                       self.serverURL,
                       "CONNECTION OK --------------------------------"
-                  )
+                      )
                 self.response = response
                 return self.response
+
+    async def create(self, nodes):
+        await req.post(self.serverURL + "/api/create/", nodes)
