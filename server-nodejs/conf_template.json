@@ -34,6 +34,13 @@
             "enable": true,
             "path" : "./extensions/user_setup.js"
         },
+        "jwt_delegate": {
+            "enable": false,
+            "path": "./extensions/jwt_delegate.js",
+            "conf": { 
+                "server": "http://localhost:3000/api/signIn/"
+            }
+        },
         "jwt": {
             "enable": false,
             "path": "./extensions/jwt.js",
