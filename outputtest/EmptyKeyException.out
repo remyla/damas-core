@@ -1,0 +1,24 @@
+/home/matereza/PycharmProjects/damas-core/venv/bin/python /home/matereza/PycharmProjects/damas-core/py/async_cli/main_test.py
+================================>>> test_create started
+type of keys = <class 'str'>
+type of data = <class 'str'>
+""
+request response is <ClientResponse(http://localhost:8090/api/create/) [400 Bad Request]>
+<CIMultiDictProxy('X-Powered-By': 'Express', 'Vary': 'X-HTTP-Method-Override', 'Content-Type': 'text/html; charset=utf-8', 'Content-Length': '52', 'Etag': 'W/"34-2Km0Og1PdzL68GSoWEkww+s/6dw"', 'Date': 'Sun, 30 May 2021 23:47:40 GMT', 'Connection': 'keep-alive')>
+
+Traceback (most recent call last):
+  File "/home/matereza/PycharmProjects/damas-core/py/async_cli/main_test.py", line 203, in <module>
+    loop.run_until_complete(main(loop))
+  File "/usr/lib/python3.9/asyncio/base_events.py", line 642, in run_until_complete
+    return future.result()
+  File "/home/matereza/PycharmProjects/damas-core/py/async_cli/main_test.py", line 148, in main
+    await test_create(id0) # test EmptyKeyException
+  File "/home/matereza/PycharmProjects/damas-core/py/async_cli/main_test.py", line 69, in test_create
+    await damas.create(key, callback)
+  File "/home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py", line 107, in create
+    json_result = await resp.json()
+  File "/home/matereza/PycharmProjects/damas-core/venv/lib/python3.9/site-packages/aiohttp/client_reqrep.py", line 1097, in json
+    raise ContentTypeError(
+aiohttp.client_exceptions.ContentTypeError: 0, message='Attempt to decode JSON with unexpected mimetype: text/html; charset=utf-8', url=URL('http://localhost:8090/api/create/')
+
+Process finished with exit code 1
