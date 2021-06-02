@@ -1,0 +1,9 @@
+/home/matereza/PycharmProjects/damas-core/venv/bin/python /home/matereza/PycharmProjects/damas-core/py/async_cli/main_test.py
+================================>>> test_delete started
+json requests result ===============================================60ad22f105f7c6c3ad890d6e
+>>>>>>>>>>>>>>>>>>> read status code is 200 <<<<<<<<<<<<<<<
+callback given is print
+60ad22f105f7c6c3ad890d6e
+================================>>> test_delete finished
+
+Process finished with exit code 0

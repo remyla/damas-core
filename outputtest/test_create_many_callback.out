@@ -1,0 +1,13 @@
+/home/matereza/PycharmProjects/damas-core/venv/bin/python /home/matereza/PycharmProjects/damas-core/py/async_cli/main_test.py
+Traceback (most recent call last):
+  File "/home/matereza/PycharmProjects/damas-core/py/async_cli/main_test.py", line 205, in <module>
+    loop.run_until_complete(main(loop))
+  File "/usr/lib/python3.9/asyncio/base_events.py", line 642, in run_until_complete
+    return future.result()
+  File "/home/matereza/PycharmProjects/damas-core/py/async_cli/main_test.py", line 178, in main
+    await test_create_many_element(loop,json_elts_keys_list, 10, print)
+TypeError: test_create_many_element() takes from 0 to 3 positional arguments but 4 were given
+Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x7f2e47300f40>
+
+Process finished with exit code 1
