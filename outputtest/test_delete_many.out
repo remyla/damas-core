@@ -1,0 +1,218 @@
+/home/matereza/PycharmProjects/damas-core/venv/bin/python /home/matereza/PycharmProjects/damas-core/py/async_cli/main_test.py
+================================>>> test_delete_many_element started
+Traceback (most recent call last):
+  File "/home/matereza/PycharmProjects/damas-core/py/async_cli/main_test.py", line 203, in <module>
+    loop.run_until_complete(main(loop))
+  File "/usr/lib/python3.9/asyncio/base_events.py", line 642, in run_until_complete
+    return future.result()
+  File "/home/matereza/PycharmProjects/damas-core/py/async_cli/main_test.py", line 189, in main
+    await test_delete_many_element(ids, 10)
+  File "/home/matereza/PycharmProjects/damas-core/py/async_cli/main_test.py", line 128, in test_delete_many_element
+    await asyncio.gather(*tasks)
+  File "/home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py", line 252, in delete
+    json_result = await resp.json()
+  File "/home/matereza/PycharmProjects/damas-core/venv/lib/python3.9/site-packages/aiohttp/client_reqrep.py", line 1097, in json
+    raise ContentTypeError(
+aiohttp.client_exceptions.ContentTypeError: 0, message='Attempt to decode JSON with unexpected mimetype: text/html; charset=utf-8', url=URL('http://localhost:8090/api/delete/')
+Task was destroyed but it is pending!
+task: <Task pending name='Task-201' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a00a90>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-200' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a00850>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-199' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a00610>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-198' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a003d0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-197' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a00190>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-196' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089f8f10>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-195' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089f8cd0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-194' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089f8a90>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-193' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089f8850>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-192' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089f8610>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-191' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089f83d0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-190' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089f8190>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-189' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089eff10>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-188' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089efcd0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-187' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089efa90>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-186' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089ef850>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-185' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089ef5e0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-184' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089ef3a0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-183' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089ef160>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-182' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089e6ee0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-181' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089e6ca0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-180' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089e6a60>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-179' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089e6820>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-178' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089e65e0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-177' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089e63a0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-176' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089e6160>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-175' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089ddee0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-174' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089ddca0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-173' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089dda60>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-172' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089dd820>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-171' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089dd5e0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-170' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089dd3a0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-169' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f80089dd160>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-168' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a55ee0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-167' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a55ca0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-166' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a55a60>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-165' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a55820>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-164' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a555e0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-163' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a553a0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-162' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a55160>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-161' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a4aee0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-160' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a4aca0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-159' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a4aa60>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-158' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a4a820>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-157' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a4a5e0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-156' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a4a3a0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-155' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a4a160>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-154' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a42ee0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-153' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a42ca0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-152' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a42a60>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-151' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a42820>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-150' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a425e0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-149' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a423a0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-148' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a42160>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-147' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a39ee0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-146' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a39ca0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-145' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a39a60>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-144' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a39820>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-143' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a395e0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-142' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a393a0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-141' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a39160>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-140' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a31ee0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-139' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a31ca0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-138' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a31a60>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-137' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a31820>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-136' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a315e0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-135' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a313a0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-134' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a31160>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-133' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a2aee0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-132' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a2aca0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-131' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a2aa60>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-130' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a2a820>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-129' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a2a5e0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-128' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a2a3a0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-127' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a2a160>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-126' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a1eee0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-125' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a1eca0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-124' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a1ea60>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-123' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a1e820>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-122' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a1e5e0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-121' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a1e3a0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-120' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a1e160>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-119' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a96ee0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-118' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a96ca0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-117' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a96a60>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-116' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a96820>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-115' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a965e0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-114' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a963a0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-113' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a96160>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-112' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a8dee0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-111' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a8dca0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-110' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a8da60>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-109' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a8d820>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-108' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a8d5e0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-107' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a8d3a0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-106' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a8d160>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-105' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a85ee0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-104' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a85ca0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-103' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[<TaskWakeupMethWrapper object at 0x7f8008a85a60>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+Task was destroyed but it is pending!
+task: <Task pending name='Task-102' coro=<http_async_connection.delete() running at /home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py:251> wait_for=<Future pending cb=[BaseSelectorEventLoop._sock_write_done(6, handle=<Handle BaseS....0.1', 8090))>)(), <TaskWakeupMethWrapper object at 0x7f8008a614c0>()]> cb=[gather.<locals>._done_callback() at /usr/lib/python3.9/asyncio/tasks.py:759]>
+
+Process finished with exit code 1

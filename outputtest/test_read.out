@@ -1,0 +1,9 @@
+/home/matereza/PycharmProjects/damas-core/venv/bin/python /home/matereza/PycharmProjects/damas-core/py/async_cli/main_test.py
+================================>>> test_read started
+json requests result ==============================================={'_id': '60ad1b1605f7c6c3ad890d67', 'author': '::1', 'time': 1621957398502}
+>>>>>>>>>>>>>>>>>>> read status code is 200 <<<<<<<<<<<<<<<
+there is no call back provided
+{'_id': '60ad1b1605f7c6c3ad890d67', 'author': '::1', 'time': 1621957398502}
+================================>>> test_read finished
+
+Process finished with exit code 0

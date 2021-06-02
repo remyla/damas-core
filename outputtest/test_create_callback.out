@@ -1,0 +1,14 @@
+/home/matereza/PycharmProjects/damas-core/venv/bin/python /home/matereza/PycharmProjects/damas-core/py/async_cli/main_test.py
+================================>>> test_create started
+type of keys = <class 'dict'>
+type of data = <class 'str'>
+{"key1": "value1"}
+request response is <ClientResponse(http://localhost:8090/api/create/) [201 Created]>
+<CIMultiDictProxy('X-Powered-By': 'Express', 'Vary': 'X-HTTP-Method-Override', 'Content-Type': 'application/json; charset=utf-8', 'Content-Length': '99', 'Etag': 'W/"63-br/7dx6mGJO8KIZuPtz8z4PFRp8"', 'Date': 'Sun, 30 May 2021 23:50:00 GMT', 'Connection': 'keep-alive')>
+
+json requests result ==============================================={'author': '::ffff:127.0.0.1', 'time': 1622418600973, 'key1': 'value1', '_id': '60b424a8556cb538f2d8b1f6'}
+callbck given is print
+{'author': '::ffff:127.0.0.1', 'time': 1622418600973, 'key1': 'value1', '_id': '60b424a8556cb538f2d8b1f6'}
+================================>>> test_create finished
+
+Process finished with exit code 0
