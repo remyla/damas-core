@@ -1,6 +1,6 @@
 class NoneResultException(Exception):
-    def __init__(self, msg="Damas Error : None Result Error :"):
-        self.msgError = msg
+    def __init__(self, details="no more details"):
+        self.msg_error = "Damas Error : None Result Error :" + details
 
-    def throw(self, details="no more details"):
-        print(self.msgError + details)
+    def __str__(self):
+        return self.msg_error
