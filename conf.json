@@ -7,11 +7,12 @@
     },
     "db": "mongodb",
     "mongodb": {
-        "host": "localhost",
+        "host": "mongo",
         "collection": "node",
         "port": 27017,
         "options": { "auto_reconnect": true }
     },
+	"morgan": "combined",
     "extensions": {
         "es6_polyfills": {
             "enable": true,
