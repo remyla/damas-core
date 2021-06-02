@@ -1,0 +1,23 @@
+/home/matereza/PycharmProjects/damas-core/venv/bin/python /home/matereza/PycharmProjects/damas-core/py/async_cli/main_test.py
+================================>>> test_read started
+json requests result ==============================================={'_id': '60ad1b1605f7c6c3ad890d67', 'author': '::1', 'time': 1621957398502}
+>>>>>>>>>>>>>>>>>>> read status code is 200 <<<<<<<<<<<<<<<
+callback given is print
+{'_id': '60ad1b1605f7c6c3ad890d67', 'author': '::1', 'time': 1621957398502}
+================================>>> test_read finished
+================================>>> test_update started
+session is closed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Traceback (most recent call last):
+  File "/home/matereza/PycharmProjects/damas-core/py/async_cli/main_test.py", line 205, in <module>
+    loop.run_until_complete(main(loop))
+  File "/usr/lib/python3.9/asyncio/base_events.py", line 642, in run_until_complete
+    return future.result()
+  File "/home/matereza/PycharmProjects/damas-core/py/async_cli/main_test.py", line 166, in main
+    await test_update(element_with_auto_generated_id_key)
+  File "/home/matereza/PycharmProjects/damas-core/py/async_cli/main_test.py", line 101, in test_update
+    await damas.update(key, callback)
+  File "/home/matereza/PycharmProjects/damas-core/py/async_cli/damas_async.py", line 210, in update
+    raise ClosedSessionExecption
+TypeError: exceptions must derive from BaseException
+
+Process finished with exit code 1

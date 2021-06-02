@@ -4,79 +4,42 @@ import aiohttp
 import asyncio
 import requests
 
-from py.async_cli.DamasException import EmptyKeyElementException, NoneResultExecption, ClosedSessionExecption, \
-    SessionNotInitializedExecption
+from py.async_cli.DamasException import ClosedSessionExecption, EmptyElementException, NoneResultExecption, \
+    FailedRequestException
+from py.async_cli.DamasException.AlreadyExistException import AlreadyExistException
+from py.async_cli.DamasException.NotFoundException import NotFoundException
 
 
 class http_async_connection(object):
     def __init__(self, url, loop=asyncio.get_event_loop()):
-        # self.cj = cookielib.LWPCookieJar()
         self.loop = loop
         self.serverURL = url
-        # self.session = None
-        self.session = aiohttp.ClientSession(loop=self.loop)
+        self.session = None
         self.response = None
         self.token = None
         self.headers = {}
 
     async def connect(self, callback=None):
-        # async with aiohttp.ClientSession(loop=self.loop) as session:
-        async with self.session as session:
-            # self.session = session
+        async with aiohttp.ClientSession(loop=self.loop) as session:
+            self.session = session
             async with session.get(self.serverURL, ssl=False) as response:
                 assert response.status == 200
-                # print("Status:", response.status)
                 self.headers = response.headers
-                # print("Content-type:", self.headers['content-type'])
-                html = await response.text()
-                print("Body", html)
                 print("-------------------------------- HTTP ",
                       self.serverURL,
                       "CONNECTION OK --------------------------------"
                       )
-                print("==============================================================================================")
-                print("==============================================================================================")
-                print("|| RESPONSE SERVER = {} ||".format(response))
-                print("==============================================================================================")
-                print("==============================================================================================")
                 self.response = response
                 if callback is None:
-                    print("there is no call back provided")
+                    print("there is no callback provided")
                     return self.response
                 else:
                     res_callback = callback(self.response)
-                    print("the call back is executed")
+                    print("the {} callback is executed".format(callback.__name__))
                     if res_callback is None:
-                        print("the call back return none. return value before callback is {}".format(self.response))
+                        print("The call back return none. \nReturned value before callback is {}".format(self.response))
                         return self.response
                     return res_callback
-
-    # async def connect(self, callback=None):
-    #     self.session = aiohttp.ClientSession(loop=self.loop)
-    #     async with self.session.get(self.serverURL, ssl=False) as response:
-    #         assert response.status == 200
-    #         # print("Status:", response.status)
-    #         self.headers = response.headers
-    #         # print("Content-type:", self.headers['content-type'])
-    #         html = await response.text()
-    #         print("Body", html)
-    #         print("-------------------------------- HTTP ",
-    #               self.serverURL,
-    #               "CONNECTION OK --------------------------------"
-    #               )
-    #         print("==============================================================================================")
-    #         print("==============================================================================================")
-    #         print("|| RESPONSE SERVER = {} ||".format(response))
-    #         print("==============================================================================================")
-    #         print("==============================================================================================")
-    #         self.response = response
-    #         print(response)
-    #         if callback is None:
-    #             print("there is no call back provided")
-    #             return self.response
-    #         else:
-    #             print("the call back is executed")
-    #             return callback
 
     async def disconnect(self):
         await self.session.close()
@@ -88,9 +51,10 @@ class http_async_connection(object):
         try:
             assert (keys != {})
             assert (keys is not None)
-        except EmptyKeyElementException:
-            EmptyKeyElementException(keys).throw("empty json keys element")
-        async with self.session as session:
+        except EmptyElementException:
+            raise EmptyElementException(keys)
+        async with aiohttp.ClientSession(loop=self.loop) as session:
+            self.session = session
             if self.session.closed:
                 print("session is closed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 raise ClosedSessionExecption
@@ -98,76 +62,42 @@ class http_async_connection(object):
             headers = {'content-type': 'application/json'}
             headers.update(self.headers)
             data = json.dumps(keys)
-            print("type of keys = {}".format(type(keys)))
-            print("type of data = {}".format(type(data)))
-            print(data)
             async with session.post(url, data=data, headers=headers, ssl=False) as resp:
                 assert resp is not None
-                print("request response is {}".format(resp))
-                json_result = await resp.json()
-                print("json requests result ==============================================={}".format(json_result))
                 if resp.status < 300:
+                    json_result = await resp.json()
                     try:
                         assert (json_result is not None)
                     except NoneResultExecption:
-                        NoneResultExecption().throw("Create returun None")
+                        NoneResultExecption().throw("Create return None")
                     if callback is None:
-                        print("there is no call back provided")
+                        print("There is no callback provided")
                         print(json_result)
                         return json_result
                     else:
-                        print("callbck given is {}".format(callback.__name__))
-                        return callback(json_result)
+                        print("callback given is {}".format(callback.__name__))
+                        callback_result = callback(json_result)
+                        if callback_result is None:
+                            print("The call back return none. \nReturned value before callback is {}".format(self.response))
+                            return self.response
+                    return callback_result
                 else:
-                    print("Les erreurs du client (400 - 499)")
-                    print("Les erreurs du serveur (500 - 599)")
-                    return resp.status
-
-    # async def create(self, keys, callback=None):
-    #     try:
-    #         assert (keys != {})
-    #         assert (keys is not None)
-    #     except EmptyKeyElementException:
-    #         EmptyKeyElementException(keys).throw("empty json keys element")
-    #     if self.session is None:
-    #         print("session is not initialized !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    #         raise SessionNotInitializedExecption
-    #     if self.session.closed:
-    #         print("session is closed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    #         raise ClosedSessionExecption
-    #     url = self.serverURL + "/api/create/"
-    #     headers = {'content-type': 'application/json'}
-    #     headers.update(self.headers)
-    #     data = json.dumps(keys)
-    #     async with self.session.post(url, data=data, headers=headers, ssl=False) as resp:
-    #         json_result = await resp.json()
-    #         print("json requests result ==============================================={}".format(json_result))
-    #         if resp.status < 300:
-    #             try:
-    #                 assert (json_result is not None)
-    #             except NoneResultExecption:
-    #                 NoneResultExecption().throw("Create returun None")
-    #             if callback is None:
-    #                 print("there is no call back provided")
-    #                 print(json_result)
-    #                 # await self.session.close()
-    #                 return json_result
-    #             else:
-    #                 print("callbck given is {}".format(callback.__name__))
-    #                 # await self.session.close()
-    #                 return callback(json_result)
-    #         else:
-    #             print("Les erreurs du client (400 - 499)")
-    #             print("Les erreurs du serveur (500 - 599)")
-    #             return resp.status
+                    if resp.status == 409:
+                        print("Code http create request error is {}".format(resp.status))
+                        raise AlreadyExistException(keys)
+                    print("Code http create request error is {}".format(resp.status))
+                    print("Damas create request: client errors (400 - 499)")
+                    print("Damas create request: server errors (500 - 599)")
+                    raise FailedRequestException
 
     async def read(self, id, callback=None):
         try:
             assert (id != "")
             assert (id is not None)
-        except EmptyKeyElementException:
-            EmptyKeyElementException(id).throw("empty json keys element")
-        async with self.session as session:
+        except EmptyElementException:
+            EmptyElementException(id).throw("empty json keys element")
+        async with aiohttp.ClientSession(loop=self.loop) as session:
+            self.session = session
             if self.session.closed:
                 print("session is closed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 raise ClosedSessionExecption
@@ -176,71 +106,90 @@ class http_async_connection(object):
             headers.update(self.headers)
             data = json.dumps(id)
             async with session.get(url, data=data, headers=headers, ssl=False) as resp:
-                json_result = await resp.json()
-                print("json requests result ==============================================={}".format(json_result))
-                print(">>>>>>>>>>>>>>>>>>> read status code is {} <<<<<<<<<<<<<<<".format(resp.status))
+                assert resp is not None
                 if resp.status < 300:
+                    json_result = await resp.json()
                     try:
-                        assert (json_result is not None)
+                        assert json_result is not None
                     except NoneResultExecption:
                         NoneResultExecption().throw("Read return None")
                     if callback is None:
-                        print("there is no call back provided")
-                        # print(result)
+                        print("There is no call back provided")
                         print(json_result)
-                        # await self.session.close()
                         return json_result
                     else:
-                        print("callback given is {}".format(callback.__name__))
-                        # await self.session.close()
+                        print("Callback given is {}".format(callback.__name__))
                         return callback(json_result)
                 else:
-                    print("Les erreurs du client (400 - 499)")
-                    print("Les erreurs du serveur (500 - 599)")
+                    if resp.status == 404:
+                        print("Code http read request error is {}".format(resp.status))
+                        raise NotFoundException(id)
+                    print("Code http create request error is {}".format(resp.status))
+                    print("Damas read request: client errors (400 - 499)")
+                    print("Damas read request: server errors (500 - 599)")
+                    raise FailedRequestException
+
+    async def read_all(self, callback=None):
+        result = await http_async_connection(self.serverURL, self.loop).read(await self.search("*"))
+        if callback is None:
+            print("There is no call back provided")
+            print(result)
+            return result
+        else:
+            print("Callback given is {}".format(callback.__name__))
+            return callback(result)
 
     async def update(self, keys, callback=None):
         try:
             assert (keys != {})
             assert (keys is not None)
-        except EmptyKeyElementException:
-            EmptyKeyElementException(keys).throw("empty json keys element")
-        async with self.session as session:
+        except EmptyElementException:
+            EmptyElementException(keys).throw("empty json keys element")
+        async with aiohttp.ClientSession(loop=self.loop) as session:
+            self.session = session
             if self.session.closed:
-                print("session is closed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                print("Session is closed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 raise ClosedSessionExecption
             url = self.serverURL + "/api/update/"
             headers = {'content-type': 'application/json'}
             headers.update(self.headers)
             data = json.dumps(keys)
             async with session.put(url, data=data, headers=headers, ssl=False) as resp:
-                json_result = await resp.json()
-                print("json requests result ==============================================={}".format(json_result))
+                assert resp is not None
                 if resp.status < 300:
+                    json_result = await resp.json()
                     try:
                         assert (json_result is not None)
                     except NoneResultExecption:
-                        NoneResultExecption().throw("Create returun None")
+                        NoneResultExecption().throw("Update return None")
                     if callback is None:
-                        print("there is no call back provided")
+                        print("There is no callback provided")
                         print(json_result)
-                        # await self.session.close()
                         return json_result
                     else:
-                        print("callback given is {}".format(callback.__name__))
-                        # await self.session.close()
-                        return callback(json_result)
+                        print("Callback given is {}".format(callback.__name__))
+                        callback_result = callback(json_result)
+                        if callback_result is None:
+                            print("The call back return none. \nReturned value before callback is {}".format(self.response))
+                            return self.response
+                    return callback_result
                 else:
-                    print("client errors (400 - 499)")
-                    print("server errors (500 - 599)")
-                    return resp.status
+                    if resp.status == 409:
+                        print("Code http update request error is {}".format(resp.status))
+                        raise AlreadyExistException(keys)
+                    print("Code http update request error is {}".format(resp.status))
+                    print("Damas update request: client errors (400 - 499)")
+                    print("Damas update request: server errors (500 - 599)")
+                    raise FailedRequestException
 
     async def delete(self, id, callback=None):
         try:
             assert (id != "")
             assert (id is not None)
-        except EmptyKeyElementException:
-            EmptyKeyElementException(id).throw("empty json keys element")
-        async with self.session as session:
+        except EmptyElementException:
+            EmptyElementException(id).throw("empty json keys element")
+        async with aiohttp.ClientSession(loop=self.loop) as session:
+            self.session = session
             if self.session.closed:
                 print("session is closed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 raise ClosedSessionExecption
@@ -249,39 +198,249 @@ class http_async_connection(object):
             headers.update(self.headers)
             data = json.dumps(id)
             async with session.delete(url, data=data, headers=headers, ssl=False) as resp:
-                json_result = await resp.json()
-                print("json requests result ==============================================={}".format(json_result))
-                print(">>>>>>>>>>>>>>>>>>> read status code is {} <<<<<<<<<<<<<<<".format(resp.status))
+                assert resp is not None
                 if resp.status < 300:
+                    json_result = await resp.json()
+                    try:
+                        assert json_result is not None
+                    except NoneResultExecption:
+                        NoneResultExecption().throw("Delete return None")
+                    if callback is None:
+                        print("There is no call back provided")
+                        print(json_result)
+                        return json_result
+                    else:
+                        print("Callback given is {}".format(callback.__name__))
+                        return callback(json_result)
+                else:
+                    if resp.status == 404:
+                        print("Code http delete request error is {}".format(resp.status))
+                        raise NotFoundException(id)
+                    print("Code http delete request error is {}".format(resp.status))
+                    print("Damas delete request: client errors (400 - 499)")
+                    print("Damas delete request: server errors (500 - 599)")
+                    raise FailedRequestException
+
+    async def delete_all(self, callback=None):
+        result = await http_async_connection(self.serverURL, self.loop).delete(await self.search("*"))
+        if callback is None:
+            print("There is no call back provided")
+            print(result)
+            return result
+        else:
+            print("Callback given is {}".format(callback.__name__))
+            return callback(result)
+
+    async def search(self, query, callback=None):
+        try:
+            assert (query != "")
+            assert (query is not None)
+        except EmptyElementException:
+            EmptyElementException(id).throw("empty json keys element")
+        async with aiohttp.ClientSession(loop=self.loop) as session:
+            self.session = session
+            if self.session.closed:
+                print("session is closed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                raise ClosedSessionExecption
+            url = self.serverURL + "/api/search/" + query
+            headers = self.headers
+            async with session.get(url, headers=headers, ssl=False) as resp:
+                assert resp is not None
+                if resp.status < 300:
+                    json_result = await resp.json()
+                    try:
+                        assert json_result is not None
+                    except NoneResultExecption:
+                        NoneResultExecption().throw("Delete return None")
+                    if callback is None:
+                        print("There is no call back provided")
+                        print(json_result)
+                        return json_result
+                    else:
+                        print("Callback given is {}".format(callback.__name__))
+                        return callback(json_result)
+                else:
+                    if resp.status == 404:
+                        print("Code http delete request error is {}".format(resp.status))
+                        raise NotFoundException(id)
+                    print("Code http search request error is {}".format(resp.status))
+                    print("Damas search request: client errors (400 - 499)")
+                    print("Damas search_one request: server errors (500 - 599)")
+                    raise FailedRequestException
+
+    async def search_one(self, query, callback=None):
+        try:
+            assert (query != "")
+            assert (query is not None)
+        except EmptyElementException:
+            EmptyElementException(id).throw("empty json keys element")
+        async with aiohttp.ClientSession(loop=self.loop) as session:
+            self.session = session
+            if self.session.closed:
+                print("session is closed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                raise ClosedSessionExecption
+            url = self.serverURL + "/api/search_one/" + query
+            headers = self.headers
+            async with session.get(url, headers=headers, ssl=False) as resp:
+                assert resp is not None
+                if resp.status < 300:
+                    json_result = await resp.json()
+                    try:
+                        assert json_result is not None
+                    except NoneResultExecption:
+                        NoneResultExecption().throw("Delete return None")
+                    if callback is None:
+                        print("There is no call back provided")
+                        print(json_result)
+                        return json_result
+                    else:
+                        print("Callback given is {}".format(callback.__name__))
+                        return callback(json_result)
+                else:
+                    if resp.status == 404:
+                        print("Code http delete request error is {}".format(resp.status))
+                        raise NotFoundException(id)
+                    print("Code http search_one request error is {}".format(resp.status))
+                    print("Damas search_one request: client errors (400 - 499)")
+                    print("Damas search_one request: server errors (500 - 599)")
+                    raise FailedRequestException
+
+    async def signIn(self, username, password, callback=None):
+        try:
+            assert (username != "")
+            assert (username is not None)
+        except EmptyElementException:
+            raise EmptyElementException(username)
+        try:
+            assert (password != "")
+            assert (password is not None)
+        except EmptyElementException:
+            raise EmptyElementException(password)
+        async with aiohttp.ClientSession(loop=self.loop) as session:
+            self.session = session
+            if self.session.closed:
+                print("session is closed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                raise ClosedSessionExecption
+            url = self.serverURL + "/api/signIn/"
+            headers = {'content-type': 'application/json'}
+            headers.update(self.headers)
+            data = {"username": username, "password": password}
+            async with session.post(url, data=data, headers=headers, ssl=False) as resp:
+                assert resp is not None
+                if resp.status < 300:
+                    if resp.status == 200:
+                        json_result = await resp.json()
+                        try:
+                            assert json_result is not None
+                        except NoneResultExecption:
+                            NoneResultExecption().throw("Create return None")
+                        self.token = json.loads(json_result)
+                        self.headers["Authorization"] = 'Bearer ' + self.token['token']
+                        if callback is None:
+                            print("There is no callback provided")
+                            print(json_result)
+                            return json_result
+                        else:
+                            print("callback given is {}".format(callback.__name__))
+                            callback_result = callback(json_result)
+                            if callback_result is None:
+                                print("The call back return none. \nReturned value before callback is {}".format(
+                                    self.response))
+                                return self.response
+                        return callback_result
+                    return False
+                else:
+                    # if resp.status == 409:
+                    #     print("Code http create request error is {}".format(resp.status))
+                    #     raise AlreadyExistException(keys)
+                    print("Code http signIn request error is {}".format(resp.status))
+                    print("Damas signIn request: client errors (400 - 499)")
+                    print("Damas signIn request: server errors (500 - 599)")
+                    raise FailedRequestException
+
+    def signOut(self):
+        self.token = None
+        del self.headers['Authorization']
+
+    async def verify(self, callback=None):
+        async with aiohttp.ClientSession(loop=self.loop) as session:
+            self.session =session
+            if self.session.closed:
+                print("session is closed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                raise ClosedSessionExecption
+            url = self.serverURL + "/api/verify/"
+            headers = self.headers
+            async with session.get(url, headers=headers,ssl=False) as resp:
+                assert resp is not None
+                if resp.status == 200:
+                    json_result = await resp.json()
+                    try:
+                        assert json_result is not None
+                    except NoneResultExecption:
+                        NoneResultExecption().throw("Create return None")
+                    if callback is None:
+                        print("There is no callback provided")
+                        print(json_result)
+                        return True
+                    else:
+                        print("callback given is {}".format(callback.__name__))
+                        callback_result = callback(json_result)
+                        if callback_result is None:
+                            print("The call back return none. \nReturned value before callback is {}".format(
+                                self.response))
+                            return True
+                        return callback_result
+                        return True
+                else:
+                    # if resp.status == 409:
+                    #     print("Code http create request error is {}".format(resp.status))
+                    #     raise AlreadyExistException(keys)
+                    print("Code http verify request error is {}".format(resp.status))
+                    print("Damas verify request: client errors (400 - 499)")
+                    print("Damas verify request: server errors (500 - 599)")
+                    return False
+
+    async def comment(self, keys, callback=None):
+        try:
+            assert (keys != {})
+            assert (keys is not None)
+        except EmptyElementException:
+            raise EmptyElementException(keys)
+        async with aiohttp.ClientSession(loop=self.loop) as session:
+            self.session = session
+            if self.session.closed:
+                print("session is closed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                raise ClosedSessionExecption
+            url = self.serverURL + "/api/comment/"
+            headers = {'content-type': 'application/json'}
+            headers.update(self.headers)
+            async with session.post(url, headers=headers, ssl=False) as resp:
+                assert resp is not None
+                if resp.status < 300:
+                    json_result = await resp.json()
                     try:
                         assert (json_result is not None)
                     except NoneResultExecption:
-                        NoneResultExecption().throw("Read return None")
+                        NoneResultExecption().throw("Create return None")
+                    result = json.loads(json_result)
                     if callback is None:
-                        print("there is no call back provided")
-                        # print(result)
-                        print(json_result)
-                        # await self.session.close()
-                        return json_result
+                        print("There is no callback provided")
+                        print(result)
+                        return result
                     else:
                         print("callback given is {}".format(callback.__name__))
-                        # await self.session.close()
-                        return callback(json_result)
+                        callback_result = callback(result)
+                        if callback_result is None:
+                            print("The call back return none. \nReturned value before callback is {}".format(self.response))
+                            return self.response
+                    return callback_result
                 else:
-                    print("Les erreurs du client (400 - 499)")
-                    print("Les erreurs du serveur (500 - 599)")
+                    if resp.status == 409:
+                        print("Code http create request error is {}".format(resp.status))
+                        raise AlreadyExistException(keys)
+                    print("Code http create request error is {}".format(resp.status))
+                    print("Damas create request: client errors (400 - 499)")
+                    print("Damas create request: server errors (500 - 599)")
+                    raise FailedRequestException
 
 
-    async def signIn(self, username, password, callback=None):
-        r = await requests.post(self.serverURL + '/api/signIn/', data={"username": username, "password": password},
-                                verify=False)
-        if r.status_code == 200:
-            self.token = json.loads(r.text)
-            self.headers['Authorization'] = 'Bearer ' + self.token['token']
-            return True
-        return False
-        # opener = urllib2.build_opener( urllib2.HTTPCookieProcessor( self.cj ) )
-        # urllib2.install_opener( opener )
-        # try: a = urllib2.urlopen( self.serverURL + '/authentication.php?cmd=login&user=' + username + '&password=' + password )
-        # except: return False
-        # return json.loads( a.read() )
