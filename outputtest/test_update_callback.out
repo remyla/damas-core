@@ -1,8 +1,0 @@
-/home/matereza/PycharmProjects/damas-core/venv/bin/python /home/matereza/PycharmProjects/damas-core/py/async_cli/main_test.py
-================================>>> test_update started
-json requests result ===============================================[{'_id': 'identifier1', 'author': '::ffff:127.0.0.1', 'time': 1622385547286, 'key': 'keyvalue'}, {'_id': 'identifier2', 'author': '::ffff:127.0.0.1', 'time': 1622385547286, 'key': 'keyvalue'}]
-callback given is print
-[{'_id': 'identifier1', 'author': '::ffff:127.0.0.1', 'time': 1622385547286, 'key': 'keyvalue'}, {'_id': 'identifier2', 'author': '::ffff:127.0.0.1', 'time': 1622385547286, 'key': 'keyvalue'}]
-================================>>> test_update finished
-
-Process finished with exit code 0

@@ -1,8 +1,0 @@
-/home/matereza/PycharmProjects/damas-core/venv/bin/python /home/matereza/PycharmProjects/damas-core/py/async_cli/main_test.py
-================================>>> test_update started
-json requests result ==============================================={'_id': '/project/folder/file1', 'author': '::ffff:127.0.0.1', 'time': 1622385547289, 'tgt_id': '/project/folder/file2'}
-there is no call back provided
-{'_id': '/project/folder/file1', 'author': '::ffff:127.0.0.1', 'time': 1622385547289, 'tgt_id': '/project/folder/file2'}
-================================>>> test_update finished
-
-Process finished with exit code 0
