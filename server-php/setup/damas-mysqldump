@@ -1,9 +1,0 @@
-#!/bin/sh
-# Usage :
-# - Edit this file to match the setup of the project
-# - Copy this file to /etc/cron.hourly/
-db_name=
-db_user=
-db_pass=
-target="/root/damas_backups"
-/usr/bin/mysqldump -u$db_user -p$db_pass $db_name | /bin/bzip2 > $target/${db_name}_`/bin/date +%y%m%d-%H:%M`.sql.bz2
