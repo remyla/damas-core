@@ -5,7 +5,7 @@ cp cli/damas.sh /usr/bin/damas
 ```
 Install from the gitHub repository:
 ```sh
-sudo curl -L "https://raw.githubusercontent.com/remyla/damas-core/experimental/cli/damas.sh)" -o /usr/bin/damas
+sudo curl -L "https://raw.githubusercontent.com/remyla/damas-core/experimental/cli/damas.sh" -o /usr/bin/damas
 ```
 Then make the command executable:
 ```sh
