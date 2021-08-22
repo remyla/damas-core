@@ -9,7 +9,7 @@ sudo curl -L "https://raw.githubusercontent.com/remyla/damas-core/experimental/c
 ```
 Then make the command executable:
 ```sh
-chmod +x /usr/bin/damas
+sudo chmod +x /usr/bin/damas
 ```
 
 
