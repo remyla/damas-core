@@ -1,7 +1,7 @@
 version: "2"
 services:
     damas-experimental:
-        image: primcode/damas-server:latest
+        image: primcode/damas-core:latest
         environment:
             DEBUG: "*"
         ports:
@@ -19,7 +19,7 @@ services:
         restart: always
         stdin_open: true
         tty: true
-        container_name: damas-server
+        container_name: damas-core
     mongo:
         image: mvertes/alpine-mongo:latest
         volumes:
