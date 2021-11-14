@@ -323,15 +323,18 @@ create('should create an object in the database', {key: 'value', num: 3})
         .expectStatus(200).toss();*/
 
     // Multiple operations
+	/*
     lock('should lock two nodes', [idFound, idCustom])
         .expectStatus(200).toss();
     unlock('should unlock two nodes', [idFound, idCustom])
         .expectStatus(200).toss();
+		*/
     // */
 
     /*
      * Version tests
      */
+	 /*
     version('should throw an error (empty id)', '', '')
         .expectStatus(400).toss();
 
@@ -351,6 +354,7 @@ create('should create an object in the database', {key: 'value', num: 3})
                         .expectStatus(200).toss();
                 }).toss();
         }).toss();
+		*/
 
     /*
      * Delete tests
