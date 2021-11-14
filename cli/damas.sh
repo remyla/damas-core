@@ -78,8 +78,8 @@ run() {
   map_server_errors "${RES##*$'\n'}"
   err=$?
   if [ 0 != $err ]; then
-      echo "$RES" | sed '$d' | grep -v "^$" >&2
-	  exit $err
+    echo "$RES" | sed '$d' | grep -v "^$" >&2
+    exit $err
   fi
   if [ ! $QUIET ]; then
     if [ $LINESOUT ]; then
@@ -277,7 +277,7 @@ case $COMMAND in
     echo $TOKEN > $TOKEN_FILE
     chmod go-rw "$TOKEN_FILE"
     map_server_errors "${RES##*$'\n'}"
-	exit $?
+    exit $?
     ;;
   signout)
     TOKEN_FILE="/tmp/damas-$USER-$(echo -n $DAMAS_SERVER | cksum | head -c 10)"
