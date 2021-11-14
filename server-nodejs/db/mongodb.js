@@ -292,7 +292,7 @@ module.exports = function (conf) {
      */
     self.mongo_search = function (query, sort, skip, limit, callback) {
         self.getCollection(callback, function (coll) {
-            var cur = coll.find(query);
+            var cur = coll.find(query, { _id: 1 } );
             var total = cur.count(function(err,count){
                 var find = cur.sort(sort).skip(skip).limit(limit);
                 find.toArray(function (err, results) {
