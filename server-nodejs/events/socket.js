@@ -3,10 +3,10 @@
  */
 
 var debug = require('debug')('app:io:' + process.pid);
-var SocketServer = require('socket.io');
+const { Server } = require('socket.io');
 var events = require('./');
 
-var io = module.exports = new SocketServer();
+var io = module.exports = new Server({});
 
 /*
  * Socket management
