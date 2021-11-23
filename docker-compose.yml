@@ -2,6 +2,9 @@ version: "2"
 services:
     damas-experimental:
         image: primcode/damas-core:latest
+        build:
+            context: .
+            dockerfile: docker/Dockerfile
         environment:
             DEBUG: "*"
         ports:
