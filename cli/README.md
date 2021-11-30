@@ -1,3 +1,20 @@
+## Install the `damas` command on your system
+Install from this repository:
+```sh
+cp cli/damas.sh /usr/bin/damas
+```
+Install from the gitHub repository:
+```sh
+sudo curl -L "https://raw.githubusercontent.com/remyla/damas-core/experimental/cli/damas.sh" -o /usr/bin/damas
+```
+Then make the command executable:
+```sh
+sudo chmod +x /usr/bin/damas
+```
+
+
+## Manual page
+
 ```
 NAME
   damas.sh - a command line interface to access a remote damas-core storage
