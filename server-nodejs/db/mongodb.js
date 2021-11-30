@@ -86,8 +86,8 @@ module.exports = function (conf) {
                 });
             }
             async.mapLimit(nodes, 100, createNode, function (err, array) {
-                callback(false, array);
                 fireEvent('create', array);
+                callback(false, array);
             });
         });
     }; // create()
@@ -155,8 +155,8 @@ module.exports = function (conf) {
             }
             async.mapLimit(nodes, 100, updateNode, function (err, ids) {
                 self.read(ids, function (err, doc) {
-                    callback(false, doc);
                     fireEvent('update', doc);
+                    callback(false, doc);
                 });
             });
         });
@@ -180,8 +180,8 @@ module.exports = function (conf) {
             }
             async.mapLimit(ids.map(self.exportId), 100, deleteNode,
                     function (err, array) {
-                callback(false, array);
                 fireEvent('remove', array);
+                callback(false, array);
             });
         });
     }; // remove()
