@@ -29,7 +29,6 @@
     "morgan": "^1.6.1",
     "multer": "^0.1.8",
     "mv": "^2.1.1",
-    "nodemailer": "^2.0.1",
     "socket.io": "^4.4.0"
   },
   "devDependencies": {

@@ -1,5 +1,10 @@
 /*
  * Licensed under the GNU GPL v3
+ *
+ * This extension is not maintained anymore. Please contact contact@primcode.com
+ * if you are interested in an up-to-date extension for the same purpose.
+ *
+ * depends on: nodemailer
  */
 
 module.exports = function (app, routes){
