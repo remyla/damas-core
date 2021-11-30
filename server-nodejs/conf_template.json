@@ -39,7 +39,7 @@
             "path": "./extensions/jwt.js",
             "conf": {
                 "required": true,
-                "passwordHashAlgorithm": "md5",
+                "passwordHashAlgorithm": "sha1",
                 "secret": "webtokensecret",
                 "exp": "1d",
                 "expressUse": "/api",
