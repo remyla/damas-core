@@ -25,6 +25,8 @@
 
 import json
 import requests
+from error_handler import ErrorHandler
+
 
 #requests.packages.urllib3.disable_warnings() # remove certificate warning
 
@@ -50,7 +52,10 @@ class http_connection( object ) :
             headers=headers, verify=False)
         if r.status_code == 201 or r.status_code == 207:
             return json.loads(r.text)
-        return None
+
+        error_obj = ErrorHandler(str(r.status_code))
+        error_response = error_obj.handler("/api/create/")
+        return error_response
 
     def read( self, id_ ) :
         '''
@@ -64,7 +69,10 @@ class http_connection( object ) :
             headers=headers, verify=False)
         if r.status_code == 200 or r.status_code == 207:
             return json.loads(r.text)
-        return None
+
+        error_obj = ErrorHandler(str(r.status_code))
+        error_response = error_obj.handler("/api/read/")
+        return error_response
 
     def update( self, keys ) :
         '''
@@ -79,7 +87,10 @@ class http_connection( object ) :
             headers=headers, verify=False)
         if r.status_code == 200 or r.status_code == 207:
             return json.loads(r.text)
-        return None
+        
+        error_obj = ErrorHandler(str(r.status_code))
+        error_response = error_obj.handler("/api/update/")
+        return error_response
 
     def upsert( self, keys ) :
         '''
