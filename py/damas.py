@@ -26,7 +26,6 @@
 import json
 import requests
 
-
 #requests.packages.urllib3.disable_warnings() # remove certificate warning
 
 class http_connection( object ) :
@@ -49,9 +48,11 @@ class http_connection( object ) :
         headers.update(self.headers)
         r = requests.post(self.serverURL+"/api/create/", data=json.dumps(keys),
             headers=headers, verify=False)
+        if r.status_code == 201 or r.status_code == 207:
+            return json.loads(r.text)
         return r.status_code, r.text
 
-    def read( self, id_ ) :
+    def read( self, id_ ):
         '''
         Retrieve a node specifying its internal node index
         @param {String} id_ the internal node index to search
@@ -61,6 +62,8 @@ class http_connection( object ) :
         headers.update(self.headers)
         r = requests.post(self.serverURL+"/api/read/", data=json.dumps(id_),
             headers=headers, verify=False)
+        if r.status_code == 200 or r.status_code == 207:
+            return json.loads(r.text)
         return r.status_code, r.text
 
     def update( self, keys ) :
@@ -74,6 +77,8 @@ class http_connection( object ) :
         headers.update(self.headers)
         r = requests.put(self.serverURL+'/api/update/', data=json.dumps(keys),
             headers=headers, verify=False)
+        if r.status_code == 200 or r.status_code == 207:
+            return json.loads(r.text)
         return r.status_code, r.text
 
     def upsert( self, keys ) :
@@ -87,6 +92,8 @@ class http_connection( object ) :
         headers.update(self.headers)
         r = requests.post(self.serverURL+'/api/upsert/', data=json.dumps(keys),
                 headers=headers, verify=False)
+        if r.status_code == 200 or r.status_code == 201:
+            return json.loads(r.text)
         return r.status_code, r.text
 
     def delete( self, id_ ) :
@@ -99,6 +106,8 @@ class http_connection( object ) :
         headers.update(self.headers)
         r = requests.delete(self.serverURL+'/api/delete/', data=json.dumps(id_),
             headers=headers, verify=False)
+        if r.status_code == 200 or r.status_code == 207:
+            return json.loads(r.text)
         return r.status_code, r.text
 
     def search( self, query ) :
@@ -109,6 +118,8 @@ class http_connection( object ) :
         '''
         r = requests.get(self.serverURL+'/api/search/'+query,
             headers=self.headers, verify=False)
+        if r.status_code == 200:
+            return json.loads(r.text)
         return r.status_code, r.text
 
     def search_one( self, query ) :
@@ -119,6 +130,8 @@ class http_connection( object ) :
         '''
         r = requests.get(self.serverURL+'/api/search_one/'+query,
         headers=self.headers, verify=False)
+        if r.status_code == 200:
+            return json.loads(r.text)
         return r.status_code, r.text
 
     def search_mongo( self, query, sort, limit, skip ) :
@@ -127,6 +140,8 @@ class http_connection( object ) :
         headers.update(self.headers)
         r = requests.post(self.serverURL+'/api/search_mongo/',
             data=json.dumps(data), headers=headers, verify=False)
+        if r.status_code == 200:
+            return json.loads(r.text)
         return r.status_code, r.text
 
     def graph( self, id_ ) :
@@ -139,6 +154,8 @@ class http_connection( object ) :
         headers.update(self.headers)
         r = requests.post(self.serverURL+'/api/graph/0/', data=json.dumps(id_),
             headers=headers, verify=False)
+        if r.status_code == 200 or r.status_code == 207:
+            return json.loads(r.text)
         return r.status_code, r.text
 
     # USERS AUTHENTICATION METHODS
@@ -200,6 +217,8 @@ class http_connection( object ) :
         headers.update(self.headers)
         r = requests.post(self.serverURL+'/api/publish/', data=json.dumps(keys),
         headers=headers, verify=False)
+        if r.status_code == 201 or r.status_code == 207:
+            return json.loads(r.text)   
         return r.status_code, r.text
 
     def unlock( self, id_ ) :
@@ -212,6 +231,8 @@ class http_connection( object ) :
         headers.update(self.headers)
         r = requests.put(self.serverURL+'/api/unlock/', data=json.dumps(id_),
             headers=headers, verify=False)
+        if r.status_code == 201:
+            return json.loads(r.text)
         return r.status_code == 200
 
     def version( self, id_, keys ) :
@@ -237,6 +258,9 @@ class http_connection( object ) :
         headers.update(self.headers)
         r = requests.post(self.serverURL+"/api/comment/",
                 data=json.dumps(keys), headers=headers, verify=False)
+                
+        if r.status_code == 201 or r.status_code == 207:
+            return json.loads(r.text)
         return r.status_code, r.text
 
     """ commented until proper implementation
