@@ -49,7 +49,7 @@ class http_connection( object ) :
         r = requests.post(self.serverURL+"/api/create/", data=json.dumps(keys),
             headers=headers, verify=False)
         if r.status_code == 201 or r.status_code == 207:
-            return json.loads(r.text)
+            return r.status_code, json.loads(r.text)
         return r.status_code, r.text
 
     def read( self, id_ ):
@@ -63,7 +63,7 @@ class http_connection( object ) :
         r = requests.post(self.serverURL+"/api/read/", data=json.dumps(id_),
             headers=headers, verify=False)
         if r.status_code == 200 or r.status_code == 207:
-            return json.loads(r.text)
+            return r.status_code, json.loads(r.text)
         return r.status_code, r.text
 
     def update( self, keys ) :
@@ -78,7 +78,7 @@ class http_connection( object ) :
         r = requests.put(self.serverURL+'/api/update/', data=json.dumps(keys),
             headers=headers, verify=False)
         if r.status_code == 200 or r.status_code == 207:
-            return json.loads(r.text)
+            return r.status_code, json.loads(r.text)
         return r.status_code, r.text
 
     def upsert( self, keys ) :
@@ -93,7 +93,7 @@ class http_connection( object ) :
         r = requests.post(self.serverURL+'/api/upsert/', data=json.dumps(keys),
                 headers=headers, verify=False)
         if r.status_code == 200 or r.status_code == 201:
-            return json.loads(r.text)
+            return r.status_code, json.loads(r.text)
         return r.status_code, r.text
 
     def delete( self, id_ ) :
@@ -107,7 +107,7 @@ class http_connection( object ) :
         r = requests.delete(self.serverURL+'/api/delete/', data=json.dumps(id_),
             headers=headers, verify=False)
         if r.status_code == 200 or r.status_code == 207:
-            return json.loads(r.text)
+            return r.status_code, json.loads(r.text)
         return r.status_code, r.text
 
     def search( self, query ) :
@@ -119,7 +119,7 @@ class http_connection( object ) :
         r = requests.get(self.serverURL+'/api/search/'+query,
             headers=self.headers, verify=False)
         if r.status_code == 200:
-            return json.loads(r.text)
+            return r.status_code, json.loads(r.text)
         return r.status_code, r.text
 
     def search_one( self, query ) :
@@ -131,7 +131,7 @@ class http_connection( object ) :
         r = requests.get(self.serverURL+'/api/search_one/'+query,
         headers=self.headers, verify=False)
         if r.status_code == 200:
-            return json.loads(r.text)
+            return r.status_code, json.loads(r.text)
         return r.status_code, r.text
 
     def search_mongo( self, query, sort, limit, skip ) :
@@ -141,7 +141,7 @@ class http_connection( object ) :
         r = requests.post(self.serverURL+'/api/search_mongo/',
             data=json.dumps(data), headers=headers, verify=False)
         if r.status_code == 200:
-            return json.loads(r.text)
+            return r.status_code, json.loads(r.text)
         return r.status_code, r.text
 
     def graph( self, id_ ) :
@@ -155,7 +155,7 @@ class http_connection( object ) :
         r = requests.post(self.serverURL+'/api/graph/0/', data=json.dumps(id_),
             headers=headers, verify=False)
         if r.status_code == 200 or r.status_code == 207:
-            return json.loads(r.text)
+            return r.status_code, json.loads(r.text)
         return r.status_code, r.text
 
     # USERS AUTHENTICATION METHODS
@@ -218,7 +218,7 @@ class http_connection( object ) :
         r = requests.post(self.serverURL+'/api/publish/', data=json.dumps(keys),
         headers=headers, verify=False)
         if r.status_code == 201 or r.status_code == 207:
-            return json.loads(r.text)   
+            return r.status_code, json.loads(r.text)   
         return r.status_code, r.text
 
     def unlock( self, id_ ) :
@@ -231,9 +231,7 @@ class http_connection( object ) :
         headers.update(self.headers)
         r = requests.put(self.serverURL+'/api/unlock/', data=json.dumps(id_),
             headers=headers, verify=False)
-        if r.status_code == 201:
-            return json.loads(r.text)
-        return r.status_code == 200
+        return r.status_code, r.status_code == 200
 
     def version( self, id_, keys ) :
         '''
@@ -245,6 +243,8 @@ class http_connection( object ) :
         headers.update(self.headers)
         r = requests.post('%s/api/version/%s' % (self.serverURL, id_),
             data=json.dumps(keys), headers=headers, verify=False)
+        if r.status_code == 201:
+            return r.status_code, json.loads(r.text)
         return r.status_code, r.text
 
     def comment(self, keys) :
@@ -260,7 +260,7 @@ class http_connection( object ) :
                 data=json.dumps(keys), headers=headers, verify=False)
                 
         if r.status_code == 201 or r.status_code == 207:
-            return json.loads(r.text)
+            return r.status_code, json.loads(r.text)
         return r.status_code, r.text
 
     """ commented until proper implementation
