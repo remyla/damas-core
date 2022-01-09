@@ -25,7 +25,6 @@
 
 import json
 import requests
-from error_handler import ErrorHandler
 
 
 #requests.packages.urllib3.disable_warnings() # remove certificate warning
