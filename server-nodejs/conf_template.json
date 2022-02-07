@@ -12,11 +12,18 @@
         "port": 27017,
         "options": { "auto_reconnect": true }
     },
-	"morgan": "combined",
+    "morgan": "combined",
     "extensions": {
         "es6_polyfills": {
             "enable": true,
             "path": "./extensions/es6_polyfills.js"
+        },
+        "ulid": {
+            "enable": true,
+            "path": "./extensions/ulid.js",
+            "conf": {
+                "replacedPattern": "{*}"
+            }
         },
         "nodemailer": {
             "enable": false,
