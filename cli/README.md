@@ -30,7 +30,7 @@ DESCRIPTION
 
 COMMANDS
   Authentication commands:
-     signin    <username> <pass> or without arguments for interactive sign in
+     signin    <username> <pass> [<lifespan>] or without arguments for interactive sign in
      signout   Remove authorization token
 
   CRUDS commands (send JSON to the server, see examples below):

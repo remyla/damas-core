@@ -110,7 +110,7 @@ show_help_msg() {
   echo "When ARGS is -, read standard input."
   echo ""
   echo "Authentication commands: "
-  echo "   signin    <username> <pass> or without arguments for interactive sign in"
+  echo "   signin    <username> <pass> [<lifespan>] or without arguments for interactive sign in"
   echo "   signout   Remove authorization token"
   echo ""
   echo "CRUDS commands (send JSON to the server, see examples below):"
