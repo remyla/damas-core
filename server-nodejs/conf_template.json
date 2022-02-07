@@ -19,7 +19,7 @@
             "path": "./extensions/es6_polyfills.js"
         },
         "nodemailer": {
-            "enable": true,
+            "enable": false,
             "path": "./extensions/nodemailer.js",
             "conf": {
                 "transporter":{
@@ -31,7 +31,7 @@
             }
         },
         "user_setup" : {
-            "enable": true,
+            "enable": false,
             "path" : "./extensions/user_setup.js"
         },
         "jwt": {
