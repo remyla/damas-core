@@ -5,9 +5,12 @@ import json
 async def main():
     conn = async_damas.http_connection("http://localhost")
     def callback(r):
-        if r.status_code == 201 or r.status_code == 207:
-            return (r.status_code, json.loads(r.text))
-        return (r.status_code, r.text)
+        print("--------------------------------------")
+        print(r["status_code"])
+        # print(r.json())
+        if r["status_code"] == 201 or r["status_code"] == 207:
+            return (r["status_code"], r["data"])
+        return (r["status_code"], r["data"])
 
     keys = None
     # res = await conn.search1("*")

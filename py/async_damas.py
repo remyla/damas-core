@@ -1,9 +1,6 @@
 import aiohttp
 import json
 from re import search
-import requests
-import asyncio 
-import socketio 
 
 class http_connection( object ) :
     '''
@@ -14,9 +11,7 @@ class http_connection( object ) :
         self.serverURL = url
         self.token = None
         self.headers = {}
-    
-    def callback(self):
-        return None
+        self.connector = aiohttp.TCPConnector(verify_ssl=False)
     
     async def create( self, keys, callback) :
         '''
@@ -24,20 +19,14 @@ class http_connection( object ) :
         @param {Hash} keys of the new node
         @returns {Hash} New node on success, false otherwise
         '''
-        # def callback(r):
-        #     if r.status_code == 201 or r.status_code == 207:
-        #         return (r.status_code, json.loads(r.text))
-        #     return (r.status_code, r.text)
-
-        async with aiohttp.ClientSession() as session:
-            try:
-                headers = {'content-type': 'application/json'}
-                headers.update(self.headers)
-                async with session.post(self.serverURL+"/api/create/", data=json.dumps(keys), headers=headers) as resp:
-                    res = await resp.json()
-            except Exception:
-                return (500, "Connection error")
-        return callback(res)
+        headers = {'content-type': 'application/json'}
+        headers.update(self.headers)
+        async with aiohttp.ClientSession(headers = headers, connector = self.connector) as session:
+            async with session.post(self.serverURL+"/api/create/", params = json.dumps(keys)) as resp:
+                r={"status_code":resp.status}
+                res = await resp.json()
+                r["data"] = res
+        return callback(r)
 
     async def read( self, id_, callback) :
         '''
@@ -45,20 +34,14 @@ class http_connection( object ) :
         @param {String} id_ the internal node index to search
         @returns {Hash} node or false on failure
         '''
-        # def callback(r):
-        #     if r.status_code == 200 or r.status_code == 207:
-        #         return (r.status_code, json.loads(r.text))
-        #     return (r.status_code, r.text)
-            
-        async with aiohttp.ClientSession() as session:
-            try:
-                headers = {'content-type': 'application/json'}
-                headers.update(self.headers)
-                async with session.post(self.serverURL+"/api/read/", data=json.dumps(id_),headers=headers) as resp:
-                    res = await resp.json()
-            except Exception:
-                return (500, "Connection error")
-        return callback(res)
+        headers = {'content-type': 'application/json'}
+        headers.update(self.headers)
+        async with aiohttp.ClientSession(headers=headers, connector = self.connector) as session:
+            async with session.post(self.serverURL+"/api/read/", params = json.dumps(id_)) as resp:
+                r={"status_code":resp.status}
+                res = await resp.json()
+                r["data"] = res
+        return callback(r)
 
     async def update( self, keys, callback) :
         '''
@@ -67,20 +50,14 @@ class http_connection( object ) :
         @param {Hash} keys of the node to update
         @returns {Hash} updated node or false on failure
         '''
-        # def callback(r):
-        #     if r.status_code == 200 or r.status_code == 207:
-        #         return (r.status_code, json.loads(r.text))
-        #     return (r.status_code, r.text)
-            
-        async with aiohttp.ClientSession() as session:
-            try:
-                headers = {'content-type': 'application/json'}
-                headers.update(self.headers)
-                async with session.post(self.serverURL+'/api/update/', data=json.dumps(keys), headers=headers) as resp:
-                    res = await resp.json()
-            except Exception:
-                return (500, "Connection error")
-        return callback(res)
+        headers = {'content-type': 'application/json'}
+        headers.update(self.headers)
+        async with aiohttp.ClientSession(headers=headers, connector = self.connector) as session:
+            async with session.post(self.serverURL+'/api/update/', params = json.dumps(keys)) as resp:
+                r={"status_code":resp.status}
+                res = await resp.json()
+                r["data"] = res
+        return callback(r)
 
     async def upsert( self, keys, callback) :
         '''
@@ -89,20 +66,14 @@ class http_connection( object ) :
         @param {Hash} keys of the new node or updated node
         @returns {Hash} New nodes and updated nodes on success, false otherwise
         '''
-        # def callback(r):
-        #     if r.status_code == 200 or r.status_code == 201:
-        #         return (r.status_code, json.loads(r.text))
-        #     return (r.status_code, r.text)
-            
-        async with aiohttp.ClientSession() as session:
-            try:
-                headers = {'content-type': 'application/json'}
-                headers.update(self.headers)
-                async with session.post(self.serverURL+'/api/upsert/', data=json.dumps(keys),headers=headers) as resp:
-                    res = await resp.json()
-            except Exception:
-                return (500, "Connection error")
-        return callback(res)
+        headers = {'content-type': 'application/json'}
+        headers.update(self.headers)
+        async with aiohttp.ClientSession(headers=headers, connector = self.connector) as session:
+            async with session.post(self.serverURL+'/api/upsert/', params = json.dumps(keys)) as resp:
+                r={"status_code":resp.status}
+                res = await resp.json()
+                r["data"] = res
+        return callback(r)
 
     async def delete( self, id_, callback) :
         '''
@@ -110,20 +81,14 @@ class http_connection( object ) :
         @param {String} id_ the internal node index to delete
         @returns {Boolean} True on success, False otherwise
         '''
-        # def callback(r):
-        #     if r.status_code == 200 or r.status_code == 207:
-        #         return (r.status_code, json.loads(r.text))
-        #     return (r.status_code, r.text)
-            
-        async with aiohttp.ClientSession() as session:
-            try:
-                headers = {'content-type': 'application/json'}
-                headers.update(self.headers)
-                async with session.post(self.serverURL+'/api/delete/', data=json.dumps(id_),headers=headers) as resp:
-                    res = await resp.json()
-            except Exception:
-                return (500, "Connection error")
-        return callback(res)
+        headers = {'content-type': 'application/json'}
+        headers.update(self.headers)
+        async with aiohttp.ClientSession(headers=headers, connector = self.connector) as session:
+            async with session.post(self.serverURL+'/api/delete/', params = json.dumps(id_)) as resp:
+                r={"status_code":resp.status}
+                res = await resp.json()
+                r["data"] = res
+        return callback(r)
 
     async def search( self, query, callback) :
         '''
@@ -131,20 +96,14 @@ class http_connection( object ) :
         @param {String} query string
         @returns {Array} array of element indexes or None if no element found
         '''
-        # def callback(r):
-        #     if r.status_code == 200:
-        #         return (r.status_code, json.loads(r.text))
-        #     return (r.status_code, r.text)
-            
-        async with aiohttp.ClientSession() as session:
-            try:
-                headers = {'content-type': 'application/json'}
-                headers.update(self.headers)
-                async with session.get(self.serverURL+'/api/search/'+query, headers=headers) as resp:
-                    res = await resp.json()
-            except Exception:
-                return (500, "Connection error")
-        return callback(res)        
+        headers = {'content-type': 'application/json'}
+        headers.update(self.headers)
+        async with aiohttp.ClientSession(headers=headers, connector = self.connector) as session:
+            async with session.get(self.serverURL+'/api/search/'+query) as resp:
+                r={"status_code":resp.status}
+                res = await resp.json()
+                r["data"] = res
+        return callback(r)        
 
     async def search_one( self, query, callback) :
         '''
@@ -152,37 +111,25 @@ class http_connection( object ) :
         @param {String} query string
         @returns {Array} array of element indexes or None if no element found
         '''
-        # def callback(r):
-        #     if r.status_code == 200:
-        #         return (r.status_code, json.loads(r.text))
-        #     return (r.status_code, r.text)
-            
-        async with aiohttp.ClientSession() as session:
-            try:
-                headers = {'content-type': 'application/json'}
-                headers.update(self.headers)
-                async with session.get(self.serverURL+'/api/search_one/'+query, headers=headers) as resp:
-                    res = await resp.json()
-            except Exception:
-                return (500, "Connection error")
-        return callback(res)        
+        headers = {'content-type': 'application/json'}
+        headers.update(self.headers)
+        async with aiohttp.ClientSession(headers=headers, connector = self.connector) as session:
+            async with session.get(self.serverURL+'/api/search_one/'+query) as resp:
+                r={"status_code":resp.status}
+                res = await resp.json()
+                r["data"] = res
+        return callback(r)        
 
     async def search_mongo( self, query, sort, limit, skip, callback) :
-        # def callback(r):
-        #     if r.status_code == 200:
-        #         return (r.status_code, json.loads(r.text))
-        #     return (r.status_code, r.text)
-            
-        async with aiohttp.ClientSession() as session:
-            try:
-                data = {"query":query, "sort":sort, "limit":limit, "skip":skip}
-                headers = {'content-type': 'application/json'}
-                headers.update(self.headers)
-                async with session.post(self.serverURL+'/api/search_mongo/', data=json.dumps(data), headers=headers) as resp:
-                    res = await resp.json()
-            except Exception:
-                return (500, "Connection error")
-        return callback(res)       
+        headers = {'content-type': 'application/json'}
+        headers.update(self.headers)
+        async with aiohttp.ClientSession(headers=headers, connector = self.connector) as session:
+            data = {"query":query, "sort":sort, "limit":limit, "skip":skip}
+            async with session.post(self.serverURL+'/api/search_mongo/', params=json.dumps(data)) as resp:
+                r={"status_code":resp.status}
+                res = await resp.json()
+                r["data"] = res
+        return callback(r)       
 
     async def graph( self, id_, callback) :
         '''
@@ -190,20 +137,14 @@ class http_connection( object ) :
         @param {String} id_ the node index(es) to search
         @returns {Hash} node or false on failure
         '''
-        # def callback(r):
-        #     if r.status_code == 200 or r.status_code == 207:
-        #         return (r.status_code, json.loads(r.text))
-        #     return (r.status_code, r.text)
-            
-        async with aiohttp.ClientSession() as session:
-            try:
-                headers = {'content-type': 'application/json'}
-                headers.update(self.headers)
-                async with session.post(self.serverURL+'/api/graph/0/', data=json.dumps(id_), headers=headers) as resp:
-                    res = await resp.json()
-            except Exception:
-                return (500, "Connection error")
-        return callback(res)              
+        headers = {'content-type': 'application/json'}
+        headers.update(self.headers)
+        async with aiohttp.ClientSession(headers=headers, connector = self.connector) as session:
+            async with session.post(self.serverURL+'/api/graph/0/', params=json.dumps(id_)) as resp:
+                r={"status_code":resp.status}
+                res = await resp.json()
+                r["data"] = res
+        return callback(r)              
 
     # USERS AUTHENTICATION METHODS
 
@@ -217,18 +158,17 @@ class http_connection( object ) :
                 self.headers['Authorization'] = 'Bearer ' + self.token['token']
                 return (r.status_code, True)
             return (r.status_code, False)
-            
-        async with aiohttp.ClientSession() as session:
-            try:
-                headers = {'content-type': 'application/json'}
-                headers.update(self.headers)
-                async with session.post(self.serverURL+'/api/signIn/', data={"username":username, "password":password}, headers=headers) as resp:
-                    res = await resp.json()
-            except Exception:
-                return (500, "Connection error")
+
+        headers = {'content-type': 'application/json'}
+        headers.update(self.headers)
+        async with aiohttp.ClientSession(headers=headers, connector = self.connector) as session:
+            async with session.post(self.serverURL+'/api/signIn/', params={"username":username, "password":password}) as resp:
+                r={"status_code":resp.status}
+                res = await resp.json()
+                r["data"] = res
         if not callback:
-            return req_callback(res)     
-        return callback(res)
+            return req_callback(r)     
+        return callback(r)
 
     def signOut( self, callback) :
         '''
@@ -243,22 +183,15 @@ class http_connection( object ) :
         '''
         @return {dict} a dictionary containing username and userclass on success, None otherwise
         '''
-        async with aiohttp.ClientSession() as session:
-            try:
-                async with session.get(self.serverURL+'/api/verify/', headers=self.headers) as resp:
-                    res = await resp.json()
-            except:
-                return (500, "Connection error")
-        # r = requests.get(self.serverURL+'/api/verify/', headers=self.headers, verify=False )
+        async with aiohttp.ClientSession(headers=self.headers, connector = self.connector) as session:
+            async with session.get(self.serverURL+'/api/verify/') as resp:
+                r={"status_code":resp.status}
+                res = await resp.json()
+                r["data"] = res
         if callback:
-            return callback(res != None)
+            return callback(r != None)
         else:
-            return res != None
-        # if r.status_code == 200:
-        #     return (r.status_code, True)
-        # return (r.status_code, False)
-
-    # DIGITAL ASSET MANAGEMENT EXTENSION
+            return r != None
 
     async def lock( self, id_,callback) :
         '''
@@ -266,21 +199,17 @@ class http_connection( object ) :
         @param {String} id_ the internal node index
         @returns {Boolean} True on success, False otherwise
         '''
-        async with aiohttp.ClientSession() as session:
-            try:
-                headers = {'content-type': 'application/json'}
-                headers.update(self.headers)
-                async with session.put(self.serverURL+'/api/lock/', data=json.dumps(id_), headers=headers) as resp:
-                    res = await resp.json()
-            except:
-                return (500, "Connection error")
+        headers = {'content-type': 'application/json'}
+        headers.update(self.headers)
+        async with aiohttp.ClientSession(headers = headers, connector = self.connector) as session:
+            async with session.put(self.serverURL+'/api/lock/', params=json.dumps(id_)) as resp:
+                r={"status_code":resp.status}
+                res = await resp.json()
+                r["data"] = res
         if callback:
-            return callback(res != None)
+            return callback(r != None)
         else:
-            return res != None
-        # if r.status_code == 200:
-        #     return (r.status_code, True)
-        # return (r.status_code, False)
+            return r != None
 
     async def publish( self, keys, callback) :
         '''
@@ -289,22 +218,14 @@ class http_connection( object ) :
         @param {Hash} keys of the new node
         @returns {Hash} New node on success, false otherwise
         '''
-        async with aiohttp.ClientSession() as session:
-            try:
-                headers = {'content-type': 'application/json'}
-                headers.update(self.headers)
-                async with session.post(self.serverURL+'/api/publish/', data=json.dumps(keys), headers=headers) as resp:
-                    res = await resp.json()
-            except:
-                return (500, "Connection error")
-        return callback(res)
-        # headers = {'content-type': 'application/json'}
-        # headers.update(self.headers)
-        # r = requests.post(self.serverURL+'/api/publish/', data=json.dumps(keys),
-        # headers=headers, verify=False)
-        # if r.status_code == 201 or r.status_code == 207:
-        #     return (r.status_code, json.loads(r.text))
-        # return (r.status_code, r.text)
+        headers = {'content-type': 'application/json'}
+        headers.update(self.headers)
+        async with aiohttp.ClientSession(headers = headers, connector = self.connector) as session:
+            async with session.post(self.serverURL+'/api/publish/', params=json.dumps(keys)) as resp:
+                r={"status_code":resp.status}
+                res = await resp.json()
+                r["data"] = res
+        return callback(r)
 
     async def unlock( self, id_, callback) :
         '''
@@ -312,18 +233,17 @@ class http_connection( object ) :
         @param {String} id_ the internal node index
         @returns {Boolean} True on success, False otherwise
         '''
-        async with aiohttp.ClientSession() as session:
-            try:
-                headers = {'content-type': 'application/json'}
-                headers.update(self.headers)
-                async with session.put(self.serverURL+'/api/unlock/', data=json.dumps(id_), headers=headers) as resp:
-                    res = await resp.json()
-            except:
-                return (500, "Connection error")
+        async with aiohttp.ClientSession(headers = headers, connector = self.connector) as session:
+            headers = {'content-type': 'application/json'}
+            headers.update(self.headers)
+            async with session.put(self.serverURL+'/api/unlock/', params=json.dumps(id_)) as resp:
+                r={"status_code":resp.status}
+                res = await resp.json()
+                r["data"] = res
         if callback:
-            return callback(res != None)
+            return callback(r != None)
         else:
-            return res != None
+            return r != None
 
     async def version( self, id_, keys, callback) :
         '''
@@ -331,15 +251,14 @@ class http_connection( object ) :
         @param {Hash} keys of the new node
         @returns {Hash} New node on success, false otherwise
         '''
-        async with aiohttp.ClientSession() as session:
-            try:
-                headers = {'content-type': 'application/json'}
-                headers.update(self.headers)
-                async with session.post('%s/api/version/%s' % (self.serverURL, id_), data=json.dumps(keys), headers=headers) as resp:
-                    res = await resp.json()
-            except:
-                return (500, "Connection error")
-        return callback(res)
+        headers = {'content-type': 'application/json'}
+        headers.update(self.headers)
+        async with aiohttp.ClientSession(headers = headers, connector = self.connector) as session:
+            async with session.post('%s/api/version/%s' % (self.serverURL, id_), params=json.dumps(keys)) as resp:
+                r={"status_code":resp.status}
+                res = await resp.json()
+                r["data"] = res
+        return callback(r)
 
     async def comment(self, keys, callback) :
         '''
@@ -348,15 +267,14 @@ class http_connection( object ) :
         @param {Hash} keys of the new node
         @returns {Hash} New node on success, false otherwise
         '''
-        async with aiohttp.ClientSession() as session:
-            try:
-                headers = {'content-type': 'application/json'}
-                headers.update(self.headers)
-                async with session.post(self.serverURL+"/api/comment/", data=json.dumps(keys), headers=headers) as resp:
-                    res = await resp.json()
-            except:
-                return (500, "Connection error")
-        return callback(res)
+        headers = {'content-type': 'application/json'}
+        headers.update(self.headers)
+        async with aiohttp.ClientSession(headers = headers, connector = self.connector) as session:
+            async with session.post(self.serverURL+"/api/comment/", params=json.dumps(keys)) as resp:
+                r={"status_code":resp.status}
+                res = await resp.json()
+                r["data"] = res
+        return callback(r)
 
 
 
