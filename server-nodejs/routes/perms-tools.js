@@ -21,7 +21,8 @@ module.exports = function(app) {
                         perms.push(true);
                         continue;
                     }
-                    if(nodes[i].author !== username) {
+                    if (Array.isArray(nodes[i].author) ? nodes[i].author.indexOf(username) === -1
+                        : nodes[i].author !== username) {
                         perms.push(false);
                         continue;
                     }
