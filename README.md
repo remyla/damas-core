@@ -5,11 +5,11 @@
 Simple JSON storage service in NodeJS and Express, focused on reliability, efficiency and extensibility.
 
 Its main features are:
-* [RESTful HTTP web service](https://github.com/remyla/damas-core/wiki/4-Specifications) with CRUD functions
+* RESTful HTTP web service with CRUD functions based on [strict specifications](https://github.com/remyla/damas-core/wiki/4-Specifications)
 * [Python and Javascript API](https://github.com/remyla/damas-core/wiki/3-API-reference)
 * [Command line interface](https://github.com/remyla/damas-core/blob/master/cli/README.md)
-* [Extensions](https://github.com/remyla/damas-core/wiki/Extensions)
-* [Authentication, users and permissions management](https://github.com/remyla/damas-core/wiki/Authentication)
+* [Available extensions](https://github.com/remyla/damas-core/wiki/Extensions)
+* [User authentication and permissions](https://github.com/remyla/damas-core/wiki/Authentication)
 
 ## Usage
 Clone this repository and run:
@@ -43,6 +43,7 @@ Joaquin Galvan Angeles
 Stephane Hoarau  
 Matthieu Humeau  
 Mathieu Lalanne  
+François Morlet  
 Axel Pisani  
 Axel Prat  
 Mathieu Valero  
@@ -51,7 +52,7 @@ Quentin Villecroze
 ## License
 GPL License(GPLV3)
 
-Copyright(c) 2020 Remy Lalanne remy@primcode.com
+Copyright(c) 2023 Remy Lalanne remy@primcode.com
 
 damas-core is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
