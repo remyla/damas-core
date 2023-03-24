@@ -1,4 +1,5 @@
-# damas-core ![Licence](https://img.shields.io/github/license/remyla/damas-core.svg) ![Tag](https://img.shields.io/github/tag/remyla/damas-core.svg) ![Docker Pulls](https://img.shields.io/docker/pulls/zankia/damas-node.svg) ![Docker Image](https://images.microbadger.com/badges/image/zankia/damas-node.svg)
+# damas-core ![Licence](https://img.shields.io/github/license/remyla/damas-core) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/remyla/damas-core) ![Docker Pulls](https://img.shields.io/docker/pulls/primcode/damas-core) ![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/primcode/damas-core)
+
 
 <img src="http://damas-software.org/bin/damas-core_logo.svg?t=2" alt="damas-core logo"/>
 
