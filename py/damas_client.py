@@ -17,7 +17,7 @@
   along with damas-core.  If not, see <http://www.gnu.org/licenses/>.
 
   Usage:
-    import damas
+    import damas_client
     project = damas.http_connection( "https://localhost" )
     elem = project.search('id:element_id')
     print elem

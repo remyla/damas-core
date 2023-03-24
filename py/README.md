@@ -15,7 +15,7 @@ apt install python-requests
 Then import damas.py and connect to a server:
 
 ```python
-import damas
+import damas_client
 
 # connect to the demo server
 project = damas.http_connection("https://demo.damas.io")

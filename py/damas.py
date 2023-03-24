@@ -16,11 +16,9 @@
   You should have received a copy of the GNU General Public License
   along with damas-core.  If not, see <http://www.gnu.org/licenses/>.
 
-  Usage:
-    import damas
-    project = damas.http_connection( "https://localhost" )
-    elem = project.search('id:element_id')
-    print elem
+
+  THIS IS THE LEGACY PYTHON CLIENT, PLEASE USE THE LATEST damas_client.py
+  MODULE FROM THIS DIRECTORY SUPPORTING ERROR CODES
 """
 
 import json
