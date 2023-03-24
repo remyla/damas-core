@@ -22,7 +22,7 @@
             "enable": true,
             "path": "./extensions/ulid.js",
             "conf": {
-                "replacedPattern": "{*}"
+                "replacedPattern": "{#}"
             }
         },
         "nodemailer": {

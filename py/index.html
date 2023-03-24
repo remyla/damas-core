@@ -28,7 +28,7 @@
 		Or with Debian:
 		<pre>apt install python-requests</pre>
 
-		Then import the <a href="/py/damas.py">damas-core client module for Python</a> and connect to this server:
+		Then import the <a href="/py/damas_client.py">damas-core client module for Python</a> and connect to this server:
 
 		<pre>
 Python 2.7.13 (default, Sep 26 2018, 18:42:22) 
@@ -37,7 +37,7 @@ Type "help", "copyright", "credits" or "license" for more information.
 
 
 <span class="comment"># load the module</span>
-import damas
+import damas_client
 
 <span class="comment"># connect to this server</span>
 project = damas.http_connection(<span class="arg">"<span id="server_url">https://serveripaddr</span>"</span>)
