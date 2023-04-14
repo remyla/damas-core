@@ -1,5 +1,6 @@
 """
   Python methods and objects for DAMAS software (damas-software.org)
+  THIS IS A LEGACY VERSION, PREFER USING NEW client damas_client.py
 
   This file is part of damas-core.
 

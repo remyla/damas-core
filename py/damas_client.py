@@ -135,6 +135,13 @@ class http_connection( object ) :
         return (r.status_code, r.text)
 
     def search_mongo( self, query, sort, limit, skip ) :
+        '''
+		Find elements using a MongoDB query object (if MongoDB is the back-end)
+		@param {Object} https://docs.mongodb.org/v3.0/reference/method/db.collection.find/
+		@param {Object} https://docs.mongodb.org/v3.0/reference/method/cursor.sort/
+		@param {Number} https://docs.mongodb.org/v3.0/reference/method/cursor.limit/
+		@param {Number} https://docs.mongodb.org/v3.0/reference/method/cursor.skip/
+        '''
         data = {"query":query, "sort":sort, "limit":limit, "skip":skip}
         headers = {'content-type': 'application/json'}
         headers.update(self.headers)
@@ -172,11 +179,6 @@ class http_connection( object ) :
             self.headers['Authorization'] = 'Bearer ' + self.token['token']
             return (r.status_code, True)
         return (r.status_code, False)
-        # opener = urllib2.build_opener( urllib2.HTTPCookieProcessor( self.cj ) )
-        # urllib2.install_opener( opener )
-        # try: a = urllib2.urlopen( self.serverURL + '/authentication.php?cmd=login&user=' + username + '&password=' + password )
-        # except: return False
-        # return json.loads( a.read() )
 
     def signOut( self ) :
         '''
@@ -193,95 +195,5 @@ class http_connection( object ) :
         if r.status_code == 200:
             return (r.status_code, True)
         return (r.status_code, False)
-
-    # DIGITAL ASSET MANAGEMENT EXTENSION
-
-    def lock( self, id_ ) :
-        '''
-        Lock an asset for edition
-        @param {String} id_ the internal node index
-        @returns {Boolean} True on success, False otherwise
-        '''
-        headers = {'content-type': 'application/json'}
-        headers.update(self.headers)
-        r = requests.put(self.serverURL+'/api/lock/', data=json.dumps(id_),
-            headers=headers, verify=False)
-        if r.status_code == 200:
-            return (r.status_code, True)
-        return (r.status_code, False)
-
-    def publish( self, keys ) :
-        '''
-        Publish an asset node wearing the specified keys. The keys _id, comment,
-        origin must be specified. _id must be a string starting with '/'
-        @param {Hash} keys of the new node
-        @returns {Hash} New node on success, false otherwise
-        '''
-        headers = {'content-type': 'application/json'}
-        headers.update(self.headers)
-        r = requests.post(self.serverURL+'/api/publish/', data=json.dumps(keys),
-        headers=headers, verify=False)
-        if r.status_code == 201 or r.status_code == 207:
-            return (r.status_code, json.loads(r.text))
-        return (r.status_code, r.text)
-
-    def unlock( self, id_ ) :
-        '''
-        Unlock a locked asset
-        @param {String} id_ the internal node index
-        @returns {Boolean} True on success, False otherwise
-        '''
-        headers = {'content-type': 'application/json'}
-        headers.update(self.headers)
-        r = requests.put(self.serverURL+'/api/unlock/', data=json.dumps(id_),
-            headers=headers, verify=False)
-        if r.status_code == 200:
-            return (r.status_code, True)
-        return (r.status_code, False)
-
-    def version( self, id_, keys ) :
-        '''
-        Create a node version
-        @param {Hash} keys of the new node
-        @returns {Hash} New node on success, false otherwise
-        '''
-        headers = {'content-type': 'application/json'}
-        headers.update(self.headers)
-        r = requests.post('%s/api/version/%s' % (self.serverURL, id_),
-            data=json.dumps(keys), headers=headers, verify=False)
-        if r.status_code == 201:
-            return (r.status_code, json.loads(r.text))
-        return (r.status_code, r.text)
-
-    def comment(self, keys) :
-        '''
-        Create a node with the specified keys (similar to create
-        but concerns child node with parent's id as key)
-        @param {Hash} keys of the new node
-        @returns {Hash} New node on success, false otherwise
-        '''
-        headers = {'content-type': 'application/json'}
-        headers.update(self.headers)
-        r = requests.post(self.serverURL+"/api/comment/",
-                data=json.dumps(keys), headers=headers, verify=False)
-        if r.status_code == 201 or r.status_code == 207:
-            return (r.status_code, json.loads(r.text))
-        return (r.status_code, r.text)
-
-    """ commented until proper implementation
-    def link( self, target, sources, keys ) :
-        ''
-        Create a node edge from sources to target wearing the specified keys
-        @param {Hash} keys of the new node
-        @returns {Hash} Array of created edges ids on success, None otherwise
-        ''
-        data = {"target":target, "sources":sources, "keys":keys}
-        headers = {'content-type': 'application/json'}
-        headers.update(self.headers)
-        r = requests.post('%s/link' % (self.serverURL), data=json.dumps(data), headers=headers, verify=False)
-        if r.status_code == 200:
-            return json.loads(r.text)
-        return None
-    """
 
 

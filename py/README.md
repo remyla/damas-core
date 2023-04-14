@@ -12,7 +12,7 @@ pipenv install requests
 apt install python-requests
 ```
 
-Then import damas.py and connect to a server:
+Then import damas_client.py and connect to a server:
 
 ```python
 import damas_client
