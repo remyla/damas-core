@@ -1,0 +1,27 @@
+on: [push]
+jobs:
+  Test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./server-tests
+    env:
+      DEBUG: "*"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - working-directory: ./server-nodejs
+        run: cp conf_template.json conf.json
+      - working-directory: ./server-nodejs
+        run: npm ci
+      - working-directory: ./server-nodejs
+        run: npm start & #Would be better to directory run tests with mocha + supertest
+                         #instead of running the server in background
+      - run: npm ci
+      - run: npm test
+
+    services:
+      mongo:
+        image: mvertes/alpine-mongo:latest
+        ports:
+          - 27017:27017
