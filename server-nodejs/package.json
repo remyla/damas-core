@@ -10,7 +10,7 @@
   },
   "scripts": {
     "test": "mocha -w tests",
-    "start": "nodejs index.js"
+    "start": "node index.js"
   },
   "author": "Remy Lalanne <remy@primcode.com> http://primcode.com",
   "license": "GPL v3",
