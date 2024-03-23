@@ -1,12 +1,14 @@
+---
 on: [push]
 jobs:
-  Tests:
+  tests:
+    name: Run Tests
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./server-tests
     env:
-      DEBUG: "*"
+      DEBUG: '*'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -15,7 +17,7 @@ jobs:
       - working-directory: ./server-nodejs
         run: npm ci
       - working-directory: ./server-nodejs
-        run: npm start & #Would be better to directory run tests with mocha + supertest
+        run: npm start & #Would be better to directly run tests with mocha + supertest
                          #instead of running the server in background
       - run: npm ci
       - run: npm test
@@ -25,3 +27,27 @@ jobs:
         image: mvertes/alpine-mongo:latest
         ports:
           - 27017:27017
+
+  push_image:
+    name: Push Docker image
+    runs-on: ubuntu-latest
+    if: github.ref_type == 'tag' ||
+      contains(fromJSON('["master", "testing", "experimental"]'), github.ref_name)
+    needs: tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ github.repository }}
+
+      - uses: docker/build-push-action@v5
+        with:
+          file: docker/Dockerfile
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
