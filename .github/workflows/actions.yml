@@ -1,6 +1,6 @@
 on: [push]
 jobs:
-  Test:
+  Tests:
     runs-on: ubuntu-latest
     defaults:
       run:
