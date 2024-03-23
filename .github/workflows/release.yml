@@ -1,0 +1,14 @@
+on:
+  release:
+    types: [published]
+jobs:
+  assets:
+    name: Push clients as assets
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      VER: ${{ github.event.release.tag_name }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: gh release upload --clobber $VER js/damas.js#damas-$VER.js js/damas-socket.js#damas-socket-$VER.js
+             cli/damas#damas-$VER.sh py/damas_client.py#damas_$VER.py py/damas_socket.py#damas_socket_$VER.py
