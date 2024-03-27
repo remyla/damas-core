@@ -483,6 +483,17 @@
         return res !== null;
     }
 
+    /**
+     * Delete nodes recursively
+     */
+    damas.graphDelete = function (id, callback) {
+        return req({
+        method: 'DELETE',
+        url: 'api/graphDelete',
+        data: id,
+        callback: callback
+        });
+    }
 
     damas.create_rest = damas.create;
     damas.read_rest = damas.read;
@@ -491,8 +502,7 @@
     damas.search_rest = damas.search;
     damas.graph_rest = damas.graph;
 
-	console.log('damas-core API loaded')
+    console.log('damas-core API loaded')
 
     return damas;
-
 }));

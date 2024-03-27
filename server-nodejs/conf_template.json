@@ -101,6 +101,10 @@
         "dam": {
             "enable": true,
             "path": "./extensions/dam.js"
+        },
+        "graph": {
+            "enable": true,
+            "path": "./extensions/graph.js"
         }
     }
 }
