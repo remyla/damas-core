@@ -7,7 +7,7 @@
     },
     "db": "mongodb",
     "mongodb": {
-        "host": "mongo",
+        "host": "damas-mongo",
         "collection": "node",
         "port": 27017,
         "options": { "auto_reconnect": true }
@@ -35,10 +35,10 @@
             "path" : "./extensions/user_setup.js"
         },
         "jwt": {
-            "enable": false,
+            "enable": true,
             "path": "./extensions/jwt.js",
             "conf": {
-                "required": true,
+                "required": false,
                 "passwordHashAlgorithm": "md5",
                 "secret": "webtokensecret",
                 "exp": "1d",

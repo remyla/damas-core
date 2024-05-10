@@ -105,13 +105,14 @@ load_token() {
 }
 
 show_help_msg() {
-  echo "usage: damas [--help] [-s|--server <server_url>] [-q|--quiet] [-v|--verbose] [-l|--lines] <COMMAND> [<ARGS>]"
+  echo "usage: damas [--help] [-s|--server <server_url>] [-q|--quiet] [-v|--verbose] [-l|--lines] [--apikey <api_key>] <COMMAND> [<ARGS>]"
   echo ""
   echo "When ARGS is -, read standard input."
   echo ""
   echo "Authentication commands: "
   echo "   signin    <username> <pass> [<lifespan>] or without arguments for interactive sign in"
   echo "   signout   Remove authorization token"
+  echo "   --apikey <api_key>  Use the provided API key for authentication"
   echo ""
   echo "CRUDS commands (send JSON to the server, see examples below):"
   echo "   create       <json>  insert object(s)"
@@ -166,6 +167,24 @@ show_help_msg() {
   exit 0
 }
 
+load_token() {
+  if [ -n "${API_KEY+1}" ]; then
+    TOKEN="$API_KEY"
+  elif [ -n "$DAMAS_TOKEN" ]; then
+    TOKEN="$DAMAS_TOKEN"
+  else
+    TOKEN_FILE="/tmp/damas-$USER-$(echo -n $DAMAS_SERVER | cksum | head -c 10)"
+    TOKEN=$(cat "$TOKEN_FILE" 2> /dev/null)
+  fi
+
+  if [ -z "$TOKEN" ]; then
+    echo "Error: No API key provided and no token found " >&2
+    exit 1
+  fi
+
+  AUTH='-H "Authorization: Bearer '$TOKEN'"'
+}
+
 # loop through arguments
 while true; do
   case "$1" in
@@ -191,6 +210,10 @@ while true; do
       ;;
     -s | --server)
       DAMAS_SERVER=$2
+      shift 2
+      ;;
+    --apikey)
+      API_KEY=$2
       shift 2
       ;;
     -*)
@@ -221,10 +244,13 @@ fi
 load_token
 
 if [ "$1" == "-" ]; then
-  DATA=@/dev/stdin 
+  DATA=@/dev/stdin
 else
   DATA=$*
 fi
+
+
+
 
 case $COMMAND in
   create)
@@ -254,30 +280,30 @@ case $COMMAND in
     ;;
   signin)
     if [ $VERBOSE ]; then
-      echo "$1"
-    fi
-    USERN=$1
-    PASS=$2
-    if [ $3 ]; then
-      expiresIn="&expiresIn=$3"
-    else
-      expiresIn=""
-    fi
-    if [ -z $USERN ]; then
-      read -p "login: " USERN
-    fi
-    if [ -z $PASS ]; then
-      read -sp "password: " PASS
-      printf "\n\n"
-    fi
-    RES=$(eval "curl $CURL_VERBOSE -ks -w \"\n%{http_code}\" --fail -d 'username=$USERN&password=${PASS}${expiresIn}' ${DAMAS_SERVER}/api/signIn/")
-    TOKEN=$(echo $RES| sed 's/^.*"token":"\([^"]*\)".*$/\1/')
-    TOKEN_FILE="/tmp/damas-$USER-$(echo -n $DAMAS_SERVER | cksum | head -c 10)"
-    echo $TOKEN
-    echo $TOKEN > $TOKEN_FILE
-    chmod go-rw "$TOKEN_FILE"
-    map_server_errors "${RES##*$'\n'}"
-    exit $?
+    echo "$1"
+  fi
+  USERN=$1
+  PASS=$2
+  if [ $3 ]; then
+    expiresIn="&expiresIn=$3"
+  else
+    expiresIn=""
+  fi
+  if [ -z $USERN ]; then
+    read -p "login: " USERN
+  fi
+  if [ -z $PASS ]; then
+    read -sp "password: " PASS
+    printf "\n\n"
+  fi
+  RES=$(eval "curl $CURL_VERBOSE -ks -w \"\n%{http_code}\" --fail -d 'username=$USERN&password=${PASS}${expiresIn}' ${DAMAS_SERVER}/api/signIn/")
+  TOKEN=$(echo $RES| sed 's/^.*"token":"\([^"]*\)".*$/\1/')
+  export API_KEY=$TOKEN
+  TOKEN_FILE="/tmp/damas-$USER-$(echo -n $DAMAS_SERVER | cksum | head -c 10)"
+  echo $TOKEN > "$TOKEN_FILE"
+  chmod go-rw "$TOKEN_FILE"
+  map_server_errors "${RES##*$'\n'}"
+  exit $?
     ;;
   signout)
     TOKEN_FILE="/tmp/damas-$USER-$(echo -n $DAMAS_SERVER | cksum | head -c 10)"

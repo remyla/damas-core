@@ -454,6 +454,47 @@
         }
     }
 
+    damas.createToken = function (expiresIn, callback) {
+        function req_callback(result) {
+            if (result !== null) {
+                damas.user = result;
+                damas.token = damas.user.token;
+            }
+            return result;
+        }
+        if (!damas.verify()) {
+            return callback(new Error('User is not authenticated'));
+        }
+        let email = damas.user.email;
+        let form = 'expiresIn=' + encodeURIComponent(expiresIn) + '&email=' + encodeURIComponent(email);
+        var res = req({
+            method: 'POST',
+            url: '/api/createToken/',
+            form: form,
+            headers: {
+                'Authorization': 'Bearer ' + damas.token
+            },
+            async: callback !== undefined,
+            callback: function (result) {
+                if ('function' === typeof callback) {
+                    if (result !== null) {
+                        damas.token = result.token;
+                        result.email = email;
+                        callback(null, result);
+                    } else {
+                        callback(new Error('Failed to create new token'));
+                    }
+                }
+            }
+        });
+        if (undefined !== res) {
+            return req_callback(res);
+        }
+    };
+    
+    
+    
+    
     /**
      * Sign out using the server embeded authentication system
      */
@@ -482,6 +523,9 @@
         });
         return res !== null;
     }
+
+    
+    
 
 
     damas.create_rest = damas.create;

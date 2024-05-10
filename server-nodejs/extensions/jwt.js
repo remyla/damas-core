@@ -132,5 +132,34 @@ module.exports = function (app) {
         res.status(200).json(req.user);
     });
 
+
+    app.route('/api/createToken').post(function (req, res, next) {
+        if (!req.user) {
+            return res.status(401).json({ message: 'User is not authenticated' });
+        }
+    
+        var expiresIn = req.body.expiresIn;
+        if (!expiresIn) {
+            return res.status(400).json({ message: 'ExpiresIn parameter is missing' });
+        }
+    
+        var payload = {
+            _id: req.user._id,
+            username: req.user.username,
+            email: req.user.email,
+            ignoreExpiration: expiresIn === '0'
+        };
+    
+        var options = {
+            expiresIn: expiresIn
+        };
+    
+        var token = jwt.sign(payload, conf.secret + req.user.password, options);
+    
+        res.status(200).json({ token: token });
+    });
+    
+    
+
 }
 
