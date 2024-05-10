@@ -234,6 +234,9 @@ else
   DATA=$*
 fi
 
+
+
+
 case $COMMAND in
   create)
     run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$DATA' ${DAMAS_SERVER}/api/create/"
