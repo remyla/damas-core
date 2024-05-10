@@ -170,6 +170,7 @@ load_token() {
   fi
 }
 
+
 # loop through arguments
 while true; do
   case "$1" in
