@@ -176,14 +176,13 @@ load_token() {
     TOKEN_FILE="/tmp/damas-$USER-$(echo -n $DAMAS_SERVER | cksum | head -c 10)"
     TOKEN=$(cat "$TOKEN_FILE" 2> /dev/null)
   fi
-
-  if [ -z "$TOKEN" ]; then
-    echo "Error: No API key provided and no token found " >&2
-    exit 1
+  if [ -n "$TOKEN" ]; then
+    AUTH='-H "Authorization: Bearer '$TOKEN'"'
+  else
+    AUTH=""
   fi
-
-  AUTH='-H "Authorization: Bearer '$TOKEN'"'
 }
+
 
 # loop through arguments
 while true; do

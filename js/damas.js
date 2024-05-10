@@ -462,11 +462,7 @@
             }
             return result;
         }
-        if (!damas.verify()) {
-            return callback(new Error('User is not authenticated'));
-        }
-        let email = damas.user.email;
-        let form = 'expiresIn=' + encodeURIComponent(expiresIn) + '&email=' + encodeURIComponent(email);
+        let form = 'expiresIn=' + encodeURIComponent(expiresIn);
         var res = req({
             method: 'POST',
             url: '/api/createToken/',
@@ -478,8 +474,6 @@
             callback: function (result) {
                 if ('function' === typeof callback) {
                     if (result !== null) {
-                        damas.token = result.token;
-                        result.email = email;
                         callback(null, result);
                     } else {
                         callback(new Error('Failed to create new token'));
