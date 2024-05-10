@@ -170,7 +170,6 @@ load_token() {
   fi
 }
 
-
 # loop through arguments
 while true; do
   case "$1" in
@@ -234,9 +233,6 @@ if [ "$1" == "-" ]; then
 else
   DATA=$*
 fi
-
-
-
 
 case $COMMAND in
   create)
