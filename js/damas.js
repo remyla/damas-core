@@ -79,7 +79,7 @@
                 return null;
             }
         }
-        xhr.onreadystatechange = function(e) {
+        xhr.onreadystatechange = function (e) {
             if (4 === xhr.readyState) {
                 if (args.async && 'function' === typeof args.callback) {
                     args.callback(checkXHR());
@@ -87,7 +87,7 @@
             }
         }
         xhr.open(args.method, damas.server + args.url, args.async);
-        if(damas.token) {
+        if (damas.token) {
             xhr.setRequestHeader('Authorization', 'Bearer ' + damas.token);
         }
         if (undefined !== args.data) {
@@ -282,25 +282,25 @@
     }
 
 
-/* this is the php version as reference
-    damas.search = function (keys, sortby, order, limit, callback) {
-        function req_callback(req) {
-            return JSON.parse(req.transport.responseText);
-        }
-        var req = new Ajax.Request(this.server + "/model.json.php", {
-            asynchronous: callback !== undefined,
-            parameters: { cmd: 'search', keys: Object.toJSON(keys), sortby: sortby || 'label', order: order || 'ASC', limit: limit },
-            onSuccess: function(req) {
-                if (callback) {
-                    callback(req_callback(req));
-                }
+    /* this is the php version as reference
+        damas.search = function (keys, sortby, order, limit, callback) {
+            function req_callback(req) {
+                return JSON.parse(req.transport.responseText);
             }
-        });
-        if (callback === undefined) {
-            return req_callback(req);
+            var req = new Ajax.Request(this.server + "/model.json.php", {
+                asynchronous: callback !== undefined,
+                parameters: { cmd: 'search', keys: Object.toJSON(keys), sortby: sortby || 'label', order: order || 'ASC', limit: limit },
+                onSuccess: function(req) {
+                    if (callback) {
+                        callback(req_callback(req));
+                    }
+                }
+            });
+            if (callback === undefined) {
+                return req_callback(req);
+            }
         }
-    }
-*/
+    */
 
     /**
      * Recursively get all links and nodes sourced by the specified node
@@ -431,8 +431,8 @@
             }
             return result;
         }
-        let form = 'username='  + encodeURIComponent(username) +
-                   '&password=' + encodeURIComponent(password);
+        let form = 'username=' + encodeURIComponent(username) +
+            '&password=' + encodeURIComponent(password);
         if (undefined != expiresIn && 'function' != typeof expiresIn) {
             form += '&expiresIn=' + encodeURIComponent(expiresIn);
         } else {
@@ -454,6 +454,13 @@
         }
     }
 
+
+
+    /**
+     * Create a valid json web token, usable in the cli
+     * @param {Integer} expiresIn the token's lifespan in ms
+     * @return the token generated
+     */
     damas.createToken = function (expiresIn, callback) {
         function req_callback(result) {
             if (result !== null) {
@@ -485,10 +492,10 @@
             return req_callback(res);
         }
     };
-    
-    
-    
-    
+
+
+
+
     /**
      * Sign out using the server embeded authentication system
      */
@@ -518,8 +525,8 @@
         return res !== null;
     }
 
-    
-    
+
+
 
 
     damas.create_rest = damas.create;
@@ -529,7 +536,7 @@
     damas.search_rest = damas.search;
     damas.graph_rest = damas.graph;
 
-	console.log('damas-core API loaded')
+    console.log('damas-core API loaded')
 
     return damas;
 

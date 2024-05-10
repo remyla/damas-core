@@ -18,55 +18,55 @@
 # with damas-core.  If not, see <http://www.gnu.org/licenses/>.
 
 # VARIABLES
-USER=`whoami`
+USER=$(whoami)
 CURL_ARGS='-ksL -w "\n%{http_code}" -H "Content-Type: application/json"'
 BUFFER_SIZE=1000
 
 # map errors sent by the server
 map_server_errors() {
   case $1 in
-    200) # OK
-      return 0
-      ;;
-    201) # OK (object(s) created)
-      return 0
-      ;;
-    000) # Server unreachable
-      echo "Server '$DAMAS_SERVER' is unreachable" >&2
-      return 3
-      ;;
-    207) # Multi-Status (some objects do not exist)
-      echo "Multi-Status (some objects do not exist) (server error 207)" >&2
-      return 7
-      ;;
-    400) # Bad request (not formatted correctly)
-      echo "Bad request (not formatted correctly) (server error 400)" >&2
-      return 40
-      ;;
-    401) # Unauthorized
-      echo "Unauthorized (server error 401)" >&2
-      return 41
-      ;;
-    403) # Forbidden (the user does not have the right permission)
-      echo "Forbidden (the user does not have the right permission) (server error 403)" >&2
-      return 43
-      ;;
-    404) # Not found (all the objects do not exist)
-      echo "Not found (all the objects do not exist) (server error 404)" >&2
-      return 44
-      ;;
-    409) # Conflict (all objects already exist with these identifiers)
-      echo "Conflict (all objects already exist with these identifiers) (server error 409)" >&2
-      return 49
-      ;;
-    500) # Internal server error
-      echo "Internal server error (server error 500)" >&2
-      return 50
-      ;;
-    *)   # Unknown server error
-      echo "Unknown server error" >&2
-      return 60
-      ;;
+  200) # OK
+    return 0
+    ;;
+  201) # OK (object(s) created)
+    return 0
+    ;;
+  000) # Server unreachable
+    echo "Server '$DAMAS_SERVER' is unreachable" >&2
+    return 3
+    ;;
+  207) # Multi-Status (some objects do not exist)
+    echo "Multi-Status (some objects do not exist) (server error 207)" >&2
+    return 7
+    ;;
+  400) # Bad request (not formatted correctly)
+    echo "Bad request (not formatted correctly) (server error 400)" >&2
+    return 40
+    ;;
+  401) # Unauthorized
+    echo "Unauthorized (server error 401)" >&2
+    return 41
+    ;;
+  403) # Forbidden (the user does not have the right permission)
+    echo "Forbidden (the user does not have the right permission) (server error 403)" >&2
+    return 43
+    ;;
+  404) # Not found (all the objects do not exist)
+    echo "Not found (all the objects do not exist) (server error 404)" >&2
+    return 44
+    ;;
+  409) # Conflict (all objects already exist with these identifiers)
+    echo "Conflict (all objects already exist with these identifiers) (server error 409)" >&2
+    return 49
+    ;;
+  500) # Internal server error
+    echo "Internal server error (server error 500)" >&2
+    return 50
+    ;;
+  *) # Unknown server error
+    echo "Unknown server error" >&2
+    return 60
+    ;;
   esac
 }
 
@@ -98,7 +98,7 @@ load_token() {
     local TOKEN=$DAMAS_TOKEN
   else
     local TOKEN_FILE="/tmp/damas-$USER-$(echo -n $DAMAS_SERVER | cksum | head -c 10)"
-    local TOKEN=$(cat $TOKEN_FILE 2> /dev/null)
+    local TOKEN=$(cat $TOKEN_FILE 2>/dev/null)
   fi
 
   AUTH='-H "Authorization: Bearer '$TOKEN'"'
@@ -174,7 +174,7 @@ load_token() {
     TOKEN="$DAMAS_TOKEN"
   else
     TOKEN_FILE="/tmp/damas-$USER-$(echo -n $DAMAS_SERVER | cksum | head -c 10)"
-    TOKEN=$(cat "$TOKEN_FILE" 2> /dev/null)
+    TOKEN=$(cat "$TOKEN_FILE" 2>/dev/null)
   fi
   if [ -n "$TOKEN" ]; then
     AUTH='-H "Authorization: Bearer '$TOKEN'"'
@@ -183,45 +183,44 @@ load_token() {
   fi
 }
 
-
 # loop through arguments
 while true; do
   case "$1" in
-    -h)
-      echo "usage: damas [--help] <command> [<args>]"
-      exit 0
-      ;;
-    --help)
-      show_help_msg
-      ;;
-    -v | --verbose)
-      VERBOSE=true
-      CURL_VERBOSE="-v"
-      shift 1
-      ;;
-    -q | --quiet)
-      QUIET=true
-      shift 1
-      ;;
-    -l | --lines)
-      LINESOUT=true
-      shift 1
-      ;;
-    -s | --server)
-      DAMAS_SERVER=$2
-      shift 2
-      ;;
-    --apikey)
-      API_KEY=$2
-      shift 2
-      ;;
-    -*)
-      echo "Unknown option: $1"
-      exit 1
-      ;;
-    *)
-      break
-      ;;
+  -h)
+    echo "usage: damas [--help] <command> [<args>]"
+    exit 0
+    ;;
+  --help)
+    show_help_msg
+    ;;
+  -v | --verbose)
+    VERBOSE=true
+    CURL_VERBOSE="-v"
+    shift 1
+    ;;
+  -q | --quiet)
+    QUIET=true
+    shift 1
+    ;;
+  -l | --lines)
+    LINESOUT=true
+    shift 1
+    ;;
+  -s | --server)
+    DAMAS_SERVER=$2
+    shift 2
+    ;;
+  --apikey)
+    API_KEY=$2
+    shift 2
+    ;;
+  -*)
+    echo "Unknown option: $1"
+    exit 1
+    ;;
+  *)
+    break
+    ;;
   esac
 done
 
@@ -248,37 +247,34 @@ else
   DATA=$*
 fi
 
-
-
-
 case $COMMAND in
-  create)
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$DATA' ${DAMAS_SERVER}/api/create/"
-    ;;
-  read)
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$DATA' ${DAMAS_SERVER}/api/read/"
-    ;;
-  update)
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X PUT -d '$DATA' ${DAMAS_SERVER}/api/update/"
-    ;;
-  upsert)
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$DATA' ${DAMAS_SERVER}/api/upsert/"
-    ;;
-  delete)
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X DELETE -d '$DATA' ${DAMAS_SERVER}/api/delete/"
-    ;;
-  graph)
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$DATA' ${DAMAS_SERVER}/api/graph/0/"
-    ;;
-  search)
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH ${DAMAS_SERVER}/api/search/$1"
-    ;;
-  search_mongo)
-    QUERY='{"query": '$1', "sort": '$2', "limit": '$3', "skip": '$4'}'
-    run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X POST ${DAMAS_SERVER}/api/search_mongo/ -d '$QUERY'"
-    ;;
-  signin)
-    if [ $VERBOSE ]; then
+create)
+  run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$DATA' ${DAMAS_SERVER}/api/create/"
+  ;;
+read)
+  run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$DATA' ${DAMAS_SERVER}/api/read/"
+  ;;
+update)
+  run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X PUT -d '$DATA' ${DAMAS_SERVER}/api/update/"
+  ;;
+upsert)
+  run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$DATA' ${DAMAS_SERVER}/api/upsert/"
+  ;;
+delete)
+  run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X DELETE -d '$DATA' ${DAMAS_SERVER}/api/delete/"
+  ;;
+graph)
+  run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -d '$DATA' ${DAMAS_SERVER}/api/graph/0/"
+  ;;
+search)
+  run "curl $CURL_VERBOSE $CURL_ARGS $AUTH ${DAMAS_SERVER}/api/search/$1"
+  ;;
+search_mongo)
+  QUERY='{"query": '$1', "sort": '$2', "limit": '$3', "skip": '$4'}'
+  run "curl $CURL_VERBOSE $CURL_ARGS $AUTH -X POST ${DAMAS_SERVER}/api/search_mongo/ -d '$QUERY'"
+  ;;
+signin)
+  if [ $VERBOSE ]; then
     echo "$1"
   fi
   USERN=$1
@@ -296,22 +292,22 @@ case $COMMAND in
     printf "\n\n"
   fi
   RES=$(eval "curl $CURL_VERBOSE -ks -w \"\n%{http_code}\" --fail -d 'username=$USERN&password=${PASS}${expiresIn}' ${DAMAS_SERVER}/api/signIn/")
-  TOKEN=$(echo $RES| sed 's/^.*"token":"\([^"]*\)".*$/\1/')
+  TOKEN=$(echo $RES | sed 's/^.*"token":"\([^"]*\)".*$/\1/')
   export API_KEY=$TOKEN
   TOKEN_FILE="/tmp/damas-$USER-$(echo -n $DAMAS_SERVER | cksum | head -c 10)"
-  echo $TOKEN > "$TOKEN_FILE"
+  echo $TOKEN >"$TOKEN_FILE"
   chmod go-rw "$TOKEN_FILE"
   map_server_errors "${RES##*$'\n'}"
   exit $?
-    ;;
-  signout)
-    TOKEN_FILE="/tmp/damas-$USER-$(echo -n $DAMAS_SERVER | cksum | head -c 10)"
-    rm "$TOKEN_FILE"
-    exit 0
-    ;;
-  *)
-    echo "damas: invalid command '$COMMAND'" >&2
-    show_help_msg
-    exit 1
-    ;;
+  ;;
+signout)
+  TOKEN_FILE="/tmp/damas-$USER-$(echo -n $DAMAS_SERVER | cksum | head -c 10)"
+  rm "$TOKEN_FILE"
+  exit 0
+  ;;
+*)
+  echo "damas: invalid command '$COMMAND'" >&2
+  show_help_msg
+  exit 1
+  ;;
 esac
