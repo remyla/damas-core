@@ -53,8 +53,7 @@
                 "exp": "1d",
                 "expressUse": "/api",
                 "expressUnless": {
-                    "path":[ "/api/signIn/",
-                             "/api/createToken/" ]
+                    "path": "/api/signIn/"
                 }
             }
         },

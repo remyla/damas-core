@@ -463,13 +463,22 @@
      */
     damas.createToken = function (expiresIn, callback) {
         function req_callback(result) {
-            if (result !== null) {
-                damas.user = result;
-                damas.token = damas.user.token;
+            if ('function' === typeof callback) {
+                if (result !== null) {
+                    callback(null, result.token);
+                } else {
+                    callback(new Error('Failed to create new token'));
+                }
             }
             return result;
         }
-        let form = 'expiresIn=' + encodeURIComponent(expiresIn);
+        
+        let form = '';
+        if (undefined != expiresIn && 'function' != typeof expiresIn) {
+            form += '&expiresIn=' + encodeURIComponent(expiresIn);
+        } else {
+            callback = expiresIn;
+        }
         var res = req({
             method: 'POST',
             url: '/api/createToken/',
@@ -478,20 +487,15 @@
                 'Authorization': 'Bearer ' + damas.token
             },
             async: callback !== undefined,
-            callback: function (result) {
-                if ('function' === typeof callback) {
-                    if (result !== null) {
-                        callback(null, result);
-                    } else {
-                        callback(new Error('Failed to create new token'));
-                    }
-                }
-            }
+            callback: req_callback
         });
+    
         if (undefined !== res) {
             return req_callback(res);
         }
     };
+    
+    
 
 
 
