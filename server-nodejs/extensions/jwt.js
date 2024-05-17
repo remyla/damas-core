@@ -132,5 +132,30 @@ module.exports = function (app) {
         res.status(200).json(req.user);
     });
 
+
+    app.route('/api/createToken').post(function (req, res, next) {
+        if (!req.user.username) {
+            return res.status(401).json( 'User is not authenticated' );
+        }    
+        var expiresIn ;
+        if (!req.body.expiresIn) {
+           expiresIn = conf.exp;
+        } else {
+           expiresIn = req.body.expiresIn;
+        }    
+        var payload = {
+            _id: req.user._id,
+            username: req.user.username,
+            ignoreExpiration: expiresIn === '0'
+        };    
+        var options = {
+            expiresIn: expiresIn
+        };    
+        var token = jwt.sign(payload, conf.secret + req.user.password, options);        
+        res.status(200).json({ token: token });        
+        
+    });    
+    
+
 }
 

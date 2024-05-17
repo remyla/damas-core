@@ -1,5 +1,5 @@
 {
-    "authorMode" : true,
+"authorMode" : true,
     "https" : {
         "enable": false,
         "cert": "fullchain.pem",
@@ -7,16 +7,25 @@
     },
     "db": "mongodb",
     "mongodb": {
-        "host": "damas-mongo",
-        "collection": "node",
-        "port": 27017,
-        "options": { "auto_reconnect": true }
+    "host": "localhost",
+    "port": 27017,
+    "database": "demo",
+    "collection" : "node",
+    "options": {
+      "auto_reconnect": true    }
     },
-	"morgan": "combined",
+    "morgan": "combined",
     "extensions": {
         "es6_polyfills": {
             "enable": true,
             "path": "./extensions/es6_polyfills.js"
+        },
+        "ulid": {
+            "enable": true,
+            "path": "./extensions/ulid.js",
+            "conf": {
+                "replacedPattern": "{#}"
+            }
         },
         "nodemailer": {
             "enable": false,
@@ -27,7 +36,7 @@
                     "port": 25,
                     "secure": false
                 },
-                "from": "\"Sender\" <noreply@example.org>"
+                "from": "\"Sender\" <noreply@example.com>"
             }
         },
         "user_setup" : {
@@ -38,18 +47,19 @@
             "enable": true,
             "path": "./extensions/jwt.js",
             "conf": {
-                "required": false,
-                "passwordHashAlgorithm": "md5",
+                "required": true,
+                "passwordHashAlgorithm": "sha1",
                 "secret": "webtokensecret",
                 "exp": "1d",
                 "expressUse": "/api",
                 "expressUnless": {
-                    "path": "/api/signIn/"
+                    "path":[ "/api/signIn/",
+                             "/api/createToken/" ]
                 }
             }
         },
         "noauth": {
-            "enable": true,
+            "enable": false,
             "path": "./extensions/auth-none.js"
         },
         "restricted_keys": {
@@ -79,7 +89,7 @@
             "path": "./extensions/static_routes.js",
             "conf": {
                 "routes": {
-                    "/": [ "/app/www", "public"],
+                    "/": "public",
                     "/js": "../js",
                     "/cli": "../cli",
                     "/py": "../py",
@@ -87,8 +97,13 @@
                     "/signIn": "extensions/auth_signIn.html",
                     "/lostPassword": "extensions/user_lostPassword.html",
                     "/resetPassword": "extensions/user_resetPassword.html"
+
                 }
             }
+        },
+        "dam": {
+            "enable": true,
+            "path": "./extensions/dam.js"
         }
     }
 }
