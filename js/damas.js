@@ -493,13 +493,10 @@
         if (undefined !== res) {
             return req_callback(res);
         }
-    };
+    };    
     
     
-
-
-
-
+    
     /**
      * Sign out using the server embeded authentication system
      */
