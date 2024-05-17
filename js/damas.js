@@ -432,7 +432,7 @@
             return result;
         }
         let form = 'username=' + encodeURIComponent(username) +
-            '&password=' + encodeURIComponent(password);
+                  '&password=' + encodeURIComponent(password);
         if (undefined != expiresIn && 'function' != typeof expiresIn) {
             form += '&expiresIn=' + encodeURIComponent(expiresIn);
         } else {
@@ -458,7 +458,7 @@
 
     /**
      * Create a valid json web token, usable in the cli
-     * @param {Integer} expiresIn the token's lifespan in ms
+     * @param {String} expiresIn the token's lifespan in ms, using the 'ms' package format
      * @return the token generated
      */
     damas.createToken = function (expiresIn, callback) {
