@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Token</title>
+    <script src="/js/damas.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            damas.server = '';
+            document.querySelector('#generate-token-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const lifespan = document.querySelector('#lifespan').value;
+                damas.createToken(lifespan, function(err, result) {
+                    if (err) {
+                        alert('Error generating token: ' + err.message);
+                    } else {
+                        const tokenElement = document.querySelector('#token');
+                        tokenElement.value = result; // Change textContent to value
+                        tokenElement.select();
+                        document.execCommand('copy');
+                        alert('New token generated and copied to clipboard');
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>Generate New Token</h1>
+    <form id="generate-token-form">
+        <label for="lifespan">Lifespan (milliseconds by default, check the ms lib):</label>
+        <input type="number" id="lifespan" name="lifespan">
+        <button type="submit">Generate Token</button>
+    </form>
+    <textarea id="token" readonly></textarea>
+</body>
+</html>

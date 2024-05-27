@@ -132,5 +132,21 @@ module.exports = function (app) {
         res.status(200).json(req.user);
     });
 
+    
+    app.route('/api/createToken').post(function (req, res, next) {  
+        var expiresIn = req.body.expiresIn || conf.exp;   
+        var payload = {
+            _id: req.user._id,
+            username: req.user.username,
+            ignoreExpiration: expiresIn === '0'
+        };    
+        var options = {
+            expiresIn: expiresIn
+        };    
+        var token = jwt.sign(payload, conf.secret + req.user.password, options);        
+        res.status(200).json(token);        
+        
+    });
+
 }
 

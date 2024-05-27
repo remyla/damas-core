@@ -18,7 +18,7 @@
 # with damas-core.  If not, see <http://www.gnu.org/licenses/>.
 
 # VARIABLES
-USER=`whoami`
+USER=$(whoami)
 CURL_ARGS='-ksL -w "\n%{http_code}" -H "Content-Type: application/json"'
 BUFFER_SIZE=1000
 
@@ -63,7 +63,7 @@ map_server_errors() {
       echo "Internal server error (server error 500)" >&2
       return 50
       ;;
-    *)   # Unknown server error
+    *) # Unknown server error
       echo "Unknown server error" >&2
       return 60
       ;;
@@ -93,25 +93,15 @@ run() {
   fi
 }
 
-load_token() {
-  if [ $DAMAS_TOKEN ]; then
-    local TOKEN=$DAMAS_TOKEN
-  else
-    local TOKEN_FILE="/tmp/damas-$USER-$(echo -n $DAMAS_SERVER | cksum | head -c 10)"
-    local TOKEN=$(cat $TOKEN_FILE 2> /dev/null)
-  fi
-
-  AUTH='-H "Authorization: Bearer '$TOKEN'"'
-}
-
 show_help_msg() {
-  echo "usage: damas [--help] [-s|--server <server_url>] [-q|--quiet] [-v|--verbose] [-l|--lines] <COMMAND> [<ARGS>]"
+  echo "usage: damas [--help] [-s|--server <server_url>] [-q|--quiet] [-v|--verbose] [-l|--lines] [--apikey <DAMAS_TOKEN>] <COMMAND> [<ARGS>]"
   echo ""
   echo "When ARGS is -, read standard input."
   echo ""
   echo "Authentication commands: "
   echo "   signin    <username> <pass> [<lifespan>] or without arguments for interactive sign in"
   echo "   signout   Remove authorization token"
+  echo "   --apikey <DAMAS_TOKEN>  Use the provided API key for authentication"
   echo ""
   echo "CRUDS commands (send JSON to the server, see examples below):"
   echo "   create       <json>  insert object(s)"
@@ -193,6 +183,10 @@ while true; do
       DAMAS_SERVER=$2
       shift 2
       ;;
+    --apikey)
+      DAMAS_TOKEN=$2
+      shift 2
+      ;;
     -*)
       echo "Unknown option: $1"
       exit 1
@@ -202,6 +196,21 @@ while true; do
       ;;
   esac
 done
+
+TOKEN_FILE="/tmp/damas-$USER-$(echo -n $DAMAS_SERVER | cksum | head -c 10)"
+
+load_token() {
+  if [ -n "$DAMAS_TOKEN" ]; then
+    local TOKEN="$DAMAS_TOKEN"
+  else
+    local TOKEN=$(cat "$TOKEN_FILE" 2>/dev/null)
+  fi
+  if [ -n "$TOKEN" ]; then
+    AUTH='-H "Authorization: Bearer '$TOKEN'"'
+  else
+    AUTH=""
+  fi
+}
 
 COMMAND=$1
 shift
@@ -221,7 +230,7 @@ fi
 load_token
 
 if [ "$1" == "-" ]; then
-  DATA=@/dev/stdin 
+  DATA=@/dev/stdin
 else
   DATA=$*
 fi
@@ -271,16 +280,14 @@ case $COMMAND in
       printf "\n\n"
     fi
     RES=$(eval "curl $CURL_VERBOSE -ks -w \"\n%{http_code}\" --fail -d 'username=$USERN&password=${PASS}${expiresIn}' ${DAMAS_SERVER}/api/signIn/")
-    TOKEN=$(echo $RES| sed 's/^.*"token":"\([^"]*\)".*$/\1/')
-    TOKEN_FILE="/tmp/damas-$USER-$(echo -n $DAMAS_SERVER | cksum | head -c 10)"
+    TOKEN=$(echo $RES | sed 's/^.*"token":"\([^"]*\)".*$/\1/')
     echo $TOKEN
-    echo $TOKEN > $TOKEN_FILE
+    echo $TOKEN >"$TOKEN_FILE"
     chmod go-rw "$TOKEN_FILE"
     map_server_errors "${RES##*$'\n'}"
     exit $?
     ;;
   signout)
-    TOKEN_FILE="/tmp/damas-$USER-$(echo -n $DAMAS_SERVER | cksum | head -c 10)"
     rm "$TOKEN_FILE"
     exit 0
     ;;
