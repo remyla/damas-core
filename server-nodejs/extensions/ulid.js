@@ -18,10 +18,9 @@ module.exports = function (app) {
     const pattern = new RegExp(app.locals.conf.ulid.replacedPattern || '{#}');
     events.attach('pre-create', function (nodes) {
         for(var i=0; i<nodes.length; i++){
-            if(undefined !== nodes[i]._id){
+            if(typeof nodes[i]._id === 'string'){
                 nodes[i]._id = nodes[i]._id.replace(pattern, ULID.ulid());
             }
-		console.log(nodes[i]);
         }
         this.next();
     });
