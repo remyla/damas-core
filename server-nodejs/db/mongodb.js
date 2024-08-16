@@ -1,6 +1,13 @@
 /*
- * lib/db/mongodb.js - from Damas-Core
+ * mongodb.js - from Damas-Core
  * Licensed under the GNU GPL v3
+ *
+ * Legacy MongoDB support based on older driver without Promises.
+ * - package.json dependency:
+ *     "mongodb": "^2.1.21",
+ * - connected to MongoDB server 3.6.5
+ *
+ * Use mongodb6 from this directory for an up-to-date version.
  */
 
 var async = require('async');

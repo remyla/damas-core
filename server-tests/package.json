@@ -9,7 +9,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "./node_modules/.bin/jasmine-node 2-3-6_spec.js"
+    "test": "./node_modules/.bin/jasmine-node 2-6_spec.js"
   },
   "author": "Joaquin GALVAN",
   "license": "GPL v3"
