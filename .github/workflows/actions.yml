@@ -24,7 +24,7 @@ jobs:
 
     services:
       mongo:
-        image: mvertes/alpine-mongo:latest
+        image: mongo:8.0-rc
         ports:
           - 27017:27017
 
