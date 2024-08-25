@@ -174,10 +174,10 @@ module.exports = function (conf) {
      */
     self.remove = function (ids, callback) {
         self.getCollection(callback, function (coll) {
-            function deleteNode(id, next) {
-                coll.deleteOne(id).then(
+            function deleteNode(obj, next) {
+                coll.deleteOne(obj).then(
                     res => {
-                        next(null, res.deletedCount === 1? true: false);
+                        next(null, res.deletedCount === 1? obj._id: null);
                     },
                     err => {
                         next(null, null);
