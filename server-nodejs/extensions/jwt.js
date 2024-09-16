@@ -63,7 +63,7 @@ module.exports = function (app) {
                 user.address = req.connection.remoteAddress;
                 user.class = user.class || 'guest';
                 req.user = {_id: user._id, user: user, token: jwt.sign(payload, conf.secret + user.password, options)};
-                debug('Token generated for user: %s, token: %s', user.username, user.token);
+                debug('Token generated for user: %s, token: %s', user.username, req.user.token);
                 return res.status(200).json(req.user);
             });
         });
