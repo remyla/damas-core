@@ -29,8 +29,7 @@ jobs:
   push_image:
     name: Push Docker image
     runs-on: ubuntu-latest
-    if: github.ref_type == 'tag' ||
-      contains(fromJSON('["master", "testing", "experimental"]'), github.ref_name)
+    if: github.ref_type == 'tag'
     needs: tests
     steps:
       - uses: actions/checkout@v4
@@ -41,7 +40,7 @@ jobs:
       - id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ github.repository }}
+          images: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}
 
       - uses: docker/build-push-action@v5
         with:
