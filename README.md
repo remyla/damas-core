@@ -13,7 +13,7 @@ Its main features are:
 * CRUD operations based on [strict specifications](doc/4-Specifications.md)
 * [JSON web token authentication](doc/Authentication.md)
 * [Server extensions](doc/Extensions.md)
-* [Python and Javascript API](doc/3-API-reference.md)
+* [Python and Javascript API](doc/3-API-Reference.md)
 * [Command line interface](cli/README.md)
 
 Directory structure:
