@@ -236,6 +236,46 @@ module.exports = function (conf) {
      * Higher-level functions
      */
 
+    /**
+     * Explore a graph, specifying source(s) and following the directed links
+     * @param {Array} ids - A list of node identifiers to start from
+     * @param {Integer} depth - number of maximum recursions, specify 0 for no limit
+     * @param {Function} callback - function (err, result) to call
+     */
+    self.links = function (ids, depth, links, callback) {
+        var newIds = [];
+        var self = this;
+        self.getCollection(callback, function (coll) {
+            coll.find({src_id: {$in: ids}}).toArray().then(
+                res => {
+                    for (var r in res) {
+                        if (undefined == links[res[r]._id]) {
+                            if (res[r].tgt_id != undefined) {
+                                if (0 > ids.indexOf(res[r].tgt_id)) {
+                                    newIds.push(res[r].tgt_id);
+                                }
+                            }
+                            links[res[r]._id] = res[r];
+                        }
+                    }
+                    if (--depth === 0 || newIds.length < 1) {
+                        callback(false, links);
+                    } else {
+                        self.links(newIds, depth, links, callback);
+                    }
+                },
+                err => {
+                    callback(true);
+                });
+        });
+    }; // links()
+
+    /**
+     * Explore a graph, specifying leaf(ves) following the directed links backwards
+     * @param {Array} ids - A list of node identifiers to start from
+     * @param {Integer} depth - number of maximum recursions, specify 0 for no limit
+     * @param {Function} callback - function (err, result) to call
+     */
     self.links_r = function (ids, depth, links, callback) {
         var newIds = [];
         var self = this;
@@ -264,10 +304,10 @@ module.exports = function (conf) {
         });
     }; // links_r()
 
-
     /**
-     * Retrieve the graph of the specified target nodes
+     * Retrieve the graph from the specified target nodes (follow the directed link backwards)
      * @param {Array} ids - Array of node indexes
+     * @param {Integer} depth - number of maximum recursions, specify 0 for no limit
      * @param {Function} callback - function (err, result) to call
      */
     this.graph = function (ids, depth, callback){
@@ -297,11 +337,53 @@ module.exports = function (conf) {
         });
     }; // graph()
 
+    this.graph_backwards = function (ids, depth, callback){
+        self.links_r(ids, depth, [], function (err, links) {
+            if (err || !links) {
+                callback(true);
+                return;
+            }
+            var n_ids = ids;
+            for (l in links) {
+                if (undefined != links[l].src_id) {
+                    if (0 > n_ids.indexOf(links[l].src_id)) {
+                        n_ids.push(links[l].src_id);
+                    }
+                }
+                n_ids.push(links[l]._id);
+            }
+            callback(false, n_ids);
+        });
+    }; // graph_backwards()
+
+    /**
+     * Retrieve the graph from the specified source nodes (follow the directed links)
+     * @param {Array} ids - Array of node indexes
+     * @param {Integer} depth - number of maximum recursions, specify 0 for no limit
+     * @param {Function} callback - function (err, result) to call
+     */
+    this.graph_forwards = function (ids, depth, callback){
+        self.links(ids, depth, [], function (err, links) {
+            if (err || !links) {
+                callback(true);
+                return;
+            }
+            var n_ids = ids;
+            for (l in links) {
+                if (undefined != links[l].tgt_id) {
+                    if (0 > n_ids.indexOf(links[l].tgt_id)) {
+                        n_ids.push(links[l].tgt_id);
+                    }
+                }
+                n_ids.push(links[l]._id);
+            }
+            callback(false, n_ids);
+        });
+    }; // graph_forwards()
 
     /*
      * MongoDB-specific functions
      */
-
 
     /**
      * Search for nodes ids in the database.

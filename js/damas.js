@@ -321,6 +321,40 @@
         });
     }
 
+    /**
+     * Recursively get all links and nodes sourced by the specified node
+     * @param {String} id - Node index
+     * @param {function} callback - Function to call, array argument
+     * @returns {Array} array of element indexes or undefined if async
+     *
+     * @example
+     * // this will return an array containing nodes (links are nodes too)
+     * var sources = damas.graph("55687e68e040af7047ee1a53");
+     */
+    damas.graph_backwards = function (ids, depth, callback) {
+        return req({
+            method: 'POST',
+            url: '/api/graph_backwards/'+depth+'/',
+            data: ids,
+            callback: callback
+        });
+    }
+
+    /**
+     * Retrieve the graph from the specified source nodes (follow the directed links)
+     * @param {Array} ids - Array of node indexes
+     * @param {Integer} depth - number of maximum recursions, specify 0 for no limit
+     * @param {Function} callback - function (err, result) to call
+     */
+    damas.graph_forwards = function (ids, depth, callback) {
+        return req({
+            method: 'POST',
+            url: '/api/graph_forwards/'+depth+'/',
+            data: ids,
+            callback: callback
+        });
+    }
+
     // FIXME legacy?
     damas.get_rest = function (query, callback) {
         return req({

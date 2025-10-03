@@ -308,7 +308,6 @@ module.exports = function (app, routes) {
         });
     }; // deleteNode()
 
-
     /*
      * graph()
      *
@@ -346,6 +345,63 @@ module.exports = function (app, routes) {
         });
     }; // graph()
 
+    /*
+     * graph_backwards()
+     *
+     * Method: GET
+     * URI: /api/graph_backwards/
+     *
+     * Retrieve the graph of nodes by following the links targeting them
+     *
+     * HTTP status codes:
+     * - 200: OK (graph retrieved)
+     * - 207: Multi-Status (some nodes do not exist)
+     * - 400: Bad request (not formatted correctly)
+     * - 404: Not Found (all the nodes do not exist)
+     * - 500: Internal Server Error (could not access the database)
+     */
+    graph_backwards = function (req, res) {
+        var depth = req.params.depth || 0;
+        var ids = getRequestIds(req);
+        if (!ids) {
+            return httpStatus(res, 400, 'Graph');
+        }
+
+        db.graph_backwards(ids, depth, function (error, nodes) {
+            if (error) {
+                return httpStatus(res, 500, 'Graph');
+            }
+            var response = getMultipleResponse(nodes);
+            if (response.fail) {
+                httpStatus(res, 404, 'Graph');
+            } else if (response.partial) {
+                httpStatus(res, 207, nodes);
+            } else {
+                httpStatus(res, 200, nodes); // Always send an array for graph
+            }
+        });
+    }; // graph_backwards()
+
+    graph_forwards = function (req, res) {
+        var depth = req.params.depth || 0;
+        var ids = getRequestIds(req);
+        if (!ids) {
+            return httpStatus(res, 400, 'Graph');
+        }
+        db.graph_forwards(ids, depth, function (error, nodes) {
+            if (error) {
+                return httpStatus(res, 500, 'Graph');
+            }
+            var response = getMultipleResponse(nodes);
+            if (response.fail) {
+                httpStatus(res, 404, 'Graph');
+            } else if (response.partial) {
+                httpStatus(res, 207, nodes);
+            } else {
+                httpStatus(res, 200, nodes); // Always send an array for graph
+            }
+        });
+    }; // graph_forwards()
 
     /*
      * search()
@@ -493,6 +549,11 @@ module.exports = function (app, routes) {
     app.get('/api/read/:id(*)', read);
     app.post('/api/read/', read);
     app.delete('/api/delete/', deleteNode);
+    app.get('/api/graph_forwards/:depth/:id(*)', graph_forwards);
+    app.post('/api/graph_forwards/:depth', graph_forwards);
+    app.get('/api/graph_backwards/:depth/:id(*)', graph_backwards);
+    app.post('/api/graph_backwards/:depth', graph_backwards);
+    // graph, retro-compatibility
     app.get('/api/graph/:depth/:id(*)', graph);
     app.post('/api/graph/:depth', graph);
 
@@ -507,6 +568,8 @@ module.exports = function (app, routes) {
         update: update,
         upsert: upsert,
         deleteNode: deleteNode,
+        graph_forwards: graph_forwards,
+        graph_backwards: graph_backwards,
         graph: graph,
         search: search,
         search_one: search_one,
