@@ -19,7 +19,7 @@ module.exports = function (app) {
         }
 
         var ids = copyReq;
-        if(['update'].indexOf(req.params.route) > -1) {
+        if(['update','upsert'].indexOf(req.params.route) > -1) {
             ids = tools.extractIds(copyReq);
         }
 
