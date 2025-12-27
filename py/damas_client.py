@@ -47,7 +47,7 @@ class http_connection( object ) :
         headers = {'content-type': 'application/json'}
         headers.update(self.headers)
         r = requests.post(self.serverURL+"/api/create/", data=json.dumps(keys),
-            headers=headers, verify=False)
+            headers=headers)
         if r.status_code == 201 or r.status_code == 207:
             return (r.status_code, json.loads(r.text))
         return (r.status_code, r.text)
@@ -61,7 +61,7 @@ class http_connection( object ) :
         headers = {'content-type': 'application/json'}
         headers.update(self.headers)
         r = requests.post(self.serverURL+"/api/read/", data=json.dumps(id_),
-            headers=headers, verify=False)
+            headers=headers)
         if r.status_code == 200 or r.status_code == 207:
             return (r.status_code, json.loads(r.text))
         return (r.status_code, r.text)
@@ -76,7 +76,7 @@ class http_connection( object ) :
         headers = {'content-type': 'application/json'}
         headers.update(self.headers)
         r = requests.put(self.serverURL+'/api/update/', data=json.dumps(keys),
-            headers=headers, verify=False)
+            headers=headers)
         if r.status_code == 200 or r.status_code == 207:
             return (r.status_code, json.loads(r.text))
         return (r.status_code, r.text)
@@ -91,7 +91,7 @@ class http_connection( object ) :
         headers = {'content-type': 'application/json'}
         headers.update(self.headers)
         r = requests.post(self.serverURL+'/api/upsert/', data=json.dumps(keys),
-                headers=headers, verify=False)
+                headers=headers)
         if r.status_code == 200 or r.status_code == 201:
             return (r.status_code, json.loads(r.text))
         return (r.status_code, r.text)
@@ -105,7 +105,7 @@ class http_connection( object ) :
         headers = {'content-type': 'application/json'}
         headers.update(self.headers)
         r = requests.delete(self.serverURL+'/api/delete/', data=json.dumps(id_),
-            headers=headers, verify=False)
+            headers=headers)
         if r.status_code == 200 or r.status_code == 207:
             return (r.status_code, json.loads(r.text))
         return (r.status_code, r.text)
@@ -117,7 +117,7 @@ class http_connection( object ) :
         @returns {Array} array of element indexes or None if no element found
         '''
         r = requests.get(self.serverURL+'/api/search/'+query,
-            headers=self.headers, verify=False)
+            headers=self.headers)
         if r.status_code == 200:
             return (r.status_code, json.loads(r.text))
         return (r.status_code, r.text)
@@ -129,7 +129,7 @@ class http_connection( object ) :
         @returns {Array} array of element indexes or None if no element found
         '''
         r = requests.get(self.serverURL+'/api/search_one/'+query,
-        headers=self.headers, verify=False)
+        headers=self.headers)
         if r.status_code == 200:
             return (r.status_code, json.loads(r.text))
         return (r.status_code, r.text)
@@ -146,7 +146,7 @@ class http_connection( object ) :
         headers = {'content-type': 'application/json'}
         headers.update(self.headers)
         r = requests.post(self.serverURL+'/api/search_mongo/',
-            data=json.dumps(data), headers=headers, verify=False)
+            data=json.dumps(data), headers=headers)
         if r.status_code == 200:
             return (r.status_code, json.loads(r.text))
         return (r.status_code, r.text)
@@ -161,7 +161,7 @@ class http_connection( object ) :
         headers = {'content-type': 'application/json'}
         headers.update(self.headers)
         r = requests.post(self.serverURL+'/api/graph/0/', data=json.dumps(id_),
-            headers=headers, verify=False)
+            headers=headers)
         if r.status_code == 200 or r.status_code == 207:
             return (r.status_code, json.loads(r.text))
         return (r.status_code, r.text)
@@ -173,7 +173,7 @@ class http_connection( object ) :
         '''
         @return {Boolean} True on success, False otherwise
         '''
-        r = requests.post(self.serverURL+'/api/signIn/', data={"username":username, "password":password}, verify=False)
+        r = requests.post(self.serverURL+'/api/signIn/', data={"username":username, "password":password})
         if r.status_code == 200:
             self.token = json.loads(r.text)
             self.headers['Authorization'] = 'Bearer ' + self.token['token']
@@ -191,7 +191,7 @@ class http_connection( object ) :
         '''
         @return {dict} a dictionary containing username and userclass on success, None otherwise
         '''
-        r = requests.get(self.serverURL+'/api/verify/', headers=self.headers, verify=False )
+        r = requests.get(self.serverURL+'/api/verify/', headers=self.headers )
         if r.status_code == 200:
             return (r.status_code, True)
         return (r.status_code, False)
