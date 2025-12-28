@@ -22,11 +22,12 @@ module.exports = function (app) {
             debug('no username or password');
             return res.status(401).json('Invalid username or password');
         }
-        let nameRegex = RegExp('^[a-z][-a-z0-9_]*\$');
+        let nameRegex = RegExp(conf.username);
         let logIn;
         if (nameRegex.test(req.body.username)) {
            logIn = { 'username' : req.body.username };
         } else {
+           debug("the provided username " + req.body.username + " does not comply with the regular expression " + nameRegex + ", falling back to email login");
            logIn = { 'email' : req.body.username };
         }
         let payload = {};

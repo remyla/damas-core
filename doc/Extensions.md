@@ -1,4 +1,5 @@
-# Extensions
+Extensions
+==========
 
 The extensions give new behaviors to the nodejs-server like extending the API, managing user authentication, or permissions. This page gives a list of the extensions which are provided in this repository. The extensions are loaded at startup and are listed in the configuration file `conf.json`. They are loaded by order of appearance in that file. The extensions are defined using a simple format:
 ```json
@@ -24,25 +25,25 @@ Dummy extension example:
 ```
 `enable` and `conf` keys are optional. Omitting them means that the extension is enabled and that it does not need configuration. `path` and `conf` can be relative paths or absolute paths, and `conf` could be either an object containing configuration keys, or a string containing a path to an external json.
 
-## List of available extensions
-* [`graph`](#graph) - Recursive operations on database
-* [`jwt`](#jwt) - Authentication using JSON Web Tokens
-* [`jwt_delegate`](#jwt_delegate) - Centralize authentication on a different server
-* [`last_activity`](#last_activity) - Keep the time of users' last activity
-* [`noauth`](#noauth) - A user verification mechanism when authentication is disabled
-* [`restricted_keys`](#restricted_keys) - Whitelist of writable keys depending on user class
-* [`static_routes`](#static_routes) - Files and folders to be served by the server
-* [`ulid`](#ulid) - Generate identifiers using ulid
+# List of available extensions
+* [graph](#graph) - Recursive operations on database
+* [jwt](#jwt) - Authentication using JSON Web Tokens
+* [jwt_delegate](#jwt_delegate) - Centralize authentication on a different server
+* [last_activity](#last_activity) - Keep the time of users' last activity
+* [noauth](#noauth) - A user verification mechanism when authentication is disabled
+* [restricted_keys](#restricted_keys) - Whitelist of writable keys depending on user class
+* [static_routes](#static_routes) - Files and folders to be served by the server
+* [ulid](#ulid) - Generate identifiers using ulid
 
-Older extensions, less relevant but still operational 
-* [`es6-polyfills`](#es6-polyfills) - Polyfills for older systems
-* [`nodemailer`](#nodemailer) - Send emails using https://www.npmjs.com/package/nodemailer
-* [`prefer_https`](#prefer_https) - Redirect every HTTP queries to HTTPS
-* [`user_setup`](#user_setup) - Manage user password reset
+Older extensions, less relevant but still functional 
+* [es6-polyfills](#es6-polyfills) - Polyfills for older systems
+* [nodemailer](#nodemailer) - Send emails using https://www.npmjs.com/package/nodemailer
+* [prefer_https](#prefer_https) - Redirect every HTTP queries to HTTPS
+* [user_setup](#user_setup) - Manage user password reset
 
-## Detailed description of extensions
+# Detailed description of extensions
 
-### es6-polyfills
+## es6-polyfills
 Provide ES6 polyfills if the code is ran in a NodeJS which is not ES6.
 (NodeJS v0.10.29 for instance, on older systems)
 * default configuration:
@@ -53,7 +54,7 @@ Provide ES6 polyfills if the code is ran in a NodeJS which is not ES6.
 }
 ```
 
-### graph
+## graph
 Handles recursive operations regarding nodes in the database.
 * new routes: `/api/graphDelete`
 * default configuration:
@@ -66,7 +67,7 @@ Handles recursive operations regarding nodes in the database.
 **Methods**
 * `graphDelete(ids, callback)` | Delete specified nodes and any other node that might be associated
 
-### jwt
+## jwt
 Implementation of JSON Web Token RFC7519 for user authentication https://jwt.io/  
 * requires `jsonwebtoken` `express-jwt` `express-unless` `crypto` `cookie-parser` `ms`
 * new routes: `/api/signIn` and `/api/verify`
@@ -80,6 +81,7 @@ Implementation of JSON Web Token RFC7519 for user authentication https://jwt.io/
         "passwordHashAlgorithm": "sha1",
         "secret": "webtokensecret",
         "exp": "1d",
+        "username": "^[a-z][-a-z0-9_]*\$",
         "expressUse": "/api",
         "expressUnless": {
             "path": "/api/signIn/"
@@ -92,12 +94,13 @@ Implementation of JSON Web Token RFC7519 for user authentication https://jwt.io/
   * `passwordHashAlgorithm` (string) algorithm used to hash the passwords on server. `sha1` or `md5`
   * `secret` (string)  encryption salt
   * `exp` (number) token default expiration time default is `1d` (options: https://www.npmjs.com/package/ms)
+  * `username` (string) accepted RegExp pattern for usernames at authentication. If undefined, accept all strings.
   * `expressUse` (string, regex or array) paths to protect with authentication
   * `expressUnless` (object) paths and methods to exclude from authentication
 
 See [Authentication](Authentication.md), [express.use syntax](https://expressjs.com/en/api.html#app.use), [express unless syntax](https://www.npmjs.com/package/express-unless).
 
-#### Enable User Authentication
+### Enable User Authentication
 By default, the installation gives a public access without user authentication. Here is the procedure to create a new user using the damas-core API and the damas command line interface:
 ```sh
 $ echo -n "yourpassword" | sha1sum
@@ -114,7 +117,7 @@ Then enable the extension:
 ```
 And configure the options depending on the behavior you want. Restart the server and sign in using the newly created user. Read [Authentication](Authentication.md) to have more details about the authentication options and implementation.
 
-### jwt_delegate
+## jwt_delegate
 Centralizing authentication on a different server than the tracker.
 The user node will be save in the tracker database or update. [(learn more)](https://github.com/remyla/damas-core/wiki/Authentication#signin)
 * default configuration :
@@ -129,7 +132,7 @@ The user node will be save in the tracker database or update. [(learn more)](htt
 ```
 * Create a new request and submit it to the server
 
-### last_activity
+## last_activity
 Save the date when user makes a request.
 * default configuration:
 ```js
@@ -138,7 +141,7 @@ Save the date when user makes a request.
     "path": "./extensions/last_activity.js"
 },
 ```
-### noauth
+## noauth
 Provides basic user verification mechanisms when authentication is disabled.
 * new routes: `/api/verify`
 * default configuration:
@@ -149,7 +152,7 @@ Provides basic user verification mechanisms when authentication is disabled.
 }
 ```
 
-### nodemailer
+## nodemailer
 Send email using https://www.npmjs.com/package/nodemailer
 * requires `nodemailer`
 * default configuration:
@@ -172,7 +175,7 @@ Send email using https://www.npmjs.com/package/nodemailer
   * `from` (string) default sender email address
 See [nodemailer](https://www.npmjs.com/package/nodemailer)
 
-### restricted_keys
+## restricted_keys
 Replace keys in requests by default ones if the user class is not in the whitelist. If the new value is defined as null, delete the key from the request
 * default configuration:
 ```js
@@ -189,7 +192,7 @@ Replace keys in requests by default ones if the user class is not in the whiteli
   * `whitelist` (array) user classes that are not affected by key restriction
   * `override` (object) keys and behaviors upon updates
 
-### prefer_https
+## prefer_https
 Redirects http:// calls to https://.
 * default configuration:
 ```js
@@ -200,7 +203,7 @@ Redirects http:// calls to https://.
 ```
 The /.well-known is not redirected to allow letsencrypt authentication. See Express [res.redirect](https://expressjs.com/en/api.html#res.redirect)
 
-### Enable TLS
+## Enable TLS
 For a server which will run on a network you should enable the security layer in conf.json:
 ```json
 {
@@ -227,7 +230,7 @@ openssl req -new -x509 -days 9999 -nodes -out fullchain.pem -keyout privkey.pem
 
 
 
-### static_routes
+## static_routes
 A list of relative or absolute paths to be served by the server. It contains server resources and possible HTML interfaces.
 * new routes are defined according to the configuration
 * default configuration:
@@ -252,7 +255,7 @@ A list of relative or absolute paths to be served by the server. It contains ser
 An array as value for a directory means that it will look for a resource in each directory by order of appearance. 
 
 
-### ulid
+## ulid
 Generate identifiers using ulid (https://github.com/ulid/spec)
 * default configuration:
 ```js
@@ -274,7 +277,7 @@ damas.create({_id:"node_{#}"});
 // Object { _id: "node_01GW9F73XCD5FHNJSHTQHAQNA5" }
 ```
 
-### user_setup
+## user_setup
 Lost password procedure using email and token verification.
 * requires `crypto`
 * new routes: `/api/lostPassword` `/api/changePassword` `/api/resetPassword`
