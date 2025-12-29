@@ -50,7 +50,7 @@
             "path" : "./extensions/user_setup.js"
         },
         "jwt": {
-            "enable": true,
+            "enable": false,
             "path": "./extensions/jwt.js",
             "conf": {
                 "required": true,
@@ -65,7 +65,7 @@
             }
         },
         "noauth": {
-            "enable": false,
+            "enable": true,
             "path": "./extensions/auth-none.js"
         },
         "restricted_keys": {
