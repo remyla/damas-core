@@ -9,7 +9,7 @@
 
 ## Releases
 
-### 2025-12-26 v2.6.1
+### 2025-12-29 v2.6.1
 This release brings 2 new operations to retrieve an object's graph: `graph_forwards` and `graph_backwards` to parse the connected objects following the direction of the links, or in reverse. These two new operations return the identifiers of the connected links and objects (not the whole JSON objects) so you can retrieve large graphs with an optimized response size, and read the objects in the graph afterwards. The older operation named `graph` is equivalent to the new `graph_backwards` operation, but returning whole objects. The `graph` operation is kept for backward compatibility, in deprecated status. This release also fixes a bug preventing using the upsert operation under certain conditions and the doc was improved (see details below).
 
 #### Added
@@ -22,7 +22,7 @@ This release brings 2 new operations to retrieve an object's graph: `graph_forwa
 * jwt: moved the accepted username pattern (RegExp) to configuration file. If undefined, accept all strings.
 
 #### Fixed
-* fixed a bug occuring when calling the `upsert` operation with `authorMode` enabled (when the edition permission is conditionned to the node's author key). The bug prevented from upserting correctly, so we had to fallback to a update/create scheme. (icommit #8ce16917)
+* fixed a bug occuring when calling the `upsert` operation with `authorMode` enabled (when the edition permission is conditionned to the node's author key). The bug prevented from upserting correctly, so we had to fallback to a update/create scheme. (commit #8ce16917)
 
 #### Credits
 @remyla
