@@ -1,31 +1,62 @@
-The damas-core API is available for Python and Javascript.  
-Read the [2 Connect](2-Connect.md) documentation to setup a client environment.
-The demo site is available at https://demo.damas.io.
+The damas-core API is available for Python, Javascript and the command line.
+Read the [connect page](2-Connect.md) to setup a client environment.
 
-## Functions
-### Generic elements
-- [`create`](#create) - insert new element(s)
-- [`read`](#read) - retrieve element(s) using identifiers
-- [`update`](#update) - modify existing element(s)
-- [`upsert`](#upsert) - create or modify element(s)
-- [`delete`](#delete) - delete element(s)
+A demo server is available at https://demo.damas.io.
 
-### User Management
-- [`signIn`](#signIn)- request an authentication token from the server
-- [`signOut`](#signOut) - revoke a token
-- [`verify`](#verify) - ask the server for the authentication status and user
+The implemented methods, parameters and responses follow the [specification](4-Specifications.md).
 
-### Search queries
-- [`graph`](#graph) - retrieve connected edges and nodes (recursive)
-- [`search`](#search) - find elements matching a query string
-- [`search_one`](#search_one) - find first element matching a query string
-- [`search_mongo`](#search_mongo) - find elements using a MongoDB query object (if MongoDB is the back-end)
+# Methods
+## Generic CRUD Functions
+Create, retrieve, update, delete elements (any nodes and edges).
+- [create](#create) - insert new element(s)
+- [read](#read) - retrieve element(s) using identifiers
+- [update](#update) - modify existing element(s)
+- [upsert](#upsert) - create or modify element(s)
+- [delete](#delete) - delete element(s)
 
-***
+## User Authentication Functions
+Defined in the JWT extension.
+- [createToken](#createToken)- request an authentication token from the server
+- [signIn](#signIn)- request a token from the server and use it for further requests
+- [signOut](#signOut) - revoke a token
+- [verify](#verify) - ask the server for the authentication status and user
 
-The web service's methods, parameters and responses follow the [specification](4-Specifications.md).
+## Search queries
+Retrieve elements with more sophisticated methods.
+- [graph](#graph) - retrieve connected edges and nodes (recursive) (deprecated)
+- [graph_backwards](#graph_backwards) - retrieve the connected edges and nodes, in reverse (recursive)
+- [graph_forwards](#graph_forwards) - retrieve the connected edges and nodes, following the edges direction (recursive)
+- [search](#search) - find elements matching a query string
+- [search_one](#search_one) - find first element matching a query string
+- [search_mongo](#search_mongo) - find elements using a MongoDB query object (if MongoDB is the back-end)
 
-#### JSON-Python correspondence table
+
+# Implementation-specific Notes
+
+## Status per Language
+Function |JS | Python | CLI
+-|-  | -      | -
+[create](#create)|✓|✓|✓
+[read](#read)|✓|✓|✓
+[update](#update)|✓|✓|✓
+[upsert](#upsert)|✓|✓|✓
+[delete](#delete)|✓|✓|✓
+[createToken](#createToken)|✓||
+[signIn](#signIn)|✓|✓|✓
+[signOut](#signOut)|✓|✓|✓
+[verify](#verify)|✓|✓|✓
+[graph](#graph) * |✓|✓|✓
+[graph_backwards](#graph_backwards)|✓||
+[graph_forwards](#graph_forwards)|✓||
+[search](#search)|✓|✓|✓
+[search_one](#search_one)|✓|✓|✓
+[search_mongo](#search_mongo)|✓|✓|✓
+
+`✓` = implemented
+`*` = deprecated
+
+## JSON-Python Object Correspondence Table
+The Python module exposes the JSON data using the Python built-in types.
 
 JSON   | Python
 -------|---------
@@ -35,16 +66,13 @@ null   | None
 true   | True
 false  | False
 
-> The Python module exposes the JSON data using Python built-in types
+## Synchronous / Asynchronous calls
+The JavaScript module supports both synchronous and asynchronous requests: if an optional callback argument is provided, the request is ran asynchronously and the response is given as argument to the specified callback. If the callback is not provided, the request is made synchronously and the return value holds the response.
 
-Sync / Async
-> The JavaScript module supports both synchronous and asynchronous requests. If an optional callback argument is provided, the request is ran asynchronously and the response is given as argument to the specified callback. If the callback is not provided, the request is made synchronously and the return value holds the response. The Python API uses synchronous requests only (a bit of work is required to make them async ready). 
+The Python API uses synchronous requests only (a bit of work is required to make them async ready). 
 
-Graphs
-> The edges (the directed links between nodes) are objects as nodes, wearing key/values, with the reserved keys `src_id` and `tgt_id` referring to the `_id` of the nodes to link.
-
-## Objects and Types
-Key/value pairs using [JSON](https://json.org/):
+# Objects and Types
+The elements are described as key/value pairs using [JSON](https://json.org/):
 ```json
 {
     "_id": "your_custom_id",
@@ -53,10 +81,10 @@ Key/value pairs using [JSON](https://json.org/):
     "string":"hello world"
 }
 ```
-The elements are identified using unique identifiers stored in the reserved `_id` key. If the `_id` key is not provided at creation, a default unique value for `_id` is assigned. 
+The elements are identified using unique identifiers stored in the reserved `_id` key. If the `_id` key is not provided at creation, a default unique value for `_id` is assigned. The [ulid extension](Extensions.md#ulid) generates Universally Unique Lexicographically Sortable Identifiers and let you customize the identifiers using patterns.
 
-
-The users are described as elements wearing some reserved keys: `username`, `password`, `class` plus optional keys.
+## Types
+The elements are loosely typed: it is up to the model from the layer above to decide how and if some elements are typed. For example, the users, defined in the jwt authentication extension, are described as elements wearing some reserved keys: `username`, `password`, `class` plus optional keys.
 ```js
 {
     "class": "user",
@@ -66,9 +94,7 @@ The users are described as elements wearing some reserved keys: `username`, `pas
     "username": "userlogin"
 }
 ```
-
-The [Authentication](Authentication) page gives more details about the authentication mechanism.
-
+The user elements are defined and used in the [jwt authentication extension](Extensions.md#jwt) and a dedicated [authentication page](Authentication.md) gives more details about the mechanism.
 
 <!--
 \* *Not implemented yet in NodeJS*
@@ -80,22 +106,33 @@ The [Authentication](Authentication) page gives more details about the authentic
 - `write` *
 -->
 
-## Functions list
+## Graph Edges
+The edges (the directed links between nodes) are objects as nodes, wearing key/values, with the reserved keys `src_id` and `tgt_id` referring to the `_id` of the nodes to link.
+
+```js
+{
+    "_id": "lnk_01G0J7150FYJMCSPK118YGXB56",
+    "src_id": "<sourcenode_id>",
+    "tgt_id": "<targetnode_id>"
+}
+```
+
+# Functions list
 A set of generic CRUD functions is provided to create, read, modify and delete elements:
-### create
+## create
 Create element(s) in the database. Elements have an `_id` key being their unique identifier in the database. This key can be specified during creation, but can't be updated afterwards without first deleting the element. The server may add some other arbitrary keys (like `author`, `time` at creation) depending on its configuration.
 ```js
 create ( elements [, callback] )
 ```
-#### parameters
+### parameters
 * `elements` {object | array} : object(s) to insert in the database
-* `callback` {function} _(js only, optional)_ : if specified, the request is asynchronous
+* `callback` {function} _(js only, optional)_ : if specified, the request is made asynchronous
 
-#### return values
+### return values
 * returns an object or an array of objects (depending on the input) on success
 * returns `null` (Javascript) or `None` (Python) on failure
 
-#### examples
+### examples
 Python
 ```python
 # create a new element wearing an auto-generated unique identifier
@@ -145,21 +182,21 @@ damas.create({"src_id":"/project/folder/file1","tgt_id":"/project/folder/file2"}
 ▸ Object {tgt_id: "/project/folder/to/file2", _id: "583ff67647e759beb73bde34", time: 1480586870826, src_id: "/project/folder/to/file1", author: "demo"}
 ```
 
-### read
+## read
 Retrieve one or more elements given their identifiers
 ```js
 read ( identifiers [, callback] )
 ```
-#### parameters
+### parameters
 * `identifiers` {string | array} : identifier(s) string(s) to read
-* `callback` {function} _(js only, optional)_ : if specified, the request is asynchronous
-#### return values
+* `callback` {function} _(js only, optional)_ : if specified, the request is made asynchronous
+### return values
 * returns an object or an array of objects (depending on the input) on success
 * returns `null` or `None` on failure
 
 > For multiple mode, The resulting array is sorted in the same order as the input array of identifiers. If some identifiers are not found, the result array is filled with None / null values for that position.
 
-#### examples
+### examples
 Python
 ```python
 # read a file
@@ -181,16 +218,16 @@ damas.read(["583ff5a747e759beb73bde32", "583ff5a747e759beb73bde33"]);
 ▸ Array [_id: "583ff5a747e759beb73bde32", time: 1480586663024, label: "element1", author: "demo"}, {_id: "583ff5a747e759beb73bde33", time: 1480586663024, label: "element2", author: "demo"}]
 ```
 
-### update
+## update
 Modify and remove keys of the specified element(s)
 ```js
 update ( elements [, callback] )
 ```
-#### parameters
+### parameters
 * `elements` {object | array} : object(s) to update
-* `callback` {function} _(js only, optional)_ : if specified, the request is asynchronous
+* `callback` {function} _(js only, optional)_ : if specified, the request is made asynchronous
 
-#### return values
+### return values
 * returns an object or an array of objects (depending on the input) on success
 * returns `null` (`None` in Python) on failure
 * returns an array of objects or null on mixed success/failures
@@ -201,7 +238,7 @@ update ( elements [, callback] )
 
 > The `_id` key can accept an array of identifiers, which means that the update will be performed on each specified element
 
-#### examples
+### examples
 Javascript
 ```js
 // update an element
@@ -233,21 +270,21 @@ damas.update({'_id': ['583ff5a747e759beb73bde32','583ff5a747e759beb73bde33'], 'n
 [{u'newkey': u'value', u'_id': u'583ff5a747e759beb73bde32', u'time': 1480586663024, u'label': u'elementA', u'author': u'demo'}, {u'newkey': u'value', u'_id': u'583ff5a747e759beb73bde33', u'time': 1480586663024, u'label': u'elementB', u'author': u'demo'}]
 ```
 
-### upsert
+## upsert
 Create or update element(s) when identifier(s) are specified and found
 ```js
 upsert ( elements [, callback] )
 ```
-#### parameters
+### parameters
 * `elements` {object | array} : object(s) to insert and/or update in the database
-* `callback` {function} _(js only, optional)_ : if specified, the request is asynchronous
-#### return values
+* `callback` {function} _(js only, optional)_ : if specified, the request is made asynchronous
+### return values
 * returns an object or an array of objects (depending on the input) on success
 * returns `null` (Javascript) or `None` (Python) on failure
 
 > :warning: the returned arrays in case of created and updated elements are not in the same order as the input array but: created elements first, then updated elements.
 
-#### examples
+### examples
 ```python
 # Python
 # create a new node with a specified id
@@ -288,20 +325,20 @@ damas.upsert({key1: "value2"}, function (node) {
 });
 ```
 
-### delete
+## delete
 Permanently remove element(s) from the database
 ```js
 delete ( identifiers [, callback] )
 ```
-#### parameters
+### parameters
 * `identifiers` {string | array} : identifier(s) to delete from the database
-* `callback` {function} _(js only, optional)_ : if specified, the request is asynchronous
-#### return values
+* `callback` {function} _(js only, optional)_ : if specified, the request is made asynchronous
+### return values
 * returns true on success, false otherwise
 * returns a boolean or an array of booleans (depending on the input)
 
 > the returned array is sorted as the input array
-#### examples
+### examples
 Javascript
 ```js
 damas.delete("55ae0b1ed81e88357d77d0e9");
@@ -309,16 +346,16 @@ damas.delete("55ae0b1ed81e88357d77d0e9");
 ```
 
 
-### signin
+## signin
 ```js
 signIn ( username, password [, expiresIn, callback] )
 ```
-#### parameters
+### parameters
 * `username` {string} : the username or email string
 * `password` {string} : the user secret password string
 * `expiresIn` {string} _(optional)_ : time before a new connection is required [(learn more)](https://github.com/remyla/damas-core/wiki/Authentication#token-lifespan)
-* `callback`  {function} _(js only, optional)_ : if specified, the request is asynchronous
-#### return values
+* `callback`  {function} _(js only, optional)_ : if specified, the request is made asynchronous
+### return values
 * returns an object containing an authentication token on success, false otherwise
 
 Sign in using the server embedded authentication system
@@ -343,34 +380,34 @@ damas.signIn("axel", "password", "1d" ,callback());
 
 ```
 
-### signout
+## signout
 ```js
 signOut ( [callback] )
 ```
-#### parameters
-* `callback` {function} _(js only, optional)_ : if specified, the request is asynchronous
-#### return values
+### parameters
+* `callback` {function} _(js only, optional)_ : if specified, the request is made asynchronous
+### return values
 * returns true on success, false otherwise
 
-### verify
+## verify
 Ask the server for the authentication status and user
 ```js
 verify ( [callback] )
 ```
-#### parameters
-* `callback` {function} _(js only, optional)_ : if specified, the request is asynchronous
-#### return values
+### parameters
+* `callback` {function} _(js only, optional)_ : if specified, the request is made asynchronous
+### return values
 * returns the authenticated user element on success, false otherwise
 
-### search
+## search
 Find elements wearing the specified key(s) using a query string.
 ```js
 search ( query [, callback] )
 ```
-#### parameters
+### parameters
 * `query` {string} : search query string
-* `callback` {function} _(js only, optional)_ : if specified, the request is asynchronous
-#### return values
+* `callback` {function} _(js only, optional)_ : if specified, the request is made asynchronous
+### return values
 * returns an array of matching identifiers or null if no match was found
 
 * format: "keyname1:value keyname2:value"
@@ -378,7 +415,7 @@ search ( query [, callback] )
 
 In case of `:` operator, you can use a regular expression as value.
 
-#### examples
+### examples
 Python
 ```python
 # list every png file containing "floor" in the file name, case insensitive
@@ -396,29 +433,29 @@ damas.search("file:/floor.*png$/i");
 damas.search('file:/rabbit/ type:char');
 ```
 
-### search_one
+## search_one
 Search nodes, returning the first matching occurrence as a node object (not as index as in search). The search string format is the same as for the search method.
 ```js
 search_one ( query [, callback] )
 ```
-#### parameters
+### parameters
 * `query` {string}
-* `callback` _(js only, optional)_ if specified, the request is asynchronous
-#### return values
+* `callback` _(js only, optional)_ if specified, the request is made asynchronous
+### return values
 * returns the first matching identifier or null if no match was found
 
-### search_mongo
+## search_mongo
 We expose the MongoDB find and cursor methods here in order to provide a powerful search with many options. It is only available when the server runs a MongoDB database to store the data.
 ```js
 search_mongo ( query [, sort, limit, skip, callback] )
 ```
-#### parameters
+### parameters
 * `query` {object} : the query object https://docs.mongodb.org/v3.0/reference/method/db.collection.find/
 * `sort` _(optional)_ : https://docs.mongodb.org/v3.0/reference/method/cursor.sort/
 * `limit` _(optional)_ : https://docs.mongodb.org/v3.0/reference/method/cursor.limit/
 * `skip` _(optional)_ : https://docs.mongodb.org/v3.0/reference/method/cursor.skip/
-* `callback`{function}  _(js only, optional)_ : if specified, the request is asynchronous
-#### return values
+* `callback`{function}  _(js only, optional)_ : if specified, the request is made asynchronous
+### return values
 * returns arrays of matching indexes
 
 > In order to use regular expressions, and because the JSON format only accept strings and has no type for regular expressions, we use strings with the prefix REGEX_ to indicate to the server that it must convert it to a RegExp object before executing the Mongo query. To add options to regular expressions, prefer the syntax RX_`expression`_RX`options`.
@@ -464,17 +501,60 @@ damas.search_mongo({'time': {$exists:true}}, {"time":-1},200,0, function(res){
 });
 ```
 
-### graph
+## graph_backwards
 Recursively get all source nodes and edges connected to the specified node
+```js
+graph_backwards ( identifiers, depth, [, callback] )
+```
+### parameters
+* `identifiers` {string | array} : identifier(s) string(s) to read
+* `depth` {number} : number of maximum recursions. 0 for unlimited recursions
+* `callback` {function} _(js only, optional)_ : if specified, the request is made asynchronous
+### return values
+* @returns {Array} array of element indexes
+### examples
+Javascript
+```js
+// retrieve the graph of an object users an array containing the elements (nodes and edges)
+damas.graph_backwards("usr_marion");
+```
+
+## graph_forwards
+Recursively get all target nodes and edges connected to the specified node
+```js
+graph_forwards ( identifiers, depth, [, callback] )
+```
+### parameters
+* `identifiers` {string | array} : identifier(s) string(s) to read
+* `depth` {number} : number of maximum recursions. 0 for unlimited recursions
+* `callback` {function} _(js only, optional)_ : if specified, the request is made asynchronous
+### return values
+* @returns {Array} array of element indexes
+### examples
+Javascript
+```js
+// retrieve the graph of a user
+damas.read(damas.graph_backwards("usr_marion", 0));
+
+// same but asynchronous
+damas.graph_backwards("usr_marion", 0, g => {
+    damas.read(g, n => {
+        // do something with n
+    })
+})
+```
+
+## graph
+Recursively get all source nodes and edges connected to the specified node (deprecated, use equivalent graph_backwards instead)
 ```js
 graph ( identifiers, [, callback] )
 ```
-#### parameters
+### parameters
 * `identifiers` {string | array} : identifier(s) string(s) to read
-* `callback` {function} _(js only, optional)_ : if specified, the request is asynchronous
-#### return values
-* @returns {Array} array of element indexes
-#### examples
+* `callback` {function} _(js only, optional)_ : if specified, the request is made asynchronous
+### return values
+* @returns {Array} array of elements
+### examples
 Javascript
 ```js
 // retrieve graph as an array containing the elements (nodes and edges)
@@ -483,8 +563,8 @@ damas.graph("55687e68e040af7047ee1a53");
 
 <!--
 
-### version
-#### version( `id`, `keys` [, `callback`] )
+## version
+### version( `id`, `keys` [, `callback`] )
 
 Insert a new file as a new version of an existing asset, wearing the specified keys.
 
@@ -503,8 +583,8 @@ Insert a new file as a new version of an existing asset, wearing the specified k
 {u'comment': u'added requested elements and cleaned', u'author': u'demo', u'#parent': u'5601542f690375ccae0c1a3b', u'file': "/project/files/scene-150925121320.ma", u'time': 1443174266343, u'_id': u'5605177ad8b454a87e771b65'}
 ```
 
-### link
-#### link( `target`, `sources`, `keys` [, `callback`] )
+## link
+### link( `target`, `sources`, `keys` [, `callback`] )
 Create edges from the sources files to the target file wearing the specified keys. The sources and the target are specified as pathes to the corresponding files.
 ```py
 # Python

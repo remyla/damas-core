@@ -25,7 +25,7 @@
 			<a href="/cli" title="Terminal"/><img class="logo" alt="CLI" src="/logo_terminal.svg"/></a>
 		</nav>
 		<h2>Javascript</h2>
-		Open a web console (press F12)
+		Open a web console (press Ctrl+Shift+k or F12) to start writing commands:
 		<noscript>
 			Javascript must be enabled.
 		</noscript>
@@ -33,15 +33,15 @@
 damas-core API loaded
 
 
-<span class="comment">// list every node identifiers</span>
+<span class="comment">// list every elements identifiers</span>
 damas.search(<span class="arg">'*'</span>);
 
 
-<span class="comment">// read every nodes</span>
+<span class="comment">// read every elements</span>
 damas.read(damas.search(<span class="arg">'*'</span>));
 
 
-<span class="comment">// create an empty node</span>
+<span class="comment">// create an empty element</span>
 damas.create(<span class="arg">{}</span>);
 </pre>
 Or install the module using NPM
@@ -57,9 +57,12 @@ const damas = require(<span class="arg">'damas-core-client'</span>);
 <span class="comment">// connect to this server</span>
 damas.server = <span class="arg">'<span id="server_url">https://serveripaddr</span>'</span>;
 </pre>
-
+		<a href="https://github.com/remyla/damas-core" class="forkme">Fork me on GitHub</a>
 		<footer>
-			<a href="https://github.com/remyla/damas-core/wiki/3-API-reference">🖹 API Reference</a>
+			<a href="/doc/1-Installation.md">🖹 Installation</a>
+			<a href="/doc/2-Connect.md">🖹 Connect</a>
+			<a href="/doc/3-API-Reference.md">🖹 API Reference</a>
+			<a href="/doc/4-Specifications.md">🖹 Specifications</a>
 		</footer>
 	</body>
 </html>

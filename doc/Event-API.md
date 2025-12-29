@@ -1,4 +1,5 @@
-# Event API
+Event API
+=========
 
 The events fired by a damas-core server can be listened by an external process using [socket.io](https://socket.io/).
 
@@ -9,7 +10,7 @@ We provide three events:
 - `update`
 - `remove` (delete)
 
-## Javascript
+# Javascript
 
 Here is a sample JavaScript client (see [damas-socket.js](../js/damas-socket.js)):
 
@@ -46,7 +47,7 @@ socket.on('remove', function (nodes) {
 });
 ```
 
-## Python
+# Python
 
 Here are examples to catch the events using [python-socketio](https://python-socketio.readthedocs.io/en/latest/client.html).
 See the [sample Python websocket client](../py/damas_socket.py).

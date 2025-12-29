@@ -1,8 +1,9 @@
-# Installation
-:information_source: This page explains how to install a new server. If you need to connect to an existing server, you can directly go to the [Connect Guide](2-Connect.md).
+Installation
+============
 
+This page explains how to install a new server. If you need to connect to an existing server, you can directly go to the [Connect Guide](2-Connect.md).
 
-## Usage using Docker
+# Run using Docker
 Clone this repository and run:
 ```
 cd docker
@@ -15,7 +16,8 @@ Add `-d` argument (detach) to the docker-compose command above to keep the serve
 docker-compose down
 docker-compose rm
 ```
-## Usage, from sources
+
+# Run from sources
 Run the server from the sources (without docker):
 ```
 cd server-nodejs
@@ -40,7 +42,7 @@ On Windows, to run and debug, run:
 set DEBUG=* & node .
 ```
 
-## Configure
+# Configure
 The server reads its configuration from `docker/damas.json` or `server-nodejs/conf.json` depending on the chosen installation described above. You can edit it according to your needs:
 
 ```json
@@ -66,7 +68,7 @@ The configuration is divided into sections:
 
 Read [JWT extension](Extensions.md#jwt) to enable user authentication according to your needs.
 
-##  Next steps
+#  Next steps
 Now that you have a running server you can read the [Connect Guide](2-Connect.md) to setup a client environment with Python, JavaScript or Shell, and read the [API Reference](3-API-Reference.md).
 
 In case you encounter some difficulties during the installation process you could create an issue describing the problem in this repository and we will try to solve it.

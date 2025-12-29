@@ -1,4 +1,5 @@
-# damas-core ![Licence](https://img.shields.io/github/license/remyla/damas-core) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/remyla/damas-core) ![Docker Pulls](https://img.shields.io/docker/pulls/primcode/damas-core) ![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/primcode/damas-core)
+damas-core ![Licence](https://img.shields.io/github/license/remyla/damas-core) ![GitHub release (latest by date)](https://img.shields.io/github/v/release/remyla/damas-core) ![Docker Pulls](https://img.shields.io/docker/pulls/primcode/damas-core) ![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/primcode/damas-core)
+==========
 ```
      _
   __| | __ _ _ __ ___   __ _ ___        ___ ___  _ __ ___
@@ -28,7 +29,7 @@ Directory structure:
 └── README.md       this file
 ```
 
-## Usage using Docker
+# Usage with Docker
 Clone this repository and run:
 ```
 cd docker
@@ -36,7 +37,7 @@ docker-compose up
 ```
 Then in a web browser, open `http://localhost`
 
-## Usage, from sources
+# Usage from sources
 Run the server from the sources (without docker):
 ```
 cd server-nodejs
@@ -48,10 +49,10 @@ node .
 
 Read the [documentation](doc) to configure your server for your needs.
 
-## Demo
+# Demo
 A public demo server is available at https://demo.damas.io
 
-## Related Links
+# Related Links
 http://damas-software.org is a website which presents the projects related to damas-core  
 https://syncplanet.io is a Saas using damas-core as backend  
 https://hub.docker.com/r/primcode/damas-core the ready-to-install docker images  
@@ -60,7 +61,7 @@ https://github.com/PRIMCODE/damas-flow is an interface to make directed graphs o
 https://github.com/PRIMCODE/damas-dashboard is a web control center and admin interface to index files, in production but not packaged for distribution. Get in touch if interested  
 http://primcode.com PRIMCODE is the company behind the development, the distribution and the maintenance of damas-core
 
-## Contributors
+# Contributors
 Remy Lalanne - Project lead  
 Thibault Allard  
 Julie Aresu  
@@ -77,7 +78,7 @@ Axel Prat
 Mathieu Valero  
 Quentin Villecroze
 
-## Context
+# Context
 `damas-core` is originaly created by [PRIMCODE](http://primcode.com) to support the production of 3D animated feature films and TV series as a digital asset manager and a universal meta data indexer (to index files, tasks, users etc) and was released as libre software in 2015 under the GNU GPLv3 license. Here is a chronology of the animated movies and TV series made using it:
 - Igor - 2008 - [IMDb](https://www.imdb.com/title/tt0465502/) [Wikipedia](https://en.wikipedia.org/wiki/Igor_(film))
 - Tatonka - 2010-2011 [IMDb](https://www.imdb.com/title/tt4446740/) [Wikipedia](https://en.wikipedia.org/wiki/Tales_of_Tatonka)
@@ -89,7 +90,7 @@ Quentin Villecroze
 - Zorro the Chronicles - 2015-2016 - [IMDb](https://www.imdb.com/title/tt6328652/)
 - Zombillenium - 2017 - [IMDb](https://www.imdb.com/title/tt5313906/) [Wikipedia](https://en.wikipedia.org/wiki/Zombillenium)
 - White-Fang - 2018 - [IMDb](https://www.imdb.com/title/tt5222768/) [Wikipedia](https://en.wikipedia.org/wiki/White_Fang_(2018_film))
-- Gigantosaurus - 2019 [IMDb](https://www.imdb.com/title/tt9636800/) [Wikipedia](https://en.wikipedia.org/wiki/Gigantosaurus_(TV_series))
+- Gigantosaurus - 2019 - [IMDb](https://www.imdb.com/title/tt9636800/) [Wikipedia](https://en.wikipedia.org/wiki/Gigantosaurus_(TV_series))
 - Droners - 2020 - [IMDb](https://www.imdb.com/title/tt14452674/)
 - Nefertine on the Nile - 2021 - [IMDb](https://www.imdb.com/title/tt11857654/)
 - Weird Waters - 2022 - [IMDb](https://www.imdb.com/title/tt16970040/)
@@ -98,8 +99,9 @@ Quentin Villecroze
 - Le petit Nicolas : qu'est-ce qu'on attend pour être heureux ? - 2022 - [IMDb](https://www.imdb.com/title/tt10290244/) [Wikipedia](https://en.wikipedia.org/wiki/Little_Nicholas:_Happy_As_Can_Be)
 - Mars Express - 2023 - [IMDb](https://www.imdb.com/title/tt26915336/) [Wikipedia fr](https://fr.wikipedia.org/wiki/Mars_Express_(film))
 - Angelo dans la forêt mystérieuse - 2024 - [IMDb](https://www.imdb.com/title/tt23448260/) [Wikipedia fr](https://fr.wikipedia.org/wiki/Angelo_dans_la_for%C3%AAt_myst%C3%A9rieuse)
+- Stitch Head - 2025 - [IMDb](https://www.imdb.com/title/tt26720001/) [Wikipedia](https://en.wikipedia.org/wiki/Stitch_Head)
 
-## License
+# License
 GPL License(GPLV3)
 
 Copyright(c) 2025 Remy Lalanne remy@primcode.com

@@ -1,4 +1,5 @@
-# Authentication
+Authentication
+==============
 
 The authentication in damas-core is based upon the JSON Web Token (RFC 7519) authentication and secure transmission. You can find some resources here:
 * [JSON Web Token](https://en.wikipedia.org/wiki/JSON_Web_Token) - Wikipedia page
@@ -7,19 +8,19 @@ The authentication in damas-core is based upon the JSON Web Token (RFC 7519) aut
 
 The implementation of this RFC is found in the [jwt damas-core extension](Extensions.md#jwt). Please find below some documentation about it.
 
-## Web Tokens
+# Web Tokens
 The tokens are delivered by the server using the [signIn](4-Specifications.md#signIn) operation to authenticate users.
 
-### Lifespan
+## Lifespan
 The default value for tokens' lifespan can be set in the server's conf.json under `extensions.jwt.exp`, and its value is "1d" (1 day) by default. See the syntax and examples [here](https://www.npmjs.com/package/ms). This value can also be specified during signIn, using the `expiresIn` parameter, in order to retrieve a token with the desired lifespan. A value of "0" ask for a token with an unlimited lifespan (see [#237](https://github.com/remyla/damas-core/issues/237)). By changing password, this revokes previously obtained tokens.  
 
-### Revoke
+## Revoke
 Changing the user's password revokes every tokens previously created. This is because the salt used to generate the tokens is also made of the user's hashed password value. This way, we provide a simple and secure way to revoke every tokens at once for a user without adding more complex operations.
 
-### Salt
+## Salt
 The tokens are encrypted using a salt composed of a secret passphrase specified on the server under `extension.jwt.secret`, and the users' hashed passwords. If we change either one, every previously obtained tokens is revoked.
 
-## Users
+# Users
 The users are regular elements we can create, update or delete using the API.
 ```json
 {
@@ -33,7 +34,7 @@ The users are regular elements we can create, update or delete using the API.
 ```
 Some keys can be added to users elements by the server, depending on its configuration: `lastActivity`, `lastLogin`.
 
-### Passwords
+## Passwords
 The users' passwords are stored in the database under a `password` key for each user element. The passwords are stored as encoded strings, using the `sha1` or `md5` hash algorithms. You can specify the preferred algorithm in `extensions.jwt.passwordHashAlgorithm`. The algorithm is automatically detected at signIn (using the hash length) so a mix of methods could exist in the database (this is useful to migrate or merge multiple user databases that use different hash algorithms).
 
 To create a new user using Python:
@@ -68,7 +69,7 @@ else:
     print "token expired"
 ```
 
-## Classes & Permissions
+# Classes & Permissions
 Different types of permissions are available:
 * hard-coded permissions for each /api/ operation based on the current user's `class` key (in server-nodejs/routes/perms-tools.js)
 * extension for update permissions based on the modified key name and the user's `class` key. See [restricted_keys extension](Extensions.md#restricted_keys).
@@ -87,9 +88,9 @@ The available user classes are: `admin` `editor` `user` `guest`.
 | search_mongo |   x   |   x  |    x   |   x   |
 
 
-## Miscellaneous Information
+# Miscellaneous Information
 
-### Details about the Python implementation
+## Details about the Python implementation
 ```python
 # Python
 project.token['username']  # The user name used to log in
@@ -99,11 +100,11 @@ project.token['token_iat'] # The time when the token was generated
 project.token['_id']       # The user node id
 ```
 
-### Another extension: authentication delegation
+## Another extension: authentication delegation
 The [jwt_delegate](https://github.com/remyla/damas-core/wiki/Extensions#jwt_delegate) extension can be additionally used to centralize the authentication on a different server. When an user signs in, instead of authenticating him against the local database, the extension creates a new request that is sent to the delegation server. Once the user is authenticated, its element is copied in the local server, as if the user was authenticated locally.
 
 
-### Use the token inside your custom curl Commands
+## Use the token inside your custom curl Commands
 1. Request an access token from the server:
 ```sh
 $ curl https://localhost/api/signIn -d "username=remyla&password=yyy" > /tmp/token

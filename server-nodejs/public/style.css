@@ -6,10 +6,6 @@ body {
 }
 a {
 	color: #364e64;
-	/*
-	text-decoration: none;
-	font-weight: bold;
-	*/
 }
 h1, .subtitle {
 	text-align: center;
@@ -68,4 +64,12 @@ span.comment {
 }
 span.arg {
 	color: #ffaa00;
+}
+.forkme {
+	position: absolute; top: 0; right: 0;
+	transform: rotate(45deg) translate(10ex);
+	background-color: #364e64;
+	width: 30ex;
+	text-align: center;
+	color: white;
 }

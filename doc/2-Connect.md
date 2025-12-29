@@ -1,10 +1,11 @@
-# Connect
+Connect
+=======
 This page explains how to connect to an existing server. You can use the public server https://demo.damas.io to test connecting the clients. Read the [Installation Guide](1-Installation.md) to setup a new server.
 
-## Python
-Visit https://demo.damas.io/py/ for instructions how to connect to the demo server.
+# Python
+Visit [/py](/py) on this server or https://demo.damas.io/py/ to get some instructions about how to connect to the demo server using python or follow the instructions below.
 
-__damas.py__ is a module containing the damas-core client API for Python. It is located under `/py/damas.py` in the damas-core repository. It depends on the `requests` module. On a Debian operating system you can install the `request` module using this command line:
+`damas_client.py` is a module containing the damas-core client API for Python. It is located under `/py/damas_client.py` in the damas-core repository. It depends on the `requests` module. On a Debian operating system you can install the `request` module using this command line:
 ```sh
 $ sudo apt install python-requests
 ```
@@ -12,7 +13,7 @@ $ sudo apt install python-requests
 ```python
 # Example use in a Python console
 # import the module
->>> import damas
+>>> import damas_client
 ```
 
 Then connect to a running server and start working with the nodes:
@@ -35,12 +36,12 @@ Then connect to a running server and start working with the nodes:
 ```
 
 
-## Javascript
+# Javascript
 https://demo.damas.io/js/ has the Javascript damas-core client API loaded and ready to try it with the demo server using a web browser.
 
 `/js/damas.js` in the damas-core repository is an AMD module containing the client API for Javascript. This module can be loaded in various environments.
 
-### In HTML Documents
+## In HTML Documents
 Include the library from a HTML document
 ```html
 <html>
@@ -57,11 +58,11 @@ Include the library from a HTML document
 ```
 > damas.server is set to an empty string if your page is directly served by damas-core
 
-### Using requireJS
+## Using requireJS
 ```js
 require('damas.js');
 damas.server = ''; // the server is on the localhost
-damas.signIn("demouser", "demouserpassword", function(res){
+damas.signIn("demoUser", "demoUserPassword", function(res){
     if (!res) {
         // login failed
         return;
@@ -76,10 +77,10 @@ npm install xmlhttprequest
 Also, CustomEvent is used in this module. Comment the 2 lines invoking CustomEvent if needed under NodeJS. This module would become a ready-to-use npm module if we get more clients using NodeJS.  
 
 
-## Command-line Interface
+# Command-line Interface
 https://demo.damas.io/cli/ gives explanations about the bash client and how to try it with the demo server.
 
-### Install the `damas` command on your system
+## Install the `damas` command on your system
 Install from this repository:
 ```sh
 cp cli/damas /usr/bin/damas
@@ -97,7 +98,7 @@ The manual page of the command can be found at https://demo.damas.io/cli/ or in 
 
 If the server requires authentication (the demo server has no authentication) you can use `damas signin <username> <password>` command to get a token which is stored in `/tmp/damas-<username>'. Only root and you can read it and it is removed whenever the system reboots
 
-## Next steps
+# Next steps
 Now that you have a running server and client environments you could continue reading the [API Reference](3-API-Reference.md) and the [Specifications](4-Specifications.md).
 
 If you encounter any difficulty you could create an issue describing the problem in this repository and we will try to solve it.

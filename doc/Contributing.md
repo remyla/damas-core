@@ -1,17 +1,18 @@
-# Contributing
+Contributing
+============
 
-## Table of Contents
+# Table of Contents
 * [Running Tests](#running-tests)
 * [JS Code Conventions](#js-code-conventions)
 
-## Running tests
+# Running tests
 
 * in `/server-tests/` - tests of the REST API using http://jasmine.github.io/
 * the tests are to be run on code from the same development branch (master, testing or experimental)
 * `/server-nodejs/tests` - tests for the nodejs server using mocha
 
-### Installation
-#### Mocha
+## Installation
+### Mocha
 
 To get started, you need to install some modules in server-nodejs :
 ```
@@ -20,7 +21,7 @@ npm install mocha chai chai-as-promised supertest
 
 Once mocha is started, every time you save modifications in a file the server is using, tests are made automatically
 
-#### Jasmine
+### Jasmine
 
 To get started, you need to install some modules in server-tests :
 ```
@@ -29,7 +30,7 @@ npm install
 
 Edit `conf-tests-frisby.json` as you need
 
-### Run
+## Run
 
 To run tests, simply type the following command in the appropriate directory :
 
@@ -44,7 +45,7 @@ If you have this error :
 ```
 then modify the shebang of the command (node_modules/{moduleName}/bin/{moduleName}) to `#!/usr/bin/env `**`nodejs`** or create an alias `node` -> `nodejs`
 
-### Tests results
+## Tests results
 
 Fun fact : Mocha did a really strange thing : it changes `'Foo'` into `{Foo:''}` when it is sent in POST
 
@@ -59,7 +60,7 @@ It revealed that:
 * Delete doesn't throw the right errors
 
 
-## JS Code conventions
+# JS Code conventions
 
 Abstract: as we start a new coding session with teammates we want to stick to a reference as explained in the issue [#99](../issues/99).
 
@@ -70,7 +71,7 @@ We mainly want to stick to the Crockford document. It will become our reference 
 
 http://javascript.crockford.com/code.html
 
-### Conditions
+## Conditions
 
 ```js
 if (null == variable) {
@@ -91,7 +92,7 @@ It allows for more visibility in the code, and prevents unwanted assignments.
 4. Always use braces and put the instructions on a new line. Even for single-line conditions containing a return statement.
 This way we can insert new instructions within the same condition without modifying existing lines.
 
-### Variables
+## Variables
 
 ```js
 var i = 0;
