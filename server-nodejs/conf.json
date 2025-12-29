@@ -50,21 +50,22 @@
             "path" : "./extensions/user_setup.js"
         },
         "jwt": {
-            "enable": false,
+            "enable": true,
             "path": "./extensions/jwt.js",
             "conf": {
                 "required": true,
                 "passwordHashAlgorithm": "sha1",
                 "secret": "webtokensecret",
                 "exp": "1d",
-                "expressUse": "/api",
+                "username": "^[a-z][-a-z0-9_]*\$",
+                "expressUse": "/api/*",
                 "expressUnless": {
                     "path": "/api/signIn/"
                 }
             }
         },
         "noauth": {
-            "enable": true,
+            "enable": false,
             "path": "./extensions/auth-none.js"
         },
         "restricted_keys": {
@@ -95,6 +96,7 @@
             "conf": {
                 "routes": {
                     "/": "public",
+                    "/doc": "../doc",
                     "/js": "../js",
                     "/cli": "../cli",
                     "/py": "../py",

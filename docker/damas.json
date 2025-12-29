@@ -47,7 +47,8 @@
                 "passwordHashAlgorithm": "sha1",
                 "secret": "webtokensecret",
                 "exp": "30d",
-                "expressUse": "/api",
+                "username": "^[a-z][-a-z0-9_]*\$",
+                "expressUse": "/api/*",
                 "expressUnless": {
                     "path": "/api/signIn/"
                 }
@@ -85,6 +86,7 @@
             "conf": {
                 "routes": {
                     "/": [ "/app/www", "public"],
+                    "/doc": "../doc",
                     "/js": "../js",
                     "/cli": "../cli",
                     "/py": "../py",

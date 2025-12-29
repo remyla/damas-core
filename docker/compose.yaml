@@ -1,7 +1,7 @@
 services:
     damas:
+        image: primcode/damas-core:2.6.1
         container_name: damas-core
-        image: primcode/damas-core:2.6
         volumes:
             - ./damas.json:/damas-core/server-nodejs/conf.json
             - ./www:/app/www
@@ -18,8 +18,8 @@ services:
             context: ..
             dockerfile: docker/Dockerfile
     mongo:
-        container_name: damas-mongo
         image: mongo:latest
+        container_name: damas-mongo
         volumes:
             - ./db:/data/db
         restart: always
@@ -27,7 +27,7 @@ services:
         tty: true
     nginx:
         image: nginx
-        container_name: nginx
+        container_name: damas-nginx
         volumes:
             - ./nginx.conf:/etc/nginx/nginx.conf
             - /etc/letsencrypt/:/etc/letsencrypt/
