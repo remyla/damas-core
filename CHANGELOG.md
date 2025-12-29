@@ -9,6 +9,24 @@
 
 ## Releases
 
+### 2025-12-26 v2.6.1
+This release brings 2 new operations to retrieve an object's graph: `graph_forwards` and `graph_backwards` to parse the connected objects following the direction of the links, or in reverse. These two new operations return the identifiers of the connected links and objects (not the whole JSON objects) so you can retrieve large graphs with an optimized response size, and read the objects in the graph afterwards. The older operation named `graph` is equivalent to the new `graph_backwards` operation, but returning whole objects. The `graph` operation is kept for backward compatibility, in deprecated status. This release also fixes a bug preventing using the upsert operation under certain conditions and the doc was improved (see details below).
+
+#### Added
+* new operations: graph_forwards, graph_backwards: request the graph of the specified node(s), following the directed links or in reverse (commit #6f0b55a6)
+* Javascript implementation of graph_forwards and graph_backwards in client damas.js
+
+#### Changed
+* Python client: Added back the TLS certificate verification by default (it was disabled for older `requests` module versions, thanks @Narann for the feedback. commit #b44e61c4)
+* Documentation: changed links to point the inline doc instead of the github wiki, updated the description of the create operation which now returns identifiers not objects, added implementation table in api page, reworked the md and html files (commits #7b1bca05 #0aad572a)
+* jwt: moved the accepted username pattern (RegExp) to configuration file. If undefined, accept all strings.
+
+#### Fixed
+* fixed a bug occuring when calling the `upsert` operation with `authorMode` enabled (when the edition permission is conditionned to the node's author key). The bug prevented from upserting correctly, so we had to fallback to a update/create scheme. (icommit #8ce16917)
+
+#### Credits
+@remyla
+
 ### 2024-12-21 v2.6
 This release brings performance improvement for large databases, easier container deployment with nginx in front of the API. Also, it has a small and optional change in specifications (see below), an improved documentation and 1 bugfix.
 
