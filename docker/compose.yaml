@@ -1,6 +1,24 @@
+#     _
+#  __| | __ _ _ __ ___   __ _ ___        ___ ___  _ __ ___
+# / _` |/ _` | '_ ` _ \ / _` / __|_____ / __/ _ \| '__/ _ \
+#| (_| | (_| | | | | | | (_| \__ \_____| (_| (_) | | |  __/
+# \__,_|\__,_|_| |_| |_|\__,_|___/      \___\___/|_|  \___|
+#
+#
+# Directory structure
+# ├── db/          mongo data storing json
+# ├── extensions/  additional server extensions
+# ├── www/         additional served files
+# ├── compose.yaml this file
+# ├── damas.json   damas configuration file
+# └── nginx.conf   nginx configuration file
+#
+# Run: docker compose up
+# Open: http://localhost
+
 services:
     damas:
-        image: primcode/damas-core:2.6.1
+        image: primcode/damas-core:2.6.2
         container_name: damas-core
         volumes:
             - ./damas.json:/damas-core/server-nodejs/conf.json
@@ -36,7 +54,6 @@ services:
             - 443:443
         depends_on:
             - damas
-#        # add reverse proxy networks
-#        # (multiple domains, one damas each)
+# add reverse proxy networks (multiple domains, one damas each)
 #        networks:
 #            - damas_default

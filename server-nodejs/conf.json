@@ -90,6 +90,21 @@
             "enable": false,
             "path": "./extensions/prefer_https.js"
         },
+        "markdown": {
+            "enable": true,
+            "path": "./extensions/markdown.cjs",
+            "conf": {
+                "root": "..",
+                "template": "pages/markdown.ejs",
+                "title": "%s - damas-core",
+                "routes": {
+                    "/": "../README.md",
+                    "/cli/": "../cli/README.md",
+                    "/js/": "../js/README.md",
+                    "/py/": "../py/README.md"
+                }
+            }
+        },
         "static_routes": {
             "enable": true,
             "path": "./extensions/static_routes.js",
@@ -101,6 +116,7 @@
                     "/cli": "../cli",
                     "/py": "../py",
                     "/api": "public/index.html",
+                    "/docker": "../docker",
                     "/signIn": "extensions/auth_signIn.html",
                     "/lostPassword": "extensions/user_lostPassword.html",
                     "/resetPassword": "extensions/user_resetPassword.html"
@@ -108,9 +124,17 @@
                 }
             }
         },
+        "ejs": {
+            "enable": true,
+            "path": "./extensions/ejs.js",
+            "conf": {
+                "views": "extensions/ejs"
+            }
+        },
         "dam": {
             "enable": true,
             "path": "./extensions/dam.js"
         }
+
     }
 }

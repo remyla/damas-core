@@ -23,18 +23,6 @@
                 "replacedPattern": "{#}"
             }
         },
-        "nodemailer": {
-            "enable": false,
-            "path": "./extensions/nodemailer.js",
-            "conf": {
-                "transporter":{
-                    "host": "localhost",
-                    "port": 25,
-                    "secure": false
-                },
-                "from": "\"Sender\" <noreply@example.org>"
-            }
-        },
         "user_setup" : {
             "enable": true,
             "path" : "./extensions/user_setup.js"
@@ -76,9 +64,27 @@
             "enable": true,
             "path": "./extensions/last_activity.js"
         },
-        "prefer_https": {
-            "enable": false,
-            "path": "./extensions/prefer_https.js"
+        "markdown": {
+            "enable": true,
+            "path": "./extensions/markdown.cjs",
+            "conf": {
+                "root": "..",
+                "template": "pages/markdown.ejs",
+                "title": "%s - damas-core",
+                "routes": {
+                    "/": "../README.md",
+                    "/cli/": "../cli/README.md",
+                    "/js/": "../js/README.md",
+                    "/py/": "../py/README.md"
+                }
+            }
+        },
+        "ejs": {
+            "enable": true,
+            "path": "./extensions/ejs.js",
+            "conf": {
+                "views": "extensions/ejs"
+            }
         },
         "static_routes": {
             "enable": true,

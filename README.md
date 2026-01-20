@@ -7,47 +7,51 @@ damas-core ![Licence](https://img.shields.io/github/license/remyla/damas-core) !
 | (_| | (_| | | | | | | (_| \__ \_____| (_| (_) | | |  __/
  \__,_|\__,_|_| |_| |_|\__,_|___/      \___\___/|_|  \___|
 ```
-JSON storage using NodeJS focused on reliability, efficiency and extensibility.
+JSON storage service using NodeJS focused on reliability, efficiency and extensibility.
 
 Its main features are:
-* RESTful HTTP web service
-* CRUD operations based on [strict specifications](doc/4-Specifications.md)
-* [JSON web token authentication](doc/Authentication.md)
-* [Server extensions](doc/Extensions.md)
-* [Python and Javascript API](doc/3-API-Reference.md)
-* [Command line interface](cli/README.md)
+* Based on HTTP, RESTful, CRUD operations with [strict specifications](doc/4-Specifications.md)
+* Multi-user using [JSON web token authentication](doc/Authentication.md)
+* Modular using [server extensions](doc/Extensions.md)
+* Programmable using [Python and Javascript](doc/3-API-Reference.md), [command line](cli/README.md) and [events](doc/Events-API.md)
 
 Directory structure:
 ```
 ├── cli/            Bash + curl command line client
+├── doc/            inline documentation
 ├── docker/         deployment package
 ├── js/             Javascript client API
 ├── py/             Python client API
 ├── server-nodejs/  server HTTP (NodeJS/Express)
 ├── server-tests/   server Jasmine unit tests
+├── CHANGELOG.md    releases notes
 ├── LICENSE         GNU GPLv3 license
 └── README.md       this file
 ```
 
-# Usage with Docker
-Clone this repository and run:
+[CHANGELOG](CHANGELOG.md)
+
+# Usage
+## Run using Docker
+Copy the files [/docker/compose.yaml](/docker/compose.yaml), [/docker/damas.json](/docker/damas.json) and [/docker/nginx.conf](/docker/nginx.conf) from this repository and run:
 ```
-cd docker
-docker-compose up
+docker compose up
 ```
 Then in a web browser, open `http://localhost`
 
-# Usage from sources
-Run the server from the sources (without docker):
+##  Run from Sources
+Clone this repository and run:
 ```
 cd server-nodejs
+
 # install dependencies
 npm install
+
 # run server
 node .
 ```
 
-Read the [documentation](doc) to configure your server for your needs.
+Read the [Installation](doc/1-Installation.md) for more details and to configure your server for your needs.
 
 # Demo
 A public demo server is available at https://demo.damas.io
@@ -78,6 +82,8 @@ Axel Prat
 Mathieu Valero  
 Quentin Villecroze
 
+[Contributing](doc/Contributing.md)
+
 # Context
 `damas-core` is originaly created by [PRIMCODE](http://primcode.com) to support the production of 3D animated feature films and TV series as a digital asset manager and a universal meta data indexer (to index files, tasks, users etc) and was released as libre software in 2015 under the GNU GPLv3 license. Here is a chronology of the animated movies and TV series made using it:
 - Igor - 2008 - [IMDb](https://www.imdb.com/title/tt0465502/) [Wikipedia](https://en.wikipedia.org/wiki/Igor_(film))
@@ -91,6 +97,7 @@ Quentin Villecroze
 - Zombillenium - 2017 - [IMDb](https://www.imdb.com/title/tt5313906/) [Wikipedia](https://en.wikipedia.org/wiki/Zombillenium)
 - White-Fang - 2018 - [IMDb](https://www.imdb.com/title/tt5222768/) [Wikipedia](https://en.wikipedia.org/wiki/White_Fang_(2018_film))
 - Gigantosaurus - 2019 - [IMDb](https://www.imdb.com/title/tt9636800/) [Wikipedia](https://en.wikipedia.org/wiki/Gigantosaurus_(TV_series))
+- Taffy - 2019 - [IMDb](https://www.imdb.com/fr/title/tt9179928/) [Wikipedia](https://en.wikipedia.org/wiki/Taffy_(TV_series))
 - Droners - 2020 - [IMDb](https://www.imdb.com/title/tt14452674/)
 - Nefertine on the Nile - 2021 - [IMDb](https://www.imdb.com/title/tt11857654/)
 - Weird Waters - 2022 - [IMDb](https://www.imdb.com/title/tt16970040/)
@@ -104,7 +111,7 @@ Quentin Villecroze
 # License
 GPL License(GPLV3)
 
-Copyright(c) 2025 Remy Lalanne remy@primcode.com
+Copyright(c) 2026 Remy Lalanne remy@primcode.com
 
 damas-core is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

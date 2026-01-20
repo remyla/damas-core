@@ -1,0 +1,17 @@
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<title>damas-core</title>
+<link rel="shortcut icon" href="favicon.ico"/>
+<link href="/style.css" rel="stylesheet" type="text/css"/>
+
+<script type="text/javascript">//<![CDATA[
+	document.addEventListener('DOMContentLoaded', function() {
+		document.querySelector('#server').innerHTML = window.location.host;
+		document.querySelector('#server_url').innerHTML = window.location.protocol+'//'+window.location.host;
+		damas.server = ""; // leave empty if this document is served by damas-core
+	});
+</script>
+<script type="text/javascript" src="/js/damas.js"></script>
+

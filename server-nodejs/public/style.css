@@ -3,12 +3,10 @@ body {
 	max-width: 800px;
 	margin: 1em auto;
 	color: #364e64;
+	overflow-x: hidden;
 }
 a {
 	color: #364e64;
-}
-h1, .subtitle {
-	text-align: center;
 }
 .subtitle {
 	margin-top: -1em;
@@ -22,12 +20,11 @@ h2, hr {
 }
 pre {
 	color: white;
-	background-color: #364e64;
+	background-color: #364e64dd;
 	padding: 2ex;
 	font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;
-	margin: 2ex;
 }
-footer {
+header, footer {
 	text-align: center;
 }
 hr {
@@ -73,3 +70,48 @@ span.arg {
 	text-align: center;
 	color: white;
 }
+
+
+/*
+ * Added for inline markdown doc
+ */
+table {
+	border-collapse: collapse;
+}
+table td {
+	border: 1px solid #ccc;
+}
+table tbody > *:nth-child(even) {
+        background-color: #f6f6f6;
+}
+blockquote {
+	color: #888;
+	border-left: 3px solid #ccc;
+	margin: 0;
+	padding: 0 2ex;
+}
+code {
+	background-color: #eee;
+	padding: .5ex;
+	border-radius: .5ex;
+}
+pre > code {
+	background-color: transparent;
+	padding: 0;
+}
+pre {
+	overflow: auto;
+	line-height: 1em;
+}
+h1, h2 {
+	border-bottom: 1px solid #ccc;
+}
+
+@media screen and (max-width:800px){
+	body {
+		margin: 1ex;
+	}
+}
+/*
+ * -- Added for the inline markdown doc
+ */

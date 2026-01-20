@@ -135,6 +135,8 @@ module.exports = function (app) {
 
     app.route('/api/createToken').post(function (req, res, next) {
         var expiresIn = req.body.expiresIn || conf.exp;
+	debug("#######################");
+        debug('createToken user='+req.user.username+" expiresIn="+expiresIn);
         var payload = {
             _id: req.user._id,
             username: req.user.username,

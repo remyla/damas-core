@@ -1,21 +1,35 @@
 Installation
 ============
 
-This page explains how to install a new server. If you need to connect to an existing server, you can directly go to the [Connect Guide](2-Connect.md).
+This page explains how to install a new server. If you need to connect to an existing server, you can directly read the [Connect Guide](2-Connect.md).
 
 # Run using Docker
-Clone this repository and run:
+
+Copy the files [/docker/compose.yaml](/docker/compose.yaml), [/docker/damas.json](/docker/damas.json) and [/docker/nginx.conf](/docker/nginx.conf) from this repository and run:
+
 ```
-cd docker
-docker-compose up
+docker compose up
 ```
 Then in a web browser, open `http://localhost`
 
-Add `-d` argument (detach) to the docker-compose command above to keep the servers running after closing the console. To stop the server and remove the containers, run:
+Add the `-d` (detach) option to the command above to keep the servers running after closing the console. To stop the server and remove the containers, run:
 ```shell
-docker-compose down
-docker-compose rm
+docker compose down
+docker compose rm
 ```
+
+
+The runtime docker server directory structure looks like this:
+```
+ ├── db/          mongo data storing json
+ ├── extensions/  additional server extensions
+ ├── www/         additional served files
+ ├── compose.yaml docker configuration file
+ ├── damas.json   damas configuration file
+ └── nginx.conf   nginx configuration file
+```
+The `db/`, `extensions/` and `www/` directories will be created at first launch is they don't exist. The directory `/etc/letsencrypt` of the host is mounted so the nginx container can see the certificates available on your host machine.
+
 
 # Run from sources
 Run the server from the sources (without docker):

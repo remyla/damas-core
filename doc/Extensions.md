@@ -26,10 +26,12 @@ Dummy extension example:
 `enable` and `conf` keys are optional. Omitting them means that the extension is enabled and that it does not need configuration. `path` and `conf` can be relative paths or absolute paths, and `conf` could be either an object containing configuration keys, or a string containing a path to an external json.
 
 # List of available extensions
+* [ejs](#ejs) - Enable EJS template engine
 * [graph](#graph) - Recursive operations on database
 * [jwt](#jwt) - Authentication using JSON Web Tokens
 * [jwt_delegate](#jwt_delegate) - Centralize authentication on a different server
 * [last_activity](#last_activity) - Keep the time of users' last activity
+* [markdown](#markdown) - Serve Markdown files as html using Marked
 * [noauth](#noauth) - A user verification mechanism when authentication is disabled
 * [restricted_keys](#restricted_keys) - Whitelist of writable keys depending on user class
 * [static_routes](#static_routes) - Files and folders to be served by the server
@@ -42,6 +44,21 @@ Older extensions, less relevant but still functional
 * [user_setup](#user_setup) - Manage user password reset
 
 # Detailed description of extensions
+
+## ejs
+Prepare Express to use the EJS template engine. Required by the markdown extension.
+* default configuration
+```js
+"ejs": {
+    "enable": true,
+    "path": "./extensions/ejs.js",
+    "conf": {
+        "views": "extensions/ejs"
+    }
+}
+```
+* configuration options:
+  * `views` (string) path to the directory containing .ejs files (usually containing pages/ and partials/ subfolders inside)
 
 ## es6-polyfills
 Provide ES6 polyfills if the code is ran in a NodeJS which is not ES6.
@@ -141,6 +158,33 @@ Save the date when user makes a request.
     "path": "./extensions/last_activity.js"
 },
 ```
+
+## markdown
+Serve Markdown files as html using Marked
+* default configuration:
+```js
+"markdown": {
+    "enable": true,
+    "path": "./extensions/markdown.cjs",
+    "conf": {
+        "root": "..",
+        "template": "pages/markdown.ejs",
+        "title": "%s - damas-core",
+        "routes": {
+            "/": "../README.md",
+            "/cli/": "../cli/README.md",
+            "/js/": "../js/README.md",
+            "/py/": "../py/README.md"
+        }
+    }
+},
+```
+* configuration options:
+  * `root` (string) where the .md files are located on disk. readfile on root+path.
+  * `template` (string) encapsulate the rendered html with this template
+  * `title` (string) provide a document title (`%s` is replaced with title found in document or with filename)
+  * `routes` (object) hash table with `route:path` to make correspond a route to a .md
+
 ## noauth
 Provides basic user verification mechanisms when authentication is disabled.
 * new routes: `/api/verify`

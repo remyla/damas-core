@@ -1,19 +1,16 @@
-## Install the `damas` command on your system
-Install from this repository:
-```sh
-cp cli/damas /usr/bin/damas
+Command Line Interface
+======================
+
+Get the [damas command](damas) and make it executable:
 ```
-Install from the gitHub repository:
-```sh
-sudo curl -L "https://raw.githubusercontent.com/remyla/damas-core/experimental/cli/damas" -o /usr/bin/damas
+chmod +x damas
 ```
-Then make the command executable:
+You can directly use it without installing it system-wide. To install the command on your system (optional):
 ```sh
-sudo chmod +x /usr/bin/damas
+sudo cp damas /usr/bin
 ```
 
-
-## Manual page
+# Manual page
 
 ```
 NAME
@@ -21,10 +18,10 @@ NAME
 
 SYNOPSIS
   damas [OPTION...] <COMMAND> [<ARGS>]
-  damas [--help] [-s|--server <server_url>] [-q|--quiet] [-v|--verbose] [-l|--lines] <COMMAND> [<ARGS>]
+  damas [--help] [-s|--server <server_url>] [-q|--quiet] [-v|--verbose] [-l|--lines] [--apikey <DAMAS_TOKEN>] <COMMAND> [<ARGS>]
 
 DESCRIPTION
-  Curl-based command to expose the operations of a damas-core service.
+  cURL-based command to expose the operations of a damas-core service.
 
   When ARGS is -, read standard input.
 
