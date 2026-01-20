@@ -1,4 +1,4 @@
-FROM node:alpine
+FROM node:20-alpine
 COPY . /damas-core/
 WORKDIR /damas-core/server-nodejs/
 RUN npm install
