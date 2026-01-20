@@ -57,7 +57,7 @@
                 "passwordHashAlgorithm": "sha1",
                 "secret": "webtokensecret",
                 "exp": "1d",
-                "username": "^[a-z][-a-z0-9_]*\$",
+                "username": "^[a-z][-a-z0-9_]*$",
                 "expressUse": "/api/*",
                 "expressUnless": {
                     "path": "/api/signIn/"
