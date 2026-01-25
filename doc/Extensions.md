@@ -115,7 +115,7 @@ Implementation of JSON Web Token RFC7519 for user authentication https://jwt.io/
   * `expressUse` (string, regex or array) paths to protect with authentication
   * `expressUnless` (object) paths and methods to exclude from authentication
 
-See [Authentication](Authentication.md), [express.use syntax](https://expressjs.com/en/api.html#app.use), [express unless syntax](https://www.npmjs.com/package/express-unless).
+See [Authentication](Authentication), [express.use syntax](https://expressjs.com/en/api.html#app.use), [express unless syntax](https://www.npmjs.com/package/express-unless).
 
 ### Enable User Authentication
 By default, the installation gives a public access without user authentication. Here is the procedure to create a new user using the damas-core API and the damas command line interface:
@@ -132,7 +132,7 @@ Then enable the extension:
     }
 }
 ```
-And configure the options depending on the behavior you want. Restart the server and sign in using the newly created user. Read [Authentication](Authentication.md) to have more details about the authentication options and implementation.
+And configure the options depending on the behavior you want. Restart the server and sign in using the newly created user. Read [Authentication](Authentication) to have more details about the authentication options and implementation.
 
 ## jwt_delegate
 Centralizing authentication on a different server than the tracker.

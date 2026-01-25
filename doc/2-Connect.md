@@ -1,6 +1,6 @@
 Connect
 =======
-This page explains how to connect to an existing server. You can use the public server https://demo.damas.io to test connecting the clients. Read the [Installation Guide](1-Installation.md) to setup a new server.
+This page explains how to connect to an existing server. You can use the public server https://demo.damas.io to test connecting the clients. Read the [Installation Guide](1-Installation) to setup a new server.
 
 # Python
 Visit [/py](/py) on this server or https://demo.damas.io/py/ to get some instructions about how to connect to the demo server using python or follow the instructions below.
@@ -94,11 +94,11 @@ Then make the command executable:
 chmod +x /usr/bin/damas
 ```
 
-The manual page of the command can be found at https://demo.damas.io/cli/ or in this repository under `/cli/README.md`.
+The manual page of the command can be found at https://demo.damas.io/cli/ or in this repository under `/cli/README`.
 
 If the server requires authentication (the demo server has no authentication) you can use `damas signin <username> <password>` command to get a token which is stored in `/tmp/damas-<username>'. Only root and you can read it and it is removed whenever the system reboots
 
 # Next steps
-Now that you have a running server and client environments you could continue reading the [API Reference](3-API-Reference.md) and the [Specifications](4-Specifications.md).
+Now that you have a running server and client environments you could continue reading the [API Reference](3-API-Reference) and the [Specifications](4-Specifications).
 
 If you encounter any difficulty you could create an issue describing the problem in this repository and we will try to solve it.

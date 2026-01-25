@@ -27,7 +27,6 @@ module.exports = function (app){
     const fs = require('fs');
     /*
     const ejs = require('ejs');
-    const path = require('node:path');
     app.set('views', path.join(__dirname, 'ejs') );
     app.engine('ejs', ejs.renderFile);
     app.set('view engine', 'ejs');
@@ -35,20 +34,37 @@ module.exports = function (app){
 
     var conf = app.locals.conf.markdown;
 
+    // resolve path
     app.use('/', (req,res,next ) => {
         if(req.path.match(/.*\.md$/)) {
+            // filename with explicit md extension: file in conf.root
             res.locals.translated_path = conf.root+req.path;
             debug('TRANSLATED_PATH FROM '+req.path+' TO '+res.locals.translated_path);
             return next();
         }
         for (var route in conf.routes) {
+            // explicit path in conf.routes
             if (req.path === route){
                     res.locals.translated_path = conf.routes[route];
                     debug('TRANSLATED_PATH FROM '+req.path+' TO '+res.locals.translated_path);
-                    break;
+                    return next();
             }
         }
-        next();
+        let filename = req.path.split('/').reverse()[0];
+        if (-1 === filename.indexOf('.')) {
+            // filename without extension: test if .md exists in conf.root
+            fs.exists(conf.root+req.path+'.md', function(exists) {
+                if (exists) {
+                    console.log('file found render of file '+ req.path+'.md');
+                    res.locals.translated_path = conf.root+req.path+'.md';
+                    debug('TRANSLATED_PATH FROM '+req.path+' TO '+res.locals.translated_path);
+                }
+                return next();
+            });
+
+        } else {
+            next();
+        }
     });
 
     app.use('/', (req,res,next ) => {
@@ -62,8 +78,11 @@ module.exports = function (app){
                     // remove the metadata embeded in between --- and ---
                     var data_processed = data.replace(/(^---[\s\S]*?)---/, '');
                     // find a document title, usually before = else use the file name
+                    var title = res.locals.translated_path.split('/').reverse()[0].replace(/\.[^/.]+$/, "");
                     var m = data_processed.match(/([\s\S]*?)=/);
-		    var title = (m | m.index !== 0 )? m[1].trim() : res.locals.translated_path.split('/').reverse()[0].replace(/\.[^/.]+$/, "");
+                    if (m && m[1] && m.index !== 0) {
+                        title = m[1].trim();
+                    }
                     var render = marked(data_processed.toString());
                     res.render(conf.template, { title: conf.title.replace('%s', title), content: render });
                 }

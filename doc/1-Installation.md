@@ -1,7 +1,7 @@
 Installation
 ============
 
-This page explains how to install a new server. If you need to connect to an existing server, you can directly read the [Connect Guide](2-Connect.md).
+This page explains how to install a new server. If you need to connect to an existing server, you can directly read the [Connect Guide](2-Connect).
 
 # Run using Docker
 
@@ -78,11 +78,11 @@ The configuration is divided into sections:
 * `authorMode`: if enabled the users are able to edit the nodes created by them
 * `db`: which Database Management System to use. Available values: `debug`, `mongodb6`, `mongodb` (legacy)
 * `mongodb6`: MongoDB options. Keep the default values to use a database located on the same machine
-* `extensions`: modules list to extend the core. See the [Extensions](Extensions.md) page for more details about the available extensions.
+* `extensions`: modules list to extend the core. See the [Extensions](Extensions) page for more details about the available extensions.
 
-Read [JWT extension](Extensions.md#jwt) to enable user authentication according to your needs.
+Read [JWT extension](Extensions#jwt) to enable user authentication according to your needs.
 
 #  Next steps
-Now that you have a running server you can read the [Connect Guide](2-Connect.md) to setup a client environment with Python, JavaScript or Shell, and read the [API Reference](3-API-Reference.md).
+Now that you have a running server you can read the [Connect Guide](2-Connect) to setup a client environment with Python, JavaScript or Shell, and read the [API Reference](3-API-Reference).
 
 In case you encounter some difficulties during the installation process you could create an issue describing the problem in this repository and we will try to solve it.

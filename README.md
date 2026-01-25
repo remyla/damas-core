@@ -10,10 +10,10 @@ damas-core ![Licence](https://img.shields.io/github/license/remyla/damas-core) !
 JSON storage service using NodeJS focused on reliability, efficiency and extensibility.
 
 Its main features are:
-* Based on HTTP, RESTful, CRUD operations with [strict specifications](doc/4-Specifications.md)
-* Multi-user using [JSON web token authentication](doc/Authentication.md)
-* Modular using [server extensions](doc/Extensions.md)
-* Programmable using [Python and Javascript](doc/3-API-Reference.md), [command line](cli/README.md) and [events](doc/Events-API.md)
+* Based on HTTP, RESTful, CRUD operations with [strict specifications](doc/4-Specifications)
+* Multi-user using [JSON web token authentication](doc/Authentication)
+* Modular using [server extensions](doc/Extensions)
+* Programmable using [Python and Javascript](doc/3-API-Reference), [command line](cli/README) and [events](doc/Events-API)
 
 Directory structure:
 ```
@@ -29,7 +29,7 @@ Directory structure:
 └── README.md       this file
 ```
 
-[CHANGELOG](CHANGELOG.md)
+[CHANGELOG](CHANGELOG)
 
 # Usage
 ## Run using Docker
@@ -51,7 +51,7 @@ npm install
 node .
 ```
 
-Read the [Installation](doc/1-Installation.md) for more details and to configure your server for your needs.
+Read the [Installation](doc/1-Installation) for more details and to configure your server for your needs.
 
 # Demo
 A public demo server is available at https://demo.damas.io
@@ -82,7 +82,7 @@ Axel Prat
 Mathieu Valero  
 Quentin Villecroze
 
-[Contributing](doc/Contributing.md)
+[Contributing](doc/Contributing)
 
 # Context
 `damas-core` is originaly created by [PRIMCODE](http://primcode.com) to support the production of 3D animated feature films and TV series as a digital asset manager and a universal meta data indexer (to index files, tasks, users etc) and was released as libre software in 2015 under the GNU GPLv3 license. Here is a chronology of the animated movies and TV series made using it:

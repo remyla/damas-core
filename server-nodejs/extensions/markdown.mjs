@@ -1,6 +1,7 @@
 import { marked } from 'marked';
+import markedAlert from 'marked-alert';
 // todo: support syntax hl
 //import { markedHighlight } from "marked-highlight";
-import express from 'express';
+marked.use(markedAlert());
 
 export default {marked};
