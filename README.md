@@ -10,15 +10,15 @@ damas-core ![Licence](https://img.shields.io/github/license/remyla/damas-core) !
 JSON storage service using NodeJS focused on reliability, efficiency and extensibility.
 
 Its main features are:
-* Based on HTTP, RESTful, CRUD operations with [strict specifications](doc/4-Specifications)
-* Multi-user using [JSON web token authentication](doc/Authentication)
-* Modular using [server extensions](doc/Extensions)
-* Programmable using [Python and Javascript](doc/3-API-Reference), [command line](cli/README) and [events](doc/Events-API)
+* Based on HTTP, RESTful, CRUD operations with [strict specifications](docs/4-Specifications)
+* Multi-user using [JSON web token authentication](docs/Authentication)
+* Modular using [server extensions](server-nodejs/extensions/)
+* Programmable using [Python and Javascript](docs/3-API-Reference), [command line](cli/README) and [events](docs/Event-API)
 
 Directory structure:
 ```
 ├── cli/            Bash + curl command line client
-├── doc/            inline documentation
+├── docs/           inline documentation
 ├── docker/         deployment package
 ├── js/             Javascript client API
 ├── py/             Python client API
@@ -37,7 +37,7 @@ Copy the files [/docker/compose.yaml](/docker/compose.yaml), [/docker/damas.json
 ```
 docker compose up
 ```
-Then in a web browser, open `http://localhost`
+Then in a web browser, open `http://localhost`.
 
 ##  Run from Sources
 Clone this repository and run:
@@ -50,8 +50,9 @@ npm install
 # run server
 node .
 ```
+Then in a web browser, open `http://localhost:8090`.
 
-Read the [Installation](doc/1-Installation) for more details and to configure your server for your needs.
+Read the [Installation](docs/1-Installation) for more details and to configure your server for your needs.
 
 # Demo
 A public demo server is available at https://demo.damas.io
@@ -82,36 +83,37 @@ Axel Prat
 Mathieu Valero  
 Quentin Villecroze
 
-[Contributing](doc/Contributing)
+See [Contributing](docs/Contributing) for coding conventions and unit testing.
 
 # Context
 `damas-core` is originaly created by [PRIMCODE](http://primcode.com) to support the production of 3D animated feature films and TV series as a digital asset manager and a universal meta data indexer (to index files, tasks, users etc) and was released as libre software in 2015 under the GNU GPLv3 license. Here is a chronology of the animated movies and TV series made using it:
-- Igor - 2008 - [IMDb](https://www.imdb.com/title/tt0465502/) [Wikipedia](https://en.wikipedia.org/wiki/Igor_(film))
-- Tatonka - 2010-2011 [IMDb](https://www.imdb.com/title/tt4446740/) [Wikipedia](https://en.wikipedia.org/wiki/Tales_of_Tatonka)
-- A Monster in Paris - 2011 - [IMDb](https://www.imdb.com/title/tt0961097/) [Wikipedia](https://en.wikipedia.org/wiki/A_Monster_in_Paris)
-- Approved for Adoption - 2012 - [IMDb](https://www.imdb.com/title/tt1621766/) [Wikipedia](https://en.wikipedia.org/wiki/Approved_for_Adoption)
-- Zou - 2012-2018 - [IMDb](https://www.imdb.com/title/tt2587622/) [Wikipedia](https://en.wikipedia.org/wiki/Zou_(TV_series))
-- Mademoiselle Zazie - 2013 - [IMDb](https://www.imdb.com/title/tt3227218/) [Wikipedia](https://en.wikipedia.org/wiki/Mademoiselle_Zazie)
-- Mia - 2014 - [IMDb](https://www.imdb.com/title/tt4670296/)
-- Zorro the Chronicles - 2015-2016 - [IMDb](https://www.imdb.com/title/tt6328652/)
-- Zombillenium - 2017 - [IMDb](https://www.imdb.com/title/tt5313906/) [Wikipedia](https://en.wikipedia.org/wiki/Zombillenium)
-- White-Fang - 2018 - [IMDb](https://www.imdb.com/title/tt5222768/) [Wikipedia](https://en.wikipedia.org/wiki/White_Fang_(2018_film))
-- Gigantosaurus - 2019 - [IMDb](https://www.imdb.com/title/tt9636800/) [Wikipedia](https://en.wikipedia.org/wiki/Gigantosaurus_(TV_series))
-- Taffy - 2019 - [IMDb](https://www.imdb.com/fr/title/tt9179928/) [Wikipedia](https://en.wikipedia.org/wiki/Taffy_(TV_series))
-- Droners - 2020 - [IMDb](https://www.imdb.com/title/tt14452674/)
-- Nefertine on the Nile - 2021 - [IMDb](https://www.imdb.com/title/tt11857654/)
-- Weird Waters - 2022 - [IMDb](https://www.imdb.com/title/tt16970040/)
-- Heros à Moitié - 2022 - [IMDb](https://www.imdb.com/title/tt22187618/)
-- Hello Kitty - Super Style! - 2022 - [IMDb](https://www.imdb.com/title/tt15771940/) [Wikipedia](https://en.wikipedia.org/wiki/Hello_Kitty:_Super_Style!)
-- Le petit Nicolas : qu'est-ce qu'on attend pour être heureux ? - 2022 - [IMDb](https://www.imdb.com/title/tt10290244/) [Wikipedia](https://en.wikipedia.org/wiki/Little_Nicholas:_Happy_As_Can_Be)
-- Mars Express - 2023 - [IMDb](https://www.imdb.com/title/tt26915336/) [Wikipedia fr](https://fr.wikipedia.org/wiki/Mars_Express_(film))
-- Angelo dans la forêt mystérieuse - 2024 - [IMDb](https://www.imdb.com/title/tt23448260/) [Wikipedia fr](https://fr.wikipedia.org/wiki/Angelo_dans_la_for%C3%AAt_myst%C3%A9rieuse)
-- Stitch Head - 2025 - [IMDb](https://www.imdb.com/title/tt26720001/) [Wikipedia](https://en.wikipedia.org/wiki/Stitch_Head)
+- Igor - 2008 - [IMDb⤴](https://www.imdb.com/title/tt0465502/) [Wikipedia⤴](https://en.wikipedia.org/wiki/Igor_(film))
+- Tatonka - 2010-2011 [IMDb⤴](https://www.imdb.com/title/tt4446740/) [Wikipedia⤴](https://en.wikipedia.org/wiki/Tales_of_Tatonka)
+- A Monster in Paris - 2011 - [IMDb⤴](https://www.imdb.com/title/tt0961097/) [Wikipedia⤴](https://en.wikipedia.org/wiki/A_Monster_in_Paris)
+- Approved for Adoption - 2012 - [IMDb⤴](https://www.imdb.com/title/tt1621766/) [Wikipedia⤴](https://en.wikipedia.org/wiki/Approved_for_Adoption)
+- Zou - 2012-2018 - [IMDb⤴](https://www.imdb.com/title/tt2587622/) [Wikipedia⤴](https://en.wikipedia.org/wiki/Zou_(TV_series))
+- Mademoiselle Zazie - 2013 - [IMDb⤴](https://www.imdb.com/title/tt3227218/) [Wikipedia⤴](https://en.wikipedia.org/wiki/Mademoiselle_Zazie)
+- Mia - 2014 - [IMDb⤴](https://www.imdb.com/title/tt4670296/)
+- Zorro the Chronicles - 2015-2016 - [IMDb⤴](https://www.imdb.com/title/tt6328652/) [Wikipedia fr⤴](https://fr.wikipedia.org/wiki/Les_Chroniques_de_Zorro)
+- Zombillenium - 2017 - [IMDb⤴](https://www.imdb.com/title/tt5313906/) [Wikipedia⤴](https://en.wikipedia.org/wiki/Zombillenium)
+- White-Fang - 2018 - [IMDb⤴](https://www.imdb.com/title/tt5222768/) [Wikipedia⤴](https://en.wikipedia.org/wiki/White_Fang_(2018_film))
+- Gigantosaurus - 2019 - [IMDb⤴](https://www.imdb.com/title/tt9636800/) [Wikipedia⤴](https://en.wikipedia.org/wiki/Gigantosaurus_(TV_series))
+- Taffy - 2019 - [IMDb⤴](https://www.imdb.com/fr/title/tt9179928/) [Wikipedia⤴](https://en.wikipedia.org/wiki/Taffy_(TV_series))
+- Droners - 2020 - [IMDb⤴](https://www.imdb.com/title/tt14452674/)
+- Nefertine on the Nile - 2021 - [IMDb⤴](https://www.imdb.com/title/tt11857654/)
+- Weird Waters - 2022 - [IMDb⤴](https://www.imdb.com/title/tt16970040/)
+- Heros à Moitié - 2022 - [IMDb⤴](https://www.imdb.com/title/tt22187618/)
+- Hello Kitty - Super Style! - 2022 - [IMDb⤴](https://www.imdb.com/title/tt15771940/) [Wikipedia⤴](https://en.wikipedia.org/wiki/Hello_Kitty:_Super_Style!)
+- Le petit Nicolas : qu'est-ce qu'on attend pour être heureux ? - 2022 - [IMDb⤴](https://www.imdb.com/title/tt10290244/) [Wikipedia⤴](https://en.wikipedia.org/wiki/Little_Nicholas:_Happy_As_Can_Be)
+- Mars Express - 2023 - [IMDb⤴](https://www.imdb.com/title/tt26915336/) [Wikipedia fr⤴](https://fr.wikipedia.org/wiki/Mars_Express_(film))
+- Angelo dans la forêt mystérieuse - 2024 - [IMDb⤴](https://www.imdb.com/title/tt23448260/) [Wikipedia fr⤴](https://fr.wikipedia.org/wiki/Angelo_dans_la_for%C3%AAt_myst%C3%A9rieuse)
+- Stitch Head - 2025 - [IMDb⤴](https://www.imdb.com/title/tt26720001/) [Wikipedia⤴](https://en.wikipedia.org/wiki/Stitch_Head)
+- Les Légendaires - 2025 [IMDb⤴](https://www.imdb.com/title/tt35659725/) [Wikipedia fr⤴](https://fr.wikipedia.org/wiki/Les_L%C3%A9gendaires_(film))
 
 # License
 GPL License(GPLV3)
 
-Copyright(c) 2026 Remy Lalanne remy@primcode.com
+Copyright(c) 2026 Remy Lalanne (remy at primcode dot com)
 
 damas-core is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

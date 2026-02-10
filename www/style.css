@@ -12,36 +12,12 @@ a {
 	margin-top: -1em;
 	margin-bottom: 2em;
 }
-h2, hr {
-	border: none;
-	border-bottom: 1px solid #808080;
-	border-bottom: 1px solid #364e64;
-	border-bottom: 1px solid #6a8698;
-}
-pre {
-	color: white;
-	background-color: #364e64dd;
-	padding: 2ex;
-	font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;
-}
 header, footer {
 	text-align: center;
 }
 hr {
 	margin-top: 3em;
 }
-nav {
-	text-align: center;
-}
-/*
-nav a {
-	color: white;
-	background-color: #364e64;
-	padding: 1ex;
-	border-radius: 3px;
-	text-decoration: none;
-}
-*/
 .logo {
 	width: 10ex;
 	padding: 1ex;
@@ -50,10 +26,6 @@ nav a {
 }
 .logo.selected {
 	background-color: #bbf;
-
-}
-a .logo {
-	width: 10ex;
 }
 span.comment {
 	font-style: italic;
@@ -70,7 +42,6 @@ span.arg {
 	text-align: center;
 	color: white;
 }
-
 
 /*
  * Added for inline markdown doc
@@ -102,8 +73,12 @@ pre > code {
 pre {
 	overflow: auto;
 	line-height: 1em;
+	color: white;
+	background-color: #364e64dd;
+	padding: 1rem;
+	font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
-h1, h2 {
+h1, h2, hr {
 	border-bottom: 1px solid #ccc;
 }
 

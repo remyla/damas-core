@@ -49,8 +49,8 @@ In a Python console:
 [{u'key2': u'value2', u'key1': u'value1', u'time': 1437469470133, u'_id': u'55ae0b1ed81e88357d77d0e9', u'author': u'xxx.xxx.xxx.xxx'}]
 </pre>
 
-Visit the [API-Reference](/doc/3-API-Reference.md) for the documentation.
+Visit the [API-Reference](/docs/3-API-Reference) for the documentation.
 
 # Additional Python ressources
 
-[damas_socket.py](damas_socket.py) is a module to connect to a damas-core server using Socketio websockets. See [Event-API](/doc/Events-API.md).
+[damas_socket.py](damas_socket.py) is a module to connect to a damas-core server using Socketio websockets. See [Event-API](/docs/Events-API).

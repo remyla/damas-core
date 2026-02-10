@@ -68,14 +68,11 @@
             "enable": true,
             "path": "./extensions/markdown.cjs",
             "conf": {
-                "root": "..",
                 "template": "pages/markdown.ejs",
                 "title": "%s - damas-core",
                 "routes": {
-                    "/": "../README.md",
-                    "/cli/": "../cli/README.md",
-                    "/js/": "../js/README.md",
-                    "/py/": "../py/README.md"
+                    "/api/": "../",
+                    "/": "../"
                 }
             }
         },
@@ -91,12 +88,7 @@
             "path": "./extensions/static_routes.js",
             "conf": {
                 "routes": {
-                    "/": [ "/app/www", "public"],
-                    "/doc": "../doc",
-                    "/js": "../js",
-                    "/cli": "../cli",
-                    "/py": "../py",
-                    "/api": "public/index.html",
+                    "/": [ "/app/www", "../", "../www"],
                     "/signIn": "extensions/auth_signIn.html",
                     "/lostPassword": "extensions/user_lostPassword.html",
                     "/resetPassword": "extensions/user_resetPassword.html"

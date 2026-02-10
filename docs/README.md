@@ -14,7 +14,7 @@ Welcome to the damas-core wiki.
 * [4 Specifications](4-Specifications.md) - Protocol specifications
 
 ### Additional information
-* [Authentication](Authentification.md) - Token based authentication implemented in server-nodejs
+* [Authentication](Authentication.md) - Token based authentication implemented in server-nodejs
 * [Database Admin](Database-Administration.md) -  Cook Book, some recipes for the administration of the underlying database
-* [Extensions](Extensions.md) - Documentation about the provided extensions and their format
+* [Extensions](../server-nodejs/extensions/) - Documentation about the provided extensions and their format
 * [Contributing](Contributing.md) - Documentation for coding conventions and unit testing

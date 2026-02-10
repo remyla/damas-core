@@ -60,7 +60,7 @@ set DEBUG=* & node .
 The server reads its configuration from `docker/damas.json` or `server-nodejs/conf.json` depending on the chosen installation described above. You can edit it according to your needs:
 
 ```json
-{                                                                                                                     
+{
     "authorMode" : true,
     "db": "mongodb6",
     "mongodb6": {
@@ -78,9 +78,9 @@ The configuration is divided into sections:
 * `authorMode`: if enabled the users are able to edit the nodes created by them
 * `db`: which Database Management System to use. Available values: `debug`, `mongodb6`, `mongodb` (legacy)
 * `mongodb6`: MongoDB options. Keep the default values to use a database located on the same machine
-* `extensions`: modules list to extend the core. See the [Extensions](Extensions) page for more details about the available extensions.
+* `extensions`: modules list to extend the core. See the [available extensions](../server-nodejs/extensions/).
 
-Read [JWT extension](Extensions#jwt) to enable user authentication according to your needs.
+Read about the [JWT extension](../server-nodejs/extensions/#jwt) to configure a user authentication system according to your needs.
 
 #  Next steps
 Now that you have a running server you can read the [Connect Guide](2-Connect) to setup a client environment with Python, JavaScript or Shell, and read the [API Reference](3-API-Reference).

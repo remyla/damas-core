@@ -1,3 +1,6 @@
+Programming Interface
+=====================
+
 The damas-core API is available for Python, Javascript and the command line.
 Read the [connect page](2-Connect) to setup a client environment.
 
@@ -81,7 +84,7 @@ The elements are described as key/value pairs using [JSON](https://json.org/):
     "string":"hello world"
 }
 ```
-The elements are identified using unique identifiers stored in the reserved `_id` key. If the `_id` key is not provided at creation, a default unique value for `_id` is assigned. The [ulid extension](Extensions#ulid) generates Universally Unique Lexicographically Sortable Identifiers and let you customize the identifiers using patterns.
+The elements are identified using unique identifiers stored in the reserved `_id` key. If the `_id` key is not provided at creation, a default unique value for `_id` is assigned. The [ulid extension](../server-nodejs/extensions/#ulid) generates Universally Unique Lexicographically Sortable Identifiers and let you customize the identifiers using patterns.
 
 ## Types
 The elements are loosely typed: it is up to the model from the layer above to decide how and if some elements are typed. For example, the users, defined in the jwt authentication extension, are described as elements wearing some reserved keys: `username`, `password`, `class` plus optional keys.
@@ -94,7 +97,7 @@ The elements are loosely typed: it is up to the model from the layer above to de
     "username": "userlogin"
 }
 ```
-The user elements are defined and used in the [jwt authentication extension](Extensions#jwt) and a dedicated [authentication page](Authentication) gives more details about the mechanism.
+The user elements are defined and used in the [jwt authentication extension](../server-nodejs/extensions/#jwt) and a dedicated [authentication page](Authentication) gives more details about the mechanism.
 
 <!--
 \* *Not implemented yet in NodeJS*

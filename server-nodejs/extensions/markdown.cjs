@@ -12,7 +12,10 @@
  *
  * This module uses EJS to build the html using templates. EJS can be
  * activated outside this module for flexibility, activate the ejs.js
- * extension.
+ * extension. The ejs template is specified in conf. 3 variables are passed
+ * to the template: title, path, content.
+ *
+ * Resolves routes, directory README.md and file .md extension autocompletion.
  */
 
 module.exports = function (app){
@@ -25,7 +28,7 @@ module.exports = function (app){
     import_marked_mjs();
 
     const fs = require('fs');
-    /*
+    /* // ejs is now an as an external module
     const ejs = require('ejs');
     app.set('views', path.join(__dirname, 'ejs') );
     app.engine('ejs', ejs.renderFile);
@@ -34,59 +37,57 @@ module.exports = function (app){
 
     var conf = app.locals.conf.markdown;
 
-    // resolve path
+    // path resolver
     app.use('/', (req,res,next ) => {
-        if(req.path.match(/.*\.md$/)) {
-            // filename with explicit md extension: file in conf.root
-            res.locals.translated_path = conf.root+req.path;
-            debug('TRANSLATED_PATH FROM '+req.path+' TO '+res.locals.translated_path);
-            return next();
-        }
         for (var route in conf.routes) {
-            // explicit path in conf.routes
-            if (req.path === route){
-                    res.locals.translated_path = conf.routes[route];
-                    debug('TRANSLATED_PATH FROM '+req.path+' TO '+res.locals.translated_path);
+            if (0 === req.path.indexOf(route)){
+                res.locals.resolved_path = req.path.replace(route, conf.routes[route]);
+                if (res.locals.resolved_path.endsWith("/")) {
+                    res.locals.resolved_path = res.locals.resolved_path+'README.md';
                     return next();
+                }
+                if (-1 === res.locals.resolved_path.split("/").reverse()[0].indexOf(".")) {
+                    res.locals.resolved_path += ".md";
+                    return next();
+                }
             }
         }
-        let filename = req.path.split('/').reverse()[0];
-        if (-1 === filename.indexOf('.')) {
-            // filename without extension: test if .md exists in conf.root
-            fs.exists(conf.root+req.path+'.md', function(exists) {
-                if (exists) {
-                    console.log('file found render of file '+ req.path+'.md');
-                    res.locals.translated_path = conf.root+req.path+'.md';
-                    debug('TRANSLATED_PATH FROM '+req.path+' TO '+res.locals.translated_path);
-                }
-                return next();
-            });
-
-        } else {
-            next();
-        }
+        next();
     });
 
     app.use('/', (req,res,next ) => {
-        if(res.locals.translated_path !== undefined) {
-            fs.readFile(res.locals.translated_path, 'utf8', function(err, data) {
-                if(err) {
-                  console.log(err);
-                  res.send('not found');
-                }
-                else {
-                    // remove the metadata embeded in between --- and ---
-                    var data_processed = data.replace(/(^---[\s\S]*?)---/, '');
-                    // find a document title, usually before = else use the file name
-                    var title = res.locals.translated_path.split('/').reverse()[0].replace(/\.[^/.]+$/, "");
-                    var m = data_processed.match(/([\s\S]*?)=/);
-                    if (m && m[1] && m.index !== 0) {
-                        title = m[1].trim();
+        if(res.locals.resolved_path !== undefined) {
+            debug(req.path+' resolved to '+res.locals.resolved_path);
+            if(res.locals.resolved_path.endsWith('.md')) {
+                fs.readFile(res.locals.resolved_path, 'utf8', function(err, data) {
+                    if(err) {
+                      res.send('not found');
                     }
-                    var render = marked(data_processed.toString());
-                    res.render(conf.template, { title: conf.title.replace('%s', title), content: render });
-                }
-            });
+                    else {
+                        // remove the metadata embeded in between --- and ---
+                        var data_processed = data.replace(/(^---[\s\S]*?)---/, '');
+                        // find a document title, usually before = else use the file name
+                        var title = res.locals.resolved_path.split('/').reverse()[0].replace(/\.[^/.]+$/, "");
+                        var m = data_processed.match(/([\s\S]*?)===/);
+                        if (null != m) {
+                            if (m[1]) {
+                                title = m[1].trim();
+                            }
+                        }
+                        var render = marked(data_processed.toString());
+                        res.render(conf.template, {
+                            title: conf.title.replace('%s', title),
+                            path: req.path,
+                            content: render });
+                    }
+                });
+            } else {
+                // we translated a path, but it is not a .md
+                // so we can serve the images,css:
+                // res.sendFile(res.locals.resolved_path);
+                // or we let the following express static middleware serve the other files:
+                next();
+            }
         }
         else {
             next();

@@ -115,7 +115,7 @@ Implementation of JSON Web Token RFC7519 for user authentication https://jwt.io/
   * `expressUse` (string, regex or array) paths to protect with authentication
   * `expressUnless` (object) paths and methods to exclude from authentication
 
-See [Authentication](/doc/Authentication), [express.use syntax⤴](https://expressjs.com/en/api.html#app.use), [express unless syntax⤴](https://www.npmjs.com/package/express-unless).
+See [Authentication](/docs/Authentication), [express.use syntax⤴](https://expressjs.com/en/api.html#app.use), [express unless syntax⤴](https://www.npmjs.com/package/express-unless).
 
 ### Enable User Authentication
 By default, the installation gives a public access without user authentication. Here is the procedure to create a new user using the damas-core API and the damas command line interface:
@@ -132,11 +132,11 @@ Then enable the extension:
     }
 }
 ```
-And configure the options depending on the behavior you want. Restart the server and sign in using the newly created user. Read [Authentication](/doc/Authentication) to have more details about the authentication options and implementation.
+And configure the options depending on the behavior you want. Restart the server and sign in using the newly created user. Read [Authentication](/docs/Authentication) to have more details about the authentication options and implementation.
 
 ## jwt_delegate
 Centralizing authentication on a different server than the tracker.
-The user node will be save in the tracker database or update [(learn more)](/doc/Authentication#signin).
+The user node will be save in the tracker database or update [(learn more)](/docs/Authentication#signin).
 * default configuration :
 ```js
 "jwt_delegate": {
@@ -170,10 +170,11 @@ Serve Markdown files as HTML, rendered using Marked and EJS. Resolves routes, RE
         "template": "pages/markdown.ejs",
         "title": "%s - damas-core",
         "routes": {
+            "/api/": "../",
             "/": "../"
         }
     }
-},
+}
 ```
 * configuration options:
   * `template` (string) encapsulate the rendered html with the specified EJS template
