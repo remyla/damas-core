@@ -26,6 +26,7 @@
     "jsonwebtoken": "^5.7.0",
     "marked": "^17.0.1",
     "marked-alert": "^2.1.2",
+    "marked-custom-heading-id": "^2.0.16",
     "method-override": "^2.3.10",
     "mongodb": "^6.8.0",
     "morgan": "^1.10.0",

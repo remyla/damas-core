@@ -39,8 +39,11 @@ module.exports = function (app){
 
     // path resolver
     app.use('/', (req,res,next ) => {
+        if (0 === req.path.indexOf('/api/')) {
+            return next();
+        }
         for (var route in conf.routes) {
-            if (0 === req.path.indexOf(route)){
+            if (0 === req.path.indexOf(route)) {
                 res.locals.resolved_path = req.path.replace(route, conf.routes[route]);
                 if (res.locals.resolved_path.endsWith("/")) {
                     res.locals.resolved_path = res.locals.resolved_path+'README.md';
