@@ -45,7 +45,7 @@ Older extensions, less relevant but still functional
 
 # Detailed description of extensions
 
-## ejs
+## ejs {#ejs}
 Prepare Express to use the EJS template engine. Required by the markdown extension.
 * default configuration
 ```js
@@ -60,7 +60,7 @@ Prepare Express to use the EJS template engine. Required by the markdown extensi
 * configuration options:
   * `views` (string) path to the directory containing .ejs files (usually containing pages/ and partials/ subfolders inside)
 
-## es6-polyfills
+## es6-polyfills {#es6-polyfills}
 Provide ES6 polyfills if the code is ran in a NodeJS which is not ES6.
 (NodeJS v0.10.29 for instance, on older systems)
 * default configuration:
@@ -84,7 +84,7 @@ Handles recursive operations regarding nodes in the database.
 **Methods**
 * `graphDelete(ids, callback)` | Delete specified nodes and any other node that might be associated
 
-## jwt
+## jwt {#jwt}
 Implementation of JSON Web Token RFC7519 for user authentication https://jwt.io/  
 * requires `jsonwebtoken` `express-jwt` `express-unless` `crypto` `cookie-parser` `ms`
 * new routes: `/api/signIn` and `/api/verify`
@@ -134,7 +134,7 @@ Then enable the extension:
 ```
 And configure the options depending on the behavior you want. Restart the server and sign in using the newly created user. Read [Authentication](/docs/Authentication) to have more details about the authentication options and implementation.
 
-## jwt_delegate
+## jwt_delegate {#jwt_delegate}
 Centralizing authentication on a different server than the tracker.
 The user node will be save in the tracker database or update [(learn more)](/docs/Authentication#signin).
 * default configuration :
@@ -149,7 +149,7 @@ The user node will be save in the tracker database or update [(learn more)](/doc
 ```
 * Create a new request and submit it to the server
 
-## last_activity
+## last_activity {#last_activity}
 Save the date when user makes a request.
 * default configuration:
 ```js
@@ -159,7 +159,7 @@ Save the date when user makes a request.
 },
 ```
 
-## markdown
+## markdown {#markdown}
 Serve Markdown files as HTML, rendered using Marked and EJS. Resolves routes, README.md in directories and .md extension autocompletion.
 * default configuration:
 ```js
@@ -186,7 +186,7 @@ Serve Markdown files as HTML, rendered using Marked and EJS. Resolves routes, RE
   * [markdown.ejs](ejs/pages/markdown.ejs)
 
 
-## noauth
+## noauth {#noauth}
 Provides basic user verification mechanisms when authentication is disabled.
 * new routes: `/api/verify`
 * default configuration:
@@ -197,7 +197,7 @@ Provides basic user verification mechanisms when authentication is disabled.
 }
 ```
 
-## nodemailer
+## nodemailer {#nodemailer}
 Send email using https://www.npmjs.com/package/nodemailer
 * requires `nodemailer`
 * default configuration:
@@ -220,7 +220,7 @@ Send email using https://www.npmjs.com/package/nodemailer
   * `from` (string) default sender email address
 See [nodemailer⤴](https://www.npmjs.com/package/nodemailer)
 
-## restricted_keys
+## restricted_keys {#restricted_keys}
 Replace keys in requests by default ones if the user class is not in the whitelist. If the new value is defined as null, delete the key from the request
 * default configuration:
 ```js
@@ -237,7 +237,7 @@ Replace keys in requests by default ones if the user class is not in the whiteli
   * `whitelist` (array) user classes that are not affected by key restriction
   * `override` (object) keys and behaviors upon updates
 
-## prefer_https
+## prefer_https {#prefer_https}
 Redirects http:// calls to https://.
 * default configuration:
 ```js
@@ -275,7 +275,7 @@ openssl req -new -x509 -days 9999 -nodes -out fullchain.pem -keyout privkey.pem
 
 
 
-## static_routes
+## static_routes {#static_routes}
 A list of relative or absolute paths to be served by the server. It contains server resources and possible HTML interfaces.
 * new routes are defined according to the configuration
 * default configuration:
@@ -300,7 +300,7 @@ A list of relative or absolute paths to be served by the server. It contains ser
 An array as value for a directory means that it will look for a resource in each directory by order of appearance. 
 
 
-## ulid
+## ulid {#ulid}
 Generate identifiers using ulid (https://github.com/ulid/spec)
 * default configuration:
 ```js
@@ -322,7 +322,7 @@ damas.create({_id:"node_{#}"});
 // Object { _id: "node_01GW9F73XCD5FHNJSHTQHAQNA5" }
 ```
 
-## user_setup
+## user_setup {#user_setup}
 Lost password procedure using email and token verification.
 * requires `crypto`
 * new routes: `/api/lostPassword` `/api/changePassword` `/api/resetPassword`

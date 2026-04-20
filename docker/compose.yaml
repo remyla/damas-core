@@ -6,12 +6,12 @@
 #
 #
 # Directory structure
-# ├── db/          mongo data storing json
-# ├── extensions/  additional server extensions
-# ├── www/         additional served files
 # ├── compose.yaml this file
 # ├── damas.json   damas configuration file
-# └── nginx.conf   nginx configuration file
+# ├── db/          mongo data storing JSON
+# ├── extensions/  additional server extensions
+# ├── nginx.conf   nginx configuration file
+# └── www/         additional served files
 #
 # Run: docker compose up
 # Open: http://localhost

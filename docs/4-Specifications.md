@@ -7,26 +7,29 @@ The communication protocol used by damas-core clients and servers is based on [J
 
 |PATH|METHOD|PARAMS|RESPONSE STATUS CODE|
 |---|-----|--|-|
-| CRUD ||
+| <br/>CRUD ||
 | [/api/create/](#create)                   | POST      | JSON       | 201, 207, 400, 403, 409, 500 |
 | [/api/read/](#read)                       | GET, POST | URL, JSON  | 200, 207, 400, 403, 404, 500 |
 | [/api/update/](#update)                   | PUT       | JSON       | 200, 207, 400, 403, 404, 500 |
 | [/api/upsert/](#upsert)                   | POST      | JSON       | 200, 400, 403, 500 |
 | [/api/delete/](#delete)                   | DELETE    | JSON       | 200, 207, 400, 404, 500 |
-| AUTH (jwt extension) ||
+| <br/>JWT 🧩 ||
 | [/api/createToken/](#createToken)         | POST      | JSON       | 200 |
 | [/api/signIn/](#signIn)                   | POST      | FORM       | 200, 401, 404 |
 | [/api/verify/](#verify)                   | GET       | -          | 200, 401 |
-| SEARCH ||
-| [/api/graph/](#graph)                     | GET       | URL        | 200, 207, 400, 404, 500 |
+| <br/>SEARCH ||
+| [/api/graph/](#graph) ⚠️                   | GET       | URL        | 200, 207, 400, 404, 500 |
 | [/api/graph_backwards/](#graph_backwards) | GET       | URL        | 200, 207, 400, 404, 500 |
 | [/api/graph_forwards/](#graph_forwards)   | GET       | URL        | 200, 207, 400, 404, 500 |
 | [/api/search/](#search)                   | GET       | URL        | 200, 400, 500 |
 | [/api/search_one/](#search_one)           | GET       | URL        | 200, 400, 500 |
 | [/api/search_mongo/](#search_mongo)       | POST      | JSON       | 200, 500, 501 |
 
+🧩 The JWT operations are defined in the [JWT extension](../server-nodejs/extensions/#jwt) for the [user authentication mecanism](Authentication)  
+⚠️ Deprecated operation (see replacement in the operation's details)
+
 # Details
-## create
+## create {#create}
 Insert new element(s) in the database. The elements have an `_id` key being their unique string identifier in the database. This key can be specified during creation, but can't be updated afterwards without first deleting the element. If it is not provided, it will be set with a default unique identifier string. The server may add some other arbitrary keys (like `author`, `time`) at creation depending on its configuration. To create multiple elements you can provide an array of objects as input and also provide an array of strings as `_id` keys that will be unfolded at creation time.
 
 ### HTTP Requests
@@ -48,7 +51,7 @@ Insert new element(s) in the database. The elements have an `_id` key being thei
 
 > 207 Multi-Status happens when some specified identifiers already exist. A null value is returned in the array at corresponding position
 
-## read
+## read {#read}
 Retrieve one or more elements giving their identifier(s). In addition to the GET method, a POST method is provided to avoid the limitation of the URL length.
 
 ### HTTP Requests
@@ -69,7 +72,7 @@ Retrieve one or more elements giving their identifier(s). In addition to the GET
 
 > The requested element is returned if found. In case of a request for multiple elements, an array in same order as input is returned.
 
-## update
+## update {#update}
 Add, modify and remove keys on element(s) identified by their `_id` key. Keys are overwritten if they exist on the server. Specifying `null` as value removes the key. Unspecified keys are left untouched on the server. Providing an array of objects or an array of identifiers modify multiple elements with one request.
 
 ### HTTP Requests
@@ -87,7 +90,7 @@ Add, modify and remove keys on element(s) identified by their `_id` key. Keys ar
 
 > The modified element is returned. In case of a multiple element update an array in same order as input is returned.
 
-## upsert
+## upsert {#upsert}
 Create or modify existing element(s). The input can be a single object, an array, and can use arrays for `_id` keys (similar to update). If the element is not found in the database, it is created.
 
 ### HTTP Requests
@@ -102,7 +105,7 @@ Create or modify existing element(s). The input can be a single object, an array
 ```
 > The input accepts arrays for _id keys, as well as values "null".
 
-## delete
+## delete {#delete}
 Permanently remove one or more elements from the database specifying their identifier(s).
 
 ### HTTP Requests
@@ -117,12 +120,10 @@ Permanently remove one or more elements from the database specifying their ident
 500 Internal Server Error text/html (error message) could not access the database
 ```
 
-## graph
-deprecated
-### HTTP Requests
-### HTTP Responses
+## graph {#graph}
+Deprecated. Use the equivalent operation [`graph_backwards`](#graph_backwards) below.
 
-## graph_backwards
+## graph_backwards {#graph_backwards}
 Recursively get all source nodes and edges connected to the specified node
 
 ### HTTP Requests
@@ -141,7 +142,7 @@ Recursively get all source nodes and edges connected to the specified node
 500 Internal Server Error text/html (error message) error while accessing the database
 ```
 
-## graph_forwards
+## graph_forwards {#graph_forwards}
 Recursively get all target nodes and edges connected to the specified node
 
 ### HTTP Requests
@@ -159,7 +160,7 @@ Recursively get all target nodes and edges connected to the specified node
 500 Internal Server Error text/html (error message) error while accessing the database
 ```
 
-## search_one
+## search_one {#search_one}
 
 ### HTTP Requests
 * `GET` `/api/search_one/` `query`
@@ -172,7 +173,7 @@ Recursively get all target nodes and edges connected to the specified node
 500 Internal Server Error text/html (error message) could not access the database
 ```
 
-## search_mongo
+## search_mongo {#search_mongo}
 ### HTTP Requests
 * `POST` `/api/search_mongo` `application/json` `query` `sort` `limit` `skip`
 ### HTTP Responses
@@ -183,14 +184,16 @@ Recursively get all target nodes and edges connected to the specified node
 501 Not Implemented       text/html (error message) the operation is not available
 ```
 
-## createToken
-Request a new token from the server, while being already authenticated
+## createToken {#createToken}
+Request a new authentication token from the server, while being already authenticated, specifying a lifespan (see [ms package](https://npmjs.com/package/ms) time format), 0 for an unlimited lifespan.
 ### HTTP Requests
-> documentation needed
+* `POST` `/api/createToken/` `application/json` `expiresIn`
 ### HTTP Responses
-> documentation needed
+```http
+200 OK application/json (string) the newly generated token
+```
 
-## signIn
+## signIn {#signIn}
 Request a token from the server, providing a username and password
 
 ### HTTP Requests
@@ -198,13 +201,13 @@ Request a token from the server, providing a username and password
 
 ### HTTP Responses
 ```http
-200 Ok             application/json (object)
+200 OK             application/json (object)
 401 Unauthorized   text/html error message
 404 Not Found      text/html error message
 ```
 > `404` error code is return if no authentication is required.
 
-## verify
+## verify {#verify}
 Check if the user has a token
 
 ### HTTP Requests

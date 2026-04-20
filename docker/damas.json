@@ -71,7 +71,6 @@
                 "template": "pages/markdown.ejs",
                 "title": "%s - damas-core",
                 "routes": {
-                    "/api/": "../",
                     "/": "../"
                 }
             }

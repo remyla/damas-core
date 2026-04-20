@@ -44,13 +44,13 @@ Function |JS | Python | CLI
 [update](#update)|✓|✓|✓
 [upsert](#upsert)|✓|✓|✓
 [delete](#delete)|✓|✓|✓
-[createToken](#createToken)|✓||
+[createToken](#createToken)|✓|✓|
 [signIn](#signIn)|✓|✓|✓
 [signOut](#signOut)|✓|✓|✓
 [verify](#verify)|✓|✓|✓
 [graph](#graph) * |✓|✓|✓
-[graph_backwards](#graph_backwards)|✓||
-[graph_forwards](#graph_forwards)|✓||
+[graph_backwards](#graph_backwards)|✓|✓|
+[graph_forwards](#graph_forwards)|✓|✓|
 [search](#search)|✓|✓|✓
 [search_one](#search_one)|✓|✓|✓
 [search_mongo](#search_mongo)|✓|✓|✓
@@ -122,7 +122,7 @@ The edges (the directed links between nodes) are objects as nodes, wearing key/v
 
 # Functions list
 A set of generic CRUD functions is provided to create, read, modify and delete elements:
-## create
+## create {#create}
 Create element(s) in the database. Elements have an `_id` key being their unique identifier in the database. This key can be specified during creation, but can't be updated afterwards without first deleting the element. The server may add some other arbitrary keys (like `author`, `time` at creation) depending on its configuration.
 ```js
 create ( elements [, callback] )
@@ -185,7 +185,7 @@ damas.create({"src_id":"/project/folder/file1","tgt_id":"/project/folder/file2"}
 ▸ Object {tgt_id: "/project/folder/to/file2", _id: "583ff67647e759beb73bde34", time: 1480586870826, src_id: "/project/folder/to/file1", author: "demo"}
 ```
 
-## read
+## read {#read}
 Retrieve one or more elements given their identifiers
 ```js
 read ( identifiers [, callback] )
@@ -221,7 +221,7 @@ damas.read(["583ff5a747e759beb73bde32", "583ff5a747e759beb73bde33"]);
 ▸ Array [_id: "583ff5a747e759beb73bde32", time: 1480586663024, label: "element1", author: "demo"}, {_id: "583ff5a747e759beb73bde33", time: 1480586663024, label: "element2", author: "demo"}]
 ```
 
-## update
+## update {#update}
 Modify and remove keys of the specified element(s)
 ```js
 update ( elements [, callback] )
@@ -273,7 +273,7 @@ damas.update({'_id': ['583ff5a747e759beb73bde32','583ff5a747e759beb73bde33'], 'n
 [{u'newkey': u'value', u'_id': u'583ff5a747e759beb73bde32', u'time': 1480586663024, u'label': u'elementA', u'author': u'demo'}, {u'newkey': u'value', u'_id': u'583ff5a747e759beb73bde33', u'time': 1480586663024, u'label': u'elementB', u'author': u'demo'}]
 ```
 
-## upsert
+## upsert {#upsert}
 Create or update element(s) when identifier(s) are specified and found
 ```js
 upsert ( elements [, callback] )
@@ -328,7 +328,7 @@ damas.upsert({key1: "value2"}, function (node) {
 });
 ```
 
-## delete
+## delete {#delete}
 Permanently remove element(s) from the database
 ```js
 delete ( identifiers [, callback] )
@@ -349,7 +349,7 @@ damas.delete("55ae0b1ed81e88357d77d0e9");
 ```
 
 
-## signin
+## signIn {#signIn}
 ```js
 signIn ( username, password [, expiresIn, callback] )
 ```
@@ -383,7 +383,7 @@ damas.signIn("axel", "password", "1d" ,callback());
 
 ```
 
-## signout
+## signOut {#signOut}
 ```js
 signOut ( [callback] )
 ```
@@ -392,7 +392,7 @@ signOut ( [callback] )
 ### return values
 * returns true on success, false otherwise
 
-## verify
+## verify {#verify}
 Ask the server for the authentication status and user
 ```js
 verify ( [callback] )
@@ -402,7 +402,7 @@ verify ( [callback] )
 ### return values
 * returns the authenticated user element on success, false otherwise
 
-## search
+## search {#search}
 Find elements wearing the specified key(s) using a query string.
 ```js
 search ( query [, callback] )
@@ -436,7 +436,7 @@ damas.search("file:/floor.*png$/i");
 damas.search('file:/rabbit/ type:char');
 ```
 
-## search_one
+## search_one {#search_one}
 Search nodes, returning the first matching occurrence as a node object (not as index as in search). The search string format is the same as for the search method.
 ```js
 search_one ( query [, callback] )
@@ -447,7 +447,7 @@ search_one ( query [, callback] )
 ### return values
 * returns the first matching identifier or null if no match was found
 
-## search_mongo
+## search_mongo {#search_mongo}
 We expose the MongoDB find and cursor methods here in order to provide a powerful search with many options. It is only available when the server runs a MongoDB database to store the data.
 ```js
 search_mongo ( query [, sort, limit, skip, callback] )
@@ -504,7 +504,7 @@ damas.search_mongo({'time': {$exists:true}}, {"time":-1},200,0, function(res){
 });
 ```
 
-## graph_backwards
+## graph_backwards {#graph_backwards}
 Recursively get all source nodes and edges connected to the specified node
 ```js
 graph_backwards ( identifiers, depth, [, callback] )
@@ -522,7 +522,7 @@ Javascript
 damas.graph_backwards("usr_marion");
 ```
 
-## graph_forwards
+## graph_forwards {#graph_forwards}
 Recursively get all target nodes and edges connected to the specified node
 ```js
 graph_forwards ( identifiers, depth, [, callback] )
@@ -547,7 +547,7 @@ damas.graph_backwards("usr_marion", 0, g => {
 })
 ```
 
-## graph
+## graph {#graph}
 Recursively get all source nodes and edges connected to the specified node (deprecated, use equivalent graph_backwards instead)
 ```js
 graph ( identifiers, [, callback] )
@@ -566,7 +566,7 @@ damas.graph("55687e68e040af7047ee1a53");
 
 <!--
 
-## version
+## version {#version}
 ### version( `id`, `keys` [, `callback`] )
 
 Insert a new file as a new version of an existing asset, wearing the specified keys.
@@ -586,7 +586,7 @@ Insert a new file as a new version of an existing asset, wearing the specified k
 {u'comment': u'added requested elements and cleaned', u'author': u'demo', u'#parent': u'5601542f690375ccae0c1a3b', u'file': "/project/files/scene-150925121320.ma", u'time': 1443174266343, u'_id': u'5605177ad8b454a87e771b65'}
 ```
 
-## link
+## link {#link}
 ### link( `target`, `sources`, `keys` [, `callback`] )
 Create edges from the sources files to the target file wearing the specified keys. The sources and the target are specified as pathes to the corresponding files.
 ```py

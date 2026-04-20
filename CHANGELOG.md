@@ -10,12 +10,33 @@ Changelog
 
 Releases by date and the corresponding tag name in the repository
 
+# 2026-04-20 v2.6.2
+
+This release brings Markdown rendering, improves inline documentation and adds Python support for 3 new operations.
+
+## Added
+* new extensions: [markdown](server-nodejs/extensions/#markdown) and [ejs](server-nodejs/extensions/#ejs) to serve Markdown .md files as HTML. Markdown supports path resolver, extended syntax for heading ids and GMF alerts. EJS is provided as a template system to encapsulate the Markdown HTML/CSS rendering.
+* new Python client methods for these operations: [`graph_backwards`](docs/4-Specifications#graph_backwards), [`graph_forwards`](docs/4-Specifications#graph_forwards), [`createToken`](docs/4-Specifications#createToken)
+
+## Changed
+* the static HTML was replaced by Markdown
+* the documentation about the extensions was moved to /server-nodejs/extensions/README.md
+* the static served files (favicon, css, logos) were moved to /www/
+* doc/ was renamed to docs/
+
+## Fixed
+* fixed regex for default jwt username check
+* docker image use node:20-alpine, to stay similar to default Node version in Debian trixie (stable)
+
+## Credits
+@remyla
+
 # 2025-12-29 v2.6.1
 This release brings 2 new operations to retrieve an object's graph: `graph_forwards` and `graph_backwards` to parse the connected objects following the direction of the links, or in reverse. These two new operations return the identifiers of the connected links and objects (not the whole JSON objects) so you can retrieve large graphs with an optimized response size, and read the objects in the graph afterwards. The older operation named `graph` is equivalent to the new `graph_backwards` operation, but returning whole objects. The `graph` operation is kept for backward compatibility, in deprecated status. This release also fixes a bug preventing using the upsert operation under certain conditions and the doc was improved (see details below).
 
 ## Added
-* new operations: graph_forwards, graph_backwards: request the graph of the specified node(s), following the directed links or in reverse (commit #6f0b55a6)
-* Javascript implementation of graph_forwards and graph_backwards in client damas.js
+* new operations: `graph_forwards`, `graph_backwards`: request the graph of the specified node(s), following the directed links or in reverse (commit #6f0b55a6)
+* Javascript implementation of `graph_forwards` and `graph_backwards` in client damas.js
 
 ## Changed
 * Python client: Added back the TLS certificate verification by default (it was disabled for older `requests` module versions, thanks @Narann for the feedback. commit #b44e61c4)
