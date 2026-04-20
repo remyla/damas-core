@@ -166,8 +166,47 @@ class http_connection( object ) :
             return (r.status_code, json.loads(r.text))
         return (r.status_code, r.text)
 
+    def graph_backwards( self, ids, depth ) :
+        '''
+        Recursively get edges and nodes connected to the specified node(s) going upstream through the directed edges
+        @param {String|Array} ids - node index or array of node indexes
+        @param {Integer} depth - number of maximum recursions, specify 0 for no limit
+        @returns {Array} array of node and edges indexes
+        '''
+        headers = {'content-type': 'application/json'}
+        headers.update(self.headers)
+        r = requests.post(self.serverURL+'/api/graph_backwards/'+str(depth)+'/', data=json.dumps(ids),
+            headers=headers)
+        if r.status_code == 200 or r.status_code == 207:
+            return (r.status_code, json.loads(r.text))
+        return (r.status_code, r.text)
+
+    def graph_forwards( self, ids, depth ) :
+        '''
+        Recursively get edges and nodes connected to the specified specified node(s) following the directed egdes
+        @param {String|Array} ids - node index or array of node indexes
+        @param {Integer} depth - number of maximum recursions, specify 0 for no limit
+        @returns {Array} array node and edges indexes
+        '''
+        headers = {'content-type': 'application/json'}
+        headers.update(self.headers)
+        r = requests.post(self.serverURL+'/api/graph_forwards/'+str(depth)+'/', data=json.dumps(ids),
+            headers=headers)
+        if r.status_code == 200 or r.status_code == 207:
+            return (r.status_code, json.loads(r.text))
+        return (r.status_code, r.text)
 
     # USERS AUTHENTICATION METHODS
+
+    def createToken( self, expiresIn ) :
+        '''
+        @param {String} expiresIn - token lifespan using ms time format, 0 for unlimited
+        @return {String} newly generated token
+        '''
+        r = requests.post(self.serverURL+'/api/createToken/', data={"expiresIn":expiresIn})
+        if r.status_code == 200:
+            return (r.status_code, json.loads(r.text))
+        return (r.status_code, r.text)
 
     def signIn( self, username, password ) :
         '''
