@@ -51,4 +51,4 @@ damas.server = <span class="arg">'<span id="server_url">https://serveripaddr</sp
 
 # Additional JS ressources
 
-[damas-socket.js](damas-socket.js) is a module to connect to a damas-core server using websockets. See [Event-API](/docs/Events-API.md).
+[damas-socket.js](damas-socket.js) is a module to connect to a damas-core server using websockets. See [Event-API](../docs/Event-API.md).

@@ -115,7 +115,7 @@ Implementation of JSON Web Token RFC7519 for user authentication https://jwt.io/
   * `expressUse` (string, regex or array) paths to protect with authentication
   * `expressUnless` (object) paths and methods to exclude from authentication
 
-See [Authentication](/docs/Authentication), [express.use syntax⤴](https://expressjs.com/en/api.html#app.use), [express unless syntax⤴](https://www.npmjs.com/package/express-unless).
+See [Authentication](../../docs/Authentication.md), [express.use syntax⤴](https://expressjs.com/en/api.html#app.use), [express unless syntax⤴](https://www.npmjs.com/package/express-unless).
 
 ### Enable User Authentication
 By default, the installation gives a public access without user authentication. Here is the procedure to create a new user using the damas-core API and the damas command line interface:
@@ -132,11 +132,11 @@ Then enable the extension:
     }
 }
 ```
-And configure the options depending on the behavior you want. Restart the server and sign in using the newly created user. Read [Authentication](/docs/Authentication) to have more details about the authentication options and implementation.
+And configure the options depending on the behavior you want. Restart the server and sign in using the newly created user. Read [Authentication](../../docs/Authentication.md) to have more details about the authentication options and implementation.
 
 ## jwt_delegate {#jwt_delegate}
 Centralizing authentication on a different server than the tracker.
-The user node will be save in the tracker database or update [(learn more)](/docs/Authentication#signin).
+The user node will be save in the tracker database or update [(learn more)](../../docs/Authentication.md#signin).
 * default configuration :
 ```js
 "jwt_delegate": {
@@ -285,11 +285,7 @@ A list of relative or absolute paths to be served by the server. It contains ser
     "path": "./extensions/static_routes.js",
     "conf": {
         "routes": {
-            "/": "public",
-            "/js": "../js",
-            "/cli": "../cli",
-            "/py": "../py",
-            "/api": "public/index.html",
+            "/": ["/", "www"],
             "/signIn": "extensions/auth_signIn.html"
         }
      }

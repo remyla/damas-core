@@ -1,5 +1,5 @@
-User Authentication
-===================
+JSON Web Token User Authentication
+===
 
 The user authentication in damas-core is based upon the JSON Web Token (RFC 7519) authentication and secure transmission. You can find some resources here:
 * [JSON Web Token⤴](https://en.wikipedia.org/wiki/JSON_Web_Token) - Wikipedia page
@@ -9,7 +9,7 @@ The user authentication in damas-core is based upon the JSON Web Token (RFC 7519
 The implementation of this RFC is found in the [jwt damas-core extension](../server-nodejs/extensions/#jwt). Please find below some documentation about it.
 
 # Web Tokens
-The tokens are delivered by the server using the [signIn](4-Specifications#signIn) operation to authenticate users.
+The tokens are delivered by the server using the [signIn](4-Specifications.md#signIn) operation to authenticate users.
 
 ## Lifespan
 The default value for tokens' lifespan can be set in the server's conf.json under `extensions.jwt.exp`, and its value is "1d" (1 day) by default. See the syntax and examples [here⤴](https://www.npmjs.com/package/ms). This value can also be specified during signIn, using the `expiresIn` parameter, in order to retrieve a token with the desired lifespan. A value of "0" ask for a token with an unlimited lifespan (see [#237⤴](https://github.com/remyla/damas-core/issues/237)). By changing password, this revokes previously obtained tokens.  

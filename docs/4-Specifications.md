@@ -1,7 +1,7 @@
 Specifications
 ==============
 
-The communication protocol used by damas-core clients and servers is based on [JSON data-interchange format](http://json.org) over [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol).
+The damas-core clients and servers communicate using the [JSON data-interchange format](http://json.org) over [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol), with a REST architecture and basic CRUD operations. A damas-core server can provide some extra operations, defined in the extensions loaded at startup.
 
 # Set of operations
 
@@ -25,7 +25,7 @@ The communication protocol used by damas-core clients and servers is based on [J
 | [/api/search_one/](#search_one)           | GET       | URL        | 200, 400, 500 |
 | [/api/search_mongo/](#search_mongo)       | POST      | JSON       | 200, 500, 501 |
 
-🧩 The JWT operations are defined in the [JWT extension](../server-nodejs/extensions/#jwt) for the [user authentication mecanism](Authentication)  
+🧩 The JWT operations are defined in the [JWT extension](../server-nodejs/extensions/#jwt) for the [user authentication mecanism](Authentication.md)  
 ⚠️ Deprecated operation (see replacement in the operation's details)
 
 # Details
@@ -49,6 +49,7 @@ Insert new element(s) in the database. The elements have an `_id` key being thei
 
 > In case of a multiple element creation, the returned JSON is an array of strings ordered using the same order as the input array.
 
+> [!NOTE]
 > 207 Multi-Status happens when some specified identifiers already exist. A null value is returned in the array at corresponding position
 
 ## read {#read}

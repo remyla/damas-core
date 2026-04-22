@@ -6,30 +6,16 @@ damas-core ![Licence](https://img.shields.io/github/license/remyla/damas-core) !
  / _` |/ _` | '_ ` _ \ / _` / __|_____ / __/ _ \| '__/ _ \
 | (_| | (_| | | | | | | (_| \__ \_____| (_| (_) | | |  __/
  \__,_|\__,_|_| |_| |_|\__,_|___/      \___\___/|_|  \___|
+   data management system core
 ```
-JSON storage service using NodeJS focused on reliability, efficiency and extensibility.
+damas-core is a web service back-end programmed in NodeJS. Its main features are&nbsp;:
 
-Its main features are:
-* Based on HTTP, RESTful, CRUD operations with [strict specifications](docs/4-Specifications)
-* Multi-user using [JSON web token authentication](docs/Authentication)
-* Modular using [server extensions](server-nodejs/extensions/)
-* Programmable using [Python and Javascript](docs/3-API-Reference), [command line](cli/README) and [events](docs/Event-API)
+* [JSON database model](docs/4-Specifications.md) with graph capabilities
+* [Multi-user](docs/Authentication.md)
+* [Extensible server](server-nodejs/extensions/)
+* [Client API for Python, Javascript](docs/3-API-Reference.md), [command line](cli/) and [events](docs/Event-API.md)
 
-Directory structure:
-```
-├── cli/            Bash + curl command line client
-├── docs/           inline documentation
-├── docker/         deployment package
-├── js/             Javascript client API
-├── py/             Python client API
-├── server-nodejs/  server HTTP (NodeJS/Express)
-├── server-tests/   server Jasmine unit tests
-├── CHANGELOG.md    releases notes
-├── LICENSE         GNU GPLv3 license
-└── README.md       this file
-```
-
-[CHANGELOG](CHANGELOG)
+[CHANGELOG](CHANGELOG.md)
 
 # Usage
 ## Run using Docker
@@ -52,19 +38,47 @@ node .
 ```
 Then in a web browser, open `http://localhost:8090`.
 
-Read the [Installation](docs/1-Installation) for more details and to configure your server for your needs.
+Read the [Installation](docs/1-Installation.md) for more details and to configure your server for your needs.
 
 # Demo
 A public demo server is available at https://demo.damas.io
 
-# Related Links
-http://damas-software.org is a website which presents the projects related to damas-core  
-https://syncplanet.io is a Saas using damas-core as backend  
-https://hub.docker.com/r/primcode/damas-core the ready-to-install docker images  
-http://dabox.io is collaborative platform for architecture using damas-core as backend  
-https://github.com/PRIMCODE/damas-flow is an interface to make directed graphs on top of damas-core  
-https://github.com/PRIMCODE/damas-dashboard is a web control center and admin interface to index files, in production but not packaged for distribution. Get in touch if interested  
-http://primcode.com PRIMCODE is the company behind the development, the distribution and the maintenance of damas-core
+# Directory Structure
+<span style="display: none">
+```
+├── cli/            Bash + curl command line client
+├── docs/           inline documentation
+├── docker/         deployment package
+├── js/             Javascript client API
+├── py/             Python client API
+├── server-nodejs/  HTTP server (NodeJS/Express)
+├── server-tests/   server Jasmine unit tests
+├── www/
+├── CHANGELOG.md    releases notes
+├── LICENSE         GNU GPLv3 license
+└── README.md       this file
+```
+</span>
+
+<pre class="html">
+📁 damas-core/
+├── <a href="cli/">📁 cli/</a>                Bash + curl command line client
+├── <a href="docs/">📁 docs/</a>               inline documentation
+│   ├── <a href="docs/1-Installation.md">📜 1-Installation.md</a>
+│   ├── <a href="docs/2-Connect.md">📜 2-Connect.md</a>
+│   ├── <a href="docs/3-API-Reference.md">📜 3-API-Reference.md</a>
+│   └── <a href="docs/4-Specifications.md">📜 4-Specifications.md</a>
+├── 📁 docker/             deployment package
+├── <a href="js/">📁 js/</a>                 Javascript client API
+├── <a href="py/">📁 py/</a>                 Python client API
+├── 📁 server-nodejs/      HTTP server (NodeJS/Express)
+│   └── <a href="server-nodejs/extensions/">📁 extensions/</a>
+├── 📁 server-tests/       server Jasmine unit tests
+├── 📁 www/                served files
+├── <a href="CHANGELOG.md">📜 CHANGELOG.md</a>        releases notes
+├── <a href="LICENSE">📜 LICENSE</a>             GNU GPLv3 license
+└── 📜 README.md           this file
+</pre>
 
 # Contributors
 Remy Lalanne - Project lead  
@@ -83,7 +97,7 @@ Axel Prat
 Mathieu Valero  
 Quentin Villecroze
 
-See [Contributing](docs/Contributing) for coding conventions and unit testing.
+See [Contributing](docs/Contributing.md) for coding conventions and unit testing.
 
 # Context
 `damas-core` is originaly created by [PRIMCODE](http://primcode.com) to support the production of 3D animated feature films and TV series as a digital asset manager and a universal meta data indexer (to index files, tasks, users etc) and was released as libre software in 2015 under the GNU GPLv3 license. Here is a chronology of the animated movies and TV series made using it:
@@ -109,6 +123,15 @@ See [Contributing](docs/Contributing) for coding conventions and unit testing.
 - Angelo dans la forêt mystérieuse - 2024 - [IMDb⤴](https://www.imdb.com/title/tt23448260/) [Wikipedia fr⤴](https://fr.wikipedia.org/wiki/Angelo_dans_la_for%C3%AAt_myst%C3%A9rieuse)
 - Stitch Head - 2025 - [IMDb⤴](https://www.imdb.com/title/tt26720001/) [Wikipedia⤴](https://en.wikipedia.org/wiki/Stitch_Head)
 - Les Légendaires - 2025 [IMDb⤴](https://www.imdb.com/title/tt35659725/) [Wikipedia fr⤴](https://fr.wikipedia.org/wiki/Les_L%C3%A9gendaires_(film))
+
+# Related Links
+http://damas-software.org is a website which presents the projects related to damas-core  
+https://syncplanet.io is a Saas using damas-core as backend  
+https://hub.docker.com/r/primcode/damas-core the ready-to-install docker images  
+http://dabox.io is collaborative platform for architecture using damas-core as backend  
+https://github.com/PRIMCODE/damas-flow is an interface to make directed graphs on top of damas-core  
+https://github.com/PRIMCODE/damas-dashboard is a web control center and admin interface to index files, in production but not packaged for distribution. Get in touch if interested  
+http://primcode.com PRIMCODE is the company behind the development, the distribution and the maintenance of damas-core
 
 # License
 GPL License(GPLV3)

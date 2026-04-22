@@ -2,11 +2,11 @@ Programming Interface
 =====================
 
 The damas-core API is available for Python, Javascript and the command line.
-Read the [connect page](2-Connect) to setup a client environment.
+Read the [connect page](2-Connect.md) to setup a client environment.
 
 A demo server is available at https://demo.damas.io.
 
-The implemented methods, parameters and responses follow the [specification](4-Specifications).
+The implemented methods, parameters and responses follow the [specification](4-Specifications.md).
 
 # Methods
 ## Generic CRUD Functions
