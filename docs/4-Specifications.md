@@ -1,7 +1,7 @@
 Specifications
 ==============
 
-The damas-core clients and servers communicate using the [JSON data-interchange format](http://json.org) over [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol), with a REST architecture and basic CRUD operations. A damas-core server can provide some extra operations, defined in the extensions loaded at startup.
+The damas-core clients and servers communicate using the [JSON data-interchange format](http://json.org) over [HTTP](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol), with a REST architecture and basic CRUD operations. A damas-core server can provide additional operations defined in the [extensions](../server-nodejs/extensions/) that are [loaded at startup](1-Installation.md#configure).
 
 # Set of operations
 

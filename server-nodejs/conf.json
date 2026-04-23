@@ -14,35 +14,13 @@
         "options": { },
         "create_returns_obj": false
     },
-    "mongodb": {
-        "host": "mongo",
-        "collection": "node",
-        "port": 27017,
-        "options": { "auto_reconnect": true }
-    },
     "morgan": "combined",
     "extensions": {
-        "es6_polyfills": {
-            "enable": true,
-            "path": "./extensions/es6_polyfills.js"
-        },
         "ulid": {
             "enable": true,
             "path": "./extensions/ulid.js",
             "conf": {
                 "replacedPattern": "{#}"
-            }
-        },
-        "nodemailer": {
-            "enable": false,
-            "path": "./extensions/nodemailer.js",
-            "conf": {
-                "transporter":{
-                    "host": "localhost",
-                    "port": 25,
-                    "secure": false
-                },
-                "from": "\"Sender\" <noreply@example.com>"
             }
         },
         "user_setup" : {
@@ -86,10 +64,6 @@
             "enable": true,
             "path": "./extensions/last_activity.js"
         },
-        "prefer_https": {
-            "enable": false,
-            "path": "./extensions/prefer_https.js"
-        },
         "markdown": {
             "enable": true,
             "path": "./extensions/markdown.cjs",
@@ -97,9 +71,15 @@
                 "template": "pages/markdown.ejs",
                 "title": "%s - damas-core",
                 "routes": {
-                    "/api/": "../",
                     "/": "../"
                 }
+            }
+        },
+        "ejs": {
+            "enable": true,
+            "path": "./extensions/ejs.js",
+            "conf": {
+                "views": "extensions/ejs"
             }
         },
         "static_routes": {
@@ -114,18 +94,6 @@
 
                 }
             }
-        },
-        "ejs": {
-            "enable": true,
-            "path": "./extensions/ejs.js",
-            "conf": {
-                "views": "extensions/ejs"
-            }
-        },
-        "dam": {
-            "enable": true,
-            "path": "./extensions/dam.js"
         }
-
     }
 }

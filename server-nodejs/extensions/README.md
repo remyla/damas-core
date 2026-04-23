@@ -38,12 +38,28 @@ Dummy extension example:
 * [ulid](#ulid) - Generate identifiers using ulid
 
 Older extensions, less relevant but still functional 
+* [dam](#dam) - operations for DAM (not maintained since 2021)
 * [es6-polyfills](#es6-polyfills) - Polyfills for older systems
 * [nodemailer](#nodemailer) - Send emails using https://www.npmjs.com/package/nodemailer
 * [prefer_https](#prefer_https) - Redirect every HTTP queries to HTTPS
 * [user_setup](#user_setup) - Manage user password reset
 
 # Detailed description of extensions
+
+## dam {#dam}
+Provide operations for Digital Asset Management (asset lock, unlock, publish, version, comment). Used in production until 2021.
+```js
+"dam": {
+    "enable": true,
+    "path": "./extensions/dam.js",
+    "conf": {
+        "fileSystem": "/path/to/files/"
+    }
+}
+```
+* configuration options:
+  * `fileSystem` (string) path to the directory containing the files (digital assets), aka project's root. This used to be a global configuration option, it may need an adaptation to point to the local extension conf
+
 
 ## ejs {#ejs}
 Prepare Express to use the EJS template engine. Required by the markdown extension.

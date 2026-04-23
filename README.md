@@ -6,13 +6,13 @@ damas-core ![Licence](https://img.shields.io/github/license/remyla/damas-core) !
  / _` |/ _` | '_ ` _ \ / _` / __|_____ / __/ _ \| '__/ _ \
 | (_| | (_| | | | | | | (_| \__ \_____| (_| (_) | | |  __/
  \__,_|\__,_|_| |_| |_|\__,_|___/      \___\___/|_|  \___|
-   data management system core
+      data management system                  core
 ```
 damas-core is a web service back-end programmed in NodeJS. Its main features are&nbsp;:
 
 * [JSON database model](docs/4-Specifications.md) with graph capabilities
 * [Multi-user](docs/Authentication.md)
-* [Extensible server](server-nodejs/extensions/)
+* [Server extensions](server-nodejs/extensions/)
 * [Client API for Python, Javascript](docs/3-API-Reference.md), [command line](cli/) and [events](docs/Event-API.md)
 
 [CHANGELOG](CHANGELOG.md)
@@ -44,21 +44,6 @@ Read the [Installation](docs/1-Installation.md) for more details and to configur
 A public demo server is available at https://demo.damas.io
 
 # Directory Structure
-<span style="display: none">
-```
-├── cli/            Bash + curl command line client
-├── docs/           inline documentation
-├── docker/         deployment package
-├── js/             Javascript client API
-├── py/             Python client API
-├── server-nodejs/  HTTP server (NodeJS/Express)
-├── server-tests/   server Jasmine unit tests
-├── www/
-├── CHANGELOG.md    releases notes
-├── LICENSE         GNU GPLv3 license
-└── README.md       this file
-```
-</span>
 
 <pre class="html">
 📁 damas-core/

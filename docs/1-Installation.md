@@ -56,7 +56,7 @@ On Windows, to run and debug, run:
 set DEBUG=* & node .
 ```
 
-# Configure
+# Configure {#configure}
 The server reads its configuration from `docker/damas.json` or `server-nodejs/conf.json` depending on the chosen installation described above. You can edit it according to your needs:
 
 ```json
@@ -83,6 +83,6 @@ The configuration is divided into sections:
 Read about the [JWT extension](../server-nodejs/extensions/#jwt) to configure a user authentication system according to your needs.
 
 #  Next steps
-Now that you have a running server you can read the [Connect Guide](2-Connect) to setup a client environment with Python, JavaScript or Shell, and read the [API Reference](3-API-Reference).
+Now that you have a running server you can read the [Connect Guide](2-Connect.md) to setup a client environment with Python, JavaScript or Shell, and read the [API Reference](3-API-Reference.md).
 
 In case you encounter some difficulties during the installation process you could create an issue describing the problem in this repository and we will try to solve it.
