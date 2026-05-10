@@ -4,7 +4,7 @@
   "description": "Damas Server Nodejs test with frisbyjs",
   "main": "node-tests-frisby_spec.js",
   "dependencies": {
-    "frisby": "^0.8.5",
+    "frisby": "^2.1.3",
     "jasmine-node": "^1.14.5"
   },
   "devDependencies": {},
